@@ -91,6 +91,37 @@ function resolveProvider(request: ChatRequest, env: Env): { config: AIProviderCo
   return null;
 }
 
+function getAvailableProviders(request: ChatRequest, env: Env): Array<{ config: AIProviderConfig; apiKey: string }> {
+  const sorted = [...PROVIDERS].sort((a, b) => a.priority - b.priority);
+
+  // If user pinned a specific provider, try only that one
+  if (request.provider) {
+    const cfg = sorted.find(p => p.name === request.provider);
+    const key = cfg ? getApiKey(env, cfg.name) : undefined;
+    return cfg && key ? [{ config: cfg, apiKey: key }] : [];
+  }
+
+  // If user pinned a model, put that provider first but keep fallbacks
+  const result: Array<{ config: AIProviderConfig; apiKey: string }> = [];
+  if (request.model) {
+    const primary = sorted.find(p => p.models.includes(request.model!));
+    if (primary) {
+      const key = getApiKey(env, primary.name);
+      if (key) result.push({ config: primary, apiKey: key });
+    }
+  }
+
+  // Add remaining providers as fallbacks
+  for (const cfg of sorted) {
+    if (!result.some(r => r.config.name === cfg.name)) {
+      const key = getApiKey(env, cfg.name);
+      if (key) result.push({ config: cfg, apiKey: key });
+    }
+  }
+
+  return result;
+}
+
 function buildRequestBody(provider: string, request: ChatRequest): Record<string, unknown> {
   const messages = [];
   if (request.systemPrompt) {
@@ -171,44 +202,53 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
     return errorResponse('Prompt too long (max 100k chars)', 413);
   }
 
-  const resolved = resolveProvider(body, env);
-  if (!resolved) {
+  // Cascade: try all available providers in priority order
+  const availableProviders = getAvailableProviders(body, env);
+  if (availableProviders.length === 0) {
     return errorResponse('No AI provider available. Check API key configuration.', 503);
   }
 
-  const { config, apiKey } = resolved;
+  const errors: string[] = [];
   const startTime = Date.now();
 
-  try {
-    const resp = await fetch(config.endpoint, {
-      method: 'POST',
-      headers: buildHeaders(config.name, apiKey),
-      body: JSON.stringify(buildRequestBody(config.name, body)),
-    });
+  for (const { config, apiKey } of availableProviders) {
+    try {
+      const resp = await fetch(config.endpoint, {
+        method: 'POST',
+        headers: buildHeaders(config.name, apiKey),
+        body: JSON.stringify(buildRequestBody(config.name, body)),
+        signal: AbortSignal.timeout(30_000),
+      });
 
-    if (!resp.ok) {
-      const errText = await resp.text();
-      return errorResponse(`Provider ${config.name} returned ${resp.status}: ${errText.slice(0, 500)}`, 502);
+      if (!resp.ok) {
+        const errText = await resp.text();
+        errors.push(`${config.name}: ${resp.status} ${errText.slice(0, 200)}`);
+        continue; // Try next provider
+      }
+
+      const data = await resp.json();
+      const extracted = extractContent(config.name, data);
+      const latency = Date.now() - startTime;
+
+      return jsonResponse({
+        id: crypto.randomUUID(),
+        provider: config.name,
+        model: extracted.model,
+        content: extracted.content,
+        tokens: extracted.tokens,
+        cost: (extracted.tokens.total / 1_000_000) * config.costPerMTok,
+        latency,
+        cached: false,
+        timestamp: new Date().toISOString(),
+        ...(errors.length > 0 ? { fallback: true, attemptedProviders: errors.length + 1 } : {}),
+      });
+    } catch (err: any) {
+      errors.push(`${config.name}: ${err.message}`);
+      continue; // Try next provider
     }
-
-    const data = await resp.json();
-    const extracted = extractContent(config.name, data);
-    const latency = Date.now() - startTime;
-
-    return jsonResponse({
-      id: crypto.randomUUID(),
-      provider: config.name,
-      model: extracted.model,
-      content: extracted.content,
-      tokens: extracted.tokens,
-      cost: (extracted.tokens.total / 1_000_000) * config.costPerMTok,
-      latency,
-      cached: false,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (err: any) {
-    return errorResponse(`AI request failed: ${err.message}`, 502);
   }
+
+  return errorResponse(`All providers failed: ${errors.join(' | ')}`, 502);
 }
 
 async function handleStream(request: Request, env: Env): Promise<Response> {

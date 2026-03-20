@@ -57,8 +57,29 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       vad_filter: true,
     });
 
+    const text = (result.text || '').trim();
+
+    // If whisper returned nothing, try again without VAD filter (might be filtering real speech)
+    if (!text) {
+      const retry = await context.env.AI.run('@cf/openai/whisper-large-v3-turbo' as any, {
+        audio: audioBase64,
+        language: 'pl',
+        vad_filter: false,
+      });
+
+      const retryText = (retry.text || '').trim();
+      return jsonResponse({
+        text: retryText,
+        language: (retry as any).transcription_info?.language || 'pl',
+        duration: (retry as any).transcription_info?.duration || 0,
+        words: (retry as any).segments?.[0]?.words || [],
+        word_count: (retry as any).word_count || 0,
+        retried: true,
+      });
+    }
+
     return jsonResponse({
-      text: result.text || '',
+      text,
       language: (result as any).transcription_info?.language || 'pl',
       duration: (result as any).transcription_info?.duration || 0,
       words: (result as any).segments?.[0]?.words || [],
