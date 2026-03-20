@@ -18,7 +18,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const contentType = context.request.headers.get('content-type') || '';
-    let audioBytes: number[];
+    let audioBase64: string;
 
     if (contentType.includes('application/json')) {
       const body = await context.request.json() as { audio?: string; language?: string };
@@ -28,15 +28,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (body.audio.length > MAX_AUDIO_SIZE * 1.37) {
         return errorResponse('Audio too large (max 25MB)', 413);
       }
-      // Decode base64 to raw bytes
-      const binaryStr = atob(body.audio);
-      const u8 = new Uint8Array(binaryStr.length);
-      for (let i = 0; i < binaryStr.length; i++) {
-        u8[i] = binaryStr.charCodeAt(i);
-      }
-      audioBytes = [...u8];
+      audioBase64 = body.audio;
     } else {
-      // Raw binary audio — use directly, no base64 round-trip
+      // Raw binary audio — convert to base64 string (Whisper expects base64)
       const buffer = await context.request.arrayBuffer();
       if (buffer.byteLength === 0) {
         return errorResponse('Empty audio data', 400);
@@ -44,15 +38,21 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       if (buffer.byteLength > MAX_AUDIO_SIZE) {
         return errorResponse('Audio too large (max 25MB)', 413);
       }
-      audioBytes = [...new Uint8Array(buffer)];
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      audioBase64 = btoa(binary);
     }
 
-    if (audioBytes.length === 0) {
+    if (!audioBase64) {
       return errorResponse('Empty audio data', 400);
     }
 
+    // Whisper expects audio as base64-encoded string
     const result = await context.env.AI.run('@cf/openai/whisper-large-v3-turbo' as any, {
-      audio: audioBytes,
+      audio: audioBase64,
       language: 'pl',
       vad_filter: true,
     });
