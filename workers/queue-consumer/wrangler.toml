@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════
+#  ZENO Queue Consumer Worker
+#  Consumes: agent-tasks, image-processing-queue, voice-processing
+#  Deploy: npx wrangler deploy
+# ═══════════════════════════════════════════════════════════════
+
+name = "zeno-queue-consumer"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── Queue Consumers ────────────────────────────────────────
+[[queues.consumers]]
+queue = "agent-tasks"
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 3
+dead_letter_queue = ""
+
+[[queues.consumers]]
+queue = "image-processing-queue"
+max_batch_size = 5
+max_batch_timeout = 60
+max_retries = 3
+dead_letter_queue = ""
+
+[[queues.consumers]]
+queue = "voice-processing"
+max_batch_size = 5
+max_batch_timeout = 60
+max_retries = 2
+dead_letter_queue = "voice-processing-dlq"
+
+# ─── DLQ Producer (for voice failures) ─────────────────────
+[[queues.producers]]
+queue = "voice-processing-dlq"
+binding = "VOICE_DLQ"

@@ -40,6 +40,23 @@ database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
 # [ai]
 # binding = "AI"
 
+# ─── Queues ─────────────────────────────────────────────────
+[[queues.producers]]
+queue = "agent-tasks"
+binding = "AGENT_TASKS_QUEUE"
+
+[[queues.producers]]
+queue = "image-generation-queue"
+binding = "IMAGE_GEN_QUEUE"
+
+[[queues.producers]]
+queue = "image-processing-queue"
+binding = "IMAGE_PROC_QUEUE"
+
+[[queues.producers]]
+queue = "voice-processing"
+binding = "VOICE_QUEUE"
+
 # ─── Environment Variables ──────────────────────────────────
 [vars]
 ENVIRONMENT = "development"
@@ -65,6 +82,23 @@ SITES_JIMBO77_COM = "https://jimbo77.com"
 binding = "DB"
 database_name = "zeno-browser-db"
 database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
+
+# ─── Production Queues ──────────────────────────────────────
+[[env.production.queues.producers]]
+queue = "agent-tasks"
+binding = "AGENT_TASKS_QUEUE"
+
+[[env.production.queues.producers]]
+queue = "image-generation-queue"
+binding = "IMAGE_GEN_QUEUE"
+
+[[env.production.queues.producers]]
+queue = "image-processing-queue"
+binding = "IMAGE_PROC_QUEUE"
+
+[[env.production.queues.producers]]
+queue = "voice-processing"
+binding = "VOICE_QUEUE"
 
 # Secrets (set via CLI):
 # wrangler secret put DEEPSEEK_API_KEY

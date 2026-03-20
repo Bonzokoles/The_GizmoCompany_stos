@@ -10,6 +10,12 @@ export interface Env {
   // WEB_CACHE: R2Bucket;
   // AI: Ai;
 
+  // Queues
+  AGENT_TASKS_QUEUE: Queue;
+  IMAGE_GEN_QUEUE: Queue;
+  IMAGE_PROC_QUEUE: Queue;
+  VOICE_QUEUE: Queue;
+
   ENVIRONMENT: string;
   SITE_NAME: string;
   SITE_URL: string;
