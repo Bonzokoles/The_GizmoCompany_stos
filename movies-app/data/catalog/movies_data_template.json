@@ -1,0 +1,16 @@
+{
+  "movies": [
+    {
+      "id": "unikalne-id-filmu-np-fight-club-1999",
+      "title": "Tytuł Filmu",
+      "year": 1999,
+      "director": "Imię Nazwisko",
+      "category": "urban-decay",
+      "tags": [
+        "tag1",
+        "tag2"
+      ],
+      "poster": "posters/nazwa_pliku_plakatu.jpg"
+    }
+  ]
+}

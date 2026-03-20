@@ -1,0 +1,22 @@
+<clickhouse>
+    <logger>
+        <level>warning</level>
+        <console>true</console>
+    </logger>
+
+    <!--
+    NOTE: ClickHouse in CE is meant for single-node / low-traffic self-hosting.
+    The settings below keep memory usage modest (~256 MB cap).
+    -->
+    <max_server_memory_usage_to_ram_ratio>0.5</max_server_memory_usage_to_ram_ratio>
+
+    <http_port>8123</http_port>
+    <tcp_port>9000</tcp_port>
+    <listen_host>0.0.0.0</listen_host>
+
+    <path>/var/lib/clickhouse/</path>
+    <tmp_path>/var/lib/clickhouse/tmp/</tmp_path>
+    <user_files_path>/var/lib/clickhouse/user_files/</user_files_path>
+
+    <mark_cache_size>268435456</mark_cache_size>
+</clickhouse>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Katalog Filmowy - Archive Node</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030407;
+      --bg-panel: rgba(10, 15, 30, 0.85);
+      --primary-neon: #00f3ff;
+      --secondary-neon: #bf00ff;
+      --text-main: #e0e0e0;
+      --text-dim: #8a8a8a;
+      --glass-border: 1px solid rgba(0, 243, 255, 0.15);
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background-color: var(--bg-dark);
+      background-image:
+        linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .nav-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+      padding-bottom: 15px;
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      color: #fff;
+      text-shadow: 0 0 10px var(--primary-neon);
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    .btn-return {
+      background: rgba(0, 243, 255, 0.1);
+      border: 1px solid var(--primary-neon);
+      color: var(--primary-neon);
+      padding: 10px 20px;
+      border-radius: 0;
+      /* ZAWSZE OSTRE */
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+    }
+
+    .btn-return:hover {
+      background: var(--primary-neon);
+      color: #000;
+      box-shadow: 0 0 20px var(--primary-neon);
+      transform: translateX(-5px);
+    }
+
+    .subtitle {
+      color: var(--primary-neon);
+      margin-bottom: 3rem;
+      font-size: 1.1rem;
+      opacity: 0.8;
+      letter-spacing: 1px;
+    }
+
+    .category {
+      margin-bottom: 2rem;
+      padding: 2rem;
+      border-radius: 8px;
+      background: var(--bg-panel);
+      border: var(--glass-border);
+      backdrop-filter: blur(5px);
+      transition: transform 0.3s;
+    }
+
+    .category:hover {
+      transform: translateX(10px);
+      box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+    }
+
+    .category h2 {
+      margin: 0 0 0.5rem;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.4rem;
+      color: #fff;
+    }
+
+    .slug {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--secondary-neon);
+      margin-bottom: 1rem;
+      font-weight: 700;
+      opacity: 0.8;
+    }
+
+    ul.film-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 10px;
+    }
+
+    ul.film-list li {
+      padding: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 1rem;
+      color: #ccc;
+      transition: color 0.2s;
+    }
+
+    ul.film-list li:hover {
+      color: var(--primary-neon);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    ul.film-list li:last-child {
+      border-bottom: none;
+    }
+
+    .notes {
+      margin-top: 3rem;
+      font-size: 0.9rem;
+      color: #666;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-top: 1rem;
+    }
+
+    .notes code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--primary-neon);
+      font-family: monospace;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-family: 'Orbitron';
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 5px 15px;
+      border-radius: 4px;
+    }
+
+    .back-link:hover {
+      color: #fff;
+      border-color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="nav-header">
+      <div>
+        <h1>Katalog Filmowy</h1>
+        <div class="subtitle" style="margin-bottom:0;">Wybierz kategorię i eksploruj archiwa</div>
+      </div>
+      <a href="MOVIES_DATA_BASE_index.html" class="btn-return">◄ RETURN TO TERMINAL</a>
+    </div>
+
+    <div style="margin-bottom: 2rem;"></div>
+
+    <div id="katalog-container">
+      Wczytywanie bazy...
+    </div>
+
+    <section class="category" id="psychodeliczne-bez-horroru">
+      <h2>Psychodeliczne, ale bez horroru</h2>
+      <div class="slug">#psychodeliczne-bez-horroru</div>
+      <ul class="film-list">
+        <li>Upstream Color (2013)</li>
+        <li>Holy Motors (2012)</li>
+        <li>The Congress (2013)</li>
+        <li>Enter the Void (2009)</li>
+        <li>The Fountain (2006)</li>
+        <li>A Field in England (2013)</li>
+        <li>The Holy Mountain (1973)</li>
+        <li>Mandy (2018)</li>
+        <li>Synecdoche, New York (2008)</li>
+        <li>The Green Knight (2021)</li>
+      </ul>
+    </section>
+
+    <section class="category" id="czule-o-milosci-bez-kiczu">
+      <h2>Czułe o miłości, ale bez kiczu</h2>
+      <div class="slug">#czule-o-milosci-bez-kiczu</div>
+      <ul class="film-list">
+        <li>Blue Valentine (2010)</li>
+        <li>Her (2013)</li>
+        <li>Before Sunrise (1995)</li>
+        <li>Past Lives (2023)</li>
+        <li>In the Mood for Love (2000)</li>
+        <li>Eternal Sunshine of the Spotless Mind (2004)</li>
+        <li>Once (2007)</li>
+        <li>Punch-Drunk Love (2002)</li>
+        <li>Lost in Translation (2003)</li>
+        <li>Beginners (2010)</li>
+      </ul>
+    </section>
+
+    <section class="category" id="urban-decay">
+      <h2>Urban Decay</h2>
+      <div class="slug">#urban-decay</div>
+      <ul class="film-list">
+        <li>Heaven Knows What (2014)</li>
+        <li>Gummo (1997)</li>
+        <li>Mid90s (2018)</li>
+        <li>Last Days (2005)</li>
+        <li>Pixote (1981)</li>
+        <li>Naked (1993)</li>
+        <li>Taxi Driver (1976)</li>
+        <li>Chungking Express (1994)</li>
+        <li>La Haine (1995)</li>
+        <li>Honey Boy (2019)</li>
+      </ul>
+    </section>
+
+    <section class="category" id="kino-o-outsiderach">
+      <h2>Kino o outsiderach</h2>
+      <div class="slug">#kino-o-outsiderach</div>
+      <ul class="film-list">
+        <li>The Station Agent (2003)</li>
+        <li>Wendy and Lucy (2008)</li>
+        <li>Mary and Max (2009)</li>
+        <li>Submarine (2010)</li>
+        <li>Frances Ha (2012)</li>
+        <li>Napoleon Dynamite (2004)</li>
+        <li>The Peanut Butter Falcon (2019)</li>
+        <li>Girl, Interrupted (1999)</li>
+        <li>The Double (2013)</li>
+        <li>Joker (2019)</li>
+      </ul>
+    </section>
+
+    <section class="category" id="brudna-uliczna-poezja">
+      <h2>Brudna, uliczna poezja</h2>
+      <div class="slug">#brudna-uliczna-poezja</div>
+      <ul class="film-list">
+        <li>Dead Man (1995)</li>
+        <li>A Girl Walks Home Alone at Night (2014)</li>
+        <li>The Rider (2017)</li>
+        <li>Fish Tank (2009)</li>
+        <li>Red Rocket (2021)</li>
+        <li>Frozen River (2008)</li>
+        <li>Blue Ruin (2013)</li>
+        <li>The Place Beyond the Pines (2012)</li>
+        <li>Monster (2003)</li>
+        <li>Buffalo '66 (1998)</li>
+      </ul>
+    </section>
+
+    <section class="category" id="senne-i-eteryczne">
+      <h2>Senne i eteryczne</h2>
+      <div class="slug">#senne-i-eteryczne</div>
+      <ul class="film-list">
+        <li>A Ghost Story (2017)</li>
+        <li>Columbus (2017)</li>
+        <li>Loveless (2017)</li>
+        <li>Drive (2011)</li>
+        <li>Solaris (1972)</li>
+        <li>All the Real Girls (2003)</li>
+        <li>The Tree of Life (2011)</li>
+        <li>Arrival (2016)</li>
+        <li>Stalker (1979)</li>
+        <li>Only Lovers Left Alive (2013)</li>
+      </ul>
+    </section>
+
+    <section class="category" id="kino-o-zyciu-bez-ściemy">
+      <h2>Kino o życiu, które nie traktuje widza jak debila</h2>
+      <div class="slug">#kino-o-zyciu-bez-ściemy</div>
+      <ul class="film-list">
+        <li>The Florida Project (2017)</li>
+        <li>The Wrestler (2008)</li>
+        <li>Short Term 12 (2013)</li>
+        <li>Nebraska (2013)</li>
+        <li>Manchester by the Sea (2016)</li>
+        <li>A Separation (2011)</li>
+        <li>The Father (2020)</li>
+        <li>Lean on Pete (2017)</li>
+        <li>The Straight Story (1999)</li>
+        <li>Nomadland (2020)</li>
+      </ul>
+    </section>
+
+    <div class="notes">
+      <strong>RECORDING PROTOCOL:</strong> Modify HTML directly or use the automated terminal interface.
+    </div>
+  </div>
+</body>
+
+</html>

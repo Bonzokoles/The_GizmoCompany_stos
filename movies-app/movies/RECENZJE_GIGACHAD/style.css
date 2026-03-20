@@ -1,0 +1,193 @@
+
+:root {
+    --bg-color: #03040b;
+    /* GLASSMORPHISM VARS */
+    --glass-bg: rgba(15, 23, 42, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-glow: rgba(0, 255, 204, 0.15);
+    
+    --accent: #00ffcc;
+    --accent-hover: #14f1c7;
+    --text-primary: #f8fafc;
+    --text-muted: #94a3b8;
+    --font-fam: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-fam);
+    line-height: 1.6;
+    /* Ciemne gradientowe tło wzmacniające efekt szkła */
+    background: radial-gradient(circle at 50% -20%, #1a2238 0%, #03040b 60%);
+    background-attachment: fixed;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+header h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* ANIMACJE OPENINGU */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUpStagger {
+    from { opacity: 0; transform: translateY(40px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* KARTY - INDEX (GLASSMORPHISM) */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.grid > * {
+    opacity: 0;
+    animation: fadeInUpStagger 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Kaskadowe opóźnienie animacji na szybko obliczane - n=20 max w CSS dla elegancji */
+.grid > *:nth-child(1) { animation-delay: 0.1s; }
+.grid > *:nth-child(2) { animation-delay: 0.15s; }
+.grid > *:nth-child(3) { animation-delay: 0.2s; }
+.grid > *:nth-child(4) { animation-delay: 0.25s; }
+.grid > *:nth-child(5) { animation-delay: 0.3s; }
+.grid > *:nth-child(n+6) { animation-delay: 0.35s; }
+
+.card {
+    /* UI-UX Pro Max Glass Pattern */
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, -20%), var(--glass-glow), transparent 40%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px var(--glass-glow);
+}
+
+.card:hover::after {
+    opacity: 1;
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.card p {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin-top: auto;
+}
+
+/* STYLE RECENZJI W HTML FILMU */
+.review-block {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-left: 4px solid var(--accent);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    animation: fadeInUpStagger 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.review-block:nth-child(odd) { animation-delay: 0.1s; }
+.review-block:nth-child(even) { animation-delay: 0.2s; }
+
+.review-block h3 {
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.review-content {
+    font-size: 1.15rem;
+    color: #e2e8f0;
+    white-space: pre-wrap;
+    line-height: 1.8;
+}
+
+/* NAVIGACJA I ELEMENTY */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 2rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255,255,255,0.2);
+}
+
+.back-btn svg { width: 20px; height: 20px; }

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Assistant Ecosystem - Terminal</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Syncopate:wght@700;800&family=Rajdhani:wght@500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="static/brutalmagic.css">
+    <style>
+        /* Custom tweaks to Brutal Magic for Jimbo Ecosystem */
+        .stat-card {
+            border: 1px solid #333;
+            padding: 30px;
+            background: #0a0a0a;
+            transition: all 0.3s var(--easing);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            background: #111;
+        }
+
+        .action-card {
+            border: 1px solid #333;
+            padding: 40px;
+            background: #0a0a0a;
+            transition: all 0.3s var(--easing);
+            cursor: pointer;
+        }
+
+        .action-card:hover {
+            border-color: var(--secondary);
+            background: #130a18;
+        }
+
+        .action-icon {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+        }
+
+        .action-title {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .action-desc {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.05em;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .subtitle-glitch {
+            color: var(--accent);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-top: 1rem;
+            text-transform: uppercase;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 15vw;
+            }
+
+            .brutal-nav {
+                padding: 1.5rem 1rem;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="brutal-nav">
+        <a href="#" class="nav-logo" style="text-decoration: none;">JIMBO</a>
+        <ul class="nav-menu">
+            <li><a href="#" class="nav-link magnetic" data-text="SYSTEM">SYSTEM</a></li>
+            <li><a href="#" class="nav-link magnetic" data-text="MODULES">MODULES</a></li>
+            <li><a href="#" class="nav-link magnetic" data-text="DOCS">DOCS</a></li>
+        </ul>
+        <button class="cta-btn magnetic"
+            onclick="alert('Sekwencja startowa: START_ECOSYSTEM.bat')"><span>LAUNCHPAD</span></button>
+    </nav>
+
+    <div id="scroll-content">
+        <section class="hero">
+            <div class="hero-title-container">
+                <h1>
+                    <div class="word">REVIEW</div><br>
+                    <div class="word">ASSISTANT</div>
+                </h1>
+                <p class="subtitle-glitch" data-text="SYSTEM OPERACYJNY RECENZJI FILMOWYCH // UNIFIED_DB_CONNECTED">
+                    SYSTEM OPERACYJNY RECENZJI FILMOWYCH // UNIFIED_DB_CONNECTED</p>
+            </div>
+        </section>
+
+        <!-- Stats Section -->
+        <section class="section-dark" style="flex-direction: column; align-items: flex-start;">
+            <p class="big-text" style="margin-bottom: 60px;">
+                SYSTEM <span>METRICS</span>
+            </p>
+            <div class="stats"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; width: 100%;">
+                <div class="stat-card magnetic">
+                    <div style="font-family: 'Syncopate'; font-size: 4em; color: var(--accent);">250</div>
+                    <div style="font-family: 'Space Grotesk'; color: #888; text-transform: uppercase;">Baza Recenzji
+                    </div>
+                </div>
+                <div class="stat-card magnetic">
+                    <div style="font-family: 'Syncopate'; font-size: 4em; color: var(--accent);">50</div>
+                    <div style="font-family: 'Space Grotesk'; color: #888; text-transform: uppercase;">Katalog Filmów
+                    </div>
+                </div>
+                <div class="stat-card magnetic">
+                    <div style="font-family: 'Syncopate'; font-size: 4em; color: var(--accent);">5</div>
+                    <div style="font-family: 'Space Grotesk'; color: #888; text-transform: uppercase;">Moduły AI</div>
+                </div>
+                <div class="stat-card magnetic">
+                    <div style="font-family: 'Syncopate'; font-size: 4em; color: var(--accent);">58</div>
+                    <div style="font-family: 'Space Grotesk'; color: #888; text-transform: uppercase;">Total Records
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modules Section -->
+        <section class="section-dark" style="flex-direction: column; align-items: flex-start; background: #050505;">
+            <p class="big-text" style="margin-bottom: 60px; text-align: right; width: 100%;">
+                CORE <span>MODULES</span>
+            </p>
+
+            <div class="actions"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; width: 100%;">
+
+                <div class="action-card magnetic"
+                    onclick="location.href='MOVIES_DATA_BASE/MOVIES_DATA_BASE_index.html'">
+                    <div class="action-icon">💾</div>
+                    <div class="action-title">Movies Database</div>
+                    <div class="action-desc">
+                        Dostęp do centralnego rejestru danych. 7 kategorii, metadane, plakaty.
+                        <br><br><span style="color:var(--accent); font-weight: 700;">[STATUS: ONLINE]</span>
+                    </div>
+                </div>
+
+                <div class="action-card magnetic" onclick="alert('Uruchamianie modułu CLI: python explore_reviews.py')">
+                    <div class="action-icon">🔍</div>
+                    <div class="action-title">Review Explorer</div>
+                    <div class="action-desc">
+                        Interfejs eksploracji tekstów (CLI). Analiza stylistyczna: Bukowski, Thompson, Gombrowicz.
+                    </div>
+                </div>
+
+                <div class="action-card magnetic" onclick="alert('Inicjalizacja NEURAL CORE: ReviewAssistant.bat')">
+                    <div class="action-icon">🧠</div>
+                    <div class="action-title">AI Core Assistant</div>
+                    <div class="action-desc">
+                        Generator GPT-4o. Tłumaczenie semantyczne i synteza nowych recenzji.
+                    </div>
+                </div>
+
+                <div class="action-card magnetic"
+                    onclick="alert('Synchronizacja baz danych: python unify_databases.py')">
+                    <div class="action-icon">🔄</div>
+                    <div class="action-title">Data Sync</div>
+                    <div class="action-desc">
+                        Agregacja danych JSON/JSONL. Eksport do Unified DB format.
+                    </div>
+                </div>
+
+                <div class="action-card magnetic" onclick="window.open('README.md')">
+                    <div class="action-icon">💠</div>
+                    <div class="action-title">Archivium</div>
+                    <div class="action-desc">
+                        Pełna dokumentacja operacyjna systemu. Schematy danych i protokoły.
+                    </div>
+                </div>
+
+                <div class="action-card magnetic" onclick="alert('Sekwencja startowa: START_ECOSYSTEM.bat')">
+                    <div class="action-icon">🚀</div>
+                    <div class="action-title">Launchpad</div>
+                    <div class="action-desc">
+                        Uruchomienie pełnego środowiska operacyjnego.
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer
+            style="height: 30vh; background: var(--fg); color: var(--bg); display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            <h2 style="font-family: 'Syncopate'; font-size: 3rem; margin-bottom:1rem; letter-spacing: -2px;">JIMBO INC.
+            </h2>
+            <p style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.1rem;">SYSTEM VERSION 4.2.0 • BUILT
+                FOR BONZO</p>
+        </footer>
+    </div>
+</body>
+
+</html>

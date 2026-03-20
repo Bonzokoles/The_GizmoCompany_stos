@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>MOVIES_DATA_BASE – Terminal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Google Fonts: Orbitron for headers, Rajdhani for body -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #030407;
+      --bg-panel: rgba(10, 15, 30, 0.85);
+      --primary-neon: #00f3ff;
+      --secondary-neon: #bf00ff;
+      --success-neon: #00ff9d;
+      --warning-neon: #ffbd00;
+      --text-main: #e0e0e0;
+      --text-dim: #8a8a8a;
+      --glass-border: 1px solid rgba(0, 243, 255, 0.15);
+      --glass-shadow: 0 0 15px rgba(0, 243, 255, 0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Rajdhani', sans-serif;
+      background-color: var(--bg-dark);
+      background-image:
+        linear-gradient(rgba(0, 243, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(0, 243, 255, 0.2);
+      background: rgba(3, 4, 7, 0.95);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 0 10px var(--primary-neon);
+    }
+
+    header p {
+      margin: 5px 0 0;
+      font-size: 1rem;
+      color: var(--primary-neon);
+      opacity: 0.8;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 24px;
+      align-items: center;
+      background: var(--bg-panel);
+      padding: 15px;
+      border-radius: 8px;
+      border: var(--glass-border);
+    }
+
+    .controls-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--primary-neon);
+      font-weight: 700;
+    }
+
+    select,
+    input[type="text"],
+    input[type="number"] {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.2s;
+      min-width: 150px;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--primary-neon);
+      box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+    }
+
+    #moviesList {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-bottom: 40px;
+    }
+
+    .movie-row {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+      border-left: 3px solid transparent;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .movie-row:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-left-color: var(--primary-neon);
+      padding-left: 25px;
+      /* Slide effect */
+    }
+
+    .movie-row-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex: 1;
+    }
+
+    .movie-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+
+    .movie-year {
+      font-size: 1rem;
+      color: var(--text-dim);
+      font-family: 'Orbitron', monospace;
+    }
+
+    .movie-status-badge {
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+      border: 1px solid transparent;
+    }
+
+    .movie-status-badge.seen {
+      border-color: var(--success-neon);
+      color: var(--success-neon);
+      box-shadow: 0 0 5px rgba(0, 255, 157, 0.2);
+    }
+
+    .movie-status-badge.fav {
+      border-color: var(--warning-neon);
+      color: var(--warning-neon);
+      box-shadow: 0 0 5px rgba(255, 189, 0, 0.2);
+    }
+
+    .movie-status-badge.todo {
+      border-color: var(--primary-neon);
+      color: var(--primary-neon);
+      box-shadow: 0 0 5px rgba(0, 243, 255, 0.2);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: rgba(0, 243, 255, 0.1);
+      border: 1px solid var(--primary-neon);
+      color: var(--primary-neon);
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-neon);
+      color: #000;
+      box-shadow: 0 0 20px var(--primary-neon);
+    }
+
+    /* Modal Styling */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0a0f14;
+      border: 1px solid var(--primary-neon);
+      border-radius: 8px;
+      padding: 30px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 0 40px rgba(0, 243, 255, 0.15);
+      position: relative;
+    }
+
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--primary-neon), transparent);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 15px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      color: var(--primary-neon);
+      font-size: 1.5rem;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+
+    .modal-close:hover {
+      color: var(--secondary-neon);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      padding: 10px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #aaa;
+      padding: 12px;
+      font-family: 'Orbitron', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+      border-color: #fff;
+      color: #fff;
+    }
+
+    .btn-save {
+      flex: 1;
+      background: var(--primary-neon);
+      border: none;
+      color: #000;
+      font-weight: 700;
+      padding: 12px;
+      font-family: 'Orbitron', sans-serif;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+      background: #fff;
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.6);
+    }
+
+    /* Details Styling */
+    .detail-poster {
+      width: 200px;
+      height: 300px;
+      border-radius: 8px;
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(255, 255, 255, 0.05);
+      margin-bottom: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .detail-poster.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #555;
+      font-family: 'Orbitron';
+      border: 1px dashed #444;
+    }
+
+    .detail-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      margin-bottom: 5px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+
+    .notes {
+      margin-top: 40px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-top: 20px;
+      color: #666;
+      font-family: monospace;
+    }
+
+    @media (max-width: 640px) {
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="wrap">
+      <h1>MOVIES_DATA_BASE <span
+          style="font-size: 0.5em; color: var(--secondary-neon); vertical-align: super;">TERMINAL</span></h1>
+      <p>CENTRAL REPOSITORY // ACCESS GRANTED</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="action-buttons">
+      <button class="btn-primary" onclick="openReviewAssistant()"
+        style="border-color: var(--secondary-neon); color: var(--secondary-neon);">🤖 OPEN ASSISTANT</button>
+      <button class="btn-primary" onclick="openReviewExplorer()" style="border-color: #ff0055; color: #ff0055;">📜 OPEN
+        REVIEWS</button>
+      <div style="width: 1px; background: rgba(255,255,255,0.1); margin: 0 10px;"></div>
+      <button class="btn-primary" onclick="openAddModal()">➕ ADD MOVIE</button>
+      <button class="btn-primary" onclick="openCatalogModal()">📚 CATALOG ACCESS</button>
+      <button class="btn-primary" onclick="exportData()">📥 EXPORT JSON</button>
+    </div>
+
+    <div class="controls">
+      <div class="controls-group">
+        <label for="filterCategory">CATEGORY</label>
+        <select id="filterCategory">
+          <option value="">ALL SYSTEMS</option>
+        </select>
+      </div>
+      <div class="controls-group">
+        <label for="filterStatus">STATUS</label>
+        <select id="filterStatus">
+          <option value="">ALL STATUSES</option>
+          <option value="todo">PENDING</option>
+          <option value="seen">COMPLETED</option>
+          <option value="fav">PRIORITY</option>
+        </select>
+      </div>
+      <div class="controls-group" style="flex: 1;">
+        <label for="searchInput">SEARCH QUERY</label>
+        <input id="searchInput" type="text" placeholder="Scanning database..." style="width: 100%;" />
+      </div>
+      <div id="stats"
+        style="color: var(--primary-neon); font-family: 'Orbitron'; font-size: 0.9rem; margin-left: auto;">
+        INITIALIZING...
+      </div>
+    </div>
+
+    <div id="moviesList"></div>
+
+    <div class="notes">
+      <strong>SYSTEM INSTRUCTIONS:</strong><br />
+      1. Use "ADD MOVIE" to input new data records.<br />
+      2. Statuses are persisted in local browser storage.<br />
+      3. Use "EXPORT JSON" for backup.
+    </div>
+
+    <!-- Modal dodawania filmu -->
+    <div id="addModal" class="modal" onclick="if(event.target === this) closeAddModal()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>NEW RECORD ENTRY</h2>
+          <button class="modal-close" onclick="closeAddModal()">×</button>
+        </div>
+        <form id="addMovieForm">
+          <div class="form-group">
+            <label>TITLE *</label>
+            <input type="text" id="movieTitle" required />
+          </div>
+          <div class="form-group">
+            <label>YEAR</label>
+            <input type="number" id="movieYear" min="1800" max="2099" />
+          </div>
+          <div class="form-group">
+            <label>DIRECTOR</label>
+            <input type="text" id="movieDirector" />
+          </div>
+          <div class="form-group">
+            <label>CATEGORY</label>
+            <select id="movieCategory"></select>
+          </div>
+          <div class="form-group">
+            <label>TAGS (comma separated)</label>
+            <input type="text" id="movieTags" placeholder="e.g. mindfuck, surreal" />
+          </div>
+          <div class="form-group">
+            <label>POSTER URL</label>
+            <input type="text" id="moviePoster" placeholder="http://..." />
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" onclick="closeAddModal()">ABORT</button>
+            <button type="submit" class="btn-save">EXECUTE SAVE</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal detali filmu -->
+    <div id="detailModal" class="modal" onclick="if(event.target === this) closeDetailModal()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 id="detailTitle">RECORD DETAILS</h2>
+          <button class="modal-close" onclick="closeDetailModal()">×</button>
+        </div>
+        <div id="detailContent"></div>
+      </div>
+    </div>
+
+    <!-- Modal katalogu filmów -->
+    <div id="catalogModal" class="modal" onclick="if(event.target === this) closeCatalogModal()">
+      <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+          <h2>TEMPLATE CATALOG</h2>
+          <button class="modal-close" onclick="closeCatalogModal()">×</button>
+        </div>
+        <div id="catalogContent"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Keep original data logic but update text to match new UI vibe
+    const CATEGORIES = [
+      { slug: "psychodeliczne-bez-horroru", name: "Psychodeliczne (Non-Horror)" },
+      { slug: "czule-o-milosci-bez-kiczu", name: "Modern Romance (No Kitsch)" },
+      { slug: "urban-decay", name: "Urban Decay" },
+      { slug: "kino-o-outsiderach", name: "Outsider Cinema" },
+      { slug: "brudna-uliczna-poezja", name: "Street Poetry" },
+      { slug: "senne-i-eteryczne", name: "Ethereal / Dreamlike" },
+      { slug: "kino-o-zyciu-bez-scemy", name: "Realism (No BS)" }
+    ];
+
+    const STATUS_KEY = "MOVIES_DATA_BASE_STATUS_v1";
+    const MOVIES_KEY = "MOVIES_DATA_BASE_CUSTOM_v1";
+    let MOVIES = [];
+
+    function loadCustomMovies() {
+      try {
+        const raw = localStorage.getItem(MOVIES_KEY);
+        if (!raw) return [];
+        return JSON.parse(raw);
+      } catch (e) {
+        console.error("Error loading custom movies", e);
+        return [];
+      }
+    }
+
+    function saveCustomMovies(movies) {
+      try {
+        localStorage.setItem(MOVIES_KEY, JSON.stringify(movies));
+      } catch (e) {
+        console.error("Error saving custom movies", e);
+      }
+    }
+
+    function loadStatus() {
+      try {
+        const raw = localStorage.getItem(STATUS_KEY);
+        if (!raw) return {};
+        return JSON.parse(raw);
+      } catch (e) {
+        console.error("Error loading status", e);
+        return {};
+      }
+    }
+
+    function saveStatus(map) {
+      try {
+        localStorage.setItem(STATUS_KEY, JSON.stringify(map));
+      } catch (e) {
+        console.error("Error saving status", e);
+      }
+    }
+
+    function humanStatus(code) {
+      if (code === "seen") return "COMPLETED";
+      if (code === "fav") return "PRIORITY";
+      if (code === "todo") return "PENDING";
+      return "UNKNOWN";
+    }
+
+    function render() {
+      const moviesList = document.getElementById("moviesList");
+      const statsEl = document.getElementById("stats");
+      const filterCategory = document.getElementById("filterCategory").value;
+      const filterStatus = document.getElementById("filterStatus").value;
+      const search = document.getElementById("searchInput").value.toLowerCase().trim();
+      const statusMap = loadStatus();
+
+      let filtered = MOVIES.slice();
+
+      if (filterCategory) {
+        filtered = filtered.filter(m => m.category === filterCategory);
+      }
+      if (filterStatus) {
+        filtered = filtered.filter(m => (statusMap[m.id] || "") === filterStatus);
+      }
+      if (search) {
+        filtered = filtered.filter(m => {
+          const hay = [
+            m.title,
+            m.director || "",
+            (m.tags || []).join(" "),
+            m.year || ""
+          ].join(" ").toLowerCase();
+          return hay.includes(search);
+        });
+      }
+
+      filtered.sort((a, b) => a.title.localeCompare(b.title, "pl"));
+
+      moviesList.innerHTML = "";
+
+      filtered.forEach(movie => {
+        const row = document.createElement("div");
+        row.className = "movie-row";
+        row.onclick = () => openDetailModal(movie);
+
+        const left = document.createElement("div");
+        left.className = "movie-row-left";
+
+        const title = document.createElement("span");
+        title.className = "movie-title";
+        title.textContent = movie.title;
+
+        const year = document.createElement("span");
+        year.className = "movie-year";
+        year.textContent = movie.year || "";
+
+        left.appendChild(title);
+        if (movie.year) left.appendChild(year);
+
+        const status = statusMap[movie.id] || "";
+        if (status) {
+          const badge = document.createElement("span");
+          badge.className = `movie-status-badge ${status}`;
+          badge.textContent = humanStatus(status);
+          row.appendChild(left);
+          row.appendChild(badge);
+        } else {
+          row.appendChild(left);
+        }
+
+        moviesList.appendChild(row);
+      });
+
+      const total = MOVIES.length;
+      const statusMapAll = loadStatus();
+      const seenCount = Object.values(statusMapAll).filter(s => s === "seen").length;
+      const todoCount = Object.values(statusMapAll).filter(s => s === "todo").length;
+      const favCount = Object.values(statusMapAll).filter(s => s === "fav").length;
+
+      statsEl.innerHTML = `TOTAL: <strong style="color:white">${filtered.length}</strong> / ${total} • COMPLETED: ${seenCount} • PENDING: ${todoCount} • PRIORITY: ${favCount}`;
+    }
+
+    function initFilters() {
+      const select = document.getElementById("filterCategory");
+      CATEGORIES.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat.slug;
+        opt.textContent = cat.name;
+        select.appendChild(opt);
+      });
+
+      document.getElementById("filterCategory").addEventListener("change", render);
+      document.getElementById("filterStatus").addEventListener("change", render);
+      document.getElementById("searchInput").addEventListener("input", () => {
+        render();
+      });
+    }
+
+    // Inline movie data (preserved)
+    const MOVIES_DATA = { "movies": [{ "id": "gummo-1997", "title": "Gummo", "year": 1997, "director": "Harmony Korine", "category": "urban-decay", "tags": ["outsider", "experimental", "off"], "poster": "posters/gummo.jpg" }, { "id": "holy-motors-2012", "title": "Holy Motors", "year": 2012, "director": "Leos Carax", "category": "psychodeliczne-bez-horroru", "tags": ["surreal", "role-playing"], "poster": "" }, { "id": "upstream-color-2013", "title": "Upstream Color", "year": 2013, "director": "Shane Carruth", "category": "psychodeliczne-bez-horroru", "tags": ["mindfuck", "organiczne"], "poster": "" }, { "id": "blue-valentine-2010", "title": "Blue Valentine", "year": 2010, "director": "Derek Cianfrance", "category": "czule-o-milosci-bez-kiczu", "tags": ["relationship", "pain"], "poster": "" }, { "id": "the-florida-project-2017", "title": "The Florida Project", "year": 2017, "director": "Sean Baker", "category": "kino-o-zyciu-bez-scemy", "tags": ["dzieci", "margines"], "poster": "" }, { "id": "dead-man-1995", "title": "Dead Man", "year": 1995, "director": "Jim Jarmusch", "category": "brudna-uliczna-poezja", "tags": ["western", "poetyckie"], "poster": "" }, { "id": "a-ghost-story-2017", "title": "A Ghost Story", "year": 2017, "director": "David Lowery", "category": "senne-i-eteryczne", "tags": ["czas", "strata"], "poster": "" }, { "id": "the-station-agent-2003", "title": "The Station Agent", "year": 2003, "director": "Tom McCarthy", "category": "kino-o-outsiderach", "tags": ["friendship", "outsider"], "poster": "" }] };
+
+    const CATALOG_DATA = { "categories": [{ "name": "Psychodeliczne, ale bez horroru", "slug": "psychodeliczne-bez-horroru", "films": ["Upstream Color (2013)", "Holy Motors (2012)", "The Congress (2013)", "Enter the Void (2009)", "The Fountain (2006)", "A Field in England (2013)", "The Holy Mountain (1973)", "Mandy (2018)", "Synecdoche, New York (2008)", "The Green Knight (2021)"] }, { "name": "Czułe o miłości, ale bez kiczu", "slug": "czule-o-milosci-bez-kiczu", "films": ["Blue Valentine (2010)", "Her (2013)", "Before Sunrise (1995)", "Past Lives (2023)", "In the Mood for Love (2000)", "Eternal Sunshine of the Spotless Mind (2004)", "Once (2007)", "Punch-Drunk Love (2002)", "Lost in Translation (2003)", "Beginners (2010)"] }, { "name": "Urban Decay", "slug": "urban-decay", "films": ["Heaven Knows What (2014)", "Gummo (1997)", "Mid90s (2018)", "Last Days (2005)", "Pixote (1981)", "Naked (1993)", "Taxi Driver (1976)", "Chungking Express (1994)", "La Haine (1995)", "Honey Boy (2019)"] }, { "name": "Kino o outsiderach", "slug": "kino-o-outsiderach", "films": ["The Station Agent (2003)", "Wendy and Lucy (2008)", "Mary and Max (2009)", "Submarine (2010)", "Frances Ha (2012)", "Napoleon Dynamite (2004)", "The Peanut Butter Falcon (2019)", "Girl, Interrupted (1999)", "The Double (2013)", "Joker (2019)"] }, { "name": "Brudna, uliczna poezja", "slug": "brudna-uliczna-poezja", "films": ["Dead Man (1995)", "A Girl Walks Home Alone at Night (2014)", "The Rider (2017)", "Fish Tank (2009)", "Red Rocket (2021)", "Frozen River (2008)", "Blue Ruin (2013)", "The Place Beyond the Pines (2012)", "Monster (2003)", "Buffalo '66 (1998)"] }, { "name": "Senne i eteryczne", "slug": "senne-i-eteryczne", "films": ["A Ghost Story (2017)", "Columbus (2017)", "Loveless (2017)", "Drive (2011)", "Solaris (1972)", "All the Real Girls (2003)", "The Tree of Life (2011)", "Arrival (2016)", "Stalker (1979)", "Only Lovers Left Alive (2013)"] }, { "name": "Kino o życiu, które nie traktuje widza jak debila", "slug": "kino-o-zyciu-bez-ściemy", "films": ["The Florida Project (2017)", "The Wrestler (2008)", "Short Term 12 (2013)", "Nebraska (2013)", "Manchester by the Sea (2016)", "A Separation (2011)", "The Father (2020)", "Lean on Pete (2017)", "The Straight Story (1999)", "Nomadland (2020)"] }] };
+
+    function openAddModal() {
+      const modal = document.getElementById("addModal");
+      const categorySelect = document.getElementById("movieCategory");
+
+      // Populate categories
+      categorySelect.innerHTML = '<option value="">-- SELECT --</option>';
+      CATEGORIES.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat.slug;
+        opt.textContent = cat.name;
+        categorySelect.appendChild(opt);
+      });
+
+      modal.classList.add("active");
+    }
+
+    function closeAddModal() {
+      const modal = document.getElementById("addModal");
+      modal.classList.remove("active");
+      document.getElementById("addMovieForm").reset();
+    }
+
+    // ---------- NEW/PRESERVED LOGIC FOR DETAILS MODAL -----------
+
+    // ---------- NEW/PRESERVED LOGIC FOR DETAILS MODAL -----------
+
+    function openDetailModal(movie) {
+      const modal = document.getElementById("detailModal");
+      const titleEl = document.getElementById("detailTitle");
+      const contentEl = document.getElementById("detailContent");
+
+      titleEl.textContent = "RECORD DETAILS";
+
+      const statusMap = loadStatus();
+      const currentStatus = statusMap[movie.id] || "";
+
+      let posterHtml = `<div class="detail-poster empty">NO IMAGE DATA</div>`;
+      if (movie.poster) {
+        posterHtml = `<div class="detail-poster" style="background-image: url('${movie.poster}')"></div>`;
+      }
+
+      // Generate Reviews HTML if present
+      let reviewsHtml = "";
+      if (movie.has_reviews && movie.reviews && movie.reviews.length > 0) {
+        reviewsHtml = `
+          <div style="margin-top: 30px; border-top: 1px solid rgba(0, 243, 255, 0.3); padding-top: 20px;">
+            <h3 style="color: var(--primary-neon); font-family: 'Orbitron'; margin-bottom: 15px;">ARCHIVED REVIEWS (${movie.reviews.length})</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 10px;">
+              ${movie.reviews.map((r, idx) => `
+                <button class="btn-primary" onclick="showReviewTab(${idx})" style="font-size: 0.8rem; padding: 5px 10px; white-space: nowrap;">
+                  ${r.style.toUpperCase()}
+                </button>
+              `).join('')}
+            </div>
+            ${movie.reviews.map((r, idx) => `
+              <div id="review-tab-${idx}" class="review-content-tab" style="display: ${idx === 0 ? 'block' : 'none'}; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); max-height: 300px; overflow-y: auto;">
+                <div style="font-weight: bold; color: var(--secondary-neon); margin-bottom: 10px;">STYLE: ${r.style.toUpperCase()}</div>
+                <div style="white-space: pre-wrap; font-family: 'Rajdhani', sans-serif; line-height: 1.5;">${r.content}</div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      contentEl.innerHTML = `
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+          ${posterHtml}
+          <div style="flex: 1;">
+            <div class="detail-title">${movie.title}</div>
+            <div style="color: var(--primary-neon); margin-bottom: 20px; font-family: 'Orbitron'; font-size: 1.1rem;">
+              ${movie.year || "N/A"} // ${movie.director || "Unknown"}
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+              <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">CATEGORY</div>
+              <div style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; display: inline-block;">
+                ${CATEGORIES.find(c => c.slug === movie.category)?.name || movie.category || "Uncategorized"}
+              </div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 0.8rem; color: #888; margin-bottom: 5px;">TAGS</div>
+              <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                ${(movie.tags || []).map(t => `<span style="border: 1px solid #444; padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; color: #ccc;">${t}</span>`).join("")}
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+              <div style="font-size: 0.9rem; margin-bottom: 10px; color: var(--text-dim);">STATUS OVERRIDE:</div>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-primary" style="flex: 1; min-width: 100px; ${currentStatus === 'todo' ? 'background: var(--primary-neon); color: #000;' : ''}" onclick="setStatus('${movie.id}', 'todo')">PENDING</button>
+                <button class="btn-primary" style="flex: 1; min-width: 100px; border-color: var(--success-neon); color: var(--success-neon); ${currentStatus === 'seen' ? 'background: var(--success-neon); color: #000;' : ''}" onclick="setStatus('${movie.id}', 'seen')">COMPLETED</button>
+                <button class="btn-primary" style="flex: 1; min-width: 100px; border-color: var(--warning-neon); color: var(--warning-neon); ${currentStatus === 'fav' ? 'background: var(--warning-neon); color: #000;' : ''}" onclick="setStatus('${movie.id}', 'fav')">PRIORITY</button>
+                 <button class="btn-cancel" style="flex: 0; min-width: 40px;" onclick="setStatus('${movie.id}', '')">❌</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        ${reviewsHtml}
+      `;
+
+      modal.classList.add("active");
+    }
+
+    function showReviewTab(idx) {
+      document.querySelectorAll('.review-content-tab').forEach(el => el.style.display = 'none');
+      document.getElementById(`review-tab-${idx}`).style.display = 'block';
+    }
+
+    function openCatalogModal() {
+      // Odbudowano dowiązanie panelowe dla starego pliku Bonza
+      window.location.href = "katalog_filmowy.html";
+    }
+
+    function closeCatalogModal() {
+      document.getElementById("catalogModal").classList.remove("active");
+    }
+
+    function openReviewAssistant() {
+      alert("System Desktopowego Asystenta włączany jest ze skryptu Review Assistant GUI. (Uruchom go zewnętrznie z The Yellow Hub)");
+    }
+
+    function openReviewExplorer() {
+      window.location.href = "../RECENZJE_GIGACHAD/index.html";
+    }
+
+    function exportData() {
+      const dbStr = JSON.stringify(MOVIES, null, 2);
+      const blob = new Blob([dbStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "movies_data_base_export.json";
+      a.click();
+    }
+    window.addEventListener("DOMContentLoaded", async () => {
+      // 1. Load Hardcoded Data
+      MOVIES = MOVIES_DATA.movies;
+
+      // 2. Fetch Unified Database (The 50 reviews)
+      try {
+        const res = await fetch('../unified_movie_database.json');
+        if (res.ok) {
+          const unifiedData = await res.json();
+          // Merge unified data
+          // If ID matches, override. If not, add.
+          // Note: Unified DB might not have IDs for all films, need to generate them.
+
+          unifiedData.forEach(m => {
+            if (!m.id) {
+              m.id = m.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") + "-" + (m.year || "na");
+            }
+            // Check if exists
+            const existingIdx = MOVIES.findIndex(ex => ex.id === m.id || ex.title === m.title);
+            if (existingIdx >= 0) {
+              // Merge reviews into existing
+              MOVIES[existingIdx] = { ...MOVIES[existingIdx], ...m };
+            } else {
+              MOVIES.push(m);
+            }
+          });
+          console.log("Unified Database Loaded:", unifiedData.length, "items");
+        }
+      } catch (e) {
+        console.warn("Could not load unified_movie_database.json", e);
+      }
+
+      // 3. Load Custom LocalStorage Data
+      const custom = loadCustomMovies();
+      const currentIds = new Set(MOVIES.map(m => m.id));
+      const uniqueCustom = custom.filter(m => !currentIds.has(m.id));
+      MOVIES = [...MOVIES, ...uniqueCustom];
+
+      // Update stats text
+      document.getElementById("stats").textContent = "DB LOADED: " + MOVIES.length + " RECORDS";
+
+      initFilters();
+      render();
+    });
+
+  </script>
+</body>
+
+</html>
