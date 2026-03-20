@@ -1,0 +1,107 @@
+# Podman Compose - kompatybilna z docker-compose
+version: '3.8'
+
+services:
+  zeno-browser:
+    build:
+      context: .
+      dockerfile: Podfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      EDENAI_API_KEY: ${EDENAI_API_KEY}
+      CF_TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN}
+    restart: unless-stopped
+    container_name: zeno-browser-prod
+
+  zeno-browser-dev:
+    build:
+      context: .
+      dockerfile: Podfile.dev
+    ports:
+      - "5173:5173"
+      - "9222:9222"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    restart: unless-stopped
+    container_name: zeno-browser-dev
+
+  # ─── Umami Analytics ───────────────────────────────────────
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    ports:
+      - "5183:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:umami@umami-db:5432/umami
+      DISABLE_TELEMETRY: 1
+    depends_on:
+      umami-db:
+        condition: service_healthy
+    restart: unless-stopped
+    container_name: zeno-umami
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/heartbeat || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  umami-db:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    container_name: zeno-umami-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── SearXNG Meta Search Engine ─────────────────────────────
+  searxng:
+    image: docker.io/searxng/searxng:latest
+    ports:
+      - "8888:8080"
+    environment:
+      SEARXNG_BASE_URL: http://localhost:8888/
+      SEARXNG_SECRET: zeno-searxng-secret-2026
+    volumes:
+      - searxng-data:/etc/searxng
+    restart: unless-stopped
+    container_name: zeno-searxng
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+
+  # ─── Redis for SearXNG cache ───────────────────────────────
+  searxng-redis:
+    image: docker.io/valkey/valkey:8-alpine
+    command: valkey-server --save 30 1 --loglevel warning
+    volumes:
+      - searxng-redis-data:/data
+    restart: unless-stopped
+    container_name: zeno-searxng-redis
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+volumes:
+  umami-db-data:
+  searxng-data:
+  searxng-redis-data:

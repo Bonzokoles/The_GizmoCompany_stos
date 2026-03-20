@@ -1,0 +1,281 @@
+/* ZENO Browser — Global Styles */
+
+:root {
+  --color-bg: #0d0d1a;
+  --color-surface: #1a1a2e;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-text: #e0e0e0;
+  --color-text-muted: #888;
+  --color-accent: #00d4ff;
+  --color-accent-green: #00ff88;
+  --color-danger: #ff4444;
+  --radius: 6px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Browser Container ──────────────────────────────── */
+
+.browser-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+
+.browser-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  -webkit-app-region: drag;
+}
+
+.browser-header .controls {
+  display: flex;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.browser-header .header-controls {
+  display: flex;
+  gap: 4px;
+  -webkit-app-region: no-drag;
+}
+
+.btn-icon {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-icon:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text);
+}
+
+.btn-icon[aria-pressed='true'] {
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--color-accent);
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+/* ── Address Bar ────────────────────────────────────── */
+
+.address-bar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0 10px;
+  -webkit-app-region: no-drag;
+}
+
+.address-bar input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--color-text);
+  font-size: 13px;
+  padding: 6px 0;
+  outline: none;
+}
+
+.address-bar:focus-within {
+  border-color: var(--color-accent);
+}
+
+.address-bar .loading-indicator {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Tab Bar ────────────────────────────────────────── */
+
+.tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 12px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  max-width: 200px;
+  min-width: 80px;
+  transition: background 0.15s;
+}
+
+.tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tab.active {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-color: var(--color-border);
+  border-bottom-color: var(--color-bg);
+}
+
+.tab .tab-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tab .tab-close {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.tab:hover .tab-close {
+  opacity: 1;
+}
+
+.tab-close:hover {
+  color: var(--color-danger);
+}
+
+/* ── Main content area ──────────────────────────────── */
+
+.browser-main {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.web-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ── Floating Panels ────────────────────────────────── */
+
+.floating-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow);
+  z-index: 9000;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.panel-loading {
+  padding: 40px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* ── Footer ─────────────────────────────────────────── */
+
+.browser-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .floating-panel {
+    width: 90vw;
+    height: 70vh;
+    bottom: 10px;
+    right: 10px;
+  }
+}

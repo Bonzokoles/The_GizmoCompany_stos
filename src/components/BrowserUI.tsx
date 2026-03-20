@@ -1,0 +1,447 @@
+/**
+ * Browser UI — Main React Component
+ * React 19 + lazy panels + ErrorBoundary + typed API + real webview
+ */
+
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { ErrorBoundary } from './ErrorBoundary';
+import { TabBar } from './TabBar';
+import { AddressBar } from './AddressBar';
+import { WebViewPanel } from './WebViewPanel';
+import { StartPage } from './StartPage';
+import { SidebarOverlay } from './SidebarOverlay';
+import type { WebViewPanelHandle } from './WebViewPanel';
+import type { Tab } from '../types/electron';
+
+const AIPanel = lazy(() => import('./AIPanel').then(m => ({ default: m.AIPanel })));
+const SecurityMonitor = lazy(() => import('./SecurityMonitor').then(m => ({ default: m.SecurityMonitor })));
+const CloudflareTunnelPanel = lazy(() => import('./CloudflareTunnelPanel').then(m => ({ default: m.CloudflareTunnelPanel })));
+const PluginHub = lazy(() => import('./PluginHub').then(m => ({ default: m.PluginHub })));
+const ToolsPanel = lazy(() => import('./ToolsPanel').then(m => ({ default: m.ToolsPanel })));
+const AIGatewayPanel = lazy(() => import('./AIGatewayPanel').then(m => ({ default: m.AIGatewayPanel })));
+const TerminalPanel = lazy(() => import('./TerminalPanel').then(m => ({ default: m.TerminalPanel })));
+const AnalyticsPanel = lazy(() => import('./AnalyticsPanel').then(m => ({ default: m.AnalyticsPanel })));
+const UpdateNotification = lazy(() => import('./UpdateNotification').then(m => ({ default: m.UpdateNotification })));
+const SearchPanel = lazy(() => import('./SearchPanel').then(m => ({ default: m.SearchPanel })));
+const CatalogBrowser = lazy(() => import('./CatalogBrowser').then(m => ({ default: m.CatalogBrowser })));
+
+function PanelFallback() {
+  return <div className="panel-loading">Ładowanie panelu...</div>;
+}
+
+/** Check if running inside Electron (electronAPI available) */
+const isElectron = typeof window !== 'undefined' && !!window.electronAPI;
+
+/** Normalize URL — add https:// if missing, detect search queries */
+function normalizeUrl(input: string): string {
+  const trimmed = input.trim();
+  if (!trimmed || trimmed === 'about:blank') return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(trimmed)) return `https://${trimmed}`;
+  // Treat as search query
+  return `https://www.google.com/search?q=${encodeURIComponent(trimmed)}`;
+}
+
+export function BrowserUI() {
+  const [tabs, setTabs] = useState<Tab[]>([
+    {
+      id: 'tab-1',
+      title: 'Nowa karta',
+      url: 'about:blank',
+      isActive: true,
+      createdAt: new Date(),
+      lastAccessedAt: new Date(),
+    },
+  ]);
+  const [currentUrl, setCurrentUrl] = useState('about:blank');
+  const [showAIPanel, setShowAIPanel] = useState(false);
+  const [showSecurityPanel, setShowSecurityPanel] = useState(false);
+  const [showTunnelPanel, setShowTunnelPanel] = useState(false);
+  const [showPluginHub, setShowPluginHub] = useState(false);
+  const [showToolsPanel, setShowToolsPanel] = useState(false);
+  const [showAIGateway, setShowAIGateway] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showSearchPanel, setShowSearchPanel] = useState(false);
+  const [showCatalogBrowser, setShowCatalogBrowser] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [showUpdateNotification, setShowUpdateNotification] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  // URL that the webview should navigate to (set from address bar)
+  const [webviewUrl, setWebviewUrl] = useState('about:blank');
+
+  const webviewRef = useRef<WebViewPanelHandle>(null);
+  const tabCounter = useRef(1);
+
+  const handleNewTab = useCallback(() => {
+    tabCounter.current += 1;
+    const newTab: Tab = {
+      id: `tab-${tabCounter.current}`,
+      title: 'Nowa karta',
+      url: 'about:blank',
+      isActive: true,
+      createdAt: new Date(),
+      lastAccessedAt: new Date(),
+    };
+    setTabs(prev => prev.map(t => ({ ...t, isActive: false })).concat(newTab));
+    setCurrentUrl('about:blank');
+    setWebviewUrl('about:blank');
+  }, []);
+
+  const handleCloseTab = useCallback((tabId: string) => {
+    setTabs(prev => {
+      const remaining = prev.filter(t => t.id !== tabId);
+      if (remaining.length === 0) {
+        // Don't close last tab, reset it
+        return [{
+          id: 'tab-1',
+          title: 'Nowa karta',
+          url: 'about:blank',
+          isActive: true,
+          createdAt: new Date(),
+          lastAccessedAt: new Date(),
+        }];
+      }
+      // If we closed the active tab, activate the last one
+      const closedWasActive = prev.find(t => t.id === tabId)?.isActive;
+      if (closedWasActive && remaining.length > 0) {
+        remaining[remaining.length - 1].isActive = true;
+        const active = remaining[remaining.length - 1];
+        setCurrentUrl(active.url);
+        setWebviewUrl(active.url);
+      }
+      return remaining;
+    });
+  }, []);
+
+  const handleNavigate = useCallback((input: string) => {
+    const url = normalizeUrl(input);
+    if (!url || url === 'about:blank') return;
+
+    setCurrentUrl(url);
+    setWebviewUrl(url);
+    setTabs(prev => prev.map(t =>
+      t.isActive ? { ...t, url, lastAccessedAt: new Date() } : t
+    ));
+  }, []);
+
+  // Called by webview when it navigates (e.g. clicking a link)
+  const handleWebviewNavigate = useCallback((url: string) => {
+    setCurrentUrl(url);
+    setTabs(prev => prev.map(t =>
+      t.isActive ? { ...t, url, lastAccessedAt: new Date() } : t
+    ));
+  }, []);
+
+  const handleTitleChange = useCallback((title: string) => {
+    setTabs(prev => prev.map(t =>
+      t.isActive ? { ...t, title } : t
+    ));
+  }, []);
+
+  const handleFaviconChange = useCallback((favicons: string[]) => {
+    if (favicons.length > 0) {
+      setTabs(prev => prev.map(t =>
+        t.isActive ? { ...t, favicon: favicons[0] } : t
+      ));
+    }
+  }, []);
+
+  const handleGoBack = useCallback(() => {
+    webviewRef.current?.goBack();
+  }, []);
+
+  const handleGoForward = useCallback(() => {
+    webviewRef.current?.goForward();
+  }, []);
+
+  const handleReload = useCallback(() => {
+    webviewRef.current?.reload();
+  }, []);
+
+  // Listen for main-process navigation commands (IPC path for extensions/plugins)
+  useEffect(() => {
+    if (!isElectron) return;
+    const unsubBack = window.electronAPI.on('browser:navigate-back', () => {
+      webviewRef.current?.goBack();
+    });
+    const unsubForward = window.electronAPI.on('browser:navigate-forward', () => {
+      webviewRef.current?.goForward();
+    });
+    const unsubMcpNav = window.electronAPI.on('mcp:navigate', (...args: unknown[]) => {
+      const url = typeof args[1] === 'string' ? args[1] : typeof args[0] === 'string' ? args[0] : '';
+      if (url) handleNavigate(url);
+    });
+    return () => { unsubBack(); unsubForward(); unsubMcpNav(); };
+  }, []);
+
+  const handleTabClick = useCallback((tabId: string) => {
+    setTabs(prev => {
+      const tab = prev.find(t => t.id === tabId);
+      if (tab) {
+        setCurrentUrl(tab.url);
+        setWebviewUrl(tab.url);
+      }
+      return prev.map(t => ({ ...t, isActive: t.id === tabId }));
+    });
+  }, []);
+
+  return (
+    <ErrorBoundary>
+      <div className="browser-container" style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+        {/* Update Notification */}
+        {isElectron && showUpdateNotification && (
+          <Suspense fallback={null}>
+            <ErrorBoundary>
+              <UpdateNotification onDismiss={() => setShowUpdateNotification(false)} />
+            </ErrorBoundary>
+          </Suspense>
+        )}
+
+        {/* Header */}
+        <header className="browser-header" style={{ display: 'flex', alignItems: 'center', padding: '4px 8px', gap: '4px', background: '#1a1a2e', color: '#fff' }}>
+          <div className="controls" style={{ display: 'flex', gap: '2px' }}>
+            <button
+              className="btn-icon"
+              onClick={() => setShowSidebar(v => !v)}
+              title="Menu boczne"
+              aria-pressed={showSidebar}
+              style={{ ...navBtnStyle, fontSize: '18px', marginRight: '4px' }}
+            >
+              ☰
+            </button>
+            <button
+              className="btn-icon"
+              onClick={handleGoBack}
+              aria-label="Wstecz"
+              style={navBtnStyle}
+            >
+              ←
+            </button>
+            <button
+              className="btn-icon"
+              onClick={handleGoForward}
+              aria-label="Dalej"
+              style={navBtnStyle}
+            >
+              →
+            </button>
+            <button className="btn-icon" onClick={handleReload} aria-label="Odśwież" style={navBtnStyle}>
+              ⟳
+            </button>
+          </div>
+
+          <AddressBar
+            url={currentUrl}
+            onNavigate={handleNavigate}
+            loading={loading}
+          />
+
+          <div className="header-controls" style={{ display: 'flex', gap: '2px' }}>
+            <button
+              className="btn-icon"
+              onClick={() => setShowAIPanel(v => !v)}
+              title="Asystent AI"
+              aria-pressed={showAIPanel}
+              style={navBtnStyle}
+            >
+              🤖
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowSecurityPanel(v => !v)}
+              title="Bezpieczeństwo"
+              aria-pressed={showSecurityPanel}
+              style={navBtnStyle}
+            >
+              🔒
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowTunnelPanel(v => !v)}
+              title="Cloudflare Tunnel"
+              aria-pressed={showTunnelPanel}
+              style={navBtnStyle}
+            >
+              🌐
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowPluginHub(v => !v)}
+              title="Wtyczki"
+              aria-pressed={showPluginHub}
+              style={navBtnStyle}
+            >
+              🔌
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowToolsPanel(v => !v)}
+              title="Narzędzia"
+              aria-pressed={showToolsPanel}
+              style={navBtnStyle}
+            >
+              🛠
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowAIGateway(v => !v)}
+              title="AI Gateway"
+              aria-pressed={showAIGateway}
+              style={navBtnStyle}
+            >
+              🧠
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowTerminal(v => !v)}
+              title="Terminal"
+              aria-pressed={showTerminal}
+              style={navBtnStyle}
+            >
+              ⌨
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowAnalytics(v => !v)}
+              title="Analytics (Umami)"
+              aria-pressed={showAnalytics}
+              style={navBtnStyle}
+            >
+              📊
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowSearchPanel(v => !v)}
+              title="Wyszukiwarka"
+              aria-pressed={showSearchPanel}
+              style={navBtnStyle}
+            >
+              🔍
+            </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowCatalogBrowser(v => !v)}
+              title="Biblioteka lokalna"
+              aria-pressed={showCatalogBrowser}
+              style={navBtnStyle}
+            >
+              📚
+            </button>
+            <button className="btn-icon" onClick={handleNewTab} title="Nowa karta" style={navBtnStyle}>
+              +
+            </button>
+          </div>
+        </header>
+
+        {/* Tab Bar */}
+        <TabBar
+          tabs={tabs}
+          onTabClick={handleTabClick}
+          onTabClose={handleCloseTab}
+          onNewTab={handleNewTab}
+        />
+
+        {/* Main Content — Webview + floating panels */}
+        <main className="browser-main" style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+          {/* Start Page overlay for new tabs */}
+          {(currentUrl === 'about:blank' || !currentUrl) && (
+            <div style={{ position: 'absolute', inset: 0, zIndex: 10 }}>
+              <StartPage onNavigate={handleNavigate} />
+            </div>
+          )}
+
+          {/* Sidebar overlay — available on any page */}
+          {showSidebar && (
+            <SidebarOverlay
+              onNavigate={handleNavigate}
+              onClose={() => setShowSidebar(false)}
+            />
+          )}
+
+          {/* Real web page rendering — webview in Electron, iframe fallback otherwise */}
+          <WebViewPanel
+            ref={webviewRef}
+            url={webviewUrl}
+            onNavigate={handleWebviewNavigate}
+            onTitleChange={handleTitleChange}
+            onLoadStart={() => setLoading(true)}
+            onLoadStop={() => setLoading(false)}
+            onFaviconChange={handleFaviconChange}
+          />
+
+          {/* Lazy-loaded floating panels */}
+          <Suspense fallback={<PanelFallback />}>
+            {showAIPanel && (
+              <ErrorBoundary>
+                <AIPanel onClose={() => setShowAIPanel(false)} />
+              </ErrorBoundary>
+            )}
+            {showSecurityPanel && (
+              <ErrorBoundary>
+                <SecurityMonitor onClose={() => setShowSecurityPanel(false)} />
+              </ErrorBoundary>
+            )}
+            {showTunnelPanel && (
+              <ErrorBoundary>
+                <CloudflareTunnelPanel onClose={() => setShowTunnelPanel(false)} />
+              </ErrorBoundary>
+            )}
+            {showPluginHub && (
+              <ErrorBoundary>
+                <PluginHub onClose={() => setShowPluginHub(false)} />
+              </ErrorBoundary>
+            )}
+            {showToolsPanel && (
+              <ErrorBoundary>
+                <ToolsPanel onClose={() => setShowToolsPanel(false)} />
+              </ErrorBoundary>
+            )}
+            {showAIGateway && (
+              <ErrorBoundary>
+                <AIGatewayPanel onClose={() => setShowAIGateway(false)} />
+              </ErrorBoundary>
+            )}
+            {showTerminal && (
+              <ErrorBoundary>
+                <TerminalPanel onClose={() => setShowTerminal(false)} onNavigate={handleNavigate} />
+              </ErrorBoundary>
+            )}
+            {showAnalytics && (
+              <ErrorBoundary>
+                <AnalyticsPanel onClose={() => setShowAnalytics(false)} />
+              </ErrorBoundary>
+            )}
+            {showSearchPanel && (
+              <ErrorBoundary>
+                <SearchPanel onClose={() => setShowSearchPanel(false)} onNavigate={handleNavigate} />
+              </ErrorBoundary>
+            )}
+            {showCatalogBrowser && (
+              <ErrorBoundary>
+                <CatalogBrowser onClose={() => setShowCatalogBrowser(false)} />
+              </ErrorBoundary>
+            )}
+          </Suspense>
+        </main>
+
+        {/* Status Bar */}
+        <footer className="browser-footer" style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 8px', background: '#16213e', color: '#8892b0', fontSize: '12px' }}>
+          <span>{loading ? 'Ładowanie...' : 'Gotowy'}</span>
+          <span>{tabs.length} kart(a/y)</span>
+        </footer>
+      </div>
+    </ErrorBoundary>
+  );
+}
+
+const navBtnStyle: React.CSSProperties = {
+  background: 'transparent',
+  border: 'none',
+  color: '#e0e0e0',
+  cursor: 'pointer',
+  padding: '4px 8px',
+  fontSize: '16px',
+  borderRadius: '4px',
+};

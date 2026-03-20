@@ -1,0 +1,56 @@
+/**
+ * AI Gateway - Main Entry Point
+ * Multi-provider router: DeepSeek, OpenRouter, EdenAI
+ */
+
+import { AIGateway, AIGatewayConfig } from './gateway';
+import { DeepSeekProvider } from './providers/deepseek';
+import { OpenRouterProvider } from './providers/openrouter';
+import { EdenAIProvider } from './providers/edenai';
+
+// Load configuration from environment
+const gatewayConfig: AIGatewayConfig = {
+  providers: {
+    deepseek: {
+      apiKey: process.env.DEEPSEEK_API_KEY || '',
+      enabled: !!process.env.DEEPSEEK_API_KEY,
+      priority: 1,
+    },
+    openrouter: {
+      apiKey: process.env.OPENROUTER_API_KEY || '',
+      enabled: !!process.env.OPENROUTER_API_KEY,
+      priority: 2,
+    },
+    edenai: {
+      apiKey: process.env.EDENAI_API_KEY || '',
+      enabled: !!process.env.EDENAI_API_KEY,
+      priority: 3,
+    },
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY || '',
+      enabled: process.env.USE_CLASSIC_AI === 'true',
+      priority: 99,
+    },
+    anthropic: {
+      apiKey: process.env.ANTHROPIC_API_KEY || '',
+      enabled: process.env.USE_CLASSIC_AI === 'true',
+      priority: 100,
+    },
+  },
+  cacheConfig: {
+    enabled: true,
+    maxSize: 5000,
+    ttl: 3600,
+  },
+  monitoring: {
+    enabled: true,
+    metricsInterval: 60000,
+  },
+};
+
+// Create and export gateway instance
+export const aiGateway = new AIGateway(gatewayConfig);
+
+// Export types
+export * from './gateway';
+export * from './providers/index';
