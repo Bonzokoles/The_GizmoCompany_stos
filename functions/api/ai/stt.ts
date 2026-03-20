@@ -18,41 +18,41 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
   try {
     const contentType = context.request.headers.get('content-type') || '';
-    let audioBase64: string;
+    let audioBytes: number[];
 
     if (contentType.includes('application/json')) {
       const body = await context.request.json() as { audio?: string; language?: string };
       if (!body.audio || typeof body.audio !== 'string') {
         return errorResponse('Missing "audio" field (base64 encoded)', 400);
       }
-      if (body.audio.length > MAX_AUDIO_SIZE * 1.37) { // base64 overhead
+      if (body.audio.length > MAX_AUDIO_SIZE * 1.37) {
         return errorResponse('Audio too large (max 25MB)', 413);
       }
-      audioBase64 = body.audio;
+      // Decode base64 to raw bytes
+      const binaryStr = atob(body.audio);
+      const u8 = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) {
+        u8[i] = binaryStr.charCodeAt(i);
+      }
+      audioBytes = [...u8];
     } else {
-      // Raw binary audio
+      // Raw binary audio — use directly, no base64 round-trip
       const buffer = await context.request.arrayBuffer();
+      if (buffer.byteLength === 0) {
+        return errorResponse('Empty audio data', 400);
+      }
       if (buffer.byteLength > MAX_AUDIO_SIZE) {
         return errorResponse('Audio too large (max 25MB)', 413);
       }
-      const bytes = new Uint8Array(buffer);
-      // Convert to base64
-      let binary = '';
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      audioBase64 = btoa(binary);
+      audioBytes = [...new Uint8Array(buffer)];
     }
 
-    // Decode base64 to raw bytes — Whisper expects number[]
-    const binaryStr = atob(audioBase64);
-    const bytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) {
-      bytes[i] = binaryStr.charCodeAt(i);
+    if (audioBytes.length === 0) {
+      return errorResponse('Empty audio data', 400);
     }
 
     const result = await context.env.AI.run('@cf/openai/whisper-large-v3-turbo' as any, {
-      audio: Array.from(bytes),
+      audio: audioBytes,
       language: 'pl',
       vad_filter: true,
     });
