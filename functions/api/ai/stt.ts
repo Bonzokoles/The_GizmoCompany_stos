@@ -44,8 +44,15 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       audioBase64 = btoa(binary);
     }
 
+    // Decode base64 to raw bytes — Whisper expects number[]
+    const binaryStr = atob(audioBase64);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      bytes[i] = binaryStr.charCodeAt(i);
+    }
+
     const result = await context.env.AI.run('@cf/openai/whisper-large-v3-turbo' as any, {
-      audio: audioBase64,
+      audio: Array.from(bytes),
       language: 'pl',
       vad_filter: true,
     });
