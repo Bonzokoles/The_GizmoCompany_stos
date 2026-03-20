@@ -627,8 +627,9 @@ init();
   let silenceTimer=null, audioCtx=null, analyser=null, silenceStart=0;
   const SILENCE_THRESHOLD=0.01, SILENCE_DURATION=3000;
 
+  let greeted=false;
   toggle.onclick=()=>{win.classList.toggle('open');toggle.classList.toggle('active');
-    if(win.classList.contains('open'))txt.focus()};
+    if(win.classList.contains('open')){txt.focus();if(!greeted){greeted=true;setTimeout(()=>{addMsg('ai','Cześć! Jestem Jimbo, twój kolega i przewodnik po tej aplikacji. Karol ją cały czas rozwija, a ta część jest eksperymentalna — więc jeżeli coś pójdzie nie tak z moimi odpowiedziami głosowymi, to pisz i też postaram się pomóc! 😊')},2000)}}};
   closeBtn.onclick=()=>{win.classList.remove('open');toggle.classList.remove('active')};
   txt.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}};
   sendBtn.onclick=()=>sendMsg();
