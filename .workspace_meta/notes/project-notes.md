@@ -1,6 +1,6 @@
 ﻿# ZENO Browser  Notatki Projektu
 
-> **Ostatnia aktualizacja:** 2026-03-19
+> **Ostatnia aktualizacja:** 2026-03-27
 > **Typ:** Electron Desktop Browser z AI
 > **Stack:** TypeScript, React 18, Electron 27, Vite 5, Zustand, Jest, Playwright
 
@@ -45,6 +45,14 @@
 - Podman v5.7.1 (zamiast Docker)
 - docker-compose.yml  produkcja (port 3000) + dev (port 5173)
 - podman-compose.yml  alternatywna konfiguracja
+
+### Web Dashboard (zenbrowsers.org)
+
+- **11 tabów:** Overview, Workers, Content, Analytics, Pipelines, Crawlers, Storage, Databases, Images, MOA, Render
+- **14 API Workers:** webgate, ai, search, sites, workers, content, analytics, storage, db, moa, images, crawlers, pipelines, render
+- **Pipelines (LinkedOut-style):** Event Source → CF Worker → D1 → R2 Data Catalog (Iceberg) → R2 SQL
+  - 7 pipeline configs: page-analytics, worker-metrics, content-pipeline, crawler-events, ecommerce-events, ai-usage, search-events
+- **Weft AI Board:** Osobna instancja na `weft.mybonzo.com` (docs: `docs/WEFT_SETUP.md`)
 
 ---
 

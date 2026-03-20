@@ -171,6 +171,38 @@ const api = {
       ipcRenderer.invoke('search:set-config', config),
   },
 
+  // MeiliSearch — history & autocomplete
+  meilisearch: {
+    addHistory: (entry: { url: string; title?: string; snippet?: string }) =>
+      ipcRenderer.invoke('meili:add-history', entry),
+    searchHistory: (query: string, limit?: number) =>
+      ipcRenderer.invoke('meili:search-history', query, limit),
+    autocomplete: (query: string, limit?: number) =>
+      ipcRenderer.invoke('meili:autocomplete', query, limit),
+    recentHistory: (limit?: number) =>
+      ipcRenderer.invoke('meili:recent-history', limit),
+    clearHistory: () => ipcRenderer.invoke('meili:clear-history'),
+    isHealthy: () => ipcRenderer.invoke('meili:healthy'),
+  },
+
+  // Websurfx — meta search engine (SearXNG replacement)
+  websurfx: {
+    search: (query: string, filters?: Record<string, unknown>) =>
+      ipcRenderer.invoke('websurfx:search', query, filters),
+    isHealthy: () => ipcRenderer.invoke('websurfx:healthy'),
+  },
+
+  // sist2 — Archive/Document indexer
+  sist2: {
+    search: (query: string, size?: number, from?: number) =>
+      ipcRenderer.invoke('sist2:search', query, size, from),
+    getIndices: () => ipcRenderer.invoke('sist2:get-indices'),
+    scanDirectory: (dirPath: string) =>
+      ipcRenderer.invoke('sist2:scan-directory', dirPath),
+    getJobs: () => ipcRenderer.invoke('sist2:get-jobs'),
+    isHealthy: () => ipcRenderer.invoke('sist2:healthy'),
+  },
+
   // Catalog — local file library browser
   catalog: {
     addLibrary: (name: string, rootPath: string, extensions?: string[]) =>
@@ -186,6 +218,46 @@ const api = {
     readFile: (filePath: string) =>
       ipcRenderer.invoke('catalog:read-file', filePath),
     getStats: () => ipcRenderer.invoke('catalog:get-stats'),
+  },
+
+  // CMS — local article management + publish
+  cms: {
+    createArticle: (data: { title?: string; content?: string; excerpt?: string; category?: string; tags?: string[]; status?: string; language?: string; author?: string; seoTitle?: string; seoDescription?: string }) =>
+      ipcRenderer.invoke('cms:create-article', data),
+    updateArticle: (id: string, data: Record<string, unknown>) =>
+      ipcRenderer.invoke('cms:update-article', id, data),
+    deleteArticle: (id: string) =>
+      ipcRenderer.invoke('cms:delete-article', id),
+    getArticle: (id: string) =>
+      ipcRenderer.invoke('cms:get-article', id),
+    listArticles: (filter?: { status?: string; category?: string }) =>
+      ipcRenderer.invoke('cms:list-articles', filter),
+    saveImage: (data: { articleId?: string; fileName: string; base64: string; altText?: string }) =>
+      ipcRenderer.invoke('cms:save-image', data),
+    listImages: (articleId?: string) =>
+      ipcRenderer.invoke('cms:list-images', articleId),
+    deleteImage: (imageId: string) =>
+      ipcRenderer.invoke('cms:delete-image', imageId),
+    publishArticle: (articleId: string) =>
+      ipcRenderer.invoke('cms:publish-article', articleId),
+    unpublishArticle: (articleId: string) =>
+      ipcRenderer.invoke('cms:unpublish-article', articleId),
+  },
+
+  // Sync — bidirectional CF ↔ Local
+  sync: {
+    pullArticles: () => ipcRenderer.invoke('sync:pull-articles'),
+    pullEvents: (limit?: number) => ipcRenderer.invoke('sync:pull-events', limit),
+    pullAnalytics: (siteId?: string) => ipcRenderer.invoke('sync:pull-analytics', siteId),
+    status: () => ipcRenderer.invoke('sync:status'),
+    getCachedEvents: (pipelineId?: string, limit?: number) =>
+      ipcRenderer.invoke('sync:get-cached-events', pipelineId, limit),
+  },
+
+  // File — save files to local disk
+  file: {
+    saveToDisk: (data: { base64: string; fileName: string; directory?: string }) =>
+      ipcRenderer.invoke('file:save-to-disk', data),
   },
 
   // System info

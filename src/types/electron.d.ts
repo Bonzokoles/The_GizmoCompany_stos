@@ -275,6 +275,85 @@ export interface LocalSearchResult {
   rank: number;
 }
 
+// ── MeiliSearch Types ──────────────────────────────────────────
+
+export interface MeiliHistoryEntry {
+  url: string;
+  title?: string;
+  snippet?: string;
+}
+
+export interface MeiliAutocompleteResult {
+  title: string;
+  url: string;
+  type: 'history' | 'bookmark';
+}
+
+export interface MeiliSearchResult<T> {
+  hits: T[];
+  query: string;
+  processingTimeMs: number;
+  estimatedTotalHits: number;
+}
+
+// ── Websurfx Types ──────────────────────────────────────────
+
+export interface WebsurfxResult {
+  url: string;
+  title: string;
+  description: string;
+  engine: string[];
+}
+
+export interface WebsurfxResponse {
+  results: WebsurfxResult[];
+  page_query: string;
+  style: string;
+  engine: string[];
+}
+
+// ── sist2 Types ──────────────────────────────────────────────
+
+export interface Sist2SearchHit {
+  _id: string;
+  _source: {
+    name: string;
+    path: string;
+    extension: string;
+    size: number;
+    mtime: number;
+    content?: string;
+    mime?: string;
+    thumbnail?: string;
+    tag?: string[];
+    parent?: string;
+  };
+  _score?: number;
+  highlight?: Record<string, string[]>;
+}
+
+export interface Sist2SearchResponse {
+  hits: Sist2SearchHit[];
+  total: number;
+  took: number;
+}
+
+export interface Sist2IndexInfo {
+  id: string;
+  name: string;
+  root: string;
+  version: string;
+  timestamp: number;
+  numDocs: number;
+}
+
+export interface Sist2JobStatus {
+  id: string;
+  type: 'scan' | 'index';
+  status: 'running' | 'done' | 'error';
+  progress?: number;
+}
+
 export interface CatalogLibrary {
   id: string;
   name: string;
@@ -331,6 +410,28 @@ export interface CatalogAPI {
   getStats(): Promise<{ libraries: number; files: number; totalSize: number }>;
 }
 
+export interface MeilisearchAPI {
+  addHistory(entry: MeiliHistoryEntry): Promise<APIResult<void>>;
+  searchHistory(query: string, limit?: number): Promise<APIResult<MeiliSearchResult<unknown>>>;
+  autocomplete(query: string, limit?: number): Promise<APIResult<MeiliAutocompleteResult[]>>;
+  recentHistory(limit?: number): Promise<APIResult<unknown[]>>;
+  clearHistory(): Promise<APIResult<void>>;
+  isHealthy(): Promise<boolean>;
+}
+
+export interface WebsurfxAPI {
+  search(query: string, filters?: Record<string, unknown>): Promise<APIResult<WebsurfxResponse>>;
+  isHealthy(): Promise<boolean>;
+}
+
+export interface Sist2API {
+  search(query: string, size?: number, from?: number): Promise<APIResult<Sist2SearchResponse>>;
+  getIndices(): Promise<APIResult<Sist2IndexInfo[]>>;
+  scanDirectory(dirPath: string): Promise<APIResult<Sist2JobStatus>>;
+  getJobs(): Promise<APIResult<Sist2JobStatus[]>>;
+  isHealthy(): Promise<boolean>;
+}
+
 // ── Main ElectronAPI Interface ─────────────────────────────────
 
 export interface ElectronAPI {
@@ -346,6 +447,9 @@ export interface ElectronAPI {
   plugin?: PluginAPI;
   search: SearchAPI;
   catalog: CatalogAPI;
+  meilisearch: MeilisearchAPI;
+  websurfx: WebsurfxAPI;
+  sist2: Sist2API;
 
   /** Subscribe to IPC events from main process. Returns unsubscribe function. */
   on(channel: string, callback: (...args: unknown[]) => void): () => void;

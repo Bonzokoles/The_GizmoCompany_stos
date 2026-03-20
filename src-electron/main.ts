@@ -29,6 +29,10 @@ import { UmamiService } from './services/umami-service';
 import { SearXNGService } from './services/searxng-service';
 import { CatalogService } from './services/catalog-service';
 import { SearchService } from './services/search-service';
+import { MeilisearchService } from './services/meilisearch-service';
+import { WebsurfxService } from './services/websurfx-service';
+import { Sist2Service } from './services/sist2-service';
+import { SyncService } from './services/sync-service';
 import { createMCPServer, MCPServer } from './mcp-server';
 
 let mainWindow: BrowserWindow | null = null;
@@ -47,6 +51,10 @@ let umamiService: UmamiService;
 let searxngService: SearXNGService;
 let catalogService: CatalogService;
 let searchService: SearchService;
+let meilisearchService: MeilisearchService;
+let websurfxService: WebsurfxService;
+let sist2Service: Sist2Service;
+let syncService: SyncService;
 
 /**
  * Create main window
@@ -251,6 +259,24 @@ async function initializeServices() {
     // Search — unified orchestrator (SearXNG + AI + Catalog)
     searchService = new SearchService(searxngService, catalogService, aiGatewayService);
     console.log('✅ Search Service initialized');
+
+    // MeiliSearch — local history + autocomplete
+    meilisearchService = new MeilisearchService();
+    meilisearchService.ensureIndexes().catch(() => { /* Meili may not be running yet */ });
+    console.log('✅ MeiliSearch Service initialized');
+
+    // Websurfx — meta search engine (SearXNG replacement)
+    websurfxService = new WebsurfxService();
+    console.log('✅ Websurfx Service initialized');
+
+    // sist2 — archive/document indexer (SQLite mode)
+    sist2Service = new Sist2Service();
+    console.log('✅ sist2 Service initialized');
+
+    // Sync + CMS — bidirectional local ↔ CF sync
+    syncService = new SyncService();
+    syncService.registerIPC();
+    console.log('✅ Sync/CMS Service initialized');
 
     // MCP Server
     mcpServer = createMCPServer({
@@ -659,6 +685,126 @@ function setupIPCHandlers() {
   ipcMain.handle('search:set-config', async (_, config: any) => {
     if (!config || typeof config !== 'object') return;
     searchService.setConfig(config);
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // MeiliSearch — History & Autocomplete
+  // ═══════════════════════════════════════════════════════════
+
+  ipcMain.handle('meili:add-history', async (_, entry: any) => {
+    if (!entry || !entry.url) return { success: false, error: 'Brak URL' };
+    try {
+      await meilisearchService.addHistoryEntry(entry);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('meili:search-history', async (_, query: string, limit?: number) => {
+    if (!isValidString(query)) return { success: false, error: 'Nieprawidłowe zapytanie' };
+    try {
+      const result = await meilisearchService.searchHistory(query, limit);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('meili:autocomplete', async (_, query: string, limit?: number) => {
+    if (!isValidString(query)) return { success: false, error: 'Nieprawidłowe zapytanie' };
+    try {
+      const results = await meilisearchService.autocomplete(query, limit);
+      return { success: true, data: results };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('meili:recent-history', async (_, limit?: number) => {
+    try {
+      const results = await meilisearchService.getRecentHistory(limit);
+      return { success: true, data: results };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('meili:clear-history', async () => {
+    try {
+      await meilisearchService.clearHistory();
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('meili:healthy', async () => {
+    return meilisearchService.isHealthy();
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // Websurfx — Meta search engine (SearXNG replacement)
+  // ═══════════════════════════════════════════════════════════
+
+  ipcMain.handle('websurfx:search', async (_, query: string, filters?: Record<string, unknown>) => {
+    if (!isValidString(query)) return { success: false, error: 'Brak zapytania' };
+    try {
+      const result = await websurfxService.search(query, filters as any);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('websurfx:healthy', async () => {
+    return websurfxService.isHealthy();
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // sist2 — Archive/Document Indexer
+  // ═══════════════════════════════════════════════════════════
+
+  ipcMain.handle('sist2:search', async (_, query: string, size?: number, from?: number) => {
+    if (!isValidString(query)) return { success: false, error: 'Brak zapytania' };
+    try {
+      const result = await sist2Service.search(query, size, from);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('sist2:get-indices', async () => {
+    try {
+      const indices = await sist2Service.getIndices();
+      return { success: true, data: indices };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('sist2:scan-directory', async (_, dirPath: string) => {
+    if (!isValidString(dirPath)) return { success: false, error: 'Nieprawidłowa ścieżka' };
+    try {
+      const job = await sist2Service.scanDirectory(dirPath);
+      return { success: true, data: job };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('sist2:get-jobs', async () => {
+    try {
+      const jobs = await sist2Service.getJobs();
+      return { success: true, data: jobs };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('sist2:healthy', async () => {
+    return sist2Service.isHealthy();
   });
 
   // ═══════════════════════════════════════════════════════════

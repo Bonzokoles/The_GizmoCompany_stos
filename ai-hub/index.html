@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI HUB Tools — JIMBO DevZ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+:root {
+    --bg: #03040b;
+    --glass-bg: rgba(15,23,42,0.45);
+    --glass-border: rgba(255,255,255,0.08);
+    --glass-glow: rgba(0,255,204,0.15);
+    --accent: #00ffcc;
+    --accent2: #a78bfa;
+    --accent3: #f59e0b;
+    --accent4: #f472b6;
+    --accent-dim: rgba(0,255,204,0.15);
+    --danger: #f87171;
+    --success: #34d399;
+    --text: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dim: #64748b;
+    --font: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+    --radius: 14px;
+    --transition: 0.3s cubic-bezier(0.25,0.8,0.25,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;
+  background:radial-gradient(ellipse at 20% -10%,#1a2238 0%,#03040b 55%);background-attachment:fixed}
+a{color:var(--accent);text-decoration:none;transition:var(--transition)}
+a:hover{color:#5effe0}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,255,204,0.15);border-radius:3px}
+
+/* ─── TOPBAR ─── */
+.topbar{position:sticky;top:0;z-index:100;padding:.8rem 2rem;display:flex;align-items:center;gap:1.5rem;
+  background:rgba(3,4,11,0.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border)}
+.logo{display:flex;align-items:center;gap:.6rem;font-size:1.3rem;font-weight:900;letter-spacing:1px;white-space:nowrap}
+.logo span{color:var(--accent)}
+.logo-icon{font-size:1.6rem}
+.nav{display:flex;gap:.3rem;flex:1;justify-content:center;flex-wrap:wrap}
+.nav-btn{padding:.45rem 1rem;border-radius:10px;border:1px solid transparent;background:transparent;
+  color:var(--text-muted);font-size:.82rem;font-family:var(--font);font-weight:600;cursor:pointer;transition:var(--transition);
+  display:flex;align-items:center;gap:.4rem;white-space:nowrap}
+.nav-btn:hover{color:var(--text);background:rgba(255,255,255,0.04)}
+.nav-btn.active{color:var(--accent);background:var(--accent-dim);border-color:rgba(0,255,204,0.2)}
+.nav-btn .icon{font-size:1rem}
+.topbar-right{display:flex;align-items:center;gap:1rem}
+.clock{font-family:var(--mono);font-size:.8rem;color:var(--text-dim)}
+
+/* ─── PAGE ─── */
+.page{display:none;padding:2rem;max-width:1400px;margin:0 auto;animation:fadeIn .4s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ─── SECTION HEADER ─── */
+.section-head{margin-bottom:2rem}
+.section-head h2{font-size:2rem;font-weight:900;letter-spacing:-0.5px;margin-bottom:.4rem}
+.section-head h2 .hl{color:var(--accent)}
+.section-head p{color:var(--text-muted);font-size:.95rem;max-width:600px}
+
+/* ─── GLASS CARD ─── */
+.glass{background:var(--glass-bg);backdrop-filter:blur(14px);border:1px solid var(--glass-border);border-radius:var(--radius);
+  transition:var(--transition);overflow:hidden}
+.glass:hover{border-color:rgba(255,255,255,0.14);box-shadow:0 12px 32px rgba(0,0,0,0.3),0 0 15px var(--glass-glow)}
+
+/* ─── GRID LAYOUTS ─── */
+.grid-3{display:grid;grid-template-columns:repeat(auto-fill,minmax(350px,1fr));gap:1.5rem}
+.grid-4{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.2rem}
+.grid-2{display:grid;grid-template-columns:repeat(auto-fill,minmax(450px,1fr));gap:1.5rem}
+
+/* ─── STAT CARDS ─── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{padding:1.2rem 1.5rem;text-align:center}
+.stat-card .num{font-size:2.2rem;font-weight:900;line-height:1;margin-bottom:.3rem}
+.stat-card .lbl{font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;font-weight:600}
+.stat-card.teal .num{color:var(--accent)}
+.stat-card.purple .num{color:var(--accent2)}
+.stat-card.amber .num{color:var(--accent3)}
+.stat-card.pink .num{color:var(--accent4)}
+
+/* ─── MODEL CARD ─── */
+.model-card{padding:1.4rem;display:flex;flex-direction:column;gap:.8rem;position:relative}
+.model-card .model-head{display:flex;justify-content:space-between;align-items:flex-start}
+.model-card .model-name{font-size:1.05rem;font-weight:700;line-height:1.3}
+.model-card .model-provider{font-size:.75rem;color:var(--text-dim);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:.15rem}
+.model-card .model-badge{padding:.2rem .6rem;border-radius:8px;font-size:.7rem;font-weight:700;white-space:nowrap}
+.badge-api{background:rgba(0,255,204,0.12);color:var(--accent);border:1px solid rgba(0,255,204,0.25)}
+.badge-local{background:rgba(167,139,250,0.12);color:var(--accent2);border:1px solid rgba(167,139,250,0.25)}
+.badge-new{background:rgba(245,158,11,0.12);color:var(--accent3);border:1px solid rgba(245,158,11,0.25)}
+.model-card .model-desc{font-size:.85rem;color:var(--text-muted);line-height:1.5;flex:1}
+.model-card .model-meta{display:flex;gap:.5rem;flex-wrap:wrap}
+.model-chip{font-size:.7rem;padding:.15rem .5rem;border-radius:8px;background:rgba(255,255,255,0.04);
+  color:var(--text-dim);border:1px solid var(--glass-border)}
+.model-card .model-price{font-family:var(--mono);font-size:.82rem;color:var(--accent3);font-weight:600}
+.model-card .model-footer{display:flex;justify-content:space-between;align-items:center;padding-top:.6rem;
+  border-top:1px solid rgba(255,255,255,0.05)}
+
+/* ─── TOOL CARD ─── */
+.tool-card{padding:1.3rem;display:flex;flex-direction:column;gap:.6rem;cursor:pointer}
+.tool-card .tool-icon{font-size:2rem;margin-bottom:.2rem}
+.tool-card .tool-name{font-size:1rem;font-weight:700}
+.tool-card .tool-desc{font-size:.82rem;color:var(--text-muted);line-height:1.5;flex:1}
+.tool-card .tool-tag{font-size:.7rem;padding:.15rem .5rem;border-radius:8px;display:inline-block;margin-top:auto}
+.tag-app{background:rgba(0,255,204,0.1);color:var(--accent);border:1px solid rgba(0,255,204,0.2)}
+.tag-util{background:rgba(167,139,250,0.1);color:var(--accent2);border:1px solid rgba(167,139,250,0.2)}
+.tag-gen{background:rgba(244,114,182,0.1);color:var(--accent4);border:1px solid rgba(244,114,182,0.2)}
+.tag-data{background:rgba(245,158,11,0.1);color:var(--accent3);border:1px solid rgba(245,158,11,0.2)}
+
+/* ─── PROVIDER CARD ─── */
+.provider-card{padding:1.2rem;display:flex;align-items:center;gap:1rem}
+.provider-card .prov-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:900;flex-shrink:0}
+.provider-card .prov-info{flex:1}
+.provider-card .prov-name{font-weight:700;font-size:.95rem}
+.provider-card .prov-models{font-size:.78rem;color:var(--text-muted)}
+.provider-card .prov-status{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.prov-online{background:var(--success);box-shadow:0 0 8px rgba(52,211,153,0.4)}
+.prov-offline{background:var(--danger);box-shadow:0 0 8px rgba(248,113,113,0.4)}
+
+/* ─── PRICING TABLE ─── */
+.price-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.price-table th{text-align:left;padding:.8rem 1rem;color:var(--accent);text-transform:uppercase;letter-spacing:2px;
+  font-size:.72rem;font-weight:700;border-bottom:1px solid rgba(0,255,204,0.15)}
+.price-table td{padding:.7rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-muted)}
+.price-table tr:hover td{background:rgba(255,255,255,0.02);color:var(--text)}
+.price-table .price-val{font-family:var(--mono);color:var(--accent3);font-weight:600}
+.price-table .model-name-cell{color:var(--text);font-weight:600}
+.price-table .tier-free{color:var(--success)}
+.price-table .tier-budget{color:var(--accent)}
+.price-table .tier-premium{color:var(--accent3)}
+.price-table .tier-enterprise{color:var(--accent4)}
+
+/* ─── APPS GRID ─── */
+.app-card{padding:0;cursor:pointer;overflow:hidden}
+.app-card .app-banner{height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.app-card .app-banner .bg-icon{font-size:5rem;opacity:.15;position:absolute}
+.app-card .app-banner-gradient{position:absolute;inset:0}
+.app-card .app-body{padding:1.2rem;position:relative;z-index:2}
+.app-card .app-name{font-size:1.15rem;font-weight:800;margin-bottom:.3rem}
+.app-card .app-desc{font-size:.82rem;color:var(--text-muted);line-height:1.5;margin-bottom:.8rem}
+.app-card .app-stats{display:flex;gap:1rem;font-size:.75rem;color:var(--text-dim)}
+.app-card .app-stats span{display:flex;align-items:center;gap:.3rem}
+.app-open-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:8px;border:1px solid var(--accent);
+  background:var(--accent-dim);color:var(--accent);font-family:var(--font);font-weight:700;font-size:.8rem;cursor:pointer;transition:var(--transition)}
+.app-open-btn:hover{background:var(--accent);color:#000}
+
+/* ─── SEARCH BAR ─── */
+.hub-search{max-width:500px;position:relative;margin-bottom:2rem}
+.hub-search input{width:100%;padding:.7rem 1rem .7rem 2.5rem;background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);
+  border-radius:10px;color:var(--text);font-size:.9rem;font-family:var(--font);outline:none;transition:var(--transition)}
+.hub-search input:focus{border-color:var(--accent);box-shadow:0 0 20px var(--accent-dim)}
+.hub-search svg{position:absolute;left:.75rem;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-muted)}
+
+/* ─── FILTER PILLS ─── */
+.pills{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.pill{padding:.35rem .8rem;border-radius:20px;border:1px solid var(--glass-border);background:transparent;
+  color:var(--text-muted);font-size:.78rem;font-family:var(--font);font-weight:600;cursor:pointer;transition:var(--transition)}
+.pill:hover,.pill.active{background:var(--accent-dim);color:var(--accent);border-color:rgba(0,255,204,0.25)}
+
+/* ─── BUDGET BAR ─── */
+.budget-bar{margin-top:1rem}
+.budget-track{height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.budget-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.budget-labels{display:flex;justify-content:space-between;margin-top:.4rem;font-size:.75rem;color:var(--text-dim)}
+
+/* ─── IFRAME EMBED ─── */
+.embed-frame{width:100%;border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;background:#03040b}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .topbar{flex-wrap:wrap;padding:.6rem 1rem;gap:.5rem}
+  .nav{order:3;flex-basis:100%;justify-content:flex-start;overflow-x:auto}
+  .page{padding:1rem}
+  .grid-3,.grid-2{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+  .stat-row{grid-template-columns:repeat(2,1fr)}
+  .section-head h2{font-size:1.4rem}
+}
+    </style>
+</head>
+<body>
+
+<!-- ─── TOPBAR ─── -->
+<div class="topbar">
+    <div class="logo">
+        <span class="logo-icon">🤖</span>
+        <div>AI <span>HUB</span> Tools</div>
+    </div>
+    <nav class="nav" id="nav">
+        <button class="nav-btn active" data-tab="dashboard"><span class="icon">📊</span> Dashboard</button>
+        <button class="nav-btn" data-tab="models"><span class="icon">🧠</span> Modele AI</button>
+        <button class="nav-btn" data-tab="pricing"><span class="icon">💰</span> Cennik</button>
+        <button class="nav-btn" data-tab="providers"><span class="icon">🔌</span> Providerzy</button>
+        <button class="nav-btn" data-tab="tools"><span class="icon">🛠️</span> Narzędzia</button>
+        <button class="nav-btn" data-tab="apps"><span class="icon">📦</span> Aplikacje</button>
+    </nav>
+    <div class="topbar-right">
+        <div class="clock" id="clock"></div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- DASHBOARD -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
+    <div class="section-head">
+        <h2>🤖 AI <span class="hl">Hub</span> — Przegląd</h2>
+        <p>Centralny hub do zarządzania modelami AI, narzędziami, aplikacjami i kosztami</p>
+    </div>
+
+    <div class="stat-row">
+        <div class="glass stat-card teal"><div class="num" id="s-models">0</div><div class="lbl">Modele AI</div></div>
+        <div class="glass stat-card purple"><div class="num" id="s-providers">0</div><div class="lbl">Providerzy</div></div>
+        <div class="glass stat-card amber"><div class="num" id="s-tools">0</div><div class="lbl">Narzędzia</div></div>
+        <div class="glass stat-card pink"><div class="num" id="s-apps">0</div><div class="lbl">Aplikacje</div></div>
+    </div>
+
+    <!-- Budget Overview -->
+    <div class="grid-2" style="margin-bottom:2rem">
+        <div class="glass" style="padding:1.5rem">
+            <h3 style="color:var(--accent3);font-size:.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem">💸 Budżet Miesięczny</h3>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.8rem">
+                <span style="font-size:2rem;font-weight:900;color:var(--accent3)">$300</span>
+                <span style="color:var(--text-dim);font-size:.85rem">z $500 total</span>
+            </div>
+            <div class="budget-bar">
+                <div class="budget-track"><div class="budget-fill" style="width:60%;background:linear-gradient(90deg,var(--accent),var(--accent3))"></div></div>
+                <div class="budget-labels"><span>AI Models</span><span>$300 / $500</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.2rem;font-size:.82rem">
+                <div style="color:var(--text-muted)">☁️ Cloudflare <span style="float:right;color:var(--accent)">$100</span></div>
+                <div style="color:var(--text-muted)">🛡️ Buffer <span style="float:right;color:var(--success)">$100</span></div>
+                <div style="color:var(--text-muted)">🤖 AI Models <span style="float:right;color:var(--accent3)">$300</span></div>
+                <div style="color:var(--text-muted)">💵 Koszt/zapytanie <span style="float:right;color:var(--text)">~$0.02</span></div>
+            </div>
+        </div>
+
+        <div class="glass" style="padding:1.5rem">
+            <h3 style="color:var(--accent2);font-size:.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem">⚡ Quick Actions</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem">
+                <button class="app-open-btn" onclick="switchTab('models')" style="justify-content:center">🧠 Modele</button>
+                <button class="app-open-btn" onclick="switchTab('pricing')" style="justify-content:center">💰 Cennik</button>
+                <button class="app-open-btn" onclick="switchTab('tools')" style="justify-content:center">🛠️ Narzędzia</button>
+                <button class="app-open-btn" onclick="switchTab('apps')" style="justify-content:center">📦 Aplikacje</button>
+                <button class="app-open-btn" onclick="openApp('../movies-app/index.html')" style="justify-content:center;grid-column:span 2">🎬 Movie Buch App</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Models Preview -->
+    <h3 style="color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem">🏆 Top Modele</h3>
+    <div class="grid-4" id="dash-top-models"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- MODELS -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-models">
+    <div class="section-head">
+        <h2>🧠 Modele <span class="hl">AI</span></h2>
+        <p>Katalog wszystkich modeli AI — API, lokalne i konteneryzowane</p>
+    </div>
+    <div class="hub-search">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="model-search" placeholder="Szukaj modeli po nazwie, providerze, kategorii...">
+    </div>
+    <div class="pills" id="model-pills">
+        <button class="pill active" data-mf="all">Wszystkie</button>
+        <button class="pill" data-mf="api">API</button>
+        <button class="pill" data-mf="local">Lokalne</button>
+        <button class="pill" data-mf="text">Tekst</button>
+        <button class="pill" data-mf="vision">Vision</button>
+        <button class="pill" data-mf="embedding">Embedding</button>
+        <button class="pill" data-mf="image">Image Gen</button>
+        <button class="pill" data-mf="audio">Audio</button>
+        <button class="pill" data-mf="code">Code</button>
+    </div>
+    <div class="grid-3" id="models-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- PRICING -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-pricing">
+    <div class="section-head">
+        <h2>💰 <span class="hl">Cennik</span> Modeli AI</h2>
+        <p>Porównanie kosztów per 1M tokenów — input / output</p>
+    </div>
+    <div class="pills" id="price-pills">
+        <button class="pill active" data-pf="all">Wszystkie</button>
+        <button class="pill" data-pf="free">Darmowe</button>
+        <button class="pill" data-pf="budget">Budget</button>
+        <button class="pill" data-pf="premium">Premium</button>
+        <button class="pill" data-pf="enterprise">Enterprise</button>
+    </div>
+    <div class="glass" style="padding:0;overflow-x:auto">
+        <table class="price-table" id="price-table">
+            <thead>
+                <tr><th>Model</th><th>Provider</th><th>Input /1M tok</th><th>Output /1M tok</th><th>Tier</th><th>Kontekst</th></tr>
+            </thead>
+            <tbody id="price-tbody"></tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- PROVIDERS -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-providers">
+    <div class="section-head">
+        <h2>🔌 <span class="hl">Providerzy</span> LiteLLM</h2>
+        <p>Aktywni providerzy AI z integracją przez LiteLLM proxy</p>
+    </div>
+    <div class="grid-3" id="providers-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- TOOLS -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-tools">
+    <div class="section-head">
+        <h2>🛠️ <span class="hl">Narzędzia</span> AI</h2>
+        <p>Platformy, SDK, narzędzia deweloperskie i biblioteki AI</p>
+    </div>
+    <div class="hub-search">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="tool-search" placeholder="Szukaj narzędzi...">
+    </div>
+    <div class="pills" id="tool-pills">
+        <button class="pill active" data-tf="all">Wszystkie</button>
+        <button class="pill" data-tf="framework">Framework</button>
+        <button class="pill" data-tf="platform">Platforma</button>
+        <button class="pill" data-tf="sdk">SDK</button>
+        <button class="pill" data-tf="devtool">DevTool</button>
+        <button class="pill" data-tf="database">Database</button>
+        <button class="pill" data-tf="monitoring">Monitoring</button>
+    </div>
+    <div class="grid-4" id="tools-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- APPS -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-apps">
+    <div class="section-head">
+        <h2>📦 <span class="hl">Aplikacje</span></h2>
+        <p>Mini-aplikacje zintegrowane z AI Hub</p>
+    </div>
+    <div class="grid-3" id="apps-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<script>
+/* ═══════════════════════════════════════════════════════
+   DATA — AI Models
+   ═══════════════════════════════════════════════════════ */
+const MODELS = [
+  // ── API MODELS ──
+  { name:'Claude Sonnet 4',       provider:'Anthropic',  type:'api', cats:['text','code'],    ctx:'200K', input:3, output:15, tier:'premium',    desc:'Flagowy model Anthropic — coding, reasoning, analiza' },
+  { name:'Claude Opus 4.6',       provider:'Anthropic',  type:'api', cats:['text','code'],    ctx:'200K', input:15, output:75, tier:'enterprise', desc:'Najpotężniejszy model Anthropic — deep reasoning, złożone zadania' },
+  { name:'GPT-4o',                provider:'OpenAI',     type:'api', cats:['text','vision','code'], ctx:'128K', input:2.5, output:10, tier:'premium', desc:'Multimodalny model OpenAI — tekst, obraz, audio, kod' },
+  { name:'GPT-5.3 Codex',        provider:'OpenAI',     type:'api', cats:['code','text'],    ctx:'256K', input:12, output:48, tier:'enterprise', desc:'Zaawansowany model kodowania z GPT-5 — agentic coding' },
+  { name:'Gemini 2.0 Flash',     provider:'Google',     type:'api', cats:['text','vision'],  ctx:'1M',   input:0.075, output:0.3, tier:'budget', desc:'Ultra-szybki model Google — ogromny kontekst 1M tokenów' },
+  { name:'Gemini 3 Flash',       provider:'Google',     type:'api', cats:['text','vision','audio'], ctx:'2M', input:0.1, output:0.4, tier:'budget', desc:'Najnowszy Flash — 2M kontekst, multimodal' },
+  { name:'DeepSeek R1 8B',       provider:'DeepSeek',   type:'api', cats:['text','code'],    ctx:'128K', input:0.14, output:2.19, tier:'budget', desc:'Tani model reasoning — świetny stosunek jakości do ceny' },
+  { name:'Qwen 2.5 14B',        provider:'Alibaba',    type:'api', cats:['text','code'],    ctx:'128K', input:0.5, output:1.5, tier:'budget', desc:'Open-source model z Alibaba — wielojęzykowy, kod' },
+  { name:'Grok 4',               provider:'xAI',        type:'api', cats:['text','code'],    ctx:'256K', input:3, output:15, tier:'premium',    desc:'Model xAI — szybki reasoning, real-time knowledge' },
+  { name:'Kimi K2.5',            provider:'Moonshot',   type:'api', cats:['text'],           ctx:'200K', input:1, output:4, tier:'budget',      desc:'Model Moonshot — długi kontekst, analiza dokumentów' },
+  { name:'GLM-5',                provider:'Zhipu',      type:'api', cats:['text','code'],    ctx:'128K', input:1, output:4, tier:'budget',      desc:'Chinese-English bilingual model — kompetentny ogólnie' },
+  { name:'MiniMax M2.5',         provider:'MiniMax',    type:'api', cats:['text','audio'],   ctx:'128K', input:0.5, output:2, tier:'budget',    desc:'Multimodal model — tekst i generowanie audio' },
+  { name:'Mistral Large',        provider:'Mistral',    type:'api', cats:['text','code'],    ctx:'128K', input:2, output:6, tier:'premium',     desc:'Flagowy model Mistral — wielojęzyczny, reasoning' },
+  // ── LOCAL MODELS ──
+  { name:'Gemma 2B',             provider:'Google',     type:'local', cats:['text'],         ctx:'8K',   input:0, output:0, tier:'free',       desc:'Lekki model do terminala — polski support, konteneryzowany' },
+  { name:'Phi Nano 0.5B',        provider:'Microsoft',  type:'local', cats:['text'],         ctx:'4K',   input:0, output:0, tier:'free',       desc:'Ultra-lekki model — terminal support, multilingual' },
+  // ── EMBEDDING ──
+  { name:'text-embedding-3-small', provider:'OpenAI',   type:'api', cats:['embedding'],      ctx:'8K',   input:0.02, output:0, tier:'budget',  desc:'Model embeddingów OpenAI — search, RAG, klasyfikacja' },
+  { name:'text-embedding-3-large', provider:'OpenAI',   type:'api', cats:['embedding'],      ctx:'8K',   input:0.13, output:0, tier:'budget',  desc:'Duży model embeddingów — wyższa jakość retrieval' },
+  // ── VISION & IMAGE ──
+  { name:'DALL·E 3',              provider:'OpenAI',    type:'api', cats:['image'],          ctx:'—',    input:40, output:0, tier:'premium',    desc:'Generowanie obrazów z tekstu — high quality' },
+  { name:'Stable Diffusion XL',   provider:'Stability', type:'api', cats:['image'],          ctx:'—',    input:0, output:0, tier:'free',        desc:'Open-source image generation — lokalne lub API' },
+  { name:'Claude Vision',         provider:'Anthropic', type:'api', cats:['vision'],         ctx:'200K', input:3, output:15, tier:'premium',    desc:'Analiza obrazów przez Claude — OCR, diagram understanding' },
+  // ── AUDIO ──
+  { name:'Whisper Large v3',      provider:'OpenAI',    type:'api', cats:['audio'],          ctx:'—',    input:0.006, output:0, tier:'budget', desc:'Speech-to-text — 99 języków, świetna jakość' },
+  { name:'ElevenLabs TTS',        provider:'ElevenLabs',type:'api', cats:['audio'],          ctx:'—',    input:0.3, output:0, tier:'premium',   desc:'Text-to-speech — naturalne głosy, klonowanie' },
+];
+
+/* ═══════════════════════════════════════════════════════
+   DATA — Providers
+   ═══════════════════════════════════════════════════════ */
+const PROVIDERS = [
+  { name:'Anthropic',      icon:'A', bg:'#da7756', models:3, status:'online',  desc:'Claude Sonnet 4, Opus 4.6, Vision' },
+  { name:'OpenAI',         icon:'◎', bg:'#10a37f', models:5, status:'online',  desc:'GPT-4o, GPT-5.3, DALL·E, Whisper, Embeddings' },
+  { name:'Google',         icon:'G', bg:'#4285f4', models:3, status:'online',  desc:'Gemini 2.0 Flash, Gemini 3, Gemma' },
+  { name:'DeepSeek',       icon:'D', bg:'#5b6ef5', models:1, status:'online',  desc:'DeepSeek R1 8B — budget reasoning' },
+  { name:'xAI',            icon:'X', bg:'#1d9bf0', models:1, status:'online',  desc:'Grok 4 — real-time AI' },
+  { name:'Mistral',        icon:'M', bg:'#ff7000', models:1, status:'online',  desc:'Mistral Large — European AI' },
+  { name:'Moonshot',       icon:'🌙', bg:'#6366f1', models:1, status:'online', desc:'Kimi K2.5 — long context' },
+  { name:'Alibaba',        icon:'Q', bg:'#ff6a00', models:1, status:'online',  desc:'Qwen 2.5 14B — open source' },
+  { name:'Microsoft',      icon:'⊞', bg:'#00a4ef', models:1, status:'online',  desc:'Phi Nano — ultra-light local' },
+  { name:'Stability',      icon:'S', bg:'#9333ea', models:1, status:'online',  desc:'Stable Diffusion XL — image gen' },
+  { name:'ElevenLabs',     icon:'XI', bg:'#000', models:1, status:'online',    desc:'TTS — naturalne głosy' },
+  { name:'Zhipu',          icon:'Z', bg:'#3b82f6', models:1, status:'online',  desc:'GLM-5 — bilingual model' },
+  { name:'MiniMax',        icon:'M²', bg:'#ec4899', models:1, status:'online', desc:'MiniMax M2.5 — multimodal' },
+  { name:'Groq',           icon:'⚡', bg:'#f97316', models:0, status:'online', desc:'Ultra-fast inference — LPU hardware' },
+  { name:'OpenRouter',     icon:'↗', bg:'#22d3ee', models:8, status:'online',  desc:'Multi-provider proxy — 8 models' },
+  { name:'Ollama',         icon:'🦙', bg:'#64748b', models:0, status:'offline', desc:'Usunięty — brak wsparcia polskiego' },
+];
+
+/* ═══════════════════════════════════════════════════════
+   DATA — Tools
+   ═══════════════════════════════════════════════════════ */
+const TOOLS = [
+  { name:'LiteLLM',     icon:'🔀', cat:'framework', desc:'Ujednolicone proxy API — jeden endpoint do 100+ modeli, load balancing, fallback' },
+  { name:'LangChain',   icon:'🦜', cat:'framework', desc:'Framework do budowy aplikacji LLM — chains, agents, RAG, memory' },
+  { name:'LlamaIndex',  icon:'🦙', cat:'framework', desc:'Framework do RAG i indeksowania danych — query engines, knowledge graphs' },
+  { name:'Vercel AI SDK', icon:'▲', cat:'sdk',      desc:'SDK do streaming AI w Next.js / React — hooks, edge runtime' },
+  { name:'Hugging Face', icon:'🤗', cat:'platform',  desc:'Hub modeli AI — 500k+ modeli, datasets, Spaces, Inference API' },
+  { name:'Weights & Biases', icon:'📊', cat:'monitoring', desc:'MLOps platform — experiment tracking, model registry, monitoring' },
+  { name:'Replicate',   icon:'🔄', cat:'platform',   desc:'Cloud ML — uruchamiaj open-source modele przez API' },
+  { name:'Pinecone',    icon:'🌲', cat:'database',   desc:'Vector database — serverless, szybki similarity search do RAG' },
+  { name:'ChromaDB',    icon:'💎', cat:'database',   desc:'Open-source embedding database — local-first, easy Python SDK' },
+  { name:'Weaviate',    icon:'🔷', cat:'database',   desc:'Vector search engine — hybrid search, multi-modal, GraphQL' },
+  { name:'Instructor',  icon:'📋', cat:'sdk',        desc:'Structured output z LLM — Pydantic validation, retry logic' },
+  { name:'DSPy',        icon:'🧪', cat:'framework',  desc:'Programming framework for LLMs — optimize prompts automatically' },
+  { name:'Ollama',      icon:'🦙', cat:'devtool',    desc:'Lokalne uruchamianie LLM — prosty CLI, modele offline' },
+  { name:'vLLM',        icon:'⚡', cat:'devtool',    desc:'High-throughput LLM serving — PagedAttention, continuous batching' },
+  { name:'LobeChat',    icon:'💬', cat:'platform',   desc:'Open-source ChatGPT UI — multi-provider, plugins, agents' },
+  { name:'Open WebUI',  icon:'🌐', cat:'platform',   desc:'Self-hosted AI chat — kompatybilny z OpenAI API, RAG wbudowany' },
+  { name:'Cursor',      icon:'⌨️', cat:'devtool',    desc:'AI-powered IDE — Fork VS Code, inline AI editing, code generation' },
+  { name:'Continue',    icon:'➡️', cat:'devtool',    desc:'Open-source AI coding assistant — VS Code & JetBrains extension' },
+  { name:'Cody',        icon:'🤖', cat:'devtool',    desc:'AI coding assistant od Sourcegraph — code search + context' },
+  { name:'Qdrant',      icon:'🎯', cat:'database',   desc:'Vector similarity engine — Rust, filtering, payload storage' },
+  { name:'Haystack',    icon:'🔍', cat:'framework',  desc:'NLP framework — pipelines, RAG, semantic search, agents' },
+  { name:'CrewAI',      icon:'👥', cat:'framework',  desc:'Multi-agent framework — role-based agents, collaborative tasks' },
+  { name:'AutoGen',     icon:'🔄', cat:'framework',  desc:'Microsoft multi-agent — conversational AI, code execution' },
+  { name:'Helicone',    icon:'📈', cat:'monitoring',  desc:'LLM observability — request logging, cost tracking, analytics' },
+];
+
+/* ═══════════════════════════════════════════════════════
+   DATA — Apps
+   ═══════════════════════════════════════════════════════ */
+const APPS = [
+  {
+    id: 'movie-buch',
+    name: '🎬 Movie Buch App',
+    desc: 'Kolekcja 66 filmów z recenzjami w 5 stylach literackich (akademicki, Bukowski, Thompson, Gombrowicz, Mrożek) + osobiste recenzje. Plakaty TMDB, wyszukiwanie, filtry.',
+    url: '../movies-app/index.html',
+    banner_bg: 'linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0a192f 100%)',
+    icon: '🎬',
+    stats: { movies: 66, reviews: 50, styles: 5 }
+  },
+  {
+    id: 'zeno-ops',
+    name: '📊 ZENO Ops Dashboard',
+    desc: 'Centralny panel operacyjny — Workers, Content, Analytics, Pipelines, Storage, Databases, Images, MOA, Browser Rendering.',
+    url: '../index.html',
+    banner_bg: 'linear-gradient(135deg, #0a192f 0%, #112240 50%, #1a365d 100%)',
+    icon: '📊',
+    stats: { tabs: 11, workers: 14, apis: 14 }
+  },
+  {
+    id: 'moa-pipeline',
+    name: '🧬 MOA Pipeline',
+    desc: 'Mixture-of-Agents content generator — 5-stage pipeline: Input → Parallel Writing → Critique → Aggregation → Validation. K.R.A.F.T. Framework.',
+    url: 'https://moa.mybonzo.com',
+    banner_bg: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
+    icon: '🧬',
+    stats: { stages: 5, criteria: 5 }
+  },
+  {
+    id: 'ai-app-tools',
+    name: '🤖 AI App Tools',
+    desc: 'Wkrótce — interaktywne mini-aplikacje AI: chat, tłumaczenie, generowanie treści, analiza obrazów, TTS. Połączenie z modelami API.',
+    url: '#',
+    banner_bg: 'linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #5b21b6 100%)',
+    icon: '🤖',
+    stats: { status: 'Wkrótce' }
+  },
+];
+
+/* ═══════════════════════════════════════════════════════
+   RENDER FUNCTIONS
+   ═══════════════════════════════════════════════════════ */
+
+// Clock
+function tickClock() {
+  const d = new Date();
+  document.getElementById('clock').textContent = d.toLocaleTimeString('pl-PL', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(tickClock, 1000); tickClock();
+
+// Navigation
+let currentTab = 'dashboard';
+function switchTab(id) {
+  currentTab = id;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+}
+document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+// Stats
+function updateStats() {
+  document.getElementById('s-models').textContent = MODELS.length;
+  document.getElementById('s-providers').textContent = PROVIDERS.filter(p => p.status === 'online').length;
+  document.getElementById('s-tools').textContent = TOOLS.length;
+  document.getElementById('s-apps').textContent = APPS.length;
+}
+
+// Models Grid
+let modelFilter = 'all';
+let modelSearch = '';
+
+function renderModels() {
+  const grid = document.getElementById('models-grid');
+  const filtered = MODELS.filter(m => {
+    if (modelFilter !== 'all') {
+      if (modelFilter === 'api' && m.type !== 'api') return false;
+      if (modelFilter === 'local' && m.type !== 'local') return false;
+      if (!['api','local'].includes(modelFilter) && !m.cats.includes(modelFilter)) return false;
+    }
+    if (modelSearch) {
+      const q = modelSearch.toLowerCase();
+      return m.name.toLowerCase().includes(q) || m.provider.toLowerCase().includes(q) || m.cats.some(c => c.includes(q));
+    }
+    return true;
+  });
+
+  grid.innerHTML = filtered.map(m => `
+    <div class="glass model-card">
+      <div class="model-head">
+        <div>
+          <div class="model-name">${m.name}</div>
+          <div class="model-provider">${m.provider}</div>
+        </div>
+        <span class="model-badge ${m.type === 'api' ? 'badge-api' : 'badge-local'}">${m.type.toUpperCase()}</span>
+      </div>
+      <div class="model-desc">${m.desc}</div>
+      <div class="model-meta">
+        ${m.cats.map(c => `<span class="model-chip">${c}</span>`).join('')}
+        <span class="model-chip">ctx: ${m.ctx}</span>
+      </div>
+      <div class="model-footer">
+        <span class="model-price">${m.input === 0 ? '🆓 Free' : `$${m.input} / $${m.output}`}</span>
+        <span class="model-badge badge-${m.tier === 'free' ? 'local' : m.tier === 'budget' ? 'api' : 'new'}">${m.tier}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('model-search').addEventListener('input', e => { modelSearch = e.target.value; renderModels(); });
+document.querySelectorAll('#model-pills .pill').forEach(p => p.addEventListener('click', () => {
+  document.querySelectorAll('#model-pills .pill').forEach(x => x.classList.remove('active'));
+  p.classList.add('active');
+  modelFilter = p.dataset.mf;
+  renderModels();
+}));
+
+// Pricing Table
+let priceFilter = 'all';
+
+function renderPricing() {
+  const tbody = document.getElementById('price-tbody');
+  const filtered = MODELS.filter(m => {
+    if (priceFilter === 'all') return true;
+    return m.tier === priceFilter;
+  }).sort((a,b) => a.input - b.input);
+
+  tbody.innerHTML = filtered.map(m => `
+    <tr>
+      <td class="model-name-cell">${m.name}</td>
+      <td>${m.provider}</td>
+      <td class="price-val">${m.input === 0 ? 'Free' : '$' + m.input}</td>
+      <td class="price-val">${m.output === 0 ? '—' : '$' + m.output}</td>
+      <td><span class="tier-${m.tier}">${m.tier}</span></td>
+      <td>${m.ctx}</td>
+    </tr>
+  `).join('');
+}
+
+document.querySelectorAll('#price-pills .pill').forEach(p => p.addEventListener('click', () => {
+  document.querySelectorAll('#price-pills .pill').forEach(x => x.classList.remove('active'));
+  p.classList.add('active');
+  priceFilter = p.dataset.pf;
+  renderPricing();
+}));
+
+// Providers Grid
+function renderProviders() {
+  const grid = document.getElementById('providers-grid');
+  grid.innerHTML = PROVIDERS.map(p => `
+    <div class="glass provider-card">
+      <div class="prov-icon" style="background:${p.bg};color:#fff;font-size:${p.icon.length > 2 ? '1rem' : '1.4rem'}">${p.icon}</div>
+      <div class="prov-info">
+        <div class="prov-name">${p.name}</div>
+        <div class="prov-models">${p.desc}</div>
+        <div style="font-size:.73rem;color:var(--text-dim);margin-top:.2rem">${p.models} model${p.models !== 1 ? 'i' : ''}</div>
+      </div>
+      <div class="prov-status ${p.status === 'online' ? 'prov-online' : 'prov-offline'}"></div>
+    </div>
+  `).join('');
+}
+
+// Tools Grid
+let toolFilter = 'all';
+let toolSearch = '';
+
+function renderTools() {
+  const grid = document.getElementById('tools-grid');
+  const filtered = TOOLS.filter(t => {
+    if (toolFilter !== 'all' && t.cat !== toolFilter) return false;
+    if (toolSearch) {
+      const q = toolSearch.toLowerCase();
+      return t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) || t.cat.includes(q);
+    }
+    return true;
+  });
+
+  const catColorMap = { framework:'tag-app', platform:'tag-gen', sdk:'tag-util', devtool:'tag-data', database:'tag-app', monitoring:'tag-gen' };
+
+  grid.innerHTML = filtered.map(t => `
+    <div class="glass tool-card">
+      <div class="tool-icon">${t.icon}</div>
+      <div class="tool-name">${t.name}</div>
+      <div class="tool-desc">${t.desc}</div>
+      <span class="tool-tag ${catColorMap[t.cat] || 'tag-util'}">${t.cat}</span>
+    </div>
+  `).join('');
+}
+
+document.getElementById('tool-search').addEventListener('input', e => { toolSearch = e.target.value; renderTools(); });
+document.querySelectorAll('#tool-pills .pill').forEach(p => p.addEventListener('click', () => {
+  document.querySelectorAll('#tool-pills .pill').forEach(x => x.classList.remove('active'));
+  p.classList.add('active');
+  toolFilter = p.dataset.tf;
+  renderTools();
+}));
+
+// Apps Grid
+function renderApps() {
+  const grid = document.getElementById('apps-grid');
+  grid.innerHTML = APPS.map(a => {
+    const statsHtml = Object.entries(a.stats).map(([k,v]) => `<span>📌 ${k}: <strong>${v}</strong></span>`).join('');
+    const isComingSoon = a.url === '#';
+    return `
+    <div class="glass app-card" ${!isComingSoon ? `onclick="openApp('${a.url}')"` : ''} style="cursor:${isComingSoon ? 'default' : 'pointer'}">
+      <div class="app-banner" style="background:${a.banner_bg}">
+        <span class="bg-icon">${a.icon}</span>
+        <div class="app-banner-gradient" style="background:linear-gradient(to top,#0a0e1a 0%,transparent 70%)"></div>
+      </div>
+      <div class="app-body">
+        <div class="app-name">${a.name}</div>
+        <div class="app-desc">${a.desc}</div>
+        <div class="app-stats">${statsHtml}</div>
+        <div style="margin-top:.8rem">
+          ${isComingSoon
+            ? '<span style="color:var(--accent3);font-size:.82rem;font-weight:700">🚧 Wkrótce</span>'
+            : `<button class="app-open-btn" onclick="event.stopPropagation();openApp('${a.url}')">Otwórz →</button>`}
+        </div>
+      </div>
+    </div>
+  `}).join('');
+}
+
+// Dashboard: Top Models
+function renderDashTopModels() {
+  const top = MODELS.filter(m => ['Claude Sonnet 4','GPT-4o','Gemini 2.0 Flash','DeepSeek R1 8B','Grok 4','Mistral Large'].includes(m.name)).slice(0,6);
+  document.getElementById('dash-top-models').innerHTML = top.map(m => `
+    <div class="glass" style="padding:1rem;cursor:pointer" onclick="switchTab('models')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+        <strong style="font-size:.9rem">${m.name}</strong>
+        <span class="model-badge ${m.type === 'api' ? 'badge-api' : 'badge-local'}" style="font-size:.6rem">${m.type.toUpperCase()}</span>
+      </div>
+      <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.4rem">${m.provider} · ${m.cats.join(', ')}</div>
+      <div style="font-family:var(--mono);font-size:.78rem;color:var(--accent3)">${m.input === 0 ? 'Free' : `$${m.input} / $${m.output} per 1M`}</div>
+    </div>
+  `).join('');
+}
+
+// Open App
+function openApp(url) {
+  if (url && url !== '#') window.open(url, '_blank');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════ */
+function init() {
+  updateStats();
+  renderModels();
+  renderPricing();
+  renderProviders();
+  renderTools();
+  renderApps();
+  renderDashTopModels();
+}
+
+init();
+</script>
+</body>
+</html>

@@ -97,3 +97,17 @@
 5. Zmienne ustawione jako User Environment Variables Windows → dostępne dla VS Code MCP serwerów
 **Konsekwencje:** MCP serwery w VS Code mają dostęp do kluczy API. ZENO Browser może wywoływać Claude API przez narzędzia MCP. Klucze nigdy nie są commitowane (`.env` + `.vscode/mcp.json` w .gitignore).
 **Alternatywy:** (1) Hardcoded klucze — odrzucone ze względów bezpieczeństwa. (2) Vault/KeyChain — nadmiarowe na tym etapie. (3) Input prompts — odrzucone, użytkownik nie chce wpisywać kluczy manualnie.
+
+---
+
+### ADR-007: Weft Self-Hosted + LinkedOut-style Pipelines
+
+**Data:** 2026-03-27
+**Status:** accepted
+**Kontekst:** Dashboard potrzebuje rozbudowy analytics o event streaming (pipelines) wzorem LinkedOut CF project. Weft (CF Workers AI task board) przydatny jako osobna instancja do zarządzania agentami.
+**Decyzja:**
+1. **Weft** — Osobna instancja CF Workers (`weft.mybonzo.com`). Docs: `docs/WEFT_SETUP.md`, automation: `scripts/setup-weft.ps1`. Wymaga DO, Workflows, D1, AI Gateway.
+2. **Pipelines** — Nowy Worker `functions/api/pipelines/[[path]].ts` (6 endpoints, 7 pipeline configs). LinkedOut architektura: Event Source → CF Worker → D1 → R2 Data Catalog (Iceberg) → R2 SQL.
+3. **Dashboard tab** — 11. tab "Pipelines" w WebLanding.tsx: stats grid, pipeline cards, data flow visualization, events table, ingest form.
+**Konsekwencje:** Dashboard ma 11 tabów i 14 API services. Pipelines daje real-time event analytics. Weft jest niezależny od ZENO (osobny deployment).
+**Alternatywy:** (1) Umami analytics tylko — za mało granularności. (2) Własny event system od zera — zbyt dużo pracy. (3) Weft jako moduł w ZENO — odrzucone, lepiej osobna instancja.

@@ -5,6 +5,26 @@
 
 import { useState, useCallback, useEffect, type KeyboardEvent, type CSSProperties } from 'react';
 
+/* ── Search-engine registry ────────────────────────── */
+type SearchEngineId = 'searxng' | 'duckduckgo' | 'google' | 'brave' | 'kaggle' | 'perplexity';
+
+interface SearchEngine {
+  id: SearchEngineId;
+  label: string;
+  icon: string;
+  buildUrl: (q: string) => string;
+  hint: string;
+}
+
+const SEARCH_ENGINES: SearchEngine[] = [
+  { id: 'searxng',     label: 'SearXNG',     icon: '🔒', buildUrl: q => `http://localhost:8888/search?q=${encodeURIComponent(q)}`,           hint: 'Prywatne · lokalne · bez śledzenia' },
+  { id: 'duckduckgo',  label: 'DuckDuckGo',  icon: '🦆', buildUrl: q => `https://duckduckgo.com/?q=${encodeURIComponent(q)}`,                hint: 'Prywatne · bez śledzenia' },
+  { id: 'google',      label: 'Google',       icon: '🔍', buildUrl: q => `https://www.google.com/search?q=${encodeURIComponent(q)}`,           hint: 'Popularny · szybki' },
+  { id: 'brave',       label: 'Brave',        icon: '🦁', buildUrl: q => `https://search.brave.com/search?q=${encodeURIComponent(q)}`,         hint: 'Prywatne · niezależny indeks' },
+  { id: 'kaggle',      label: 'Kaggle',       icon: '📊', buildUrl: q => `https://www.kaggle.com/search?q=${encodeURIComponent(q)}`,           hint: 'Datasety · notebooki · modele ML' },
+  { id: 'perplexity',  label: 'Perplexity',   icon: '🧠', buildUrl: q => `https://www.perplexity.ai/search?q=${encodeURIComponent(q)}`,       hint: 'AI-powered · podsumowania · źródła' },
+];
+
 /** Glance-style live clock — time part (above line) */
 function GlanceClockTime() {
   const [time, setTime] = useState(new Date());
@@ -380,6 +400,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
   const [includeLocal, setIncludeLocal] = useState(false);
   const [showAllTools, setShowAllTools] = useState(false);
   const [openWidget, setOpenWidget] = useState<string | null>(null);
+  const [searchEngine, setSearchEngine] = useState<SearchEngineId>('searxng');
 
   const handleLinkClick = useCallback(
     (url: string) => { onNavigate(url); },
@@ -389,9 +410,9 @@ export function StartPage({ onNavigate }: StartPageProps) {
   const handleSearch = useCallback(() => {
     const q = searchQuery.trim();
     if (!q) return;
-    // SearXNG — not Google
-    onNavigate(`http://localhost:8888/search?q=${encodeURIComponent(q)}`);
-  }, [searchQuery, onNavigate]);
+    const engine = SEARCH_ENGINES.find(e => e.id === searchEngine) ?? SEARCH_ENGINES[0];
+    onNavigate(engine.buildUrl(q));
+  }, [searchQuery, searchEngine, onNavigate]);
 
   const onSearchKey = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => { if (e.key === 'Enter') handleSearch(); },
@@ -501,7 +522,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
         {/* Spacer pushes bottom content down */}
         <div style={{ flex: 1 }} />
 
-        {/* Search bar — bottom, SearXNG */}
+        {/* Search bar + engine selector */}
         <div style={S.searchWrap}>
           <div style={S.searchBar}>
             <span style={S.searchIcon}>⌕</span>
@@ -530,8 +551,28 @@ export function StartPage({ onNavigate }: StartPageProps) {
               <button style={S.searchGo} onClick={handleSearch}>↵</button>
             )}
           </div>
+
+          {/* Engine selector chips */}
+          <div style={S.engineRow}>
+            {SEARCH_ENGINES.map(eng => (
+              <button
+                key={eng.id}
+                onClick={() => setSearchEngine(eng.id)}
+                style={{
+                  ...S.engineChip,
+                  background: searchEngine === eng.id ? '#0c0c22' : 'transparent',
+                  color: searchEngine === eng.id ? '#c0c0d8' : '#445',
+                  borderColor: searchEngine === eng.id ? '#00d4ff44' : 'transparent',
+                }}
+                title={eng.hint}
+              >
+                <span style={{ fontSize: 11 }}>{eng.icon}</span> {eng.label}
+              </button>
+            ))}
+          </div>
+
           <span style={S.searchHint}>
-            Bez śledzenia · prywatnie · lokalnie · SearXNG
+            {(SEARCH_ENGINES.find(e => e.id === searchEngine) ?? SEARCH_ENGINES[0]).hint}
             {includeLocal && <span style={{ color: '#00d4ff88' }}> + biblioteka lokalna</span>}
           </span>
         </div>
@@ -875,6 +916,27 @@ const S: Record<string, CSSProperties> = {
     color: '#334',
     letterSpacing: 0.3,
     paddingLeft: 2,
+  },
+
+  /* Engine selector row */
+  engineRow: {
+    display: 'flex',
+    flexWrap: 'wrap' as const,
+    gap: 4,
+    marginTop: 2,
+  },
+  engineChip: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 3,
+    fontSize: 10,
+    padding: '2px 8px',
+    border: '1px solid transparent',
+    borderRadius: 0,
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    fontFamily: 'inherit',
+    lineHeight: 1.5,
   },
 
   /* ── All Tools overlay ── */
