@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 /* ─── Types ──────────────────────────────────────── */
 
-type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render';
+type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub';
 type Status = 'online' | 'offline' | 'checking' | 'unknown';
 
 interface SiteStatus { name: string; status: Status; url: string }
@@ -30,6 +30,8 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'images', label: 'Images', icon: '🖼️' },
   { id: 'moa', label: 'MOA', icon: '🧬' },
   { id: 'render', label: 'Render', icon: '🌐' },
+  { id: 'queues', label: 'Queues', icon: '📨' },
+  { id: 'aihub', label: 'AI Hub', icon: '🤖' },
 ];
 
 const API_SERVICES: ApiStatus[] = [
@@ -167,6 +169,25 @@ export function WebLanding() {
   const [renderPrompt, setRenderPrompt] = useState('');
   const [renderResult, setRenderResult] = useState<any>(null);
   const [renderLoading, setRenderLoading] = useState(false);
+
+  // Queues
+  const [queueName, setQueueName] = useState<string>('agent-tasks');
+  const [queueAction, setQueueAction] = useState('summarize');
+  const [queuePrompt, setQueuePrompt] = useState('');
+  const [queueResult, setQueueResult] = useState<any>(null);
+  const [queueLoading, setQueueLoading] = useState(false);
+  const [consumerHealth, setConsumerHealth] = useState<any>(null);
+  const [recentResults, setRecentResults] = useState<any[]>([]);
+  const [queueTaskId, setQueueTaskId] = useState('');
+  const [queueLookupResult, setQueueLookupResult] = useState<any>(null);
+
+  // AI Hub
+  const [aiHubPrompt, setAiHubPrompt] = useState('');
+  const [aiHubProvider, setAiHubProvider] = useState('deepseek');
+  const [aiHubResponse, setAiHubResponse] = useState<any>(null);
+  const [aiHubLoading, setAiHubLoading] = useState(false);
+  const [aiHubHistory, setAiHubHistory] = useState<{ role: string; text: string; provider: string; tokens?: number }[]>([]);
+  const [aiProvidersStatus, setAiProvidersStatus] = useState<{ name: string; status: string }[]>([]);
 
   // AI Chatbox Helper
   const [chatOpen, setChatOpen] = useState(false);
@@ -479,7 +500,74 @@ export function WebLanding() {
     setRenderLoading(false);
   }, [renderUrl, renderAction, renderSelectors, renderPrompt]);
 
-  const CHAT_SYSTEM_PROMPT = `Jesteś asystentem dashboardu ZENO Ops (zenbrowsers.org). Odpowiadasz TYLKO po polsku. Znasz wszystkie 11 zakładek i ich funkcje:
+  const CONSUMER_URL = 'https://zeno-queue-consumer.stolarnia-ams.workers.dev';
+
+  const loadConsumerHealth = useCallback(async () => {
+    const data = await apiFetch(CONSUMER_URL + '/');
+    setConsumerHealth(data);
+  }, []);
+
+  const handleQueueSend = useCallback(async () => {
+    if (!queuePrompt.trim()) return;
+    setQueueLoading(true); setQueueResult(null);
+    const actionMap: Record<string, any> = {
+      'agent-tasks': { action: queueAction, prompt: queuePrompt },
+      'image-gen': { action: 'generate', prompt: queuePrompt },
+      'image-proc': { action: 'analyze', url: queuePrompt },
+      'voice': { action: 'transcribe', url: queuePrompt },
+    };
+    const data = await apiFetch('/api/queues/test', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ queue: queueName, data: actionMap[queueName] || { prompt: queuePrompt } }),
+    });
+    setQueueResult(data);
+    setQueueLoading(false);
+  }, [queueName, queueAction, queuePrompt]);
+
+  const handleQueueLookup = useCallback(async () => {
+    if (!queueTaskId.trim()) return;
+    setQueueLookupResult(null);
+    const data = await apiFetch(CONSUMER_URL + '/results?taskId=' + encodeURIComponent(queueTaskId));
+    setQueueLookupResult(data);
+  }, [queueTaskId]);
+
+  const loadRecentResults = useCallback(async () => {
+    const data = await apiFetch(CONSUMER_URL + '/results?recent=5');
+    if (data?.results) setRecentResults(data.results);
+    else if (Array.isArray(data)) setRecentResults(data);
+  }, []);
+
+  const handleAiHubChat = useCallback(async () => {
+    if (!aiHubPrompt.trim()) return;
+    setAiHubLoading(true); setAiHubResponse(null);
+    const userText = aiHubPrompt;
+    setAiHubPrompt('');
+    setAiHubHistory((prev) => [...prev, { role: 'user', text: userText, provider: aiHubProvider }]);
+
+    const data = await apiFetch<any>('/api/ai/chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: userText, provider: aiHubProvider, maxTokens: 2048 }),
+    });
+
+    const reply = data?.content || data?.error || 'Brak odpowiedzi';
+    const tokens = data?.usage?.total_tokens || data?.tokens;
+    setAiHubResponse(data);
+    setAiHubHistory((prev) => [...prev, { role: 'ai', text: reply, provider: data?.provider || aiHubProvider, tokens }]);
+    setAiHubLoading(false);
+  }, [aiHubPrompt, aiHubProvider]);
+
+  const loadAiProviders = useCallback(async () => {
+    const providers = ['deepseek', 'openrouter', 'anthropic', 'workers-ai'];
+    const statuses = await Promise.all(
+      providers.map(async (p) => {
+        const ok = await apiFetch('/api/ai/status');
+        return { name: p, status: ok ? 'online' : 'offline' };
+      })
+    );
+    setAiProvidersStatus(statuses);
+  }, []);
+
+  const CHAT_SYSTEM_PROMPT = `Jesteś asystentem dashboardu ZENO Ops (zenbrowsers.org). Odpowiadasz TYLKO po polsku. Znasz wszystkie 13 zakładek i ich funkcje:
 
 1. OVERVIEW — Główna strona. Pola: "Search" (wyszukiwarka web), "AI Gate" (pytania do AI — wpisz pytanie i kliknij Ask). Wyświetla status API, podłączone strony, WebGate proxy, link do aplikacji Desktop.
 
@@ -505,6 +593,10 @@ export function WebLanding() {
 10. MOA — Mixture-of-Agents pipeline. Podaj Topic, Type, Language. Uruchamia wieloetapowy pipeline AI (Drafts → Critique → Aggregation → Validation).
 
 11. RENDER — Browser Rendering. Wpisz URL, wybierz akcję (Screenshot/PDF/Scrape/Markdown/AI JSON). Dla Scrape podaj CSS Selectors, dla AI JSON podaj prompt ekstrakcji.
+
+12. QUEUES — Cloudflare Queues. Wysyłaj zadania AI do kolejek (agent-tasks, image-gen, image-proc, voice). Sprawdzaj status konsumera i przeglądaj wyniki. Lookup: wklej taskId aby pobrać rezultat.
+
+13. AI HUB — Centrum AI. Czat z różnymi providerami (DeepSeek, OpenRouter, Anthropic, Workers AI), historia rozmów, generowanie treści przez kolejki, szybkie akcje AI.
 
 Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
 
@@ -537,6 +629,8 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
     if (tab === 'pipelines') loadPipelines();
     if (tab === 'storage' && buckets.length === 0) loadBuckets();
     if (tab === 'databases' && databases.length === 0) loadDatabases();
+    if (tab === 'queues') { loadConsumerHealth(); loadRecentResults(); }
+    if (tab === 'aihub') loadAiProviders();
   }, [tab]);
 
   /* ─── Derived ─── */
@@ -1630,6 +1724,221 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
               )}
             </section>
           )}
+        </div>
+      )}
+
+      {/* ─── QUEUES TAB ─── */}
+      {tab === 'queues' && (
+        <div className="tab-content">
+          <div className="tab-header">
+            <h2>📨 Cloudflare Queues</h2>
+            <div className="tab-actions">
+              <button className="btn-sm" onClick={() => { loadConsumerHealth(); loadRecentResults(); }}>Refresh</button>
+            </div>
+          </div>
+
+          {/* Consumer Health */}
+          <section className="card">
+            <h3>🏥 Queue Consumer Status</h3>
+            {consumerHealth ? (
+              <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+                <div className="stat-card"><span className="stat-label">Status</span><span className="stat-value" style={{ color: '#4ade80' }}>✅ Online</span></div>
+                <div className="stat-card"><span className="stat-label">Service</span><span className="stat-value">{consumerHealth.service || 'queue-consumer'}</span></div>
+                <div className="stat-card"><span className="stat-label">Queues</span><span className="stat-value">{consumerHealth.queues?.join(', ') || 'agent-tasks, image, voice'}</span></div>
+                <div className="stat-card"><span className="stat-label">AI Fallback</span><span className="stat-value">{consumerHealth.ai_fallback || 'Gemma 7b-it'}</span></div>
+              </div>
+            ) : (
+              <p className="muted">Sprawdzam status konsumera...</p>
+            )}
+          </section>
+
+          {/* Send Task */}
+          <section className="card">
+            <h3>📤 Wyślij zadanie do kolejki</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Queue</label>
+                <select value={queueName} onChange={(e) => setQueueName(e.target.value)}>
+                  <option value="agent-tasks">🤖 Agent Tasks (AI text)</option>
+                  <option value="image-gen">🖼️ Image Generation</option>
+                  <option value="image-proc">👁️ Image Analysis</option>
+                  <option value="voice">🎙️ Voice Processing</option>
+                </select>
+              </div>
+              {queueName === 'agent-tasks' && (
+                <div className="form-group">
+                  <label>Action</label>
+                  <select value={queueAction} onChange={(e) => setQueueAction(e.target.value)}>
+                    <option value="summarize">Summarize</option>
+                    <option value="translate">Translate</option>
+                    <option value="analyze">Analyze</option>
+                    <option value="generate">Generate</option>
+                  </select>
+                </div>
+              )}
+              <div className="form-group full-width">
+                <label>{queueName === 'voice' ? 'Audio URL' : queueName === 'image-proc' ? 'Image URL' : 'Prompt / Input'}</label>
+                <textarea value={queuePrompt} onChange={(e) => setQueuePrompt(e.target.value)}
+                  placeholder={queueName === 'voice' ? 'https://example.com/audio.mp3' : queueName === 'image-proc' ? 'https://example.com/image.jpg' : 'Opisz co ma zrobić AI...'}
+                  rows={3} />
+              </div>
+              <div className="form-group">
+                <button className="btn-primary" onClick={handleQueueSend} disabled={queueLoading}>
+                  {queueLoading ? 'Wysyłam...' : '📤 Wyślij'}
+                </button>
+              </div>
+            </div>
+            {queueResult && (
+              <div className="ai-output" style={{ marginTop: 16 }}>
+                <h4>{queueResult.ok ? '✅ Wysłano!' : '❌ Błąd'}</h4>
+                <pre>{JSON.stringify(queueResult, null, 2)}</pre>
+              </div>
+            )}
+          </section>
+
+          {/* Lookup Result */}
+          <section className="card">
+            <h3>🔍 Szukaj wyniku (Task ID)</h3>
+            <div className="input-row">
+              <input type="text" value={queueTaskId} onChange={(e) => setQueueTaskId(e.target.value)}
+                placeholder="Wklej taskId z odpowiedzi..." />
+              <button onClick={handleQueueLookup}>Szukaj</button>
+            </div>
+            {queueLookupResult && (
+              <div className="ai-output" style={{ marginTop: 12 }}>
+                <pre>{JSON.stringify(queueLookupResult, null, 2)}</pre>
+              </div>
+            )}
+          </section>
+
+          {/* Recent Results */}
+          <section className="card">
+            <h3>📋 Ostatnie wyniki</h3>
+            {recentResults.length > 0 ? (
+              <div className="status-list">
+                {recentResults.map((r, i) => (
+                  <div key={i} className="status-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 4, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', gap: 12, width: '100%', alignItems: 'center' }}>
+                      <span className={`dot ${r.status === 'completed' ? 'online' : r.status === 'error' ? 'offline' : 'checking'}`} />
+                      <strong>{r.queue || r.type}</strong>
+                      <code style={{ fontSize: 11, opacity: 0.6 }}>{r.task_id?.slice(0, 20)}...</code>
+                      <span className="muted" style={{ marginLeft: 'auto' }}>{r.provider || ''}</span>
+                    </div>
+                    {r.result && <pre style={{ fontSize: 12, maxHeight: 100, overflow: 'auto', width: '100%', margin: 0, opacity: 0.8 }}>{typeof r.result === 'string' ? r.result.slice(0, 200) : JSON.stringify(r.result, null, 2).slice(0, 200)}</pre>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="muted">Brak wyników. Wyślij zadanie lub kliknij Refresh.</p>
+            )}
+          </section>
+        </div>
+      )}
+
+      {/* ─── AI HUB TAB ─── */}
+      {tab === 'aihub' && (
+        <div className="tab-content">
+          <h2>🤖 AI Hub — Centrum Sztucznej Inteligencji</h2>
+          <p className="muted" style={{ marginBottom: 16 }}>
+            Czat z wieloma providerami AI, generowanie treści, obrazów i transkrypcji przez kolejki
+          </p>
+
+          {/* Provider Status */}
+          <section className="card">
+            <h3>📡 Dostępne Providery AI</h3>
+            <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+              {[
+                { name: 'DeepSeek', key: 'deepseek', icon: '🧠', desc: 'R1 — najtańszy, szybki' },
+                { name: 'OpenRouter', key: 'openrouter', icon: '🌐', desc: '8 modeli — fallback' },
+                { name: 'Anthropic', key: 'anthropic', icon: '🔮', desc: 'Claude — premium' },
+                { name: 'Workers AI', key: 'workers-ai', icon: '⚡', desc: 'Gemma 7b-it — darmowy (PL)' },
+              ].map((p) => {
+                const s = aiProvidersStatus.find((x) => x.name === p.key);
+                return (
+                  <div key={p.key} className="stat-card" style={{ cursor: 'pointer', border: aiHubProvider === p.key ? '1px solid #60a5fa' : '1px solid transparent' }}
+                    onClick={() => setAiHubProvider(p.key)}>
+                    <span className="stat-label">{p.icon} {p.name}</span>
+                    <span className="stat-value" style={{ fontSize: 13 }}>{p.desc}</span>
+                    <span className={`dot ${s?.status === 'online' ? 'online' : 'checking'}`} style={{ marginTop: 4 }} />
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* AI Chat */}
+          <section className="card">
+            <h3>💬 AI Chat — {aiHubProvider.toUpperCase()}</h3>
+            <div className="chatbox-messages" style={{ maxHeight: 400, overflowY: 'auto', marginBottom: 12, padding: '8px 0' }}>
+              {aiHubHistory.length === 0 && <p className="muted">Zacznij rozmowę — wpisz pytanie poniżej</p>}
+              {aiHubHistory.map((msg, i) => (
+                <div key={i} className={`chat-msg chat-${msg.role === 'user' ? 'user' : 'ai'}`} style={{ marginBottom: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 4 }}>
+                    <span className="chat-role">{msg.role === 'user' ? 'Ty' : 'AI'}</span>
+                    <code style={{ fontSize: 10, opacity: 0.5 }}>{msg.provider}</code>
+                    {msg.tokens && <span style={{ fontSize: 10, opacity: 0.5 }}>({msg.tokens} tokens)</span>}
+                  </div>
+                  <p style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</p>
+                </div>
+              ))}
+              {aiHubLoading && (
+                <div className="chat-msg chat-ai">
+                  <span className="chat-role">AI</span>
+                  <p className="chat-typing">Myślę...</p>
+                </div>
+              )}
+            </div>
+            <div className="input-row">
+              <select value={aiHubProvider} onChange={(e) => setAiHubProvider(e.target.value)} style={{ maxWidth: 150 }}>
+                <option value="deepseek">🧠 DeepSeek</option>
+                <option value="openrouter">🌐 OpenRouter</option>
+                <option value="anthropic">🔮 Anthropic</option>
+                <option value="workers-ai">⚡ Workers AI</option>
+              </select>
+              <textarea value={aiHubPrompt} onChange={(e) => setAiHubPrompt(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAiHubChat(); } }}
+                placeholder="Zapytaj AI o cokolwiek..." rows={2} style={{ flex: 1 }} />
+              <button className="btn-primary" onClick={handleAiHubChat} disabled={aiHubLoading}>
+                {aiHubLoading ? '...' : '➤'}
+              </button>
+            </div>
+          </section>
+
+          {/* Quick Actions via Queues */}
+          <section className="card">
+            <h3>⚡ Szybkie Akcje AI (via Queues)</h3>
+            <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+              <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => { setTab('queues'); setQueueName('agent-tasks'); setQueueAction('summarize'); }}>
+                <span className="stat-label">📝 Podsumuj tekst</span>
+                <span className="stat-value" style={{ fontSize: 12 }}>Agent Tasks → Summarize</span>
+              </div>
+              <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => { setTab('queues'); setQueueName('agent-tasks'); setQueueAction('translate'); }}>
+                <span className="stat-label">🌍 Przetłumacz</span>
+                <span className="stat-value" style={{ fontSize: 12 }}>Agent Tasks → Translate</span>
+              </div>
+              <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => { setTab('queues'); setQueueName('image-gen'); }}>
+                <span className="stat-label">🖼️ Generuj obraz</span>
+                <span className="stat-value" style={{ fontSize: 12 }}>SD-XL Lightning</span>
+              </div>
+              <div className="stat-card" style={{ cursor: 'pointer' }} onClick={() => { setTab('queues'); setQueueName('voice'); }}>
+                <span className="stat-label">🎙️ Transkrypcja audio</span>
+                <span className="stat-value" style={{ fontSize: 12 }}>Whisper STT</span>
+              </div>
+            </div>
+          </section>
+
+          {/* AI Tools Overview */}
+          <section className="card">
+            <h3>🛠️ Narzędzia AI w ZENO</h3>
+            <div className="status-list">
+              <div className="status-row"><span className="dot online" /><span className="name">AI Chat (Overview)</span><code>/api/ai/chat</code></div>
+              <div className="status-row"><span className="dot online" /><span className="name">Content Generator (CMS)</span><code>/api/content/generate</code></div>
+              <div className="status-row"><span className="dot online" /><span className="name">MOA Pipeline</span><code>/api/moa/generate</code></div>
+              <div className="status-row"><span className="dot online" /><span className="name">Image Generation</span><code>/api/images/generate</code></div>
+              <div className="status-row"><span className="dot online" /><span className="name">Browser AI Extract</span><code>/api/render/json</code></div>
+              <div className="status-row"><span className="dot online" /><span className="name">Queue Consumer (AI)</span><code>zeno-queue-consumer.workers.dev</code></div>
+            </div>
+          </section>
         </div>
       )}
 
