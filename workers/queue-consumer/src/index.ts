@@ -394,10 +394,10 @@ async function callExternalAI(
     }
   }
 
-  // 3) Workers AI — free tier fallback
+  // 3) Workers AI — free tier fallback (Gemma supports Polish)
   if (env.AI) {
     try {
-      const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+      const result = await env.AI.run('@cf/google/gemma-7b-it', {
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt },
@@ -406,7 +406,7 @@ async function callExternalAI(
       }) as { response?: string };
       return {
         content: result.response ?? '',
-        provider: 'workers-ai/llama-3.1-8b',
+        provider: 'workers-ai/gemma-7b',
         tokens: 0,
       };
     } catch (e) {
