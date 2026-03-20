@@ -37,8 +37,8 @@ database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
 # bucket_name = "zeno-web-cache"
 
 # ─── Workers AI (CF built-in) ──────────────────────────────
-# [ai]
-# binding = "AI"
+[ai]
+binding = "AI"
 
 # ─── Queues ─────────────────────────────────────────────────
 [[queues.producers]]
@@ -103,6 +103,10 @@ binding = "VOICE_QUEUE"
 # Secrets (set via CLI):
 # wrangler secret put DEEPSEEK_API_KEY
 # wrangler secret put OPENROUTER_API_KEY
+# wrangler secret put OPENAI_API_KEY
+
+[env.production.ai]
+binding = "AI"
 # wrangler secret put ANTHROPIC_API_KEY
 # wrangler secret put WEBGATE_SECRET
 # wrangler secret put UMAMI_SITE_ID

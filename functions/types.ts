@@ -8,7 +8,7 @@ export interface Env {
   // AI_CACHE: KVNamespace;
   // SITE_REGISTRY: KVNamespace;
   // WEB_CACHE: R2Bucket;
-  // AI: Ai;
+  AI: Ai;
 
   // Queues
   AGENT_TASKS_QUEUE: Queue;
@@ -30,6 +30,7 @@ export interface Env {
   DEEPSEEK_API_KEY?: string;
   OPENROUTER_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
+  OPENAI_API_KEY?: string;
   WEBGATE_SECRET?: string;
   UMAMI_SITE_ID?: string;
 
