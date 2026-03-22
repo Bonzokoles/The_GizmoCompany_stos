@@ -9,6 +9,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub';
 type Status = 'online' | 'offline' | 'checking' | 'unknown';
+type AnalyticsSource = 'local' | 'mybonzo';
 
 interface SiteStatus { name: string; status: Status; url: string }
 interface ApiStatus { name: string; endpoint: string; status: Status }
@@ -54,6 +55,11 @@ const API_SERVICES: ApiStatus[] = [
 const PIPELINES_LIST = [
   'page-analytics', 'worker-metrics', 'content-pipeline',
   'crawler-events', 'ecommerce-events', 'ai-usage', 'search-events',
+];
+
+const ANALYTICS_SOURCES: { id: AnalyticsSource; label: string; endpoint: string }[] = [
+  { id: 'mybonzo', label: 'mybonzo.com', endpoint: 'https://mybonzo.com/api/analytics/overview' },
+  { id: 'local', label: 'ZENO local', endpoint: '/api/analytics/overview' },
 ];
 
 /* ─── Helpers ────────────────────────────────────── */
@@ -116,6 +122,7 @@ export function WebLanding() {
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [analyticsPeriod, setAnalyticsPeriod] = useState('24h');
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsSource, setAnalyticsSource] = useState<AnalyticsSource>('mybonzo');
 
   // Storage
   const [buckets, setBuckets] = useState<BucketInfo[]>([]);
@@ -379,10 +386,12 @@ export function WebLanding() {
 
   const loadAnalytics = useCallback(async () => {
     setAnalyticsLoading(true);
-    const data = await apiFetch(`/api/analytics/overview?period=${analyticsPeriod}`);
+    const sourceConfig = ANALYTICS_SOURCES.find((s) => s.id === analyticsSource) || ANALYTICS_SOURCES[0];
+    const separator = sourceConfig.endpoint.includes('?') ? '&' : '?';
+    const data = await apiFetch(`${sourceConfig.endpoint}${separator}period=${analyticsPeriod}`);
     setAnalyticsData(data);
     setAnalyticsLoading(false);
-  }, [analyticsPeriod]);
+  }, [analyticsPeriod, analyticsSource]);
 
   const loadBuckets = useCallback(async () => {
     setStorageLoading(true);
@@ -984,6 +993,11 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
           <div className="tab-header">
             <h2>📈 Analytics Hub</h2>
             <div className="tab-actions">
+              <select value={analyticsSource} onChange={(e) => setAnalyticsSource(e.target.value as AnalyticsSource)}>
+                {ANALYTICS_SOURCES.map((source) => (
+                  <option key={source.id} value={source.id}>{source.label}</option>
+                ))}
+              </select>
               <select value={analyticsPeriod} onChange={(e) => { setAnalyticsPeriod(e.target.value); }}>
                 <option value="24h">Last 24h</option>
                 <option value="7d">Last 7 days</option>
@@ -994,6 +1008,14 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
           </div>
 
           {analyticsLoading && <div className="loading-bar" />}
+
+          <section className="card" style={{ marginBottom: 16 }}>
+            <div className="mini-stats">
+              <span>🔌 Source: <strong>{ANALYTICS_SOURCES.find((s) => s.id === analyticsSource)?.label}</strong></span>
+              <span>⏱ Period: <strong>{analyticsPeriod}</strong></span>
+              <span>🌐 Endpoint: <code>{ANALYTICS_SOURCES.find((s) => s.id === analyticsSource)?.endpoint}</code></span>
+            </div>
+          </section>
 
           {analyticsData && (
             <>
