@@ -45,10 +45,15 @@ $HttpEndpoints = @(
     @{ Name = "sist2"; Url = "http://localhost:8085"; Timeout = 5 }
 )
 
-# --- Konfiguracja tuneli ---
+# --- Konfiguracja tuneli quick (trycloudflare) ---
 $Tunnels = @(
     @{ Name = "ZENO"; Url = "http://localhost:5173"; Log = "tunnel_zeno.log" },
     @{ Name = "MyBonzo"; Url = "http://localhost:4321"; Log = "tunnel_mybonzo.log" }
+)
+
+# --- Named tunnels (CF Dashboard DNS) ---
+$NamedTunnels = @(
+    @{ Name = "umami-analytics"; DisplayName = "Analytics/Plausible/Search/Superset" }
 )
 
 $RestartCount = @{}
@@ -198,7 +203,7 @@ while ($true) {
         }
     }
 
-    # === TUNELE CLOUDFLARED (co 3 cykle = co ~90s) ===
+    # === TUNELE CLOUDFLARED quick (co 3 cykle = co ~90s) ===
     if ($cycle % 3 -eq 0) {
         $tunnelProcs = Get-TunnelProcesses
         $expectedCount = $Tunnels.Count
@@ -210,6 +215,24 @@ while ($true) {
                     $problems++
                     Start-CloudflaredTunnel $t.Name $t.Url $t.Log | Out-Null
                 }
+            }
+        }
+
+        # === Named tunnels (analytics.mybonzo.com itp.) ===
+        foreach ($nt in $NamedTunnels) {
+            $running = Get-CimInstance Win32_Process -Filter "Name='cloudflared.exe'" -ErrorAction SilentlyContinue |
+                       Where-Object { $_.CommandLine -like "*tunnel run*$($nt.Name)*" }
+            if (-not $running) {
+                $problems++
+                $logOut = Join-Path $LogDir "tunnel_$($nt.Name).log"
+                $logErr = Join-Path $LogDir "tunnel_$($nt.Name)_err.log"
+                Write-WatchdogLog "Named tunnel $($nt.Name) ($($nt.DisplayName)) - padl, restart" "FIX"
+                Start-Process "cloudflared" -ArgumentList "tunnel", "run", $nt.Name `
+                    -WindowStyle Minimized `
+                    -RedirectStandardOutput $logOut `
+                    -RedirectStandardError $logErr
+                Start-Sleep -Seconds 5
+                Write-WatchdogLog "Named tunnel $($nt.Name) - uruchomiony" "OK"
             }
         }
     }
