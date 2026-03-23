@@ -69,15 +69,18 @@ binding = "IMAGE_GEN_QUEUE"
 # ─── Env Vars ────────────────────────────────────────────────
 [vars]
 ENVIRONMENT = "development"
-CF_ACCOUNT_ID = ""
 
-# Secrets (set via CLI):
-# wrangler secret put DEEPSEEK_API_KEY
-# wrangler secret put OPENROUTER_API_KEY
-# wrangler secret put OPENAI_API_KEY
-# wrangler secret put REPLICATE_API_TOKEN
-# wrangler secret put CF_ACCOUNT_ID
-# wrangler secret put CF_API_TOKEN
+# ─── Secrets (already added to Cloudflare) ──────────────────
+# DEEPSEEK_API_KEY             ✅ added
+# OPENROUTER_API_KEY            ✅ added
+# REPLICATE_API_TOKEN           ✅ added
+# CLOUDFLARE_API_TOKEN          ✅ added
+# CLOUDFLARE_ACCOUNT_ID         ✅ added
+# GEMINI_API_KEY                ✅ added
+#
+# Optional (for Ghost CMS publishing):
+# GHOST_API_URL                (e.g. https://mybonzoaiblog.com)
+# GHOST_ADMIN_API_KEY          (format: id:secret)
 # wrangler secret put GHOST_API_URL         (np. https://mybonzoaiblog.com)
 # wrangler secret put GHOST_ADMIN_API_KEY   (format: id:secret)
 

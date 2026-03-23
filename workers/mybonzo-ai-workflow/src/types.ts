@@ -22,8 +22,9 @@ export interface Env {
   OPENROUTER_API_KEY?: string;
   OPENAI_API_KEY?: string;
   REPLICATE_API_TOKEN?: string;
-  CF_ACCOUNT_ID?: string;
-  CF_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_API_TOKEN?: string;
+  GEMINI_API_KEY?: string;
   GHOST_API_URL?: string;
   GHOST_ADMIN_API_KEY?: string;
 
