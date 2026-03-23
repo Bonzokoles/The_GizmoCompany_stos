@@ -335,6 +335,30 @@ export function BrowserUI() {
           </div>
         </header>
 
+        {/* Quick Nav Bar — skróty między stronami */}
+        <div style={{ display: 'flex', gap: '4px', padding: '3px 10px', background: '#16213e', borderBottom: '1px solid #0f3460' }}>
+          <button
+            className="btn-icon"
+            onClick={() => handleNavigate('https://zenbrowsers.org/')}
+            title="ZENO Browser – strona oficjalna"
+            style={{ background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '2px 12px', fontSize: '12px', borderRadius: '4px 4px 0 0', transition: 'background 0.15s' }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            🌐 ZenBrowser.org
+          </button>
+          <button
+            className="btn-icon"
+            onClick={() => handleNavigate('https://zeno-browser-web.pages.dev/ai-hub/')}
+            title="AI Hub Tools"
+            style={{ background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '2px 12px', fontSize: '12px', borderRadius: '4px 4px 0 0', transition: 'background 0.15s' }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+          >
+            🤖 AI Hub
+          </button>
+        </div>
+
         {/* Tab Bar */}
         <TabBar
           tabs={tabs}
