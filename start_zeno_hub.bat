@@ -244,9 +244,9 @@ echo.
 echo [BG] JIMBO DEVz Chat Backend...
 set "JIMBO_DIR=U:\The_DEVz_HUB_of_work\BUCH_DEVz_CHat_box"
 if exist "%JIMBO_DIR%\backend\venv\Scripts\python.exe" (
-    start "JIMBO-Chat" /MIN cmd /c "cd /d %JIMBO_DIR%\backend\app && %JIMBO_DIR%\backend\venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 5180 > %ZENO_DIR%logs\jimbo_chat.log 2>&1"
+    start "JIMBO-Chat" /MIN cmd /c "set PYTHONIOENCODING=utf-8 && cd /d %JIMBO_DIR%\backend\app && %JIMBO_DIR%\backend\venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 5180 > %ZENO_DIR%logs\jimbo_chat.log 2>&1"
 ) else (
-    start "JIMBO-Chat" /MIN cmd /c "cd /d %JIMBO_DIR%\backend\app && python -m uvicorn main:app --host 0.0.0.0 --port 5180 > %ZENO_DIR%logs\jimbo_chat.log 2>&1"
+    start "JIMBO-Chat" /MIN cmd /c "set PYTHONIOENCODING=utf-8 && cd /d %JIMBO_DIR%\backend\app && python -m uvicorn main:app --host 0.0.0.0 --port 5180 > %ZENO_DIR%logs\jimbo_chat.log 2>&1"
 )
 echo   [OK] JIMBO Chat uruchomiony -^> http://localhost:5180  (log: logs\jimbo_chat.log)
 echo.
