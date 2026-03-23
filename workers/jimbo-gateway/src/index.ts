@@ -1,3 +1,8 @@
+  GET  /kb/categories     — lista dostępnych kategorii (cached)
+  GET  /kb/browse         — przeglądanie artykułów z biblioteki (z filtrem po temacie)
+  GET  /kb/details/:id    — szczegóły artykułu (pełna zawartość + metadane)
+  POST /kb/bulk-export    — export całej biblioteki do JSON
+  POST /datasets/create   — utwórz dataset z biblioteki (snapshot)
 /**
  * BUCH Chat Box Gateway Worker
  *
@@ -1049,6 +1054,109 @@ export default {
 
     // ── /storage/list ─────────────────────────────────────────────────────
     if (path === "/storage/list" && req.method === "GET") {
+          // ── /kb/categories ────────────────────────────────────────────────────
+          if (path === "/kb/categories" && req.method === "GET") {
+            await ensureSchema(env.DB);
+            try {
+              const cached = await env.CACHE.get("kb:categories");
+              if (cached) return json(JSON.parse(cached));
+            } catch {}
+
+            const rows = await env.DB.prepare(
+              `SELECT DISTINCT library FROM jimbo_kb ORDER BY library ASC`
+            ).all<{ library: string }>();
+
+            const categories = (rows.results ?? []).map(r => r.library);
+            const resp = { categories, total: categories.length };
+            try { await env.CACHE.put("kb:categories", JSON.stringify(resp), { expirationTtl: 3600 }); } catch {}
+            return json(resp);
+          }
+
+          // ── /kb/browse ────────────────────────────────────────────────────────
+          if (path === "/kb/browse" && req.method === "GET") {
+            await ensureSchema(env.DB);
+            const library = url.searchParams.get("library") ?? "general";
+            const topic = url.searchParams.get("topic");
+            const limit = parseInt(url.searchParams.get("limit") ?? "20");
+            const offset = parseInt(url.searchParams.get("offset") ?? "0");
+
+            let query = "SELECT id, library, title, content, source, tags, created_at FROM jimbo_kb WHERE library = ?";
+            const params: (string | number)[] = [library];
+
+            if (topic) {
+              query += " AND (title LIKE ? OR tags LIKE ?)";
+              const topicPattern = `%${topic}%`;
+              params.push(topicPattern, topicPattern);
+            }
+
+            query += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+            params.push(limit, offset);
+
+            const rows = await env.DB.prepare(query).bind(...params).all<{
+              id: number; library: string; title: string; content: string; source: string | null; tags: string | null; created_at: string;
+            }>();
+
+            const articles = (rows.results ?? []).map(r => ({
+              id: r.id,
+              title: r.title,
+              library: r.library,
+              excerpt: r.content.slice(0, 250) + (r.content.length > 250 ? "..." : ""),
+              source: r.source,
+              tags: r.tags ? r.tags.split(",").map((t: string) => t.trim()) : [],
+              createdAt: r.created_at,
+            }));
+
+            return json({ library, topic, articles, limit, offset, total: articles.length });
+          }
+
+          // ── /kb/details/:id ────────────────────────────────────────────────────
+          if (path.startsWith("/kb/details/") && req.method === "GET") {
+            await ensureSchema(env.DB);
+            const id = Number(path.split("/")[3]);
+            if (!Number.isFinite(id)) return err("invalid article id", 400);
+
+            const row = await env.DB.prepare(
+              `SELECT id, library, title, content, source, tags, created_at FROM jimbo_kb WHERE id = ?`
+            ).bind(id).first<{
+              id: number; library: string; title: string; content: string; source: string | null; tags: string | null; created_at: string;
+            }>();
+
+            if (!row) return err("article not found", 404);
+
+            return json({
+              id: row.id,
+              title: row.title,
+              library: row.library,
+              content: row.content,
+              source: row.source,
+              tags: row.tags ? row.tags.split(",").map((t: string) => t.trim()) : [],
+              createdAt: row.created_at,
+            });
+          }
+
+          // ── /kb/bulk-export ────────────────────────────────────────────────────
+          if (path === "/kb/bulk-export" && req.method === "POST") {
+            await ensureSchema(env.DB);
+            const body = await req.json<{ library: string; limit?: number }>();
+            if (!body.library) return err("library required", 400);
+
+            const limit = body.limit ?? 500;
+            const rows = await env.DB.prepare(
+              `SELECT id, library, title, content, source, tags, created_at
+               FROM jimbo_kb WHERE library = ? LIMIT ?`
+            ).bind(body.library, limit).all();
+
+            const filename = `${body.library}-kb-export-${new Date().toISOString().split("T")[0]}.json`;
+            return new Response(JSON.stringify(rows.results ?? [], null, 2), {
+              status: 200,
+              headers: {
+                ...CORS,
+                "Content-Type": "application/json",
+                "Content-Disposition": `attachment; filename="${filename}"`,
+              },
+            });
+          }
+
       const prefix = url.searchParams.get("prefix") ?? "";
       const listed = await env.STORAGE.list({ prefix, limit: 100 });
       return json({
