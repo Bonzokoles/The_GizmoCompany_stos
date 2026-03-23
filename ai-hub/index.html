@@ -40,7 +40,7 @@ a:hover{color:#5effe0}
   background:rgba(3,4,11,0.88);backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border)}
 .logo{display:flex;align-items:center;gap:.6rem;font-size:1.3rem;font-weight:900;letter-spacing:1px;white-space:nowrap}
 .logo span{color:var(--accent)}
-.logo-icon{font-size:1.6rem}
+.logo-icon{font-size:1.6rem;filter:drop-shadow(0 0 8px var(--accent));display:flex;align-items:center;justify-content:center;width:32px;height:32px}
 .nav{display:flex;gap:.3rem;flex:1;justify-content:center;flex-wrap:wrap}
 .nav-btn{padding:.45rem 1rem;border-radius:10px;border:1px solid transparent;background:transparent;
   color:var(--text-muted);font-size:.82rem;font-family:var(--font);font-weight:600;cursor:pointer;transition:var(--transition);
@@ -75,7 +75,7 @@ a:hover{color:#5effe0}
 /* ─── STAT CARDS ─── */
 .stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
 .stat-card{padding:1.2rem 1.5rem;text-align:center}
-.stat-card .num{font-size:2.2rem;font-weight:900;line-height:1;margin-bottom:.3rem}
+.stat-card .num{font-size:2.2rem;font-weight:900;line-height:1;margin-bottom:.3rem;transition:color .3s ease}
 .stat-card .lbl{font-size:.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:2px;font-weight:600}
 .stat-card.teal .num{color:var(--accent)}
 .stat-card.purple .num{color:var(--accent2)}
@@ -187,7 +187,7 @@ a:hover{color:#5effe0}
 <!-- ─── TOPBAR ─── -->
 <div class="topbar">
     <div class="logo">
-        <span class="logo-icon">🤖</span>
+        <span class="logo-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="#00ffcc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         <div>AI <span>HUB</span> Tools</div>
     </div>
     <nav class="nav" id="nav">
@@ -196,6 +196,8 @@ a:hover{color:#5effe0}
         <button class="nav-btn" data-tab="pricing"><span class="icon">💰</span> Cennik</button>
         <button class="nav-btn" data-tab="providers"><span class="icon">🔌</span> Providerzy</button>
         <button class="nav-btn" data-tab="tools"><span class="icon">🛠️</span> Narzędzia</button>
+        <button class="nav-btn" data-tab="datasets"><span class="icon">📚</span> Datasety</button>
+        <button class="nav-btn" data-tab="skills"><span class="icon">🎓</span> Skills</button>
         <button class="nav-btn" data-tab="apps"><span class="icon">📦</span> Aplikacje</button>
     </nav>
     <div class="topbar-right">
@@ -208,7 +210,7 @@ a:hover{color:#5effe0}
 <!-- ════════════════════════════════════════════════════ -->
 <div class="page active" id="page-dashboard">
     <div class="section-head">
-        <h2>🤖 AI <span class="hl">Hub</span> — Przegląd</h2>
+        <h2>⚡ AI <span class="hl">Hub</span> — Przegląd</h2>
         <p>Centralny hub do zarządzania modelami AI, narzędziami, aplikacjami i kosztami</p>
     </div>
 
@@ -216,7 +218,9 @@ a:hover{color:#5effe0}
         <div class="glass stat-card teal"><div class="num" id="s-models">0</div><div class="lbl">Modele AI</div></div>
         <div class="glass stat-card purple"><div class="num" id="s-providers">0</div><div class="lbl">Providerzy</div></div>
         <div class="glass stat-card amber"><div class="num" id="s-tools">0</div><div class="lbl">Narzędzia</div></div>
+        <div class="glass stat-card" style="--card-accent:#22d3ee"><div class="num" id="s-skills">0</div><div class="lbl">Skills HF</div></div>
         <div class="glass stat-card pink"><div class="num" id="s-apps">0</div><div class="lbl">Aplikacje</div></div>
+        <div class="glass stat-card" style=""><div class="num" style="color:#22d3ee" id="s-datasets">200K+</div><div class="lbl">Datasety HF</div></div>
     </div>
 
     <!-- Budget Overview -->
@@ -234,7 +238,7 @@ a:hover{color:#5effe0}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.2rem;font-size:.82rem">
                 <div style="color:var(--text-muted)">☁️ Cloudflare <span style="float:right;color:var(--accent)">$100</span></div>
                 <div style="color:var(--text-muted)">🛡️ Buffer <span style="float:right;color:var(--success)">$100</span></div>
-                <div style="color:var(--text-muted)">🤖 AI Models <span style="float:right;color:var(--accent3)">$300</span></div>
+                <div style="color:var(--text-muted)">🧠 AI Models <span style="float:right;color:var(--accent3)">$300</span></div>
                 <div style="color:var(--text-muted)">💵 Koszt/zapytanie <span style="float:right;color:var(--text)">~$0.02</span></div>
             </div>
         </div>
@@ -245,9 +249,61 @@ a:hover{color:#5effe0}
                 <button class="app-open-btn" onclick="switchTab('models')" style="justify-content:center">🧠 Modele</button>
                 <button class="app-open-btn" onclick="switchTab('pricing')" style="justify-content:center">💰 Cennik</button>
                 <button class="app-open-btn" onclick="switchTab('tools')" style="justify-content:center">🛠️ Narzędzia</button>
+                <button class="app-open-btn" onclick="switchTab('datasets')" style="justify-content:center">📚 Datasety</button>
+                <button class="app-open-btn" onclick="switchTab('skills')" style="justify-content:center">🎓 Skills</button>
                 <button class="app-open-btn" onclick="switchTab('apps')" style="justify-content:center">📦 Aplikacje</button>
                 <button class="app-open-btn" onclick="openApp('../movies-app/index.html')" style="justify-content:center">🎬 Movie Buch App</button>
                 <button class="app-open-btn" onclick="openApp('http://localhost:5180')" style="justify-content:center;background:rgba(91,124,246,0.15);border-color:rgba(91,124,246,0.4);color:#a5b4fc">💬 JIMBO Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Gateway Status -->
+    <div class="glass" style="padding:1.5rem;margin-bottom:2rem">
+        <h3 style="color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem">🌐 AI Gateway Status — Multi-Provider</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem">
+            <div style="display:flex;align-items:center;gap:.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px rgba(52,211,153,0.4);flex-shrink:0"></span>
+                <div><div style="font-size:.82rem;font-weight:600">Gateway</div><div style="font-size:.7rem;color:var(--text-dim)">buch_chat_box</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px rgba(52,211,153,0.4);flex-shrink:0"></span>
+                <div><div style="font-size:.82rem;font-weight:600">Providerzy</div><div style="font-size:.7rem;color:var(--text-dim)">11 (OpenAI, Anthropic, DeepSeek...)</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px rgba(52,211,153,0.4);flex-shrink:0"></span>
+                <div><div style="font-size:.82rem;font-weight:600">Caching</div><div style="font-size:.7rem;color:var(--text-dim)">KV / 1h TTL</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:.6rem">
+                <span style="width:8px;height:8px;border-radius:50%;background:var(--accent2);box-shadow:0 0 8px rgba(167,139,250,0.4);flex-shrink:0"></span>
+                <div><div style="font-size:.82rem;font-weight:600">Endpointy</div><div style="font-size:.7rem;color:var(--text-dim)">chat, images, speech, embeddings, vision</div></div>
+            </div>
+        </div>
+        <!-- Capabilities Grid -->
+        <div style="margin-top:1.2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem">
+            <div style="background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.2);border-radius:.5rem;padding:.5rem .7rem;text-align:center">
+                <div style="font-size:1.1rem">💬</div><div style="font-size:.72rem;font-weight:600;margin-top:.2rem">Chat</div>
+                <div style="font-size:.65rem;color:var(--text-dim)">7 providerów</div>
+            </div>
+            <div style="background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.2);border-radius:.5rem;padding:.5rem .7rem;text-align:center">
+                <div style="font-size:1.1rem">🎨</div><div style="font-size:.72rem;font-weight:600;margin-top:.2rem">Grafika</div>
+                <div style="font-size:.65rem;color:var(--text-dim)">4 providerów</div>
+            </div>
+            <div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.2);border-radius:.5rem;padding:.5rem .7rem;text-align:center">
+                <div style="font-size:1.1rem">🔊</div><div style="font-size:.72rem;font-weight:600;margin-top:.2rem">Mowa TTS</div>
+                <div style="font-size:.65rem;color:var(--text-dim)">2 providerów</div>
+            </div>
+            <div style="background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-radius:.5rem;padding:.5rem .7rem;text-align:center">
+                <div style="font-size:1.1rem">🎤</div><div style="font-size:.72rem;font-weight:600;margin-top:.2rem">Mowa STT</div>
+                <div style="font-size:.65rem;color:var(--text-dim)">OpenAI Whisper</div>
+            </div>
+            <div style="background:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.2);border-radius:.5rem;padding:.5rem .7rem;text-align:center">
+                <div style="font-size:1.1rem">🧮</div><div style="font-size:.72rem;font-weight:600;margin-top:.2rem">Embeddings</div>
+                <div style="font-size:.65rem;color:var(--text-dim)">4 providerów</div>
+            </div>
+            <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.2);border-radius:.5rem;padding:.5rem .7rem;text-align:center">
+                <div style="font-size:1.1rem">👁️</div><div style="font-size:.72rem;font-weight:600;margin-top:.2rem">Vision</div>
+                <div style="font-size:.65rem;color:var(--text-dim)">3 providerów</div>
             </div>
         </div>
     </div>
@@ -344,6 +400,60 @@ a:hover{color:#5effe0}
 </div>
 
 <!-- ════════════════════════════════════════════════════ -->
+<!-- DATASETS -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-datasets">
+    <div class="section-head">
+        <h2>📚 <span class="hl">Datasety</span> HuggingFace</h2>
+        <p>Przeglądaj i wyszukuj datasety z HuggingFace Hub — ponad 200 000 zbiorów danych</p>
+    </div>
+    <div class="hub-search">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="ds-search" placeholder="Szukaj datasetów (np. polish, sentiment, NER, translation...)">
+    </div>
+    <div class="pills" id="ds-pills">
+        <button class="pill active" data-ds="trending">🔥 Trending</button>
+        <button class="pill" data-ds="polish">🇵🇱 Polski</button>
+        <button class="pill" data-ds="nlp">💬 NLP</button>
+        <button class="pill" data-ds="code">💻 Code</button>
+        <button class="pill" data-ds="vision">👁️ Vision</button>
+        <button class="pill" data-ds="audio">🎵 Audio</button>
+    </div>
+    <div id="ds-loading" style="text-align:center;padding:3rem;color:var(--text-dim);display:none">
+        <div style="font-size:1.5rem;margin-bottom:.5rem">⏳</div>Wyszukiwanie datasetów...
+    </div>
+    <div class="grid-3" id="ds-grid"></div>
+    <div id="ds-empty" style="text-align:center;padding:3rem;color:var(--text-dim)">
+        <div style="font-size:2rem;margin-bottom:.5rem">📚</div>
+        <p>Kliknij kategorię lub wpisz frazę aby wyszukać datasety z HuggingFace</p>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- SKILLS (HuggingFace) -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-skills">
+    <div class="section-head">
+        <h2>🎓 <span class="hl">Skills</span> HuggingFace</h2>
+        <p>11 modułowych skills z <a href="https://github.com/huggingface/skills" target="_blank" style="color:var(--accent)">huggingface/skills</a> — dodaj do agentów, chatbotów i aplikacji</p>
+    </div>
+    <div class="hub-search">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="skill-search" placeholder="Szukaj skills po nazwie, kategorii...">
+    </div>
+    <div class="pills" id="skill-pills">
+        <button class="pill active" data-sf="all">Wszystkie</button>
+        <button class="pill" data-sf="training">🏋️ Training</button>
+        <button class="pill" data-sf="data">📊 Data</button>
+        <button class="pill" data-sf="publishing">📝 Publishing</button>
+        <button class="pill" data-sf="frontend">🖥️ Frontend</button>
+        <button class="pill" data-sf="devops">⚙️ DevOps</button>
+        <button class="pill" data-sf="research">🔬 Research</button>
+    </div>
+    <div class="grid-3" id="skills-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
 <!-- APPS -->
 <!-- ════════════════════════════════════════════════════ -->
 <div class="page" id="page-apps">
@@ -433,12 +543,29 @@ const TOOLS = [
   { name:'Open WebUI',  icon:'🌐', cat:'platform',   desc:'Self-hosted AI chat — kompatybilny z OpenAI API, RAG wbudowany' },
   { name:'Cursor',      icon:'⌨️', cat:'devtool',    desc:'AI-powered IDE — Fork VS Code, inline AI editing, code generation' },
   { name:'Continue',    icon:'➡️', cat:'devtool',    desc:'Open-source AI coding assistant — VS Code & JetBrains extension' },
-  { name:'Cody',        icon:'🤖', cat:'devtool',    desc:'AI coding assistant od Sourcegraph — code search + context' },
+  { name:'Cody',        icon:'🔮', cat:'devtool',    desc:'AI coding assistant od Sourcegraph — code search + context' },
   { name:'Qdrant',      icon:'🎯', cat:'database',   desc:'Vector similarity engine — Rust, filtering, payload storage' },
   { name:'Haystack',    icon:'🔍', cat:'framework',  desc:'NLP framework — pipelines, RAG, semantic search, agents' },
   { name:'CrewAI',      icon:'👥', cat:'framework',  desc:'Multi-agent framework — role-based agents, collaborative tasks' },
   { name:'AutoGen',     icon:'🔄', cat:'framework',  desc:'Microsoft multi-agent — conversational AI, code execution' },
   { name:'Helicone',    icon:'📈', cat:'monitoring',  desc:'LLM observability — request logging, cost tracking, analytics' },
+];
+
+/* ═══════════════════════════════════════════════════════
+   DATA — HuggingFace Skills
+   ═══════════════════════════════════════════════════════ */
+const SKILLS = [
+  { name:'HF CLI',                   icon:'⌨️', cat:'devops',     desc:'Zarządzanie HuggingFace Hub z CLI — download, upload, zarządzanie repo, jobs, tokeny',                      file:'.agents/skills/hf-cli/SKILL.md' },
+  { name:'Community Evals',          icon:'📊', cat:'research',   desc:'Ewaluacja modeli AI z inspect-ai i lighteval — benchmarki, community evals na lokalnym sprzęcie',         file:'.agents/skills/huggingface-community-evals/SKILL.md' },
+  { name:'Datasets API',             icon:'📚', cat:'data',       desc:'Dataset Viewer REST API — splits, rows, search, filter, parquet, SQL queries na 200K+ datasetach',         file:'.agents/skills/huggingface-datasets/SKILL.md' },
+  { name:'Gradio UI',                icon:'🖥️', cat:'frontend',   desc:'Budowanie webowych interfejsów ML z Gradio — Interface, Blocks, ChatInterface, komponenty',                 file:'.agents/skills/huggingface-gradio/SKILL.md' },
+  { name:'HF Jobs',                  icon:'🚀', cat:'devops',     desc:'Uruchamianie compute jobs na infrastrukturze HF — UV scripts, Docker, scheduling, monitoring',              file:'.agents/skills/huggingface-jobs/SKILL.md' },
+  { name:'LLM Trainer',              icon:'🏋️', cat:'training',   desc:'Trenowanie i fine-tuning LLM z TRL — SFT, DPO, GRPO, reward modeling, konwersja GGUF',                      file:'.agents/skills/huggingface-llm-trainer/SKILL.md' },
+  { name:'Paper Publisher',          icon:'📝', cat:'publishing', desc:'Publikowanie papierów na HF Hub — indeksowanie, linkowanie, autorstwo, szablony',                            file:'.agents/skills/huggingface-paper-publisher/SKILL.md' },
+  { name:'Papers Lookup',            icon:'🔬', cat:'research',   desc:'Wyszukiwanie papierów naukowych na HF — API metadata, autorzy, powiązane artefakty',                       file:'.agents/skills/huggingface-papers/SKILL.md' },
+  { name:'TrackIO',                  icon:'📈', cat:'data',       desc:'Śledzenie eksperymentów ML — logowanie Python, alerty, CLI retrieval, dashboardy HF Spaces',               file:'.agents/skills/huggingface-trackio/SKILL.md' },
+  { name:'Vision Trainer',           icon:'👁️', cat:'training',   desc:'Trenowanie modeli vision — D-FINE, RT-DETR, YOLOS, timm, SAM/SAM2, object detection',                      file:'.agents/skills/huggingface-vision-trainer/SKILL.md' },
+  { name:'Transformers.js',          icon:'🌐', cat:'frontend',   desc:'Modele ML w JavaScript/TypeScript — Pipeline API, WebGPU/WASM, NLP/vision/audio/multimodal',               file:'.agents/skills/transformers-js/SKILL.md' },
 ];
 
 /* ═══════════════════════════════════════════════════════
@@ -481,6 +608,26 @@ const APPS = [
     icon: '💬',
     stats: { providers: 8, libraries: 56, rag: 'ON' }
   },
+  {
+    id: 'hf-skills',
+    name: '🎓 HuggingFace Skills',
+    desc: '11 modułowych skills z HuggingFace — CLI, Gradio, LLM Trainer, Vision Trainer, Datasets API, Transformers.js i więcej. Dodaj do agentów i chatbotów.',
+    url: '#',
+    banner_bg: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #b45309 100%)',
+    icon: '🎓',
+    stats: { skills: 11, categories: 6, source: 'HF' },
+    action: 'skills'
+  },
+  {
+    id: 'hf-datasets',
+    name: '📚 HuggingFace Datasets',
+    desc: 'Przeglądarka 200K+ datasetów z HuggingFace Hub — szukaj po kategorii, języku, zadaniu. Datasety NLP, Vision, Audio, Code i więcej.',
+    url: '#',
+    banner_bg: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 40%, #d97706 100%)',
+    icon: '📚',
+    stats: { datasets: '200K+', languages: '100+', tasks: '50+' },
+    action: 'datasets'
+  },
 ];
 
 /* ═══════════════════════════════════════════════════════
@@ -496,20 +643,33 @@ setInterval(tickClock, 1000); tickClock();
 
 // Navigation
 let currentTab = 'dashboard';
+let dsInitialized = false;
 function switchTab(id) {
   currentTab = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  if (id === 'datasets' && !dsInitialized) { dsInitialized = true; searchDatasets(''); }
 }
 document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
 
-// Stats
+// Stats with count-up animation
+function animateCount(el, target) {
+  let current = 0;
+  const step = Math.max(1, Math.ceil(target / 30));
+  const interval = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(interval); }
+    el.textContent = current;
+  }, 30);
+}
+
 function updateStats() {
-  document.getElementById('s-models').textContent = MODELS.length;
-  document.getElementById('s-providers').textContent = PROVIDERS.filter(p => p.status === 'online').length;
-  document.getElementById('s-tools').textContent = TOOLS.length;
-  document.getElementById('s-apps').textContent = APPS.length;
+  animateCount(document.getElementById('s-models'), MODELS.length);
+  animateCount(document.getElementById('s-providers'), PROVIDERS.filter(p => p.status === 'online').length);
+  animateCount(document.getElementById('s-tools'), TOOLS.length);
+  animateCount(document.getElementById('s-skills'), SKILLS.length);
+  animateCount(document.getElementById('s-apps'), APPS.length);
 }
 
 // Models Grid
@@ -641,14 +801,53 @@ document.querySelectorAll('#tool-pills .pill').forEach(p => p.addEventListener('
   renderTools();
 }));
 
+// Skills Grid (HuggingFace)
+let skillFilter = 'all';
+let skillSearch = '';
+
+function renderSkills() {
+  const grid = document.getElementById('skills-grid');
+  const filtered = SKILLS.filter(s => {
+    if (skillFilter !== 'all' && s.cat !== skillFilter) return false;
+    if (skillSearch) {
+      const q = skillSearch.toLowerCase();
+      return s.name.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q) || s.cat.includes(q);
+    }
+    return true;
+  });
+
+  const catColorMap = { training:'tag-app', data:'tag-data', publishing:'tag-gen', frontend:'tag-util', devops:'tag-app', research:'tag-gen' };
+  const catLabel = { training:'Training', data:'Data', publishing:'Publishing', frontend:'Frontend', devops:'DevOps', research:'Research' };
+
+  grid.innerHTML = filtered.map(s => `
+    <div class="glass tool-card" style="cursor:pointer" onclick="window.open('https://github.com/huggingface/skills/tree/main/skills/${encodeURIComponent(s.file.split('/')[2])}','_blank')">
+      <div class="tool-icon" style="font-size:1.8rem">${s.icon}</div>
+      <div class="tool-name">${s.name}</div>
+      <div class="tool-desc">${s.desc}</div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.5rem">
+        <span class="tool-tag ${catColorMap[s.cat] || 'tag-util'}">${catLabel[s.cat] || s.cat}</span>
+        <span class="tool-tag" style="background:rgba(255,213,0,0.1);color:#fbbf24;border-color:rgba(255,213,0,0.2)">🤗 HuggingFace</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('skill-search').addEventListener('input', e => { skillSearch = e.target.value; renderSkills(); });
+document.querySelectorAll('#skill-pills .pill').forEach(p => p.addEventListener('click', () => {
+  document.querySelectorAll('#skill-pills .pill').forEach(x => x.classList.remove('active'));
+  p.classList.add('active');
+  skillFilter = p.dataset.sf;
+  renderSkills();
+}));
+
 // Apps Grid
 function renderApps() {
   const grid = document.getElementById('apps-grid');
   grid.innerHTML = APPS.map(a => {
     const statsHtml = Object.entries(a.stats).map(([k,v]) => `<span>📌 ${k}: <strong>${v}</strong></span>`).join('');
-    const isComingSoon = a.url === '#';
-    const clickFn = a.modal ? `openChatModal('${a.url}')` : `openApp('${a.url}')`;
-    const btnLabel = a.modal ? 'Otwórz Chat →' : 'Otwórz →';
+    const isComingSoon = a.url === '#' && !a.action;
+    const clickFn = a.action ? `switchTab('${a.action}')` : a.modal ? `openChatModal('${a.url}')` : `openApp('${a.url}')`;
+    const btnLabel = a.action ? 'Otwórz zakładkę →' : a.modal ? 'Otwórz Chat →' : 'Otwórz →';
     return `
     <div class="glass app-card" ${!isComingSoon ? `onclick="${clickFn}"` : ''} style="cursor:${isComingSoon ? 'default' : 'pointer'}">
       <div class="app-banner" style="background:${a.banner_bg}">
@@ -689,6 +888,92 @@ function openApp(url) {
   if (url && url !== '#') window.open(url, '_blank');
 }
 
+/* ═══════════════════════════════════════════════════════
+   DATASETS — HuggingFace Hub Search
+   ═══════════════════════════════════════════════════════ */
+const DS_PRESET_QUERIES = {
+  trending: '', polish: 'polish', nlp: 'text-classification', code: 'code', vision: 'image-classification', audio: 'automatic-speech-recognition'
+};
+let dsCurrentQuery = '';
+let dsCache = {};
+
+async function searchDatasets(query) {
+  const grid = document.getElementById('ds-grid');
+  const loading = document.getElementById('ds-loading');
+  const empty = document.getElementById('ds-empty');
+
+  if (dsCache[query]) { renderDatasets(dsCache[query]); return; }
+
+  grid.innerHTML = ''; empty.style.display = 'none'; loading.style.display = 'block';
+  try {
+    const params = new URLSearchParams({ limit: '24', sort: 'downloads' });
+    if (query) params.set('search', query);
+    const r = await fetch('https://huggingface.co/api/datasets?' + params.toString());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    dsCache[query] = data;
+    renderDatasets(data);
+  } catch (e) {
+    loading.style.display = 'none';
+    grid.innerHTML = `<div class="glass" style="padding:2rem;grid-column:1/-1;text-align:center;color:var(--danger)">
+      ⚠️ Błąd wyszukiwania: ${e.message}<br><span style="font-size:.8rem;color:var(--text-dim)">Spróbuj ponownie lub sprawdź połączenie</span></div>`;
+  }
+}
+
+function renderDatasets(datasets) {
+  const grid = document.getElementById('ds-grid');
+  const loading = document.getElementById('ds-loading');
+  const empty = document.getElementById('ds-empty');
+  loading.style.display = 'none';
+
+  if (!datasets || datasets.length === 0) {
+    empty.style.display = 'block'; grid.innerHTML = ''; return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = datasets.map(d => {
+    const dl = d.downloads || 0;
+    const likes = d.likes || 0;
+    const dlStr = dl >= 1e6 ? (dl/1e6).toFixed(1)+'M' : dl >= 1e3 ? (dl/1e3).toFixed(1)+'K' : dl;
+    const likesStr = likes >= 1e3 ? (likes/1e3).toFixed(1)+'K' : likes;
+    const tags = (d.tags || []).slice(0,4);
+    return `
+    <div class="glass model-card" style="cursor:pointer" onclick="window.open('https://huggingface.co/datasets/${encodeURIComponent(d.id)}','_blank')">
+      <div class="model-head">
+        <div>
+          <div class="model-name" style="font-size:.95rem">${d.id.split('/').pop()}</div>
+          <div class="model-provider">${d.id.includes('/') ? d.id.split('/')[0] : 'community'}</div>
+        </div>
+        <span class="model-badge badge-api" style="font-size:.65rem">HF</span>
+      </div>
+      <div class="model-desc" style="font-size:.8rem;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">
+        ${d.description || d.id}
+      </div>
+      <div class="model-meta">
+        ${tags.map(t => `<span class="model-chip" style="font-size:.65rem">${t}</span>`).join('')}
+      </div>
+      <div class="model-footer">
+        <span style="font-size:.78rem;color:var(--text-dim)">⬇️ ${dlStr} &nbsp;❤️ ${likesStr}</span>
+        <span class="model-badge badge-new" style="font-size:.6rem">Dataset</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Dataset search
+document.getElementById('ds-search').addEventListener('input', (function(){
+  let t; return e => { clearTimeout(t); t = setTimeout(() => { const q = e.target.value.trim(); if(q.length >= 2) searchDatasets(q); }, 500); };
+})());
+
+document.querySelectorAll('#ds-pills .pill').forEach(p => p.addEventListener('click', () => {
+  document.querySelectorAll('#ds-pills .pill').forEach(x => x.classList.remove('active'));
+  p.classList.add('active');
+  const preset = p.dataset.ds;
+  const query = DS_PRESET_QUERIES[preset] || '';
+  document.getElementById('ds-search').value = query;
+  searchDatasets(query);
+}));
+
 // Chat Modal
 function openChatModal(url) {
   const m = document.getElementById('chat-modal');
@@ -714,6 +999,7 @@ function init() {
   renderPricing();
   renderProviders();
   renderTools();
+  renderSkills();
   renderApps();
   renderDashTopModels();
 }

@@ -45,6 +45,61 @@
       "source": "cloudflare/skills",
       "sourceType": "github",
       "computedHash": "ec6ba585a1ec45004569ac780a215df8fef6b0ea871899331dcf2ac88f384a1b"
+    },
+    "hf-cli": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "277897055ffeb33268641e02d8e3fc68e2c87eef07ca7ab94786b9cacaef111e"
+    },
+    "huggingface-community-evals": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "139f2f0736aeb5127dc20e2e43866c9f3da78ccd2ba49cced090022a5cb2627c"
+    },
+    "huggingface-datasets": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "5af74f3e042313efadf02e85c316a2576bdc0b0ff92c43c3ba5dcb6e2da1eded"
+    },
+    "huggingface-gradio": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "9443a05fbceae2ee27feba9dc296302ae43c862565a0924d8fc076bd4578fd54"
+    },
+    "huggingface-jobs": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "7799227abe9e05e0d643f7af6b24c78148ae3cf1a29b256fdfea4a3f6eb988eb"
+    },
+    "huggingface-llm-trainer": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "a22a3d539f8b2f1e0f8232d0bb4897c1d0791b59618aacae2cab8c3485ec3320"
+    },
+    "huggingface-paper-publisher": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "7449d07f6c280f05925bda33cb2e41284e7f89b7262265cc2a1875426f0ac69d"
+    },
+    "huggingface-papers": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "1cb8a2e3b8c88f0208e07bdbd68f9b512f990987e0ba2ce5a962cd6a02d1da0a"
+    },
+    "huggingface-trackio": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "d268ff919e667ec9ece1e24ff1340909ff0d33f69de31805d6304e5c445104cf"
+    },
+    "huggingface-vision-trainer": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "1652cc2a2d4f3fcf5626b71a7fc5da7d127d4c6d91d57aef4e6adadfb6b696c3"
+    },
+    "transformers-js": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "e04e86139565278def1e029df65754934c2a1c58d3df93830564cfb435b1b8f2"
     }
   }
 }

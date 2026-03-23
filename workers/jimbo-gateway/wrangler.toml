@@ -32,5 +32,19 @@ id = "jimbo_cache_placeholder"   # npx wrangler kv namespace create jimbo-cache 
 
 # ─── Vars ───────────────────────────────────────────────────
 [vars]
-CF_GATEWAY_BASE = "https://gateway.ai.cloudflare.com/v1/7f490d58a478c6baccb0ae01ea1d87c3/bielik_gateway/compat"
+CF_GATEWAY_BASE = "https://gateway.ai.cloudflare.com/v1/7f490d58a478c6baccb0ae01ea1d87c3/buch_chat_box/compat"
 JIMBO_BACKEND   = "http://localhost:5180"
+
+# ─── Secrets (wrangler secret put <NAME>) ────────────────────
+# API Keys — each managed via `wrangler secret put`:
+#   wrangler secret put OPENAI_API_KEY
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler secret put DEEPSEEK_API_KEY
+#   wrangler secret put GEMINI_API_KEY
+#   wrangler secret put OPENROUTER_API_KEY
+#   wrangler secret put TOGETHER_API_KEY
+#   wrangler secret put REPLICATE_API_TOKEN
+#   wrangler secret put STABILITY_API_KEY
+#   wrangler secret put ELEVENLABS_API_KEY
+#   wrangler secret put HUGGINGFACE_API_KEY
+#   wrangler secret put PERPLEXITY_API_KEY
