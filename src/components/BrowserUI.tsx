@@ -336,12 +336,12 @@ export function BrowserUI() {
         </header>
 
         {/* Quick Nav Bar — skróty między stronami */}
-        <div style={{ display: 'flex', gap: '4px', padding: '3px 10px', background: '#16213e', borderBottom: '1px solid #0f3460' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px', background: '#16213e', borderBottom: '1px solid #0f3460' }}>
           <button
             className="btn-icon"
             onClick={() => handleNavigate('https://zenbrowsers.org/')}
             title="ZENO Browser – strona oficjalna"
-            style={{ background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '2px 12px', fontSize: '12px', borderRadius: '4px 4px 0 0', transition: 'background 0.15s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 14px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', transition: 'background 0.15s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
@@ -351,11 +351,11 @@ export function BrowserUI() {
             className="btn-icon"
             onClick={() => handleNavigate('https://zeno-browser-web.pages.dev/ai-hub/')}
             title="AI Hub Tools"
-            style={{ background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '2px 12px', fontSize: '12px', borderRadius: '4px 4px 0 0', transition: 'background 0.15s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 14px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', transition: 'background 0.15s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
-            🤖 AI Hub
+            🤖 AI Org Hub
           </button>
         </div>
 
