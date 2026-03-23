@@ -500,7 +500,7 @@ function setupIPCHandlers() {
   let terminalCwd = app.getPath('home');
 
   const dangerousPatterns = [
-    /rm\s+(-rf?|--recursive)\s+[\/\\]/i,
+    /rm\s+(-rf?|--recursive)\s+[/\\]/i,
     /format\s+[a-z]:/i,
     /del\s+\/[sfq]/i,
     /:(fork|bomb)/i,

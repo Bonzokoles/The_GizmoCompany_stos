@@ -86,7 +86,7 @@ export const WORKER_REGISTRY: WorkerInfo[] = [
   { id: 'mybonzo-assistant-production', name: 'MyBonzo Assistant', category: 'ai', description: 'Personal AI assistant' },
   { id: 'zeno-iframe-proxy', name: 'iFrame Proxy', category: 'proxy', description: 'Secure iframe proxy' },
   { id: 'the-jimbo77com-nxt', name: 'jimbo77.com NXT', category: 'api', description: 'Next-gen jimbo77.com' },
-  { id: 'zeno-bielik-agents', name: 'Legacy Agents', category: 'other', description: 'Legacy agent system' },
+  { id: 'zeno-legacy-agents', name: 'Legacy Agents', category: 'other', description: 'Legacy agent system (archived)' },
 ];
 
 export interface SiteInfo {

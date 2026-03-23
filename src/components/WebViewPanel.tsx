@@ -94,7 +94,8 @@ export const WebViewPanel = forwardRef<WebViewPanelHandle, WebViewPanelProps>(
         } else {
           try { iframeRef.current?.contentWindow?.location.reload(); } catch {
             // cross-origin fallback: re-set src
-            if (iframeRef.current) iframeRef.current.src = iframeRef.current.src;
+            // eslint-disable-next-line no-self-assign
+            if (iframeRef.current) iframeRef.current.src = iframeRef.current.src; // force reload
           }
         }
       },
