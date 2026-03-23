@@ -23,6 +23,9 @@ coverage/
 .vscode/settings.json
 .vscode/mcp.json
 .idea/
+
+# Claude Code (local tool config)
+.claude/
 *.swp
 *.swo
 *~
