@@ -12,6 +12,14 @@
  *   POST /kb/search         — semantic search w D1 (libraries)
  *   POST /kb/store          — zapisz dokument do D1 + KV cache
  *   GET  /kb/list           — lista dokumentów z D1
+ *   GET  /kb/libraries      — lista bibliotek tematycznych + statystyki
+ *   GET  /kb/topics         — tematy wykryte w bibliotekach
+ *   POST /datasets/create   — utwórz dataset z biblioteki (snapshot)
+ *   GET  /datasets/list     — lista datasetów
+ *   POST /agents/create     — utwórz agenta dziedzinowego
+ *   GET  /agents/list       — lista agentów
+ *   POST /agents/:id/chat   — czat z agentem dziedzinowym
+ *   GET  /agents/:id/export — eksport konfiguracji agenta do innych aplikacji
  *   GET  /storage/list      — lista plików R2
  *   GET  /storage/:key      — pobierz plik z R2
  *   PUT  /storage/:key      — upload pliku do R2
@@ -220,6 +228,147 @@ function err(msg: string, status = 400) {
   return json({ error: msg }, status);
 }
 
+type ChatBody = {
+  messages?: { role: string; content: string }[];
+  model?: string;
+  provider?: string;
+  max_tokens?: number;
+  temperature?: number;
+  system?: string;
+};
+
+async function runChat(body: ChatBody, env: Env, providers: ProviderDef[]): Promise<Response> {
+  const model = body.model ?? "gpt-4o-mini";
+  const messages = body.messages ?? [];
+  if (body.system) messages.unshift({ role: "system", content: body.system });
+
+  // Cache key from last user message
+  const lastUser = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user")?.content ?? "";
+  const cacheKey = `chat:${model}:${btoa(lastUser).slice(0, 40)}`;
+  const cached = await env.CACHE.get(cacheKey);
+  if (cached) return json({ text: cached, cached: true, model });
+
+  // Resolve provider
+  const resolved = body.provider
+    ? resolveProviderByName(providers, body.provider, env)
+    : resolveProvider(providers, model, env);
+
+  if (!resolved) return err(`No provider found for model "${model}" or API key missing`, 400);
+  const { provider, apiKey } = resolved;
+
+  // ── Anthropic uses its own format ───────────────
+  if (provider.name === "anthropic") {
+    const systemMsg = messages.find(m => m.role === "system")?.content;
+    const nonSystem = messages.filter(m => m.role !== "system");
+    const res = await fetch(`${provider.baseUrl}/messages`, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: body.max_tokens ?? 1024,
+        temperature: body.temperature ?? 0.7,
+        ...(systemMsg ? { system: systemMsg } : {}),
+        messages: nonSystem,
+      }),
+    });
+    if (!res.ok) return err(`Anthropic error ${res.status}: ${await res.text()}`, 502);
+    const data = await res.json<{ content: { text: string }[] }>();
+    const text = data.content?.[0]?.text ?? "";
+    await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
+    return json({ text, cached: false, model, provider: "anthropic" });
+  }
+
+  // ── Gemini uses its own format ──────────────────
+  if (provider.name === "gemini") {
+    const systemMsg = messages.find(m => m.role === "system")?.content;
+    const nonSystem = messages.filter(m => m.role !== "system");
+    const geminiMessages = nonSystem.map(m => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+    const res = await fetch(
+      `${provider.baseUrl}/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: geminiMessages,
+          ...(systemMsg ? { systemInstruction: { parts: [{ text: systemMsg }] } } : {}),
+          generationConfig: {
+            maxOutputTokens: body.max_tokens ?? 1024,
+            temperature: body.temperature ?? 0.7,
+          },
+        }),
+      },
+    );
+    if (!res.ok) return err(`Gemini error ${res.status}: ${await res.text()}`, 502);
+    const data = await res.json<{ candidates: { content: { parts: { text: string }[] } }[] }>();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+    await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
+    return json({ text, cached: false, model, provider: "gemini" });
+  }
+
+  // ── OpenAI-compatible providers ──
+  const baseUrl = provider.baseUrl ?? env.CF_GATEWAY_BASE;
+  const endpoint = provider.name === "huggingface"
+    ? `${provider.baseUrl}/${model}/v1/chat/completions`
+    : `${baseUrl}/chat/completions`;
+
+  const gwRes = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `${provider.authHeader} ${apiKey}`,
+      "Content-Type": "application/json",
+      ...(provider.name === "openrouter" ? { "HTTP-Referer": "https://mybonzo.com" } : {}),
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      max_tokens: body.max_tokens ?? 1024,
+      temperature: body.temperature ?? 0.7,
+    }),
+  });
+
+  if (!gwRes.ok) {
+    const errText = await gwRes.text();
+    return err(`${provider.name} error ${gwRes.status}: ${errText}`, 502);
+  }
+
+  const gwData = await gwRes.json<{ choices: { message: { content: string } }[] }>();
+  const text = gwData.choices?.[0]?.message?.content ?? "";
+  await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
+  return json({ text, cached: false, model, provider: provider.name });
+}
+
+async function collectContextSnippets(
+  db: D1Database,
+  query: string,
+  library: string,
+  limit = 5,
+): Promise<Array<{ title: string; content: string; source: string | null }>> {
+  const rows = library && library !== "all"
+    ? await db.prepare(
+      `SELECT title, content, source
+       FROM jimbo_kb
+       WHERE library = ? AND (title LIKE ? OR content LIKE ?)
+       ORDER BY id DESC
+       LIMIT ?`
+    ).bind(library, `%${query}%`, `%${query}%`, limit).all<{ title: string; content: string; source: string | null }>()
+    : await db.prepare(
+      `SELECT title, content, source
+       FROM jimbo_kb
+       WHERE title LIKE ? OR content LIKE ?
+       ORDER BY id DESC
+       LIMIT ?`
+    ).bind(`%${query}%`, `%${query}%`, limit).all<{ title: string; content: string; source: string | null }>();
+
+  return rows.results ?? [];
+}
+
 // ── Init DB schema ────────────────────────────────────────────────────────
 async function ensureSchema(db: D1Database) {
   await db.exec(`
@@ -235,6 +384,45 @@ async function ensureSchema(db: D1Database) {
     CREATE INDEX IF NOT EXISTS idx_jimbo_kb_library ON jimbo_kb(library);
     CREATE VIRTUAL TABLE IF NOT EXISTS jimbo_kb_fts
       USING fts5(title, content, content='jimbo_kb', content_rowid='id');
+
+    CREATE TABLE IF NOT EXISTS jimbo_datasets (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT NOT NULL,
+      topic       TEXT NOT NULL,
+      library     TEXT NOT NULL DEFAULT 'general',
+      description TEXT,
+      source      TEXT,
+      tags        TEXT,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_jimbo_datasets_library ON jimbo_datasets(library);
+
+    CREATE TABLE IF NOT EXISTS jimbo_dataset_items (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      dataset_id  INTEGER NOT NULL,
+      kb_id       INTEGER,
+      title       TEXT NOT NULL,
+      excerpt     TEXT,
+      source      TEXT,
+      created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (dataset_id) REFERENCES jimbo_datasets(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_jimbo_dataset_items_dataset ON jimbo_dataset_items(dataset_id);
+
+    CREATE TABLE IF NOT EXISTS jimbo_agents (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      name          TEXT NOT NULL,
+      topic         TEXT NOT NULL,
+      library       TEXT NOT NULL DEFAULT 'general',
+      dataset_id    INTEGER,
+      model         TEXT NOT NULL DEFAULT 'gpt-4o-mini',
+      system_prompt TEXT NOT NULL,
+      tools         TEXT,
+      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (dataset_id) REFERENCES jimbo_datasets(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_jimbo_agents_topic ON jimbo_agents(topic);
+    CREATE INDEX IF NOT EXISTS idx_jimbo_agents_library ON jimbo_agents(library);
   `);
 }
 
@@ -285,119 +473,8 @@ export default {
 
     // ── /chat — Multi-provider chat ──────────────────────────────────────
     if (path === "/chat" && req.method === "POST") {
-      const body = await req.json<{
-        messages: { role: string; content: string }[];
-        model?: string;
-        provider?: string;
-        max_tokens?: number;
-        temperature?: number;
-        system?: string;
-      }>();
-
-      const model = body.model ?? "gpt-4o-mini";
-      const messages = body.messages ?? [];
-      if (body.system) messages.unshift({ role: "system", content: body.system });
-
-      // Cache key from last user message
-      const lastUser = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user")?.content ?? "";
-      const cacheKey = `chat:${model}:${btoa(lastUser).slice(0, 40)}`;
-      const cached = await env.CACHE.get(cacheKey);
-      if (cached) return json({ text: cached, cached: true, model });
-
-      // Resolve provider
-      const resolved = body.provider
-        ? resolveProviderByName(providers, body.provider, env)
-        : resolveProvider(providers, model, env);
-
-      if (!resolved) return err(`No provider found for model "${model}" or API key missing`, 400);
-      const { provider, apiKey } = resolved;
-
-      // ── Anthropic uses its own format ───────────────
-      if (provider.name === "anthropic") {
-        const systemMsg = messages.find(m => m.role === "system")?.content;
-        const nonSystem = messages.filter(m => m.role !== "system");
-        const res = await fetch(`${provider.baseUrl}/messages`, {
-          method: "POST",
-          headers: {
-            "x-api-key": apiKey,
-            "anthropic-version": "2023-06-01",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model,
-            max_tokens: body.max_tokens ?? 1024,
-            temperature: body.temperature ?? 0.7,
-            ...(systemMsg ? { system: systemMsg } : {}),
-            messages: nonSystem,
-          }),
-        });
-        if (!res.ok) return err(`Anthropic error ${res.status}: ${await res.text()}`, 502);
-        const data = await res.json<{ content: { text: string }[] }>();
-        const text = data.content?.[0]?.text ?? "";
-        await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
-        return json({ text, cached: false, model, provider: "anthropic" });
-      }
-
-      // ── Gemini uses its own format ──────────────────
-      if (provider.name === "gemini") {
-        const systemMsg = messages.find(m => m.role === "system")?.content;
-        const nonSystem = messages.filter(m => m.role !== "system");
-        const geminiMessages = nonSystem.map(m => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        }));
-        const res = await fetch(
-          `${provider.baseUrl}/models/${model}:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: geminiMessages,
-              ...(systemMsg ? { systemInstruction: { parts: [{ text: systemMsg }] } } : {}),
-              generationConfig: {
-                maxOutputTokens: body.max_tokens ?? 1024,
-                temperature: body.temperature ?? 0.7,
-              },
-            }),
-          },
-        );
-        if (!res.ok) return err(`Gemini error ${res.status}: ${await res.text()}`, 502);
-        const data = await res.json<{ candidates: { content: { parts: { text: string }[] } }[] }>();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-        await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
-        return json({ text, cached: false, model, provider: "gemini" });
-      }
-
-      // ── OpenAI-compatible providers (OpenAI, DeepSeek, OpenRouter, Together, Perplexity, HuggingFace) ──
-      const baseUrl = provider.baseUrl ?? env.CF_GATEWAY_BASE;
-      const endpoint = provider.name === "huggingface"
-        ? `${provider.baseUrl}/${model}/v1/chat/completions`
-        : `${baseUrl}/chat/completions`;
-
-      const gwRes = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          Authorization: `${provider.authHeader} ${apiKey}`,
-          "Content-Type": "application/json",
-          ...(provider.name === "openrouter" ? { "HTTP-Referer": "https://mybonzo.com" } : {}),
-        },
-        body: JSON.stringify({
-          model,
-          messages,
-          max_tokens: body.max_tokens ?? 1024,
-          temperature: body.temperature ?? 0.7,
-        }),
-      });
-
-      if (!gwRes.ok) {
-        const errText = await gwRes.text();
-        return err(`${provider.name} error ${gwRes.status}: ${errText}`, 502);
-      }
-
-      const gwData = await gwRes.json<{ choices: { message: { content: string } }[] }>();
-      const text = gwData.choices?.[0]?.message?.content ?? "";
-      await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
-      return json({ text, cached: false, model, provider: provider.name });
+      const body = await req.json<ChatBody>();
+      return runChat(body, env, providers);
     }
 
     // ── /images/generate ──────────────────────────────────────────────────
@@ -734,6 +811,240 @@ export default {
         : await env.DB.prepare(`SELECT id, library, title, source, created_at FROM jimbo_kb ORDER BY id DESC LIMIT ?`).bind(limit).all();
 
       return json({ results: rows.results });
+    }
+
+    // ── /kb/libraries ─────────────────────────────────────────────────────
+    if (path === "/kb/libraries" && req.method === "GET") {
+      await ensureSchema(env.DB);
+      const rows = await env.DB.prepare(
+        `SELECT library, COUNT(*) as documents, MAX(created_at) as last_update
+         FROM jimbo_kb
+         GROUP BY library
+         ORDER BY documents DESC, library ASC`
+      ).all<{ library: string; documents: number; last_update: string }>();
+      return json({ results: rows.results ?? [], total: (rows.results ?? []).length });
+    }
+
+    // ── /kb/topics ────────────────────────────────────────────────────────
+    if (path === "/kb/topics" && req.method === "GET") {
+      await ensureSchema(env.DB);
+      const library = url.searchParams.get("library") ?? "all";
+      const limit = parseInt(url.searchParams.get("limit") ?? "20");
+
+      const rows = library !== "all"
+        ? await env.DB.prepare(
+          `SELECT title, tags FROM jimbo_kb WHERE library = ? ORDER BY id DESC LIMIT 300`
+        ).bind(library).all<{ title: string; tags: string | null }>()
+        : await env.DB.prepare(
+          `SELECT title, tags FROM jimbo_kb ORDER BY id DESC LIMIT 300`
+        ).all<{ title: string; tags: string | null }>();
+
+      const stopwords = new Set(["oraz", "dla", "jest", "that", "this", "with", "from", "the", "and", "lub", "pod", "over", "into", "about"]);
+      const freq = new Map<string, number>();
+
+      for (const row of rows.results ?? []) {
+        const raw = `${row.title ?? ""} ${row.tags ?? ""}`
+          .toLowerCase()
+          .replace(/[^\p{L}\p{N}\s,_-]/gu, " ")
+          .replace(/[,_-]+/g, " ");
+        for (const token of raw.split(/\s+/).filter(Boolean)) {
+          if (token.length < 4 || stopwords.has(token)) continue;
+          freq.set(token, (freq.get(token) ?? 0) + 1);
+        }
+      }
+
+      const topics = [...freq.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, Math.max(1, limit))
+        .map(([topic, count]) => ({ topic, count }));
+
+      return json({ library, topics, total: topics.length });
+    }
+
+    // ── /datasets/create ──────────────────────────────────────────────────
+    if (path === "/datasets/create" && req.method === "POST") {
+      await ensureSchema(env.DB);
+      const body = await req.json<{
+        name: string;
+        topic: string;
+        library?: string;
+        description?: string;
+        source?: string;
+        tags?: string;
+        seedQuery?: string;
+        limit?: number;
+      }>();
+
+      if (!body.name || !body.topic) return err("name and topic required", 400);
+      const library = body.library ?? "general";
+      const seed = body.seedQuery?.trim() || body.topic;
+      const limit = body.limit ?? 20;
+
+      const insertDataset = await env.DB.prepare(
+        `INSERT INTO jimbo_datasets (name, topic, library, description, source, tags) VALUES (?,?,?,?,?,?)`
+      ).bind(body.name, body.topic, library, body.description ?? null, body.source ?? null, body.tags ?? null).run();
+
+      const datasetId = insertDataset.meta.last_row_id as number;
+      const docs = await collectContextSnippets(env.DB, seed, library, limit);
+
+      for (const doc of docs) {
+        await env.DB.prepare(
+          `INSERT INTO jimbo_dataset_items (dataset_id, kb_id, title, excerpt, source) VALUES (?,?,?,?,?)`
+        ).bind(datasetId, null, doc.title, doc.content.slice(0, 600), doc.source ?? null).run();
+      }
+
+      return json({
+        dataset: {
+          id: datasetId,
+          name: body.name,
+          topic: body.topic,
+          library,
+          items: docs.length,
+        },
+      }, 201);
+    }
+
+    // ── /datasets/list ────────────────────────────────────────────────────
+    if (path === "/datasets/list" && req.method === "GET") {
+      await ensureSchema(env.DB);
+      const rows = await env.DB.prepare(
+        `SELECT d.id, d.name, d.topic, d.library, d.created_at,
+                (SELECT COUNT(*) FROM jimbo_dataset_items i WHERE i.dataset_id = d.id) as items
+         FROM jimbo_datasets d
+         ORDER BY d.id DESC
+         LIMIT 200`
+      ).all();
+      return json({ results: rows.results ?? [], total: (rows.results ?? []).length });
+    }
+
+    // ── /agents/create ────────────────────────────────────────────────────
+    if (path === "/agents/create" && req.method === "POST") {
+      await ensureSchema(env.DB);
+      const body = await req.json<{
+        name: string;
+        topic: string;
+        library?: string;
+        dataset_id?: number;
+        model?: string;
+        systemPrompt?: string;
+        tools?: string[];
+      }>();
+
+      if (!body.name || !body.topic) return err("name and topic required", 400);
+      const library = body.library ?? "general";
+      const model = body.model ?? "gpt-4o-mini";
+
+      const snippets = await collectContextSnippets(env.DB, body.topic, library, 6);
+      const snippetsText = snippets.length
+        ? snippets.map((s, i) => `${i + 1}. ${s.title}\n${s.content.slice(0, 350)}`).join("\n\n")
+        : "Brak snippetów kontekstowych (dataset/library puste).";
+
+      const basePrompt = body.systemPrompt?.trim() ||
+        `Jesteś agentem dziedzinowym dla tematu: ${body.topic}. Odpowiadasz po polsku, konkretnie i biznesowo.`;
+
+      const systemPrompt = [
+        basePrompt,
+        `Biblioteka bazowa: ${library}.`,
+        `Twoim zadaniem jest łączyć wiedzę domenową z możliwościami przeglądarki (wyszukiwanie, analiza, workflow, content).`,
+        `W przypadku braków danych, jasno zaznacz luki i zaproponuj kolejne źródła do zebrania.`,
+        `Kontekst startowy (snippety):`,
+        snippetsText,
+      ].join("\n\n");
+
+      const tools = JSON.stringify(body.tools ?? ["search", "summarize", "analyze", "workflow"]);
+      const ins = await env.DB.prepare(
+        `INSERT INTO jimbo_agents (name, topic, library, dataset_id, model, system_prompt, tools)
+         VALUES (?,?,?,?,?,?,?)`
+      ).bind(body.name, body.topic, library, body.dataset_id ?? null, model, systemPrompt, tools).run();
+
+      const id = ins.meta.last_row_id as number;
+      return json({
+        agent: { id, name: body.name, topic: body.topic, library, model },
+        export: {
+          type: "jimbo-agent-profile",
+          version: 1,
+          agentId: id,
+          endpoint: `/agents/${id}/chat`,
+          model,
+          systemPrompt,
+          tools: JSON.parse(tools),
+        },
+      }, 201);
+    }
+
+    // ── /agents/list ──────────────────────────────────────────────────────
+    if (path === "/agents/list" && req.method === "GET") {
+      await ensureSchema(env.DB);
+      const rows = await env.DB.prepare(
+        `SELECT id, name, topic, library, dataset_id, model, created_at
+         FROM jimbo_agents
+         ORDER BY id DESC
+         LIMIT 200`
+      ).all();
+      return json({ results: rows.results ?? [], total: (rows.results ?? []).length });
+    }
+
+    // ── /agents/:id/export ────────────────────────────────────────────────
+    if (path.startsWith("/agents/") && path.endsWith("/export") && req.method === "GET") {
+      await ensureSchema(env.DB);
+      const id = Number(path.split("/")[2]);
+      if (!Number.isFinite(id)) return err("invalid agent id", 400);
+
+      const row = await env.DB.prepare(
+        `SELECT id, name, topic, library, dataset_id, model, system_prompt, tools, created_at
+         FROM jimbo_agents WHERE id = ?`
+      ).bind(id).first<{ id: number; name: string; topic: string; library: string; dataset_id: number | null; model: string; system_prompt: string; tools: string | null; created_at: string }>();
+
+      if (!row) return err("agent not found", 404);
+
+      return json({
+        type: "jimbo-agent-profile",
+        version: 1,
+        agentId: row.id,
+        name: row.name,
+        topic: row.topic,
+        library: row.library,
+        datasetId: row.dataset_id,
+        model: row.model,
+        systemPrompt: row.system_prompt,
+        tools: row.tools ? JSON.parse(row.tools) : [],
+        chatEndpoint: `/agents/${row.id}/chat`,
+        createdAt: row.created_at,
+      });
+    }
+
+    // ── /agents/:id/chat ──────────────────────────────────────────────────
+    if (path.startsWith("/agents/") && path.endsWith("/chat") && req.method === "POST") {
+      await ensureSchema(env.DB);
+      const id = Number(path.split("/")[2]);
+      if (!Number.isFinite(id)) return err("invalid agent id", 400);
+
+      const agent = await env.DB.prepare(
+        `SELECT id, name, topic, library, model, system_prompt
+         FROM jimbo_agents WHERE id = ?`
+      ).bind(id).first<{ id: number; name: string; topic: string; library: string; model: string; system_prompt: string }>();
+
+      if (!agent) return err("agent not found", 404);
+
+      const body = await req.json<{ message: string; max_tokens?: number; temperature?: number; provider?: string; model?: string }>();
+      const message = body.message?.trim();
+      if (!message) return err("message required", 400);
+
+      const snippets = await collectContextSnippets(env.DB, message, agent.library, 5);
+      const contextBlock = snippets.length
+        ? snippets.map((s, i) => `${i + 1}. ${s.title}\n${s.content.slice(0, 320)}`).join("\n\n")
+        : "Brak dodatkowych snippetów dla tego zapytania.";
+
+      const mergedSystem = `${agent.system_prompt}\n\nKontekst runtime dla zapytania:\n${contextBlock}`;
+
+      return runChat({
+        model: body.model ?? agent.model,
+        provider: body.provider,
+        max_tokens: body.max_tokens,
+        temperature: body.temperature,
+        system: mergedSystem,
+        messages: [{ role: "user", content: message }],
+      }, env, providers);
     }
 
     // ── /storage/list ─────────────────────────────────────────────────────

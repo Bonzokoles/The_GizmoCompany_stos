@@ -199,6 +199,7 @@ a:hover{color:#5effe0}
         <button class="nav-btn" data-tab="datasets"><span class="icon">📚</span> Datasety</button>
         <button class="nav-btn" data-tab="skills"><span class="icon">🎓</span> Skills</button>
         <button class="nav-btn" data-tab="apps"><span class="icon">📦</span> Aplikacje</button>
+        <button class="nav-btn" data-tab="jimbo"><span class="icon">💬</span> JIMBO Studio</button>
     </nav>
     <div class="topbar-right">
         <div class="clock" id="clock"></div>
@@ -462,6 +463,71 @@ a:hover{color:#5effe0}
         <p>Mini-aplikacje zintegrowane z AI Hub</p>
     </div>
     <div class="grid-3" id="apps-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- JIMBO STUDIO -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-jimbo">
+    <div class="section-head">
+        <h2>💬 <span class="hl">JIMBO Studio</span> — Biblioteki, Datasety, Agenci</h2>
+        <p>Przeglądanie tematyczne zasobów, budowa datasetów i tworzenie agentów dziedzinowych (np. finanse) gotowych do użycia w innych aplikacjach.</p>
+    </div>
+
+    <div class="glass" style="padding:1rem 1.2rem;margin-bottom:1rem">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:end">
+            <label style="font-size:.8rem;color:var(--text-muted)">Endpoint Jimbo Gateway
+                <input id="jimbo-endpoint" type="text" value="https://jimbo-gateway.stolarnia-ams.workers.dev" style="width:100%;margin-top:.35rem;padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+            </label>
+            <button class="app-open-btn" onclick="jimboReloadAll()">Odśwież dane</button>
+        </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1rem">
+        <div class="glass" style="padding:1rem 1.2rem">
+            <h3 style="margin-bottom:.7rem;color:var(--accent)">📚 Biblioteki tematyczne</h3>
+            <div id="jimbo-libraries" style="display:grid;gap:.45rem"></div>
+        </div>
+        <div class="glass" style="padding:1rem 1.2rem">
+            <h3 style="margin-bottom:.7rem;color:var(--accent2)">🏷️ Najczęstsze tematy</h3>
+            <div id="jimbo-topics" style="display:flex;flex-wrap:wrap;gap:.4rem"></div>
+        </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:1rem">
+        <div class="glass" style="padding:1rem 1.2rem">
+            <h3 style="margin-bottom:.7rem;color:var(--accent3)">🧪 Utwórz dataset z biblioteki</h3>
+            <div style="display:grid;gap:.5rem">
+                <input id="jimbo-ds-name" placeholder="Nazwa datasetu (np. Finanse-PL-KB)" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <input id="jimbo-ds-topic" placeholder="Temat (np. współczesne finanse)" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <input id="jimbo-ds-library" placeholder="Biblioteka (np. finance lub all)" value="finance" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <input id="jimbo-ds-query" placeholder="Zapytanie seed (opcjonalne)" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <button class="app-open-btn" onclick="jimboCreateDataset()">Utwórz dataset</button>
+                <div id="jimbo-ds-result" style="font-size:.78rem;color:var(--text-muted)"></div>
+            </div>
+        </div>
+        <div class="glass" style="padding:1rem 1.2rem">
+            <h3 style="margin-bottom:.7rem;color:var(--accent4)">🤖 Utwórz agenta dziedzinowego</h3>
+            <div style="display:grid;gap:.5rem">
+                <input id="jimbo-agent-name" placeholder="Nazwa agenta (np. Agent Finansowy)" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <input id="jimbo-agent-topic" placeholder="Temat agenta" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <input id="jimbo-agent-library" placeholder="Biblioteka" value="finance" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <input id="jimbo-agent-model" placeholder="Model" value="deepseek-chat" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+                <button class="app-open-btn" onclick="jimboCreateAgent()">Utwórz agenta</button>
+                <div id="jimbo-agent-result" style="font-size:.78rem;color:var(--text-muted)"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass" style="padding:1rem 1.2rem;margin-bottom:1rem">
+        <h3 style="margin-bottom:.7rem;color:var(--accent)">📦 Agenci (eksport do innych aplikacji)</h3>
+        <div id="jimbo-agents" style="display:grid;gap:.45rem"></div>
+    </div>
+
+    <div class="glass" style="padding:1rem 1.2rem">
+        <h3 style="margin-bottom:.7rem;color:var(--accent2)">🗂️ Datasety</h3>
+        <div id="jimbo-datasets" style="display:grid;gap:.45rem"></div>
+    </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════ -->
@@ -889,6 +955,94 @@ function openApp(url) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   JIMBO STUDIO
+   ═══════════════════════════════════════════════════════ */
+function jimboBase(){
+  const v = (document.getElementById('jimbo-endpoint')?.value || '').trim();
+  return v.replace(/\/$/, '');
+}
+
+async function jimboFetch(path, opts={}){
+  const r = await fetch(jimboBase() + path, opts);
+  const data = await r.json().catch(() => ({}));
+  if(!r.ok) throw new Error(data.error || ('HTTP '+r.status));
+  return data;
+}
+
+async function jimboReloadAll(){
+  try{
+    const [libs, topics, datasets, agents] = await Promise.all([
+      jimboFetch('/kb/libraries'),
+      jimboFetch('/kb/topics?library=all&limit=24'),
+      jimboFetch('/datasets/list'),
+      jimboFetch('/agents/list'),
+    ]);
+
+    const libsEl = document.getElementById('jimbo-libraries');
+    libsEl.innerHTML = (libs.results||[]).map(l => `<div style="display:flex;justify-content:space-between;padding:.45rem .55rem;border:1px solid var(--glass-border);border-radius:8px"><strong>${l.library}</strong><span style="color:var(--text-muted)">${l.documents} docs</span></div>`).join('') || '<div style="color:var(--text-dim)">Brak danych</div>';
+
+    const topicsEl = document.getElementById('jimbo-topics');
+    topicsEl.innerHTML = (topics.topics||[]).map(t => `<span class="model-chip" style="cursor:pointer" onclick="document.getElementById('jimbo-ds-topic').value='${String(t.topic).replace(/'/g, "\\'")}';document.getElementById('jimbo-agent-topic').value='${String(t.topic).replace(/'/g, "\\'")}'">${t.topic} (${t.count})</span>`).join('') || '<div style="color:var(--text-dim)">Brak tematów</div>';
+
+    const dsEl = document.getElementById('jimbo-datasets');
+    dsEl.innerHTML = (datasets.results||[]).map(d => `<div style="display:flex;justify-content:space-between;gap:8px;padding:.45rem .55rem;border:1px solid var(--glass-border);border-radius:8px"><div><strong>${d.name}</strong><div style="font-size:.72rem;color:var(--text-dim)">${d.topic} · ${d.library}</div></div><span style="font-size:.75rem;color:var(--text-muted)">${d.items||0} items</span></div>`).join('') || '<div style="color:var(--text-dim)">Brak datasetów</div>';
+
+    const agEl = document.getElementById('jimbo-agents');
+    agEl.innerHTML = (agents.results||[]).map(a => `
+      <div style="display:flex;justify-content:space-between;gap:8px;padding:.5rem .6rem;border:1px solid var(--glass-border);border-radius:8px">
+        <div>
+          <strong>${a.name}</strong>
+          <div style="font-size:.72rem;color:var(--text-dim)">${a.topic} · ${a.library} · ${a.model}</div>
+        </div>
+        <button class="app-open-btn" style="padding:.25rem .6rem;font-size:.72rem" onclick="jimboExportAgent(${a.id})">Eksport</button>
+      </div>
+    `).join('') || '<div style="color:var(--text-dim)">Brak agentów</div>';
+  }catch(e){
+    document.getElementById('jimbo-libraries').innerHTML = `<div style="color:var(--danger)">Błąd: ${e.message}</div>`;
+  }
+}
+
+async function jimboCreateDataset(){
+  const payload = {
+    name: document.getElementById('jimbo-ds-name').value.trim(),
+    topic: document.getElementById('jimbo-ds-topic').value.trim(),
+    library: document.getElementById('jimbo-ds-library').value.trim() || 'general',
+    seedQuery: document.getElementById('jimbo-ds-query').value.trim(),
+  };
+  const out = document.getElementById('jimbo-ds-result');
+  try{
+    const data = await jimboFetch('/datasets/create', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    out.textContent = `✅ Dataset utworzony: #${data.dataset.id} (${data.dataset.items} items)`;
+    jimboReloadAll();
+  }catch(e){ out.textContent = `❌ ${e.message}`; }
+}
+
+async function jimboCreateAgent(){
+  const payload = {
+    name: document.getElementById('jimbo-agent-name').value.trim(),
+    topic: document.getElementById('jimbo-agent-topic').value.trim(),
+    library: document.getElementById('jimbo-agent-library').value.trim() || 'general',
+    model: document.getElementById('jimbo-agent-model').value.trim() || 'deepseek-chat',
+  };
+  const out = document.getElementById('jimbo-agent-result');
+  try{
+    const data = await jimboFetch('/agents/create', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    out.textContent = `✅ Agent utworzony: #${data.agent.id}`;
+    jimboReloadAll();
+  }catch(e){ out.textContent = `❌ ${e.message}`; }
+}
+
+async function jimboExportAgent(id){
+  try{
+    const data = await jimboFetch(`/agents/${id}/export`);
+    await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+    alert(`Skonfigurowano agenta #${id}. JSON eksportu skopiowany do schowka.`);
+  }catch(e){
+    alert('Błąd eksportu: '+e.message);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
    DATASETS — HuggingFace Hub Search
    ═══════════════════════════════════════════════════════ */
 const DS_PRESET_QUERIES = {
@@ -1002,6 +1156,7 @@ function init() {
   renderSkills();
   renderApps();
   renderDashTopModels();
+  jimboReloadAll();
 }
 
 init();
