@@ -245,6 +245,10 @@ start "Tunnel-ZENO" /MIN cmd /c "cloudflared tunnel --url http://localhost:5173 
 :: Tunel MyBonzo (Astro :4321)
 start "Tunnel-MyBonzo" /MIN cmd /c "cloudflared tunnel --url http://localhost:4321 >logs\tunnel_mybonzo.log 2>&1"
 
+:: Named tunnel: analytics.mybonzo.com / plausible / search / superset
+start "Tunnel-Analytics" /MIN cmd /c "cloudflared tunnel run umami-analytics >logs\tunnel_umami-analytics.log 2>&1"
+echo   [OK] Named tunnel umami-analytics uruchomiony (analytics.mybonzo.com)
+
 echo   [OK] Tunele uruchomione
 echo   [INFO] Czekam na URL tuneli (8s)...
 timeout /t 8 /nobreak >nul
