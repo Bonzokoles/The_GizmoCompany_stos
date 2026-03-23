@@ -3,7 +3,8 @@
  * Central operations hub for all sites, Workers, AI, storage and databases
  * Deployed on zenbrowsers.org (CF Pages)
  */
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { PageAgent } from 'page-agent';
 
 /* ─── Types ──────────────────────────────────────── */
 
@@ -293,13 +294,9 @@ export function WebLanding() {
   const [workflowStatuses, setWorkflowStatuses] = useState<{ id: string; status: 'active' | 'idle' | 'error'; instances: number; lastRun?: Date }[]>([]);
   const [workflowEndpoint, setWorkflowEndpoint] = useState('https://mybonzo-ai-workflow.stolarnia-ams.workers.dev');
 
-  // AI Chatbox Helper
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'ai'; text: string }[]>([
-    { role: 'ai', text: 'Cześć! Jestem asystentem ZENO Ops. Zapytaj mnie o dowolną zakładkę lub funkcję dashboardu — podpowiem co i gdzie wpisać.' },
-  ]);
-  const [chatInput, setChatInput] = useState('');
-  const [chatLoading, setChatLoading] = useState(false);
+  // Page Agent (AI GUI assistant)
+  const pageAgentRef = useRef<PageAgent | null>(null);
+  const [agentReady, setAgentReady] = useState(false);
 
   /* ─── Init ─── */
   useEffect(() => {
@@ -673,61 +670,31 @@ export function WebLanding() {
     setAiProvidersStatus(statuses);
   }, []);
 
-  const CHAT_SYSTEM_PROMPT = `Jesteś asystentem dashboardu ZENO Ops (zenbrowsers.org). Odpowiadasz TYLKO po polsku. Znasz wszystkie 13 zakładek i ich funkcje:
-
-1. OVERVIEW — Główna strona. Pola: "Search" (wyszukiwarka web), "AI Gate" (pytania do AI — wpisz pytanie i kliknij Ask). Wyświetla status API, podłączone strony, WebGate proxy, link do aplikacji Desktop.
-
-2. WORKERS — Lista Cloudflare Workers. Przycisk "Refresh" ładuje listę, "Health Check" sprawdza status. Filtruj po kategoriach (core, ai, content, ecommerce, analytics, infrastructure).
-
-3. CONTENT (CMS) — System zarządzania treścią. Trzy widoki:
-   - "Artykuły" — lista opublikowanych. Kliknij artykuł aby edytować.
-   - "Nowy" — edytor: Tytuł (wymagany!), Treść (Markdown), Wstęp, Kategoria, Tagi (oddzielone przecinkami), Język, Status. Sekcja SEO: SEO Title, SEO Description. Przyciski: Zapisz (draft), Opublikuj (publish), Archiwizuj.
-   - "Generuj AI" — podaj Temat, Typ (artykuł/blog/social/email/produkt), Język, Ton. Kliknij Generuj, potem "Użyj w edytorze" aby przenieść treść.
-
-4. ANALYTICS — Statystyki odwiedzin. Wybierz okres (24h/7d/30d), kliknij Refresh. Pokazuje: Pageviews, Visitors, Visits per strona.
-
-5. PIPELINES — Event streaming. Pokazuje aktywne pipeline'y, statystyki eventów, architekturę przepływu danych. "Send Test Event": wybierz Pipeline z listy, wpisz Event Type (np. pageview, click), Payload jako JSON, kliknij Send.
-
-6. CRAWLERS — Monitor botów. Okres (24h/7d/30d) + Refresh. Pokazuje: Total Requests, Human vs Bot, unikalne crawlery, nieznane boty. Filtruj po typie.
-
-7. STORAGE — R2 buckety. Kliknij bucket aby przeglądać pliki. Refresh odświeża listę.
-
-8. DATABASES — D1 bazy danych. Kliknij bazę → tabele. SQL Query: wpisz zapytanie SELECT i kliknij Run.
-
-9. IMAGES — Generuj obrazy AI. Wpisz Prompt (opis obrazu po angielsku), wybierz Style, kliknij Generate.
-
-10. MOA — Mixture-of-Agents pipeline. Podaj Topic, Type, Language. Uruchamia wieloetapowy pipeline AI (Drafts → Critique → Aggregation → Validation).
-
-11. RENDER — Browser Rendering. Wpisz URL, wybierz akcję (Screenshot/PDF/Scrape/Markdown/AI JSON). Dla Scrape podaj CSS Selectors, dla AI JSON podaj prompt ekstrakcji.
-
-12. QUEUES — Cloudflare Queues. Wysyłaj zadania AI do kolejek (agent-tasks, image-gen, image-proc, voice). Sprawdzaj status konsumera i przeglądaj wyniki. Lookup: wklej taskId aby pobrać rezultat.
-
-13. AI HUB — Centrum AI. Czat z różnymi providerami (DeepSeek, OpenRouter, Anthropic, Workers AI), historia rozmów, generowanie treści przez kolejki, szybkie akcje AI.
-
-14. BIZTOOLS 💹 — Biblioteka narzędzi biznesowych i finansowych. Statyczny katalog 50+ narzędzi (trading, analytics, accounting, CRM, ERP, scraping, automation, API). Wyszukiwanie w katalogu + zakładka Tavily Search do wyszukiwania nowych narzędzi w sieci. Aby użyć Tavily: wpisz swój klucz API Tavily, wpisz zapytanie, kliknij Szukaj.
-
-Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
-
-  const handleChatSend = useCallback(async () => {
-    if (!chatInput.trim() || chatLoading) return;
-    const userMsg = chatInput.trim();
-    setChatInput('');
-    setChatMessages((prev) => [...prev, { role: 'user', text: userMsg }]);
-    setChatLoading(true);
-
-    const context = chatMessages.slice(-6).map((m) => `${m.role === 'user' ? 'Użytkownik' : 'Asystent'}: ${m.text}`).join('\n');
-    const fullPrompt = `${CHAT_SYSTEM_PROMPT}\n\nHistoria:\n${context}\nUżytkownik: ${userMsg}\nAsystent:`;
-
-    const data = await apiFetch<any>('/api/ai/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: fullPrompt, maxTokens: 1024 }),
+  // Initialize page-agent
+  useEffect(() => {
+    if (pageAgentRef.current) return;
+    const agent = new PageAgent({
+      baseURL: '/api/ai/v1',
+      model: 'deepseek-chat',
+      language: 'en-US',
+      customFetch: (url: string | URL | Request, init?: RequestInit) =>
+        fetch(url, { ...init, credentials: 'same-origin' }),
+      instructions: {
+        system: `Jesteś asystentem dashboardu ZENO Ops (zenbrowsers.org). Odpowiadasz TYLKO po polsku. Pomagasz użytkownikowi nawigować po zakładkach: Overview, Workers, Content/CMS, Analytics, Pipelines, Crawlers, Storage, Databases, Images, MOA, Render, Queues, AI Hub, BizTools. Możesz klikać, wypełniać pola i obsługiwać interfejs użytkownika.`,
+        getPageInstructions: (url: string) =>
+          `Aktualny URL: ${url}. To dashboard operacyjny ZENO na Cloudflare Pages. Nawiguj po zakładkach i pomagaj użytkownikowi obsługiwać Workers, bazy danych D1, buckety R2, pipeline AI i inne serwisy.`,
+      },
     });
+    pageAgentRef.current = agent;
+    setAgentReady(true);
+    return () => { pageAgentRef.current = null; };
+  }, []);
 
-    const reply = data?.content || data?.error || 'Przepraszam, nie udało się uzyskać odpowiedzi.';
-    setChatMessages((prev) => [...prev, { role: 'ai', text: reply }]);
-    setChatLoading(false);
-  }, [chatInput, chatLoading, chatMessages]);
+  const togglePageAgent = useCallback(() => {
+    const agent = pageAgentRef.current;
+    if (!agent) return;
+    try { agent.panel.show(); } catch { /* panel already visible */ }
+  }, []);
 
   const handleTavilySearch = useCallback(async (queryOverride?: string) => {
     const q = queryOverride || tavilyQuery;
@@ -2574,44 +2541,11 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
         <p>ZENO Ops &copy; {new Date().getFullYear()} — Powered by Cloudflare Workers &amp; AI</p>
       </footer>
 
-      {/* ─── AI CHATBOX HELPER ─── */}
-      <button className="chat-toggle" onClick={() => setChatOpen((o) => !o)} title="Asystent ZENO">
-        {chatOpen ? '✕' : '💬'}
-      </button>
-
-      {chatOpen && (
-        <div className="ops-chatbox">
-          <div className="chatbox-header">
-            <span>🤖 Asystent ZENO Ops</span>
-            <button className="chatbox-close" onClick={() => setChatOpen(false)}>✕</button>
-          </div>
-          <div className="chatbox-messages">
-            {chatMessages.map((msg, i) => (
-              <div key={i} className={`chat-msg chat-${msg.role}`}>
-                <span className="chat-role">{msg.role === 'user' ? 'Ty' : 'AI'}</span>
-                <p>{msg.text}</p>
-              </div>
-            ))}
-            {chatLoading && (
-              <div className="chat-msg chat-ai">
-                <span className="chat-role">AI</span>
-                <p className="chat-typing">Myślę...</p>
-              </div>
-            )}
-          </div>
-          <div className="chatbox-input">
-            <input
-              type="text"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
-              placeholder="Zapytaj o funkcje dashboardu..."
-            />
-            <button onClick={handleChatSend} disabled={chatLoading || !chatInput.trim()}>
-              {chatLoading ? '...' : '➤'}
-            </button>
-          </div>
-        </div>
+      {/* ─── PAGE AGENT TRIGGER ─── */}
+      {agentReady && (
+        <button className="chat-toggle" onClick={togglePageAgent} title="Page Agent — AI asystent">
+          🤖
+        </button>
       )}
     </div>
   );

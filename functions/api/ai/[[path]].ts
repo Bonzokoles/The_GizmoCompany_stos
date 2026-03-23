@@ -3,10 +3,11 @@
  * Multi-provider AI routing on Cloudflare Edge
  *
  * Endpoints:
- *   POST /api/ai/chat           — Send prompt to AI (auto-routes to best provider)
- *   POST /api/ai/chat/stream    — Streaming chat response (SSE)
- *   GET  /api/ai/providers      — List available providers & models
- *   GET  /api/ai/status         — Gateway health + metrics
+ *   POST /api/ai/chat                — Send prompt to AI (auto-routes to best provider)
+ *   POST /api/ai/chat/stream         — Streaming chat response (SSE)
+ *   POST /api/ai/v1/chat/completions — OpenAI-compatible proxy (for page-agent)
+ *   GET  /api/ai/providers           — List available providers & models
+ *   GET  /api/ai/status              — Gateway health + metrics
  */
 
 import type { Env, AIProviderConfig } from '../../types';
@@ -291,8 +292,89 @@ async function handleStream(request: Request, env: Env): Promise<Response> {
   }
 }
 
+/**
+ * OpenAI-compatible proxy for page-agent integration.
+ * Forwards the request body as-is to OpenAI-compatible providers (DeepSeek, OpenRouter).
+ * Supports tools/function_calling required by page-agent for DOM manipulation.
+ */
+async function handleCompletionsProxy(request: Request, env: Env): Promise<Response> {
+  const body = await request.json() as Record<string, unknown>;
+  const model = (body.model as string) || 'deepseek-chat';
+  const isStream = body.stream === true;
+
+  // Resolve to OpenAI-compatible provider (skip Anthropic — different format)
+  const openaiProviders = PROVIDERS.filter(p => p.name !== 'anthropic')
+    .sort((a, b) => a.priority - b.priority);
+
+  let target: { config: AIProviderConfig; apiKey: string } | null = null;
+
+  // Try to match model to provider
+  for (const cfg of openaiProviders) {
+    if (cfg.models.includes(model)) {
+      const key = getApiKey(env, cfg.name);
+      if (key) { target = { config: cfg, apiKey: key }; break; }
+    }
+  }
+
+  // Fallback to first available
+  if (!target) {
+    for (const cfg of openaiProviders) {
+      const key = getApiKey(env, cfg.name);
+      if (key) { target = { config: cfg, apiKey: key }; break; }
+    }
+  }
+
+  if (!target) {
+    return new Response(JSON.stringify({ error: { message: 'No AI provider available', type: 'server_error' } }), {
+      status: 503,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    });
+  }
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${target.apiKey}`,
+  };
+  if (target.config.name === 'openrouter') {
+    headers['HTTP-Referer'] = 'https://zenbrowsers.org';
+    headers['X-Title'] = 'ZENO Page Agent';
+  }
+
+  const resp = await fetch(target.config.endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ ...body, model }),
+    signal: AbortSignal.timeout(60_000),
+  });
+
+  // Pass through the response as-is (already OpenAI-compatible)
+  const responseHeaders: Record<string, string> = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  if (isStream) {
+    responseHeaders['Content-Type'] = 'text/event-stream';
+    responseHeaders['Cache-Control'] = 'no-cache';
+    return new Response(resp.body, { status: resp.status, headers: responseHeaders });
+  }
+
+  responseHeaders['Content-Type'] = 'application/json';
+  const data = await resp.text();
+  return new Response(data, { status: resp.status, headers: responseHeaders });
+}
+
 export const onRequest: PagesFunction<Env> = async (context) => {
-  if (context.request.method === 'OPTIONS') return corsHeaders();
+  if (context.request.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Max-Age': '86400',
+      },
+    });
+  }
 
   const url = new URL(context.request.url);
   const path = url.pathname.replace('/api/ai/', '');
@@ -305,6 +387,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     case 'chat/stream':
       if (context.request.method !== 'POST') return errorResponse('POST required', 405);
       return handleStream(context.request, context.env);
+
+    case 'v1/chat/completions':
+      if (context.request.method !== 'POST') return errorResponse('POST required', 405);
+      return handleCompletionsProxy(context.request, context.env);
 
     case 'providers':
       return jsonResponse({
@@ -321,12 +407,13 @@ export const onRequest: PagesFunction<Env> = async (context) => {
       return jsonResponse({
         service: 'AI Gate',
         status: 'operational',
-        version: '1.0.0',
+        version: '2.0.0',
         providers: PROVIDERS.map(p => ({
           name: p.name,
           available: !!getApiKey(context.env, p.name),
           models: p.models.length,
         })),
+        pageAgent: true,
         timestamp: new Date().toISOString(),
       });
 

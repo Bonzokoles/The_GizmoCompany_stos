@@ -40,6 +40,7 @@
     "electron-log": "^5.4.3",
     "electron-updater": "^6.8.3",
     "lru-cache": "^10.1.0",
+    "page-agent": "^1.6.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "uuid": "^9.0.0",
