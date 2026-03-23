@@ -57,7 +57,7 @@ jobs:
 
   e2e:
     runs-on: ubuntu-latest
-    if: hashFiles('test/e2e/**/*.ts') != ''
+    if: ${{ hashFiles('test/e2e/**/*.ts') != '' }}
 
     steps:
       - uses: actions/checkout@v4
