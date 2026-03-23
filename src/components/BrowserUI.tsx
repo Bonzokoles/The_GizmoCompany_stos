@@ -336,26 +336,28 @@ export function BrowserUI() {
         </header>
 
         {/* Quick Nav Bar — skróty między stronami */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 14px', background: '#16213e', borderBottom: '1px solid #0f3460' }}>
-          <button
-            onClick={() => handleNavigate('https://zenbrowsers.org/')}
-            title="ZENO Browser – strona oficjalna"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 16px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', lineHeight: '1.4', transition: 'background 0.15s' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            🌐 ZenBrowser.org
-          </button>
-          <button
-            onClick={() => handleNavigate('https://zeno-browser-web.pages.dev/ai-hub/')}
-            title="AI Hub Tools"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 16px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', lineHeight: '1.4', transition: 'background 0.15s' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-          >
-            🤖 AI Org Hub
-          </button>
-        </div>
+        {(() => {
+          const navBtn = (url: string, label: string, title: string) => (
+            <button
+              key={url}
+              onClick={() => handleNavigate(url)}
+              title={title}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '3px 12px', fontSize: '12px', borderRadius: '4px', whiteSpace: 'nowrap', lineHeight: '1.5', transition: 'background 0.15s, border-color 0.15s', flexShrink: 0 }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#0f3460'; e.currentTarget.style.borderColor = '#64ffda33'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = '#0f3460'; }}
+            >{label}</button>
+          );
+          return (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 14px', background: '#16213e', borderBottom: '1px solid #0f3460', overflowX: 'auto' }}>
+              {navBtn('https://zenbrowsers.org/',                        '🌐 ZenBrowsers.org',    'ZENO Browser – strona oficjalna')}
+              {navBtn('https://zeno-browser-web.pages.dev/ai-hub/',      '🤖 AI Org Hub',         'AI Hub — centrum narzędzi AI')}
+              {navBtn('https://jimbo77.com',                             '👤 jimbo77.com',        'Jimbo77 — strona główna')}
+              {navBtn('https://jimbo77.org',                             '🔗 jimbo77.org',        'Jimbo77 — org')}
+              {navBtn('https://mybonzoaiblog.com',                       '📝 MyBonzoAI Blog',     'MyBonzo AI Blog')}
+              {navBtn('https://mybonzo.com',                             '🤖 mybonzo.com',        'MyBonzo — strona główna')}
+            </div>
+          );
+        })()}
 
         {/* Tab Bar */}
         <TabBar
