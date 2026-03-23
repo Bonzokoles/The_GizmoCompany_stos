@@ -299,69 +299,90 @@ async function handleStream(request: Request, env: Env): Promise<Response> {
  */
 async function handleCompletionsProxy(request: Request, env: Env): Promise<Response> {
   const body = await request.json() as Record<string, unknown>;
-  const model = (body.model as string) || 'deepseek-chat';
+  const requestedModel = (body.model as string) || 'deepseek-chat';
   const isStream = body.stream === true;
 
   // Resolve to OpenAI-compatible provider (skip Anthropic — different format)
   const openaiProviders = PROVIDERS.filter(p => p.name !== 'anthropic')
     .sort((a, b) => a.priority - b.priority);
 
-  let target: { config: AIProviderConfig; apiKey: string } | null = null;
-
-  // Try to match model to provider
-  for (const cfg of openaiProviders) {
-    if (cfg.models.includes(model)) {
-      const key = getApiKey(env, cfg.name);
-      if (key) { target = { config: cfg, apiKey: key }; break; }
-    }
-  }
-
-  // Fallback to first available
-  if (!target) {
-    for (const cfg of openaiProviders) {
-      const key = getApiKey(env, cfg.name);
-      if (key) { target = { config: cfg, apiKey: key }; break; }
-    }
-  }
-
-  if (!target) {
-    return new Response(JSON.stringify({ error: { message: 'No AI provider available', type: 'server_error' } }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    });
-  }
-
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${target.apiKey}`,
+  const defaultModelByProvider: Record<string, string> = {
+    deepseek: 'deepseek-chat',
+    openrouter: 'anthropic/claude-sonnet-4',
   };
-  if (target.config.name === 'openrouter') {
-    headers['HTTP-Referer'] = 'https://zenbrowsers.org';
-    headers['X-Title'] = 'ZENO Page Agent';
-  }
 
-  const resp = await fetch(target.config.endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ ...body, model }),
-    signal: AbortSignal.timeout(60_000),
-  });
-
-  // Pass through the response as-is (already OpenAI-compatible)
   const responseHeaders: Record<string, string> = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 
-  if (isStream) {
-    responseHeaders['Content-Type'] = 'text/event-stream';
-    responseHeaders['Cache-Control'] = 'no-cache';
-    return new Response(resp.body, { status: resp.status, headers: responseHeaders });
+  const attempted: string[] = [];
+
+  // 1) Prefer provider matching requested model
+  // 2) Then try remaining available providers as fallback
+  const orderedProviders = [
+    ...openaiProviders.filter((p) => p.models.includes(requestedModel)),
+    ...openaiProviders.filter((p) => !p.models.includes(requestedModel)),
+  ];
+
+  for (const cfg of orderedProviders) {
+    const apiKey = getApiKey(env, cfg.name);
+    if (!apiKey) continue;
+
+    const modelForProvider = cfg.models.includes(requestedModel)
+      ? requestedModel
+      : (defaultModelByProvider[cfg.name] || cfg.models[0] || requestedModel);
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    };
+
+    if (cfg.name === 'openrouter') {
+      headers['HTTP-Referer'] = 'https://zenbrowsers.org';
+      headers['X-Title'] = 'ZENO Page Agent';
+    }
+
+    try {
+      const resp = await fetch(cfg.endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ ...body, model: modelForProvider }),
+        signal: AbortSignal.timeout(60_000),
+      });
+
+      if (!resp.ok) {
+        const errText = await resp.text();
+        attempted.push(`${cfg.name}(${modelForProvider}) -> ${resp.status}: ${errText.slice(0, 200)}`);
+        continue;
+      }
+
+      if (isStream) {
+        responseHeaders['Content-Type'] = 'text/event-stream';
+        responseHeaders['Cache-Control'] = 'no-cache';
+        responseHeaders['X-Zeno-Provider'] = cfg.name;
+        return new Response(resp.body, { status: resp.status, headers: responseHeaders });
+      }
+
+      responseHeaders['Content-Type'] = 'application/json';
+      responseHeaders['X-Zeno-Provider'] = cfg.name;
+      const data = await resp.text();
+      return new Response(data, { status: resp.status, headers: responseHeaders });
+    } catch (err: any) {
+      attempted.push(`${cfg.name}(${modelForProvider}) -> network_error: ${err?.message || 'unknown error'}`);
+    }
   }
 
-  responseHeaders['Content-Type'] = 'application/json';
-  const data = await resp.text();
-  return new Response(data, { status: resp.status, headers: responseHeaders });
+  return new Response(JSON.stringify({
+    error: {
+      message: 'All OpenAI-compatible providers failed for page-agent request',
+      type: 'server_error',
+      attempted,
+    },
+  }), {
+    status: 502,
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+  });
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
