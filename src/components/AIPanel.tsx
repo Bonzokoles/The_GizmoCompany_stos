@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useTransition } from 'react';
 import type { AIProvider } from '../types/electron';
+import { PROMPT_CATEGORIES, PROMPT_LIBRARY, type PromptCategory } from '../data/promptLibrary';
 
 interface AIPanelProps {
   onClose: () => void;
@@ -13,6 +14,7 @@ export function AIPanel({ onClose }: AIPanelProps) {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
   const [providers, setProviders] = useState<AIProvider[]>([]);
+  const [promptCategory, setPromptCategory] = useState<'all' | PromptCategory>('all');
   const [isPending, startTransition] = useTransition();
 
   const { electronAPI } = window;
@@ -51,6 +53,10 @@ export function AIPanel({ onClose }: AIPanelProps) {
     }
   }, [electronAPI]);
 
+  const visiblePrompts = promptCategory === 'all'
+    ? PROMPT_LIBRARY
+    : PROMPT_LIBRARY.filter((p) => p.category === promptCategory);
+
   return (
     <div className="ai-panel floating-panel" role="complementary" aria-label="Panel AI">
       <div className="panel-header">
@@ -61,6 +67,39 @@ export function AIPanel({ onClose }: AIPanelProps) {
       </div>
 
       <div className="panel-content">
+        {/* Prompt Library */}
+        <div className="providers-list" style={{ marginBottom: 12 }}>
+          <h3>Biblioteka promptów:</h3>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+            <select
+              value={promptCategory}
+              onChange={(e) => setPromptCategory(e.target.value as 'all' | PromptCategory)}
+              className="btn-small"
+              aria-label="Filtr kategorii promptów"
+            >
+              <option value="all">Wszystkie</option>
+              {PROMPT_CATEGORIES.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.label}</option>
+              ))}
+            </select>
+            <span style={{ fontSize: 12, opacity: 0.75 }}>{visiblePrompts.length} szablonów</span>
+          </div>
+          <div style={{ display: 'grid', gap: 6, maxHeight: 170, overflowY: 'auto' }}>
+            {visiblePrompts.map((tpl) => (
+              <button
+                key={tpl.id}
+                type="button"
+                className="btn-small"
+                onClick={() => setInput(tpl.prompt)}
+                title={tpl.prompt}
+                style={{ textAlign: 'left' }}
+              >
+                {tpl.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Provider Status */}
         <div className="providers-list">
           <h3>Aktywni dostawcy:</h3>
