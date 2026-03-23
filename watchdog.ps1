@@ -221,7 +221,7 @@ while ($true) {
         # === Named tunnels (analytics.mybonzo.com itp.) ===
         foreach ($nt in $NamedTunnels) {
             $running = Get-CimInstance Win32_Process -Filter "Name='cloudflared.exe'" -ErrorAction SilentlyContinue |
-                       Where-Object { $_.CommandLine -like "*tunnel run*$($nt.Name)*" }
+            Where-Object { $_.CommandLine -like "*tunnel run*$($nt.Name)*" }
             if (-not $running) {
                 $problems++
                 $logOut = Join-Path $LogDir "tunnel_$($nt.Name).log"

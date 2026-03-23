@@ -91,8 +91,8 @@ function createWindow() {
     }
 
     const csp = isDev
-      ? "default-src 'self' 'unsafe-inline' 'unsafe-eval' ws://localhost:* http://localhost:*; img-src 'self' data: https:; connect-src 'self' ws://localhost:* http://localhost:* https:; frame-src *;"
-      : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; frame-src *;";
+      ? "default-src 'self' 'unsafe-inline' 'unsafe-eval' ws://localhost:* http://localhost:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://analytics.mybonzo.com https://plausible.mybonzo.com; img-src 'self' data: https:; connect-src 'self' ws://localhost:* http://localhost:* https:; frame-src *;"
+      : "default-src 'self'; script-src 'self' https://analytics.mybonzo.com https://plausible.mybonzo.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; frame-src *;";
 
     callback({
       responseHeaders: {

@@ -8,13 +8,40 @@ function str(v: unknown): string {
   return typeof v === 'string' ? v : '';
 }
 
-/** Run JS in the active tab's webContents and return result */
+/** Run JS in the active tab's webContents and return result.
+ *  Uses mainWindow.webContents to run wrapper code in the React renderer
+ *  which then calls webview.executeJavaScript() inside the loaded page.
+ */
 async function runInActiveTab(ctx: MCPContext, code: string): Promise<unknown> {
-  const bm = ctx.browserManager;
-  if (!bm) throw new Error('browserManager unavailable');
-  const tab = bm.getActiveTab() as any;
-  if (!tab?.webContents) throw new Error('No active tab with webContents');
-  return tab.webContents.executeJavaScript(code);
+  const win = ctx.mainWindow;
+  if (!win || win.isDestroyed()) throw new Error('Main window not available');
+
+  // Escape the user script for embedding in a string literal
+  const escaped = JSON.stringify(code);
+
+  // Run inside the renderer — the renderer has access to the <webview> DOM element
+  const wrapperCode = `
+    (async () => {
+      const wv = document.querySelector('webview');
+      if (!wv) return JSON.stringify({ __error: 'No webview found in renderer' });
+      try {
+        const result = await wv.executeJavaScript(${escaped});
+        return JSON.stringify({ __result: result });
+      } catch (e) {
+        return JSON.stringify({ __error: e && e.message ? e.message : String(e) });
+      }
+    })()
+  `;
+
+  const jsonStr = await win.webContents.executeJavaScript(wrapperCode) as string;
+  let parsed: { __result?: unknown; __error?: string };
+  try {
+    parsed = JSON.parse(jsonStr);
+  } catch {
+    throw new Error('Failed to parse script result: ' + jsonStr);
+  }
+  if (parsed.__error) throw new Error(parsed.__error);
+  return parsed.__result;
 }
 
 export function createExtractionTools(): MCPTool[] {
