@@ -350,7 +350,7 @@ export function BrowserUI() {
           return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 14px', background: '#16213e', borderBottom: '1px solid #0f3460', overflowX: 'auto' }}>
               {navBtn('https://zenbrowsers.org/',                        '🌐 ZenBrowsers.org',    'ZENO Browser – strona oficjalna')}
-              {navBtn('https://zeno-browser-web.pages.dev/ai-hub/',      '🤖 AI Org Hub',         'AI Hub — centrum narzędzi AI')}
+              {navBtn('https://zenbrowsers.org/ai-hub/',                 '🤖 AI Org Hub',         'AI Hub — centrum narzędzi AI')}
               {navBtn('https://jimbo77.com',                             '👤 jimbo77.com',        'Jimbo77 — strona główna')}
               {navBtn('https://jimbo77.org',                             '🔗 jimbo77.org',        'Jimbo77 — org')}
               {navBtn('https://mybonzoaiblog.com',                       '📝 MyBonzoAI Blog',     'MyBonzo AI Blog')}

@@ -382,6 +382,7 @@ const TOOL_HIGHLIGHTS = [
 
 const QUICK_LINKS = [
   { label: 'GitHub', url: 'https://github.com' },
+  { label: 'AI Hub', url: 'https://zenbrowsers.org/ai-hub/' },
   { label: 'ChatGPT', url: 'https://chat.openai.com' },
   { label: 'Claude', url: 'https://claude.ai' },
   { label: 'Stack Overflow', url: 'https://stackoverflow.com' },

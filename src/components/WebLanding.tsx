@@ -909,6 +909,16 @@ export function WebLanding() {
                 </a>
               </div>
             </section>
+
+            <section className="card">
+              <h2>🤖 AI Hub</h2>
+              <p className="muted">Szybki dostęp do dedykowanego AI Hub na stronie głównej</p>
+              <div className="downloads">
+                <a href="/ai-hub/" target="_blank" rel="noopener noreferrer" className="btn-primary">
+                  Otwórz AI Hub
+                </a>
+              </div>
+            </section>
           </div>
         </div>
       )}
