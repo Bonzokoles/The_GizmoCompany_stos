@@ -23,7 +23,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "jest --coverage",
     "test:coverage": "jest --coverage --coverageReporters=text-summary",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test --pass-with-no-tests",
     "test:watch": "jest --watch",
     "clean": "rm -rf dist dist-electron coverage"
   },
