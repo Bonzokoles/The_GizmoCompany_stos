@@ -1,0 +1,311 @@
+@echo off
+chcp 65001 >nul 2>&1
+title ZENO HUB - Browser + MyBonzo + Watchdog + Tunnel
+color 0A
+
+echo.
+echo  ======================================================
+echo   ZENO HUB - Full Stack Launcher v2.0
+echo   Browser + MyBonzo + Podman + Watchdog + Tunnel
+echo  ======================================================
+echo   %date% %time%
+echo  ======================================================
+echo.
+
+cd /d "%~dp0"
+set "ZENO_DIR=%~dp0"
+set "MYBONZO_DIR=U:\WWW_MyBonzo_com"
+
+:: Node (NVM4W) w PATH
+set "PATH=C:\nvm4w\nodejs;C:\ProgramData\nvm;%PATH%"
+
+:: Katalog na logi
+if not exist "logs" mkdir logs
+
+:: =============================================
+:: PHASE 1: PODMAN MACHINE
+:: =============================================
+echo [PHASE 1/8] Podman Machine...
+podman machine inspect podman-machine-default >nul 2>&1
+if errorlevel 1 (
+    echo   [BLAD] Maszyna Podman nie istnieje!
+    echo   Uruchom: podman machine init
+    pause
+    exit /b 1
+)
+
+for /f "tokens=*" %%a in ('podman machine inspect podman-machine-default --format "{{.State}}" 2^>nul') do set MACHINE_STATE=%%a
+if /i not "%MACHINE_STATE%"=="running" (
+    echo   Uruchamianie maszyny Podman...
+    podman machine start podman-machine-default
+    if errorlevel 1 (
+        echo   [BLAD] Nie mozna uruchomic maszyny Podman!
+        pause
+        exit /b 1
+    )
+    timeout /t 5 /nobreak >nul
+)
+echo   [OK] Maszyna Podman dziala
+echo.
+
+:: =============================================
+:: PHASE 2: SIECI PODMAN
+:: =============================================
+echo [PHASE 2/8] Sieci Podman...
+podman network exists zeno-net 2>nul
+if errorlevel 1 (
+    echo   Tworzenie zeno-net...
+    podman network create zeno-net >nul 2>&1
+)
+podman network exists plausible-net 2>nul
+if errorlevel 1 (
+    echo   Tworzenie plausible-net...
+    podman network create plausible-net >nul 2>&1
+)
+echo   [OK] Sieci gotowe
+echo.
+
+:: =============================================
+:: PHASE 3: KONTENERY (10 serwisow)
+:: =============================================
+echo [PHASE 3/8] Kontenery (10 serwisow)...
+
+echo   [01/10] zeno-umami-db (PostgreSQL)
+podman start zeno-umami-db >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name zeno-umami-db ^
+        -e POSTGRES_DB=umami -e POSTGRES_USER=umami -e POSTGRES_PASSWORD=umami ^
+        -v umami-db-data:/var/lib/postgresql/data ^
+        --restart unless-stopped ^
+        docker.io/library/postgres:16-alpine >nul 2>&1
+)
+
+echo   [02/10] zeno-searxng-redis (Valkey)
+podman start zeno-searxng-redis >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name zeno-searxng-redis ^
+        --network zeno-net ^
+        -v searxng-redis-data:/data ^
+        --restart unless-stopped ^
+        docker.io/valkey/valkey:8-alpine ^
+        valkey-server --save 30 1 --loglevel warning >nul 2>&1
+)
+
+timeout /t 3 /nobreak >nul
+
+echo   [03/10] zeno-umami (Analytics)
+podman start zeno-umami >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name zeno-umami ^
+        -p 5183:3000 ^
+        -e DATABASE_URL=postgresql://umami:umami@zeno-umami-db:5432/umami ^
+        -e DISABLE_TELEMETRY=1 ^
+        --restart unless-stopped ^
+        ghcr.io/umami-software/umami:postgresql-latest >nul 2>&1
+)
+
+echo   [04/10] zeno-meilisearch
+podman start zeno-meilisearch >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name zeno-meilisearch ^
+        -p 7700:7700 ^
+        -e MEILI_ENV=development -e MEILI_NO_ANALYTICS=true ^
+        -e MEILI_MASTER_KEY=zeno-meili-master-2026 ^
+        -v meilisearch-data:/meili_data ^
+        --restart unless-stopped ^
+        docker.io/getmeili/meilisearch:v1.12 >nul 2>&1
+)
+
+echo   [05/10] zeno-websurfx (Meta Search)
+podman start zeno-websurfx >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name zeno-websurfx ^
+        --network zeno-net ^
+        -p 8888:8080 ^
+        -v "%ZENO_DIR%config\websurfx:/etc/xdg/websurfx:Z" ^
+        docker.io/neonmmd/websurfx:latest >nul 2>&1
+)
+podman network connect zeno-net zeno-websurfx >nul 2>&1
+
+echo   [06/10] zeno-sist2 (Document Indexer)
+podman start zeno-sist2 >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name zeno-sist2 ^
+        -p 4090:4090 -p 8085:8080 ^
+        -e SIST2_ADMIN=1 ^
+        --entrypoint python3 ^
+        docker.io/sist2app/sist2:x64-linux ^
+        /root/sist2-admin/sist2_admin/app.py >nul 2>&1
+)
+
+echo   [07/10] plausible-db (PostgreSQL)
+podman start plausible-db >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name plausible-db --network plausible-net ^
+        -e POSTGRES_DB=plausible -e POSTGRES_USER=plausible -e POSTGRES_PASSWORD=plausible ^
+        -v plausible-db-data:/var/lib/postgresql/data ^
+        --restart unless-stopped ^
+        docker.io/library/postgres:16-alpine >nul 2>&1
+)
+
+echo   [08/10] plausible-events-db (ClickHouse)
+podman start plausible-events-db >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name plausible-events-db --network plausible-net ^
+        -v plausible-events-data:/var/lib/clickhouse ^
+        -v "%ZENO_DIR%plausible-ce\clickhouse\clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:Z" ^
+        -v "%ZENO_DIR%plausible-ce\clickhouse\clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:Z" ^
+        --restart unless-stopped ^
+        docker.io/clickhouse/clickhouse-server:24.3.3.102-alpine >nul 2>&1
+)
+
+timeout /t 3 /nobreak >nul
+
+echo   [09/10] plausible (Plausible CE)
+podman start plausible >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name plausible --network plausible-net ^
+        -p 8100:8000 ^
+        -e BASE_URL=http://localhost:8100 ^
+        -e SECRET_KEY_BASE="fSDMf2LxaQYA22uiZSA3ZpxV3llPA2cwu7c1ZF9gqmOvElsOHXOFwXuHS9+tTZGa" ^
+        -e DATABASE_URL="postgres://plausible:plausible@plausible-db:5432/plausible" ^
+        -e CLICKHOUSE_DATABASE_URL="http://plausible-events-db:8123/plausible_events_db" ^
+        -e DISABLE_REGISTRATION=false ^
+        -e HTTP_PORT=8000 ^
+        --restart unless-stopped ^
+        ghcr.io/plausible/community-edition:v3.2.0 >nul 2>&1
+)
+
+echo   [10/10] zeno-superset (Apache Superset BI)
+podman start zeno-superset >nul 2>&1
+if errorlevel 1 echo          [INFO] Superset niedostepny - brak kontenera
+
+echo.
+echo   Status kontenerow:
+timeout /t 2 /nobreak >nul
+podman ps --filter "name=zeno-" --format "    {{.Names}} -> {{.Status}}"
+podman ps --filter "name=plausible" --format "    {{.Names}} -> {{.Status}}"
+echo.
+
+:: =============================================
+:: PHASE 4: NODE.JS + ZENO BUILD
+:: =============================================
+echo [PHASE 4/8] Node.js + ZENO Build...
+for /f "tokens=*" %%v in ('node --version 2^>nul') do set NODE_VER=%%v
+if not defined NODE_VER (
+    echo   [BLAD] Node.js nie jest zainstalowany!
+    pause
+    exit /b 1
+)
+echo   Node.js %NODE_VER%
+
+if not exist "node_modules" (
+    echo   Instalowanie zaleznosci ZENO...
+    call npm install || (
+        echo   [BLAD] npm install ZENO nie powiodlo sie!
+        pause
+        exit /b 1
+    )
+)
+
+echo   Kompilacja Electron...
+call npx tsc -p tsconfig.electron.json || (
+    echo   [BLAD] Kompilacja Electron nie powiodla sie!
+    pause
+    exit /b 1
+)
+echo   [OK] ZENO Build gotowy
+echo.
+
+:: =============================================
+:: PHASE 5: MYBONZO ASTRO DEV (background)
+:: =============================================
+echo [PHASE 5/8] MyBonzo Astro Dev Server...
+if exist "%MYBONZO_DIR%\package.json" (
+    start "MyBonzo-Astro" /MIN cmd /c "cd /d %MYBONZO_DIR% && npm run dev"
+    echo   [OK] MyBonzo uruchomiony -^> http://localhost:4321
+) else (
+    echo   [SKIP] MyBonzo nie znaleziony w %MYBONZO_DIR%
+)
+echo.
+
+:: =============================================
+:: PHASE 6: CLOUDFLARED TUNNELS (telefon)
+:: =============================================
+echo [PHASE 6/8] Cloudflared Web Tunnels (dostep z telefonu)...
+where cloudflared >nul 2>&1
+if errorlevel 1 (
+    echo   [SKIP] cloudflared nie zainstalowany
+    goto :skip_tunnels
+)
+
+:: Tunel ZENO Browser (Vite :5173)
+start "Tunnel-ZENO" /MIN cmd /c "cloudflared tunnel --url http://localhost:5173 >logs\tunnel_zeno.log 2>&1"
+
+:: Tunel MyBonzo (Astro :4321)
+start "Tunnel-MyBonzo" /MIN cmd /c "cloudflared tunnel --url http://localhost:4321 >logs\tunnel_mybonzo.log 2>&1"
+
+echo   [OK] Tunele uruchomione
+echo   [INFO] Czekam na URL tuneli (8s)...
+timeout /t 8 /nobreak >nul
+
+:: Pokaz URL tuneli
+for /f "tokens=*" %%u in ('findstr /R "trycloudflare.com" logs\tunnel_zeno.log 2^>nul') do (
+    echo   ZENO:    %%u
+)
+for /f "tokens=*" %%u in ('findstr /R "trycloudflare.com" logs\tunnel_mybonzo.log 2^>nul') do (
+    echo   MyBonzo: %%u
+)
+echo   [INFO] Pelne URL w logs\tunnel_*.log
+echo.
+
+:skip_tunnels
+
+:: =============================================
+:: PHASE 7: WATCHDOG (background)
+:: =============================================
+echo [PHASE 7/8] Watchdog...
+if exist "%ZENO_DIR%watchdog.ps1" (
+    start "ZENO-Watchdog" /MIN powershell -ExecutionPolicy Bypass -NoProfile -File "%ZENO_DIR%watchdog.ps1"
+    echo   [OK] Watchdog aktywny (co 30s, log: logs\watchdog.log)
+) else (
+    echo   [WARN] watchdog.ps1 nie znaleziony!
+)
+echo.
+
+:: =============================================
+:: STATUS
+:: =============================================
+echo  ======================================================
+echo   ZENO HUB - GOTOWY
+echo  ======================================================
+echo.
+echo   Lokalne serwisy:
+echo     ZENO Browser   http://localhost:5173
+echo     MyBonzo        http://localhost:4321
+echo     Websurfx       http://localhost:8888
+echo     Meilisearch    http://localhost:7700
+echo     sist2          http://localhost:8085
+echo     Umami          http://localhost:5183
+echo     Plausible      http://localhost:8100
+echo     Superset       http://localhost:8088
+echo.
+echo   Tunele (telefon):
+echo     URL w: logs\tunnel_zeno.log
+echo            logs\tunnel_mybonzo.log
+echo.
+echo   Watchdog: aktywny (co 30s)
+echo   Logi:     logs\watchdog.log
+echo.
+echo   Zamkniecie: Ctrl+C lub zamknij to okno
+echo  ======================================================
+echo.
+
+:: =============================================
+:: PHASE 8: ZENO BROWSER (foreground)
+:: =============================================
+echo [PHASE 8/8] Uruchamianie ZENO Browser...
+echo       Vite:        http://localhost:5173
+echo       Electron:    auto-launch
+echo.
+call npm run dev

@@ -158,4 +158,4 @@ export function CloudflareTunnelPanel({ onClose }: CloudflareTunnelPanelProps) {
       </div>
     </div>
   );
-};
+}
