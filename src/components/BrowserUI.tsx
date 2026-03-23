@@ -336,22 +336,20 @@ export function BrowserUI() {
         </header>
 
         {/* Quick Nav Bar — skróty między stronami */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 12px', background: '#16213e', borderBottom: '1px solid #0f3460' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '5px 14px', background: '#16213e', borderBottom: '1px solid #0f3460' }}>
           <button
-            className="btn-icon"
             onClick={() => handleNavigate('https://zenbrowsers.org/')}
             title="ZENO Browser – strona oficjalna"
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 14px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', transition: 'background 0.15s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 16px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', lineHeight: '1.4', transition: 'background 0.15s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             🌐 ZenBrowser.org
           </button>
           <button
-            className="btn-icon"
             onClick={() => handleNavigate('https://zeno-browser-web.pages.dev/ai-hub/')}
             title="AI Hub Tools"
-            style={{ display: 'flex', alignItems: 'center', gap: '5px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 14px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', transition: 'background 0.15s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'transparent', border: '1px solid #0f3460', color: '#64ffda', cursor: 'pointer', padding: '4px 16px', fontSize: '13px', borderRadius: '4px', whiteSpace: 'nowrap', lineHeight: '1.4', transition: 'background 0.15s' }}
             onMouseEnter={e => (e.currentTarget.style.background = '#0f3460')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
