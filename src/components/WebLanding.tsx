@@ -7,7 +7,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 /* ─── Types ──────────────────────────────────────── */
 
-type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub';
+type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub' | 'biztools';
 type Status = 'online' | 'offline' | 'checking' | 'unknown';
 type AnalyticsSource = 'local' | 'mybonzo';
 
@@ -33,6 +33,7 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'render', label: 'Render', icon: '🌐' },
   { id: 'queues', label: 'Queues', icon: '📨' },
   { id: 'aihub', label: 'AI Hub', icon: '🤖' },
+  { id: 'biztools', label: 'BizTools', icon: '💹' },
 ];
 
 const API_SERVICES: ApiStatus[] = [
@@ -60,6 +61,74 @@ const PIPELINES_LIST = [
 const ANALYTICS_SOURCES: { id: AnalyticsSource; label: string; endpoint: string }[] = [
   { id: 'mybonzo', label: 'mybonzo.com', endpoint: 'https://mybonzo.com/api/analytics/overview' },
   { id: 'local', label: 'ZENO local', endpoint: '/api/analytics/overview' },
+];
+
+/* ─── BizTools Catalog ───────────────────────────── */
+
+interface BizTool { name: string; url: string; category: string; desc: string; free?: boolean; open?: boolean }
+
+const BIZ_CATEGORIES = ['all', 'trading', 'analytics', 'accounting', 'crm', 'erp', 'scraping', 'automation', 'api'];
+
+const BIZTOOLS_CATALOG: BizTool[] = [
+  // Trading & Finance
+  { name: 'TradingView', url: 'https://tradingview.com', category: 'trading', desc: 'Wykresy giełdowe i platforma tradingowa', free: true },
+  { name: 'OpenBB Terminal', url: 'https://openbb.co', category: 'trading', desc: 'Open-source alternatywa dla Bloomberg Terminal', free: true, open: true },
+  { name: 'Finviz', url: 'https://finviz.com', category: 'trading', desc: 'Screener akcji i wizualizacja danych fin.', free: true },
+  { name: 'Yahoo Finance', url: 'https://finance.yahoo.com', category: 'trading', desc: 'Wiadomości i dane finansowe', free: true },
+  { name: 'Seeking Alpha', url: 'https://seekingalpha.com', category: 'trading', desc: 'Analizy inwestycyjne i raporty spółek', free: false },
+  { name: 'Macrotrends', url: 'https://macrotrends.net', category: 'trading', desc: 'Długoterminowe wykresy makroekonomiczne', free: true },
+  { name: 'SimplyWall.st', url: 'https://simplywall.st', category: 'trading', desc: 'Analiza fundamentalna spółek', free: false },
+  // Analytics & BI
+  { name: 'Metabase', url: 'https://metabase.com', category: 'analytics', desc: 'Open-source narzędzie BI i dashboardy SQL', free: true, open: true },
+  { name: 'Apache Superset', url: 'https://superset.apache.org', category: 'analytics', desc: 'Eksploracja i wizualizacja danych', free: true, open: true },
+  { name: 'Grafana', url: 'https://grafana.com', category: 'analytics', desc: 'Dashboardy metryk, monitorowania i alertów', free: true, open: true },
+  { name: 'Redash', url: 'https://redash.io', category: 'analytics', desc: 'Zapytania i wizualizacja danych z SQL', free: true, open: true },
+  { name: 'Lightdash', url: 'https://lightdash.com', category: 'analytics', desc: 'BI dla danych dbt/SQL', free: true, open: true },
+  { name: 'Evidence', url: 'https://evidence.dev', category: 'analytics', desc: 'BI jako kod — Markdown + SQL', free: true, open: true },
+  { name: 'Plausible Analytics', url: 'https://plausible.io', category: 'analytics', desc: 'Prywatna analityka webowa (GDPR)', free: false, open: true },
+  { name: 'Umami', url: 'https://umami.is', category: 'analytics', desc: 'Self-hosted analityka webowa', free: true, open: true },
+  // Accounting
+  { name: 'Wave', url: 'https://waveapps.com', category: 'accounting', desc: 'Bezpłatna księgowość dla małych firm', free: true },
+  { name: 'GNUCash', url: 'https://gnucash.org', category: 'accounting', desc: 'Open-source program finansowo-księgowy', free: true, open: true },
+  { name: 'Invoice Ninja', url: 'https://invoiceninja.com', category: 'accounting', desc: 'Fakturowanie i zarządzanie płatnościami', free: true, open: true },
+  { name: 'Odoo Accounting', url: 'https://odoo.com/app/accounting', category: 'accounting', desc: 'Moduł księgowy pakietu ERP Odoo', free: true, open: true },
+  { name: 'Beancount', url: 'https://beancount.github.io', category: 'accounting', desc: 'Podwójna księgowość w plikach tekstowych', free: true, open: true },
+  // CRM
+  { name: 'SuiteCRM', url: 'https://suitecrm.com', category: 'crm', desc: 'Open-source CRM klasy enterprise', free: true, open: true },
+  { name: 'HubSpot CRM', url: 'https://hubspot.com/crm', category: 'crm', desc: 'CRM z marketing automation (free tier)', free: true },
+  { name: 'Mautic', url: 'https://mautic.org', category: 'crm', desc: 'Open-source marketing automation', free: true, open: true },
+  { name: 'Twenty CRM', url: 'https://twenty.com', category: 'crm', desc: 'Nowoczesny open-source CRM', free: true, open: true },
+  { name: 'Attio', url: 'https://attio.com', category: 'crm', desc: 'CRM oparty na danych (nowoczesny)', free: false },
+  // ERP
+  { name: 'ERPNext', url: 'https://erpnext.com', category: 'erp', desc: 'Open-source ERP: finanse, HR, magazyn', free: true, open: true },
+  { name: 'Odoo Community', url: 'https://odoo.com', category: 'erp', desc: 'Kompleksowy pakiet ERP + CRM', free: true, open: true },
+  { name: 'Dolibarr', url: 'https://dolibarr.org', category: 'erp', desc: 'ERP/CRM dla małych i średnich firm', free: true, open: true },
+  { name: 'Akaunting', url: 'https://akaunting.com', category: 'erp', desc: 'Open-source platforma finansowo-biznesowa', free: true, open: true },
+  // Web Scraping
+  { name: 'Firecrawl', url: 'https://firecrawl.dev', category: 'scraping', desc: 'Scraping stron do Markdown — idealne dla AI', free: true },
+  { name: 'Jina AI Reader', url: 'https://r.jina.ai', category: 'scraping', desc: 'Konwersja dowolnej strony do czytelnego tekstu', free: true },
+  { name: 'Tavily', url: 'https://tavily.com', category: 'scraping', desc: 'Wyszukiwarka zaprojektowana dla agentów AI', free: true },
+  { name: 'Apify', url: 'https://apify.com', category: 'scraping', desc: 'Platforma web scraping i automatyzacji danych', free: true },
+  { name: 'Bright Data', url: 'https://brightdata.com', category: 'scraping', desc: 'Infrastruktura proxy i scraping danych', free: false },
+  { name: 'Crawl4AI', url: 'https://crawl4ai.com', category: 'scraping', desc: 'Open-source scraper do projektów AI', free: true, open: true },
+  { name: 'Browserless', url: 'https://browserless.io', category: 'scraping', desc: 'Headless Chrome jako API (skalowalny)', free: false },
+  { name: 'SerpAPI', url: 'https://serpapi.com', category: 'scraping', desc: 'API wyników wyszukiwarek Google/Bing', free: false },
+  // Automation
+  { name: 'n8n', url: 'https://n8n.io', category: 'automation', desc: 'Open-source workflow automation (self-hosted)', free: true, open: true },
+  { name: 'Node-RED', url: 'https://nodered.org', category: 'automation', desc: 'Wizualne programowanie przepływów danych IoT/API', free: true, open: true },
+  { name: 'Windmill', url: 'https://windmill.dev', category: 'automation', desc: 'Platforma automatyzacji dla deweloperów', free: true, open: true },
+  { name: 'Activepieces', url: 'https://activepieces.com', category: 'automation', desc: 'Open-source alternatywa dla Zapier', free: true, open: true },
+  { name: 'Temporal', url: 'https://temporal.io', category: 'automation', desc: 'Niezawodna orkiestracja workflow (durable exec)', free: true, open: true },
+  { name: 'Prefect', url: 'https://prefect.io', category: 'automation', desc: 'Orkiestracja pipeline\'ów danych i AI', free: true, open: true },
+  // APIs — Finance & News
+  { name: 'Alpha Vantage', url: 'https://alphavantage.co', category: 'api', desc: 'API cen akcji, forex i kryptowalut', free: true },
+  { name: 'Polygon.io', url: 'https://polygon.io', category: 'api', desc: 'Dane rynkowe w czasie rzeczywistym — US markets', free: false },
+  { name: 'Financial Modeling Prep', url: 'https://financialmodelingprep.com', category: 'api', desc: 'API danych spółek: bilanse, rachunki wyników', free: true },
+  { name: 'NewsAPI', url: 'https://newsapi.org', category: 'api', desc: 'API wiadomości z 80 000+ źródeł', free: true },
+  { name: 'FRED API', url: 'https://fred.stlouisfed.org/docs/api/fred', category: 'api', desc: 'Dane makroekonomiczne US Federal Reserve', free: true },
+  { name: 'World Bank API', url: 'https://data.worldbank.org/developers', category: 'api', desc: 'Dane makroekonomiczne Banku Światowego', free: true },
+  { name: 'CoinGecko', url: 'https://coingecko.com/api', category: 'api', desc: 'API danych kryptowalut (spot + DeFi)', free: true },
+  { name: 'OpenExchangeRates', url: 'https://openexchangerates.org', category: 'api', desc: 'Kursy walut i dane forex', free: true },
 ];
 
 /* ─── Helpers ────────────────────────────────────── */
@@ -195,6 +264,18 @@ export function WebLanding() {
   const [aiHubLoading, setAiHubLoading] = useState(false);
   const [aiHubHistory, setAiHubHistory] = useState<{ role: string; text: string; provider: string; tokens?: number }[]>([]);
   const [aiProvidersStatus, setAiProvidersStatus] = useState<{ name: string; status: string }[]>([]);
+
+  // BizTools
+  const [bizSearch, setBizSearch] = useState('');
+  const [bizCategory, setBizCategory] = useState('all');
+  const [tavilyKey, setTavilyKey] = useState(() => {
+    try { return localStorage.getItem('zeno_tavily_key') || ''; } catch { return ''; }
+  });
+  const [tavilyQuery, setTavilyQuery] = useState('business financial analytics tools open source 2025');
+  const [tavilyResults, setTavilyResults] = useState<any[]>([]);
+  const [tavilyLoading, setTavilyLoading] = useState(false);
+  const [tavilyError, setTavilyError] = useState('');
+  const [tavilyAutoRan, setTavilyAutoRan] = useState(false);
 
   // AI Chatbox Helper
   const [chatOpen, setChatOpen] = useState(false);
@@ -607,6 +688,8 @@ export function WebLanding() {
 
 13. AI HUB — Centrum AI. Czat z różnymi providerami (DeepSeek, OpenRouter, Anthropic, Workers AI), historia rozmów, generowanie treści przez kolejki, szybkie akcje AI.
 
+14. BIZTOOLS 💹 — Biblioteka narzędzi biznesowych i finansowych. Statyczny katalog 50+ narzędzi (trading, analytics, accounting, CRM, ERP, scraping, automation, API). Wyszukiwanie w katalogu + zakładka Tavily Search do wyszukiwania nowych narzędzi w sieci. Aby użyć Tavily: wpisz swój klucz API Tavily, wpisz zapytanie, kliknij Szukaj.
+
 Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
 
   const handleChatSend = useCallback(async () => {
@@ -630,6 +713,29 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
     setChatLoading(false);
   }, [chatInput, chatLoading, chatMessages]);
 
+  const handleTavilySearch = useCallback(async (queryOverride?: string) => {
+    const q = queryOverride || tavilyQuery;
+    if (!q.trim() || !tavilyKey.trim()) return;
+    setTavilyLoading(true); setTavilyError(''); setTavilyResults([]);
+    try {
+      const res = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: tavilyKey, query: q, max_results: 10, search_depth: 'advanced', include_answer: true }),
+      });
+      const data = await res.json();
+      if (data.results) {
+        setTavilyResults(data.results);
+        if (data.answer) setTavilyResults((prev) => [{ title: '🤖 AI Summary', url: '', content: data.answer, score: 1, _summary: true }, ...prev]);
+      } else {
+        setTavilyError(data.error || data.message || 'Brak wyników');
+      }
+    } catch (e: any) {
+      setTavilyError(e.message || 'Błąd połączenia z Tavily');
+    }
+    setTavilyLoading(false);
+  }, [tavilyQuery, tavilyKey]);
+
   /* ─── Tab Load Effects ─── */
   useEffect(() => {
     if (tab === 'workers' && workers.length === 0) loadWorkers();
@@ -640,6 +746,10 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
     if (tab === 'databases' && databases.length === 0) loadDatabases();
     if (tab === 'queues') { loadConsumerHealth(); loadRecentResults(); }
     if (tab === 'aihub') loadAiProviders();
+    if (tab === 'biztools' && !tavilyAutoRan && tavilyKey) {
+      setTavilyAutoRan(true);
+      handleTavilySearch('business financial analytics tools open source AI 2025');
+    }
   }, [tab]);
 
   /* ─── Derived ─── */
@@ -1959,6 +2069,209 @@ Odpowiadaj krótko i konkretnie. Podawaj dokładne instrukcje krok po kroku.`;
               <div className="status-row"><span className="dot online" /><span className="name">Image Generation</span><code>/api/images/generate</code></div>
               <div className="status-row"><span className="dot online" /><span className="name">Browser AI Extract</span><code>/api/render/json</code></div>
               <div className="status-row"><span className="dot online" /><span className="name">Queue Consumer (AI)</span><code>zeno-queue-consumer.workers.dev</code></div>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* ─── BIZTOOLS TAB ─── */}
+      {tab === 'biztools' && (
+        <div className="tab-content">
+          <div className="tab-header">
+            <h2>💹 BizTools — Biblioteka Narzędzi Biznesowych</h2>
+            <p className="muted" style={{ marginBottom: 0 }}>Katalog {BIZTOOLS_CATALOG.length}+ narzędzi: trading, analytics, accounting, CRM, ERP, scraping, automation, APIs</p>
+          </div>
+
+          {/* ── Static Catalog ── */}
+          <section className="card">
+            <h3>📚 Katalog narzędzi</h3>
+            <div className="form-grid" style={{ marginBottom: 16 }}>
+              <div className="form-group">
+                <input
+                  type="text"
+                  value={bizSearch}
+                  onChange={(e) => setBizSearch(e.target.value)}
+                  placeholder="Szukaj w katalogu..."
+                  style={{ width: '100%' }}
+                />
+              </div>
+              <div className="form-group">
+                <select value={bizCategory} onChange={(e) => setBizCategory(e.target.value)}>
+                  {BIZ_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c === 'all' ? 'Wszystkie kategorie' : c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {(() => {
+              const filtered = BIZTOOLS_CATALOG.filter((t) => {
+                const matchCat = bizCategory === 'all' || t.category === bizCategory;
+                const q = bizSearch.toLowerCase();
+                const matchQ = !q || t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
+                return matchCat && matchQ;
+              });
+              return (
+                <>
+                  <p className="muted" style={{ marginBottom: 12 }}>{filtered.length} narzędzi</p>
+                  <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
+                    {filtered.map((tool) => (
+                      <a
+                        key={tool.name}
+                        href={tool.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        <div className="stat-card" style={{ cursor: 'pointer', userSelect: 'none', padding: '14px 16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                            <strong style={{ fontSize: 14 }}>{tool.name}</strong>
+                            <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
+                              {tool.free && <span style={{ fontSize: 10, background: '#4ade8033', color: '#4ade80', borderRadius: 4, padding: '1px 5px' }}>FREE</span>}
+                              {tool.open && <span style={{ fontSize: 10, background: '#60a5fa33', color: '#60a5fa', borderRadius: 4, padding: '1px 5px' }}>OSS</span>}
+                            </div>
+                          </div>
+                          <p style={{ fontSize: 12, opacity: 0.7, margin: '4px 0 6px', lineHeight: 1.4 }}>{tool.desc}</p>
+                          <code style={{ fontSize: 11, opacity: 0.5 }}>{tool.category}</code>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </>
+              );
+            })()}
+          </section>
+
+          {/* ── Tavily Web Search ── */}
+          <section className="card">
+            <h3>🔍 Tavily Search — Wyszukaj nowe narzędzia w sieci</h3>
+            <p className="muted" style={{ marginBottom: 12 }}>
+              Tavily to wyszukiwarka dla agentów AI — zwraca aktualne, ustrukturyzowane wyniki.
+              {!tavilyKey && <span style={{ color: '#fbbf24' }}> ⚠️ Potrzebny klucz API — <a href="https://tavily.com" target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa' }}>uzyskaj bezpłatnie na tavily.com</a></span>}
+            </p>
+            <div className="form-grid">
+              <div className="form-group full-width">
+                <label>🔑 Klucz API Tavily</label>
+                <input
+                  type="password"
+                  value={tavilyKey}
+                  onChange={(e) => {
+                    setTavilyKey(e.target.value);
+                    try { localStorage.setItem('zeno_tavily_key', e.target.value); } catch { /* noop */ }
+                  }}
+                  placeholder="tvly-xxxxxxxxxxxxxxxx"
+                  style={{ fontFamily: 'monospace' }}
+                />
+              </div>
+              <div className="form-group full-width">
+                <label>Zapytanie</label>
+                <input
+                  type="text"
+                  value={tavilyQuery}
+                  onChange={(e) => setTavilyQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTavilySearch()}
+                  placeholder="np. open source BI tools for small business 2025"
+                />
+              </div>
+              <div className="form-group">
+                <button
+                  className="btn-primary"
+                  onClick={() => handleTavilySearch()}
+                  disabled={tavilyLoading || !tavilyKey.trim() || !tavilyQuery.trim()}
+                >
+                  {tavilyLoading ? '🔍 Szukam...' : '🔍 Szukaj przez Tavily'}
+                </button>
+              </div>
+              <div className="form-group" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {['business analytics tools', 'open source accounting software', 'financial data API 2025', 'AI scraping tools', 'CRM open source'].map((q) => (
+                  <button
+                    key={q}
+                    className="btn-sm"
+                    onClick={() => { setTavilyQuery(q); handleTavilySearch(q); }}
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {tavilyError && (
+              <p style={{ color: '#f87171', marginTop: 12 }}>❌ {tavilyError}</p>
+            )}
+
+            {tavilyResults.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <h4 style={{ marginBottom: 12 }}>📋 Wyniki ({tavilyResults.filter((r) => !r._summary).length} stron)</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {tavilyResults.map((r, i) => (
+                    <div
+                      key={i}
+                      className="stat-card"
+                      style={{
+                        padding: '14px 16px',
+                        background: r._summary ? 'rgba(96,165,250,0.08)' : undefined,
+                        borderLeft: r._summary ? '3px solid #60a5fa' : '3px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                        <strong style={{ fontSize: 14 }}>{r.title || 'Wynik'}</strong>
+                        {r.score && !r._summary && (
+                          <span style={{ fontSize: 11, opacity: 0.5, flexShrink: 0 }}>
+                            {Math.round(r.score * 100)}% trafność
+                          </span>
+                        )}
+                      </div>
+                      {r.url && (
+                        <a href={r.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: '#60a5fa', display: 'block', marginTop: 4, wordBreak: 'break-all' }}>
+                          {r.url}
+                        </a>
+                      )}
+                      <p style={{ fontSize: 13, opacity: 0.8, margin: '6px 0 0', lineHeight: 1.5 }}>
+                        {r.content?.slice(0, 300)}{r.content?.length > 300 ? '...' : ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!tavilyKey && (
+              <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(251,191,36,0.08)', borderRadius: 8, border: '1px solid rgba(251,191,36,0.2)' }}>
+                <p style={{ margin: 0, fontSize: 13 }}>
+                  💡 <strong>Jak uzyskać klucz Tavily:</strong><br />
+                  1. Wejdź na <a href="https://tavily.com" target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa' }}>tavily.com</a><br />
+                  2. Zarejestruj się bezpłatnie (1000 zapytań/miesiąc)<br />
+                  3. Skopiuj klucz API i wklej powyżej<br />
+                  4. Klucz jest zapisywany lokalnie w przeglądarce
+                </p>
+              </div>
+            )}
+          </section>
+
+          {/* ── Quick Links ── */}
+          <section className="card">
+            <h3>🔗 Szybkie linki — Narzędzia finansowo-analityczne</h3>
+            <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+              {[
+                { label: '📈 TradingView', url: 'https://tradingview.com' },
+                { label: '🏦 OpenBB Terminal', url: 'https://openbb.co' },
+                { label: '📊 Metabase', url: 'https://metabase.com' },
+                { label: '📉 Apache Superset', url: 'https://superset.apache.org' },
+                { label: '🔥 Firecrawl', url: 'https://firecrawl.dev' },
+                { label: '🤖 Tavily', url: 'https://tavily.com' },
+                { label: '⚡ n8n Automation', url: 'https://n8n.io' },
+                { label: '🧮 Wave Accounting', url: 'https://waveapps.com' },
+                { label: '🏢 ERPNext', url: 'https://erpnext.com' },
+                { label: '📡 Alpha Vantage', url: 'https://alphavantage.co' },
+                { label: '🌍 FRED API', url: 'https://fred.stlouisfed.org/docs/api/fred' },
+                { label: '🪙 CoinGecko API', url: 'https://coingecko.com/api' },
+              ].map((link) => (
+                <a key={link.url} href={link.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                  <div className="stat-card" style={{ textAlign: 'center', padding: '10px 8px', cursor: 'pointer', fontSize: 13 }}>
+                    {link.label}
+                  </div>
+                </a>
+              ))}
             </div>
           </section>
         </div>

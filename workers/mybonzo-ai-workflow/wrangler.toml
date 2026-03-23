@@ -1,0 +1,85 @@
+# ═══════════════════════════════════════════════════════════════
+#  mybonzo-ai-workflow — Cloudflare Workflows Worker
+#  URL: https://mybonzo-ai-workflow.bonzokoles.workers.dev
+#  Deploy: cd workers/mybonzo-ai-workflow && npx wrangler deploy
+#
+#  Workflows:
+#    - AiChatWorkflow       → processChatTask        (AI chat + routing)
+#    - ImageGenWorkflow     → processImageGeneration  (CF AI + Replicate)
+#    - MoaPublisherWorkflow → moaPublisher            (multi-agent content)
+#    - ReplicateWorkflow    → replicateImageGen       (Replicate.com API)
+#    - ContentScheduler     → contentScheduler        (auto-publish to sites)
+# ═══════════════════════════════════════════════════════════════
+
+name = "mybonzo-ai-workflow"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── Workflows ───────────────────────────────────────────────
+[[workflows]]
+name = "ai-chat-workflow"
+binding = "AI_CHAT_WORKFLOW"
+class_name = "AiChatWorkflow"
+
+[[workflows]]
+name = "image-gen-workflow"
+binding = "IMAGE_GEN_WORKFLOW"
+class_name = "ImageGenWorkflow"
+
+[[workflows]]
+name = "moa-publisher-workflow"
+binding = "MOA_PUBLISHER_WORKFLOW"
+class_name = "MoaPublisherWorkflow"
+
+[[workflows]]
+name = "replicate-workflow"
+binding = "REPLICATE_WORKFLOW"
+class_name = "ReplicateWorkflow"
+
+[[workflows]]
+name = "content-scheduler-workflow"
+binding = "CONTENT_SCHEDULER_WORKFLOW"
+class_name = "ContentSchedulerWorkflow"
+
+# ─── Workers AI ─────────────────────────────────────────────
+[ai]
+binding = "AI"
+
+# ─── D1 Database (shared) ────────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "zeno-browser-db"
+database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
+
+# ─── R2 Bucket (media storage) ──────────────────────────────
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "mybonzo-media"
+
+# ─── Queues (feed completed tasks back) ─────────────────────
+[[queues.producers]]
+queue = "agent-tasks"
+binding = "AGENT_TASKS_QUEUE"
+
+[[queues.producers]]
+queue = "image-generation-queue"
+binding = "IMAGE_GEN_QUEUE"
+
+# ─── Env Vars ────────────────────────────────────────────────
+[vars]
+ENVIRONMENT = "development"
+CF_ACCOUNT_ID = ""
+
+# Secrets (set via CLI):
+# wrangler secret put DEEPSEEK_API_KEY
+# wrangler secret put OPENROUTER_API_KEY
+# wrangler secret put OPENAI_API_KEY
+# wrangler secret put REPLICATE_API_TOKEN
+# wrangler secret put CF_ACCOUNT_ID
+# wrangler secret put CF_API_TOKEN
+# wrangler secret put GHOST_API_URL         (np. https://mybonzoaiblog.com)
+# wrangler secret put GHOST_ADMIN_API_KEY   (format: id:secret)
+
+[env.production.vars]
+ENVIRONMENT = "production"
