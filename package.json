@@ -25,7 +25,8 @@
     "test:coverage": "jest --coverage --coverageReporters=text-summary",
     "test:e2e": "playwright test",
     "test:watch": "jest --watch",
-    "clean": "rm -rf dist dist-electron coverage"
+    "clean": "rm -rf dist dist-electron coverage",
+    "curate": "node -e \"process.env.PYTHONIOENCODING='utf-8'; const {execSync}=require('child_process'); execSync('python ../The_DEVz_HUB_of_work/knowledge_base/_LIBRARIES/tools/curate_libraries.py', {stdio:'inherit', env:process.env})\""
   },
   "dependencies": {
     "@cloudflare/tanstack-ai": "^0.1.4",

@@ -218,6 +218,48 @@ echo   [OK] ZENO Build gotowy
 echo.
 
 :: =============================================
+:: LIBRARY CURATION (background, silent)
+:: =============================================
+echo [BG] Library curation...
+start "LibCuration" /MIN cmd /c "cd /d %ZENO_DIR% && npm run curate > logs\curate.log 2>&1"
+echo   [OK] Curation uruchomiona (log: logs\curate.log)
+echo.
+
+:: =============================================
+:: LIBRARIES API (background, port 7070)
+:: =============================================
+echo [BG] LIBRARIES API (ChromaDB RAG)...
+set "LIBS_DIR=U:\The_DEVz_HUB_of_work\knowledge_base\_LIBRARIES"
+if exist "%LIBS_DIR%\venv\Scripts\python.exe" (
+    start "LibrariesAPI" /MIN cmd /c "cd /d %LIBS_DIR% && venv\Scripts\python.exe api_server.py > %ZENO_DIR%logs\libraries_api.log 2>&1"
+) else (
+    start "LibrariesAPI" /MIN cmd /c "cd /d %LIBS_DIR% && python api_server.py > %ZENO_DIR%logs\libraries_api.log 2>&1"
+)
+echo   [OK] Libraries API uruchomiona -^> http://localhost:7070  (log: logs\libraries_api.log)
+echo.
+
+:: =============================================
+:: JIMBO CHAT BACKEND (background, port 5180)
+:: =============================================
+echo [BG] JIMBO DEVz Chat Backend...
+set "JIMBO_DIR=U:\The_DEVz_HUB_of_work\BUCH_DEVz_CHat_box"
+if exist "%JIMBO_DIR%\backend\venv\Scripts\python.exe" (
+    start "JIMBO-Chat" /MIN cmd /c "cd /d %JIMBO_DIR%\backend\app && %JIMBO_DIR%\backend\venv\Scripts\python.exe -m uvicorn main:app --host 0.0.0.0 --port 5180 > %ZENO_DIR%logs\jimbo_chat.log 2>&1"
+) else (
+    start "JIMBO-Chat" /MIN cmd /c "cd /d %JIMBO_DIR%\backend\app && python -m uvicorn main:app --host 0.0.0.0 --port 5180 > %ZENO_DIR%logs\jimbo_chat.log 2>&1"
+)
+echo   [OK] JIMBO Chat uruchomiony -^> http://localhost:5180  (log: logs\jimbo_chat.log)
+echo.
+
+:: =============================================
+:: DEVZ HUB SYNC LOOP (background, co 30 min)
+:: =============================================
+echo [BG] DevzHub sync loop (U: --> A:, co 30 min)...
+start "DevzHub-Sync" /MIN powershell -ExecutionPolicy Bypass -NoProfile -File "%ZENO_DIR%sync_devz_hub_loop.ps1"
+echo   [OK] Sync loop aktywny (log: logs\sync_devz_hub.log)
+echo.
+
+:: =============================================
 :: PHASE 5: MYBONZO ASTRO DEV (background)
 :: =============================================
 echo [PHASE 5/8] MyBonzo Astro Dev Server...
@@ -286,6 +328,8 @@ echo  ======================================================
 echo.
 echo   Lokalne serwisy:
 echo     ZENO Browser   http://localhost:5173
+echo     JIMBO Chat     http://localhost:5180
+echo     Libraries API  http://localhost:7070
 echo     MyBonzo        http://localhost:4321
 echo     Websurfx       http://localhost:8888
 echo     Meilisearch    http://localhost:7700

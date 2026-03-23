@@ -246,7 +246,8 @@ a:hover{color:#5effe0}
                 <button class="app-open-btn" onclick="switchTab('pricing')" style="justify-content:center">💰 Cennik</button>
                 <button class="app-open-btn" onclick="switchTab('tools')" style="justify-content:center">🛠️ Narzędzia</button>
                 <button class="app-open-btn" onclick="switchTab('apps')" style="justify-content:center">📦 Aplikacje</button>
-                <button class="app-open-btn" onclick="openApp('../movies-app/index.html')" style="justify-content:center;grid-column:span 2">🎬 Movie Buch App</button>
+                <button class="app-open-btn" onclick="openApp('../movies-app/index.html')" style="justify-content:center">🎬 Movie Buch App</button>
+                <button class="app-open-btn" onclick="openApp('http://localhost:5180')" style="justify-content:center;background:rgba(91,124,246,0.15);border-color:rgba(91,124,246,0.4);color:#a5b4fc">💬 JIMBO Chat</button>
             </div>
         </div>
     </div>
@@ -472,13 +473,13 @@ const APPS = [
     stats: { stages: 5, criteria: 5 }
   },
   {
-    id: 'ai-app-tools',
-    name: '🤖 AI App Tools',
-    desc: 'Wkrótce — interaktywne mini-aplikacje AI: chat, tłumaczenie, generowanie treści, analiza obrazów, TTS. Połączenie z modelami API.',
-    url: '#',
-    banner_bg: 'linear-gradient(135deg, #312e81 0%, #4c1d95 50%, #5b21b6 100%)',
-    icon: '🤖',
-    stats: { status: 'Wkrótce' }
+    id: 'jimbo-chat',
+    name: '💬 JIMBO DEVz Chat',
+    desc: 'Multi-provider AI chat z dostępem do bibliotek DEVz HUB — GPT-4o, Claude, DeepSeek, Gemini + RAG po całej bazie wiedzy (_LIBRARIES). Pytaj o zawartość bibliotek, kod, research.',
+    url: 'http://localhost:5180',
+    banner_bg: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #312e81 100%)',
+    icon: '💬',
+    stats: { providers: 8, libraries: 56, rag: 'ON' }
   },
 ];
 
@@ -646,8 +647,10 @@ function renderApps() {
   grid.innerHTML = APPS.map(a => {
     const statsHtml = Object.entries(a.stats).map(([k,v]) => `<span>📌 ${k}: <strong>${v}</strong></span>`).join('');
     const isComingSoon = a.url === '#';
+    const clickFn = a.modal ? `openChatModal('${a.url}')` : `openApp('${a.url}')`;
+    const btnLabel = a.modal ? 'Otwórz Chat →' : 'Otwórz →';
     return `
-    <div class="glass app-card" ${!isComingSoon ? `onclick="openApp('${a.url}')"` : ''} style="cursor:${isComingSoon ? 'default' : 'pointer'}">
+    <div class="glass app-card" ${!isComingSoon ? `onclick="${clickFn}"` : ''} style="cursor:${isComingSoon ? 'default' : 'pointer'}">
       <div class="app-banner" style="background:${a.banner_bg}">
         <span class="bg-icon">${a.icon}</span>
         <div class="app-banner-gradient" style="background:linear-gradient(to top,#0a0e1a 0%,transparent 70%)"></div>
@@ -659,7 +662,7 @@ function renderApps() {
         <div style="margin-top:.8rem">
           ${isComingSoon
             ? '<span style="color:var(--accent3);font-size:.82rem;font-weight:700">🚧 Wkrótce</span>'
-            : `<button class="app-open-btn" onclick="event.stopPropagation();openApp('${a.url}')">Otwórz →</button>`}
+            : `<button class="app-open-btn" onclick="event.stopPropagation();${clickFn}">${btnLabel}</button>`}
         </div>
       </div>
     </div>
@@ -684,6 +687,22 @@ function renderDashTopModels() {
 // Open App
 function openApp(url) {
   if (url && url !== '#') window.open(url, '_blank');
+}
+
+// Chat Modal
+function openChatModal(url) {
+  const m = document.getElementById('chat-modal');
+  const fr = document.getElementById('chat-frame');
+  fr.src = url;
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeChatModal() {
+  const m = document.getElementById('chat-modal');
+  const fr = document.getElementById('chat-frame');
+  m.style.display = 'none';
+  fr.src = '';
+  document.body.style.overflow = '';
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -898,5 +917,26 @@ init();
   }
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════
+     JIMBO CHAT MODAL
+     ═══════════════════════════════════════════════════════ -->
+<style>
+#chat-modal{display:none;position:fixed;inset:0;z-index:10000;background:rgba(3,4,11,0.85);
+  backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px}
+.chat-modal-box{position:relative;width:100%;max-width:1100px;height:90vh;border-radius:16px;
+  overflow:hidden;border:1px solid rgba(91,124,246,0.3);box-shadow:0 24px 80px rgba(0,0,0,0.7),0 0 40px rgba(91,124,246,0.15)}
+.chat-modal-close{position:absolute;top:10px;right:10px;z-index:2;background:rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.1);color:#f8fafc;width:32px;height:32px;border-radius:8px;
+  font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.chat-modal-close:hover{background:rgba(239,68,68,0.3);border-color:#ef4444}
+#chat-frame{width:100%;height:100%;border:none;display:block}
+</style>
+<div id="chat-modal" onclick="if(event.target===this)closeChatModal()">
+  <div class="chat-modal-box">
+    <button class="chat-modal-close" onclick="closeChatModal()" title="Zamknij">✕</button>
+    <iframe id="chat-frame" src="" allow="clipboard-read;clipboard-write" loading="lazy"></iframe>
+  </div>
+</div>
 </body>
 </html>
