@@ -896,6 +896,13 @@ function setupIPCHandlers() {
 /**
  * App event handlers
  */
+
+// Fix GPU process crashes on Windows (STATUS_STACK_BUFFER_OVERRUN, exit_code=-1073740791)
+app.commandLine.appendSwitch('--disable-gpu-sandbox');
+app.commandLine.appendSwitch('--disable-software-rasterizer');
+app.commandLine.appendSwitch('--no-sandbox');
+app.commandLine.appendSwitch('--disable-dev-shm-usage');
+
 app.on('ready', async () => {
   try {
     await initializeServices();
