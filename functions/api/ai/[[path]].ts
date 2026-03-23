@@ -298,7 +298,14 @@ async function handleStream(request: Request, env: Env): Promise<Response> {
  * Supports tools/function_calling required by page-agent for DOM manipulation.
  */
 async function handleCompletionsProxy(request: Request, env: Env): Promise<Response> {
-  const body = await request.json() as Record<string, unknown>;
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json() as Record<string, unknown>;
+  } catch {
+    return new Response(JSON.stringify({
+      error: { message: 'Invalid JSON body', type: 'invalid_request_error', code: 'bad_request' },
+    }), { status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
+  }
   const requestedModel = (body.model as string) || 'deepseek-chat';
   const isStream = body.stream === true;
 
@@ -386,6 +393,7 @@ async function handleCompletionsProxy(request: Request, env: Env): Promise<Respo
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
+  try {
   if (context.request.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
@@ -440,5 +448,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
 
     default:
       return errorResponse('Unknown AI Gate endpoint', 404);
+  }
+  } catch (err: any) {
+    return new Response(JSON.stringify({
+      error: { message: `Internal server error: ${err?.message || 'unknown'}`, type: 'server_error' },
+    }), { status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } });
   }
 };
