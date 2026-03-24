@@ -637,7 +637,6 @@ init();
 .admin-login-error{color:var(--danger);font-size:.78rem;margin-top:.5rem;display:none}
 
 /* ── Responsive admin panel ── */
-@media(max-width:480px){.admin-panel{width:100%}}
 
 .vchat-btn{position:fixed;bottom:28px;right:28px;z-index:9999;width:58px;height:58px;border-radius:50%;
   background:linear-gradient(135deg,#00ffcc,#a78bfa);border:none;cursor:pointer;box-shadow:0 4px 24px rgba(0,255,204,0.35);
@@ -692,11 +691,32 @@ init();
 .vchat-mic.recording{background:rgba(248,113,113,0.25);color:#f87171;animation:vchatRecPulse 1s infinite}
 @keyframes vchatRecPulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0.4)}50%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}
 
+/* ── Touch-friendly: tablets & small laptops ── */
+@media(max-width:768px) and (min-width:481px){
+  .vchat-msg{font-size:.88rem;padding:11px 15px}
+  .vchat-input input{font-size:16px;padding:12px 14px}
+  .vchat-input button{width:44px;height:44px}
+  .philo-msg{font-size:.88rem;padding:11px 15px}
+  .philo-input input{font-size:16px;padding:12px 14px}
+  .philo-input button{width:44px;height:44px}
+}
+
 @media(max-width:480px){
   .vchat-win{right:8px;bottom:88px;width:calc(100vw - 16px);height:calc(100vh - 100px)}
   .vchat-btn{bottom:18px;right:18px;width:52px;height:52px}
+  /* ── Mobile chat improvements ── */
+  .vchat-msg{font-size:.92rem;padding:12px 16px;max-width:92%;line-height:1.6}
+  .vchat-input{padding:10px 12px;gap:10px}
+  .vchat-input input{font-size:16px;padding:14px 16px;border-radius:12px}
+  .vchat-input button{width:48px;height:48px;border-radius:12px;font-size:1.2rem}
+  .vchat-hdr-title{font-size:.95rem}
+  .vchat-hdr-sub{font-size:.72rem}
+  .philo-msg{font-size:.92rem;padding:12px 16px;max-width:95%;line-height:1.6}
+  .philo-input{padding:10px 12px;gap:10px}
+  .philo-input input{font-size:16px;padding:14px 16px;border-radius:12px}
+  .philo-input button{width:48px;height:48px;border-radius:12px;font-size:1.2rem}
+  .admin-panel{width:100%}
 }
-</style>
 
 <!-- Admin login button (always visible, small) -->
 <button class="admin-login-btn" id="adminLoginBtn" title="Admin">🔐</button>
