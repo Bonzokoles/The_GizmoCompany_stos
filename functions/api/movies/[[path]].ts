@@ -129,7 +129,7 @@ const MOA_DEFAULTS: MoaStageConfig[] = [
   { stage: 'final', provider: 'openrouter', model: 'google/gemini-2.0-flash-exp', temperature: 0.6, max_tokens: 5000 },
 ];
 
-const MOA_PROVIDERS = ['openrouter', 'anthropic', 'openai', 'deepseek', 'workers-ai'] as const;
+const MOA_PROVIDERS = ['openrouter', 'anthropic', 'openai', 'deepseek', 'gemini', 'together', 'perplexity', 'workers-ai'] as const;
 
 async function ensureMoaConfig(db: D1Database) {
   await db.prepare(`
@@ -220,6 +220,52 @@ async function llmCall(
       if (!res.ok) throw new Error(`DeepSeek ${res.status}: ${(await res.text()).slice(0, 200)}`);
       const data = (await res.json()) as any;
       return data.choices?.[0]?.message?.content || '';
+    }
+    case 'gemini': {
+      if (!env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
+      const gSysMsg = messages.find(m => m.role === 'system')?.content;
+      const gNonSys = messages.filter(m => m.role !== 'system');
+      const geminiMessages = gNonSys.map(m => ({
+        role: m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+      const gRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: geminiMessages,
+            ...(gSysMsg ? { systemInstruction: { parts: [{ text: gSysMsg }] } } : {}),
+            generationConfig: { maxOutputTokens: maxTokens, temperature },
+          }),
+        },
+      );
+      if (!gRes.ok) throw new Error(`Gemini ${gRes.status}: ${(await gRes.text()).slice(0, 200)}`);
+      const gData = (await gRes.json()) as any;
+      return gData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    }
+    case 'together': {
+      if (!env.TOGETHER_API_KEY) throw new Error('TOGETHER_API_KEY not configured');
+      const tRes = await fetch('https://api.together.xyz/v1/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${env.TOGETHER_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
+      });
+      if (!tRes.ok) throw new Error(`Together ${tRes.status}: ${(await tRes.text()).slice(0, 200)}`);
+      const tData = (await tRes.json()) as any;
+      return tData.choices?.[0]?.message?.content || '';
+    }
+    case 'perplexity': {
+      if (!env.PERPLEXITY_API_KEY) throw new Error('PERPLEXITY_API_KEY not configured');
+      const pRes = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${env.PERPLEXITY_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
+      });
+      if (!pRes.ok) throw new Error(`Perplexity ${pRes.status}: ${(await pRes.text()).slice(0, 200)}`);
+      const pData = (await pRes.json()) as any;
+      return pData.choices?.[0]?.message?.content || '';
     }
     case 'workers-ai': {
       const result = (await env.AI.run(model as any, {
@@ -639,6 +685,9 @@ async function handleMoaConfig(request: Request, env: Env): Promise<Response> {
       anthropic: !!env.ANTHROPIC_API_KEY,
       openai: !!env.OPENAI_API_KEY,
       deepseek: !!env.DEEPSEEK_API_KEY,
+      gemini: !!env.GEMINI_API_KEY,
+      together: !!env.TOGETHER_API_KEY,
+      perplexity: !!env.PERPLEXITY_API_KEY,
       'workers-ai': true, // always available on CF
     };
     return jsonResponse({

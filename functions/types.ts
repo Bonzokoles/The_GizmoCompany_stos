@@ -31,6 +31,9 @@ export interface Env {
   OPENROUTER_API_KEY?: string;
   ANTHROPIC_API_KEY?: string;
   OPENAI_API_KEY?: string;
+  GEMINI_API_KEY?: string;
+  TOGETHER_API_KEY?: string;
+  PERPLEXITY_API_KEY?: string;
   WEBGATE_SECRET?: string;
   UMAMI_SITE_ID?: string;
 

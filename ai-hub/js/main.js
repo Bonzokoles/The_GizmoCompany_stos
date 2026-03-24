@@ -14,6 +14,7 @@ import { renderTools, initTools }           from './modules/tools.js';
 import { renderSkills, initSkills }         from './modules/skills.js';
 import { searchDatasets, initDatasets }     from './modules/datasets.js';
 import { renderApps, openApp, openChatModal, closeChatModal } from './modules/apps.js';
+import { renderSpaces, openSpaceEmbed, closeSpaceModal, openSpaceHF, initSpaces } from './modules/spaces.js';
 import {
   kbLoadLibraries, kbSwitchLibrary, kbShowDetail, kbCloseDetail,
   kbToggleSelect, kbFilterByTopic, kbSearchArticles,
@@ -28,6 +29,7 @@ import { initVchat } from './modules/vchat.js';
 Object.assign(window, {
   switchTab,
   openApp, openChatModal, closeChatModal,
+  openSpaceEmbed, closeSpaceModal, openSpaceHF,
   kbSwitchLibrary, kbShowDetail, kbCloseDetail,
   kbToggleSelect, kbFilterByTopic, kbSearchArticles,
   kbAddToDataset, kbCreateAgentFromArticle, kbBulkCreateDataset,
@@ -48,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProviders();
   renderTools();
   renderSkills();
+  renderSpaces();
   renderApps();
   renderDashTopModels();
 
@@ -56,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initPricing();
   initTools();
   initSkills();
+  initSpaces();
   initDatasets();
 
   // KB — restore settings + lazy load

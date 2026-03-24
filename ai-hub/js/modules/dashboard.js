@@ -6,6 +6,7 @@ import { PROVIDERS } from '../data/providers.js';
 import { TOOLS } from '../data/tools.js';
 import { SKILLS } from '../data/skills.js';
 import { APPS } from '../data/apps.js';
+import { SPACES } from '../data/spaces.js';
 
 export function animateCount(el, target) {
   let current = 0;
@@ -23,6 +24,7 @@ export function updateStats() {
   animateCount(document.getElementById('s-tools'), TOOLS.length);
   animateCount(document.getElementById('s-skills'), SKILLS.length);
   animateCount(document.getElementById('s-apps'), APPS.length);
+  animateCount(document.getElementById('s-spaces'), SPACES.length);
 }
 
 export function renderDashTopModels() {

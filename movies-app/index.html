@@ -1125,7 +1125,7 @@ function renderMoaConfig(data){
   (data.config||[]).forEach((cfg,i) => {
     const div = document.createElement('div');
     div.style.cssText='padding:10px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.02);margin-bottom:8px';
-    const provOpts = (data.providers||['openrouter','anthropic','openai','deepseek','workers-ai'])
+    const provOpts = (data.providers||['openrouter','anthropic','openai','deepseek','gemini','together','perplexity','workers-ai'])
       .map(p=>`<option value="${p}"${p===cfg.provider?' selected':''}>${p}${data.availableKeys?.[p]?' \u2705':' \u274c'}</option>`).join('');
     div.innerHTML=`
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">

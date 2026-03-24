@@ -238,6 +238,26 @@ a:hover{color:#5effe0}
 .chat-modal-close:hover{background:rgba(239,68,68,0.3);border-color:#ef4444}
 #chat-frame{width:100%;height:100%;border:none;display:block}
 
+/* ─── SPACES CARDS ─── */
+.space-card{padding:1.2rem;display:flex;flex-direction:column;gap:.8rem;transition:var(--transition);cursor:default}
+.space-card:hover{border-color:rgba(0,255,204,0.25);box-shadow:0 0 24px rgba(0,255,204,0.08)}
+.space-header{display:flex;align-items:center;gap:.7rem}
+.space-icon{font-size:1.8rem;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,255,204,0.06);border-radius:12px;flex-shrink:0}
+.space-meta{flex:1;min-width:0}
+.space-name{font-size:.95rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.space-author{font-size:.72rem;color:var(--text-dim);margin-top:.1rem}
+.space-likes{font-size:.78rem;color:var(--accent4);font-weight:600;white-space:nowrap}
+.space-desc{font-size:.8rem;color:var(--text-muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.space-tags{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
+.space-badge{font-size:.68rem;font-weight:700;padding:.15rem .5rem;border-radius:6px;letter-spacing:.5px}
+.space-badge.embed{background:rgba(0,255,204,0.12);color:var(--accent);border:1px solid rgba(0,255,204,0.25)}
+.space-badge.link{background:rgba(167,139,250,0.12);color:var(--accent2);border:1px solid rgba(167,139,250,0.25)}
+.space-cat-badge{font-size:.68rem;padding:.15rem .5rem;border-radius:6px;background:rgba(255,255,255,0.04);color:var(--text-muted);border:1px solid var(--glass-border)}
+.space-sdk{font-size:.62rem;font-weight:700;padding:.12rem .4rem;border-radius:4px;background:rgba(245,158,11,0.1);color:var(--accent3);letter-spacing:1px}
+.space-actions{display:flex;gap:.5rem;margin-top:auto}
+.space-link-btn{background:rgba(167,139,250,0.1)!important;border-color:rgba(167,139,250,0.25)!important;color:var(--accent2)!important}
+
 /* ─── RESPONSIVE ─── */
 @media(max-width:768px){
   .topbar{flex-wrap:wrap;padding:.6rem 1rem;gap:.5rem}

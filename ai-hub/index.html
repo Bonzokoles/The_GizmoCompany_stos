@@ -23,6 +23,7 @@
     <button class="nav-btn" data-tab="tools"><span class="icon">🛠️</span> Narzędzia</button>
     <button class="nav-btn" data-tab="datasets"><span class="icon">📚</span> Datasety</button>
     <button class="nav-btn" data-tab="skills"><span class="icon">🎓</span> Skills</button>
+    <button class="nav-btn" data-tab="spaces"><span class="icon">🤗</span> Spaces</button>
     <button class="nav-btn" data-tab="apps"><span class="icon">📦</span> Aplikacje</button>
     <button class="nav-btn" data-tab="jimbo"><span class="icon">💬</span> JIMBO Studio</button>
     <button class="nav-btn" data-tab="kb"><span class="icon">📖</span> Knowledge Browser</button>
@@ -47,6 +48,7 @@
     <div class="glass stat-card amber"><div class="num" id="s-tools">0</div><div class="lbl">Narzędzia</div></div>
     <div class="glass stat-card"><div class="num" style="color:#22d3ee" id="s-skills">0</div><div class="lbl">Skills HF</div></div>
     <div class="glass stat-card pink"><div class="num" id="s-apps">0</div><div class="lbl">Aplikacje</div></div>
+    <div class="glass stat-card"><div class="num" style="color:#f472b6" id="s-spaces">0</div><div class="lbl">HF Spaces</div></div>
     <div class="glass stat-card"><div class="num" style="color:#22d3ee" id="s-datasets">200K+</div><div class="lbl">Datasety HF</div></div>
   </div>
 
@@ -75,6 +77,7 @@
         <button class="app-open-btn" onclick="switchTab('pricing')" style="justify-content:center">💰 Cennik</button>
         <button class="app-open-btn" onclick="switchTab('tools')" style="justify-content:center">🛠️ Narzędzia</button>
         <button class="app-open-btn" onclick="switchTab('datasets')" style="justify-content:center">📚 Datasety</button>
+        <button class="app-open-btn" onclick="switchTab('spaces')" style="justify-content:center">🤗 Spaces</button>
         <button class="app-open-btn" onclick="switchTab('skills')" style="justify-content:center">🎓 Skills</button>
         <button class="app-open-btn" onclick="switchTab('apps')" style="justify-content:center">📦 Aplikacje</button>
         <button class="app-open-btn" onclick="openApp('../movies-app/index.html')" style="justify-content:center">🎬 Movie Buch App</button>
@@ -241,6 +244,57 @@
     <button class="pill" data-sf="research">🔬 Research</button>
   </div>
   <div class="grid-3" id="skills-grid"></div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- HUGGINGFACE SPACES & TOOLS -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-spaces">
+  <div class="section-head">
+    <h2>🤗 <span class="hl">HuggingFace Spaces</span> & Tools</h2>
+    <p>35 narzędzi AI z HuggingFace — uruchamiaj bezpośrednio (⚡ Embed) lub otwieraj na HF (🔗 Link). <span id="spaces-count" style="color:var(--accent);font-weight:700"></span></p>
+  </div>
+
+  <div class="hub-search">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <input type="text" id="spaces-search" placeholder="Szukaj spaces (np. flux, tts, face, video, inpaint...)">
+  </div>
+
+  <div class="pills" id="spaces-pills">
+    <button class="pill active" data-sf="all">🌐 Wszystkie</button>
+    <button class="pill" data-sf="image">🎨 Grafika</button>
+    <button class="pill" data-sf="audio">🔊 Audio/Mowa</button>
+    <button class="pill" data-sf="video">🎬 Video</button>
+    <button class="pill" data-sf="prompt">✨ Prompty</button>
+    <button class="pill" data-sf="vision">👁️ Vision/3D</button>
+    <button class="pill" data-sf="nlp">📝 NLP/Tekst</button>
+    <button class="pill" data-sf="design">🎯 Design</button>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="glass" style="padding:.8rem 1.2rem;margin-bottom:1.2rem;display:flex;gap:2rem;align-items:center;flex-wrap:wrap">
+    <div style="font-size:.82rem;color:var(--text-muted)">⚡ <strong style="color:var(--accent)">15</strong> do uruchomienia w iframe</div>
+    <div style="font-size:.82rem;color:var(--text-muted)">🔗 <strong style="color:var(--accent2)">20</strong> linki do HuggingFace</div>
+    <div style="font-size:.82rem;color:var(--text-muted)">❤️ <strong style="color:var(--accent4)">21K+</strong> łącznych polubień</div>
+    <div style="font-size:.82rem;color:var(--text-muted)">🏷️ <strong style="color:var(--accent3)">8</strong> kategorii</div>
+  </div>
+
+  <div class="grid-3" id="spaces-grid"></div>
+  <div id="spaces-empty" style="text-align:center;padding:3rem;color:var(--text-dim);display:none">
+    <div style="font-size:2rem;margin-bottom:.5rem">🤗</div>
+    <p>Brak wyników — spróbuj innej frazy lub kategorii</p>
+  </div>
+</div>
+
+<!-- Space Embed Modal -->
+<div id="space-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);z-index:1100;padding:1rem;flex-direction:column;align-items:center;justify-content:center">
+  <div style="width:100%;max-width:1200px;display:flex;flex-direction:column;height:90vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.8rem 1rem;background:rgba(15,23,42,0.8);border-radius:14px 14px 0 0;border:1px solid var(--glass-border);border-bottom:none">
+      <div id="space-modal-title" style="font-size:1rem;font-weight:700;color:var(--accent)"></div>
+      <button onclick="closeSpaceModal()" style="background:none;border:none;color:var(--text-muted);font-size:1.5rem;cursor:pointer;padding:.2rem .6rem;border-radius:8px;transition:var(--transition)" onmouseover="this.style.color='var(--danger)'" onmouseout="this.style.color='var(--text-muted)'">✕</button>
+    </div>
+    <iframe id="space-frame" src="" style="flex:1;border:1px solid var(--glass-border);border-top:none;border-radius:0 0 14px 14px;background:#0a0e1a" allow="clipboard-read;clipboard-write;microphone;camera" loading="lazy"></iframe>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════ -->
