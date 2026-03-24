@@ -160,6 +160,44 @@ async function getMoaConfig(db: D1Database): Promise<MoaStageConfig[]> {
   return (results as MoaStageConfig[]) || MOA_DEFAULTS;
 }
 
+/* ── API Keys from D1 (web-configurable) ─────────────────── */
+
+async function ensureApiKeysTable(db: D1Database) {
+  await db.prepare(`
+    CREATE TABLE IF NOT EXISTS api_keys (
+      provider TEXT PRIMARY KEY,
+      api_key TEXT NOT NULL,
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `).run();
+}
+
+async function loadDbApiKeys(db: D1Database): Promise<Record<string, string>> {
+  await ensureApiKeysTable(db);
+  const { results } = await db.prepare('SELECT provider, api_key FROM api_keys').all();
+  const keys: Record<string, string> = {};
+  for (const r of (results || []) as any[]) {
+    if (r.api_key) keys[r.provider] = r.api_key;
+  }
+  return keys;
+}
+
+const PROVIDER_ENV_MAP: Record<string, string> = {
+  openrouter: 'OPENROUTER_API_KEY',
+  anthropic: 'ANTHROPIC_API_KEY',
+  openai: 'OPENAI_API_KEY',
+  deepseek: 'DEEPSEEK_API_KEY',
+  gemini: 'GEMINI_API_KEY',
+  together: 'TOGETHER_API_KEY',
+  perplexity: 'PERPLEXITY_API_KEY',
+};
+
+function resolveKey(env: Env, dbKeys: Record<string, string>, provider: string): string | undefined {
+  if (dbKeys[provider]) return dbKeys[provider];
+  const envKey = PROVIDER_ENV_MAP[provider];
+  return envKey ? (env as any)[envKey] : undefined;
+}
+
 /* ── LLM Call — multi-provider router ────────────────────── */
 
 async function llmCall(
@@ -169,13 +207,15 @@ async function llmCall(
   messages: { role: string; content: string }[],
   temperature: number,
   maxTokens: number,
+  dbKeys: Record<string, string> = {},
 ): Promise<string> {
   switch (provider) {
     case 'openrouter': {
-      if (!env.OPENROUTER_API_KEY) throw new Error('OPENROUTER_API_KEY not configured');
+      const key = resolveKey(env, dbKeys, 'openrouter');
+      if (!key) throw new Error('OPENROUTER_API_KEY not configured');
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${env.OPENROUTER_API_KEY}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
       });
       if (!res.ok) throw new Error(`OpenRouter ${res.status}: ${(await res.text()).slice(0, 200)}`);
@@ -183,13 +223,14 @@ async function llmCall(
       return data.choices?.[0]?.message?.content || '';
     }
     case 'anthropic': {
-      if (!env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured');
+      const aKey = resolveKey(env, dbKeys, 'anthropic');
+      if (!aKey) throw new Error('ANTHROPIC_API_KEY not configured');
       const sysMsg = messages.find(m => m.role === 'system')?.content || '';
       const nonSys = messages.filter(m => m.role !== 'system');
       const res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
-          'x-api-key': env.ANTHROPIC_API_KEY,
+          'x-api-key': aKey,
           'Content-Type': 'application/json',
           'anthropic-version': '2023-06-01',
         },
@@ -200,10 +241,11 @@ async function llmCall(
       return data.content?.[0]?.text || '';
     }
     case 'openai': {
-      if (!env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY not configured');
+      const oKey = resolveKey(env, dbKeys, 'openai');
+      if (!oKey) throw new Error('OPENAI_API_KEY not configured');
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${oKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
       });
       if (!res.ok) throw new Error(`OpenAI ${res.status}: ${(await res.text()).slice(0, 200)}`);
@@ -211,10 +253,11 @@ async function llmCall(
       return data.choices?.[0]?.message?.content || '';
     }
     case 'deepseek': {
-      if (!env.DEEPSEEK_API_KEY) throw new Error('DEEPSEEK_API_KEY not configured');
+      const dKey = resolveKey(env, dbKeys, 'deepseek');
+      if (!dKey) throw new Error('DEEPSEEK_API_KEY not configured');
       const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${env.DEEPSEEK_API_KEY}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${dKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
       });
       if (!res.ok) throw new Error(`DeepSeek ${res.status}: ${(await res.text()).slice(0, 200)}`);
@@ -222,7 +265,8 @@ async function llmCall(
       return data.choices?.[0]?.message?.content || '';
     }
     case 'gemini': {
-      if (!env.GEMINI_API_KEY) throw new Error('GEMINI_API_KEY not configured');
+      const gKey = resolveKey(env, dbKeys, 'gemini');
+      if (!gKey) throw new Error('GEMINI_API_KEY not configured');
       const gSysMsg = messages.find(m => m.role === 'system')?.content;
       const gNonSys = messages.filter(m => m.role !== 'system');
       const geminiMessages = gNonSys.map(m => ({
@@ -230,7 +274,7 @@ async function llmCall(
         parts: [{ text: m.content }],
       }));
       const gRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${gKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -246,10 +290,11 @@ async function llmCall(
       return gData.candidates?.[0]?.content?.parts?.[0]?.text || '';
     }
     case 'together': {
-      if (!env.TOGETHER_API_KEY) throw new Error('TOGETHER_API_KEY not configured');
+      const tKey = resolveKey(env, dbKeys, 'together');
+      if (!tKey) throw new Error('TOGETHER_API_KEY not configured');
       const tRes = await fetch('https://api.together.xyz/v1/chat/completions', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${env.TOGETHER_API_KEY}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${tKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
       });
       if (!tRes.ok) throw new Error(`Together ${tRes.status}: ${(await tRes.text()).slice(0, 200)}`);
@@ -257,10 +302,11 @@ async function llmCall(
       return tData.choices?.[0]?.message?.content || '';
     }
     case 'perplexity': {
-      if (!env.PERPLEXITY_API_KEY) throw new Error('PERPLEXITY_API_KEY not configured');
+      const pKey = resolveKey(env, dbKeys, 'perplexity');
+      if (!pKey) throw new Error('PERPLEXITY_API_KEY not configured');
       const pRes = await fetch('https://api.perplexity.ai/chat/completions', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${env.PERPLEXITY_API_KEY}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${pKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, max_tokens: maxTokens, temperature }),
       });
       if (!pRes.ok) throw new Error(`Perplexity ${pRes.status}: ${(await pRes.text()).slice(0, 200)}`);
@@ -319,6 +365,7 @@ async function moaGenerateReview(
   movieInfo: string,
   style: string,
   moaConfig: MoaStageConfig[],
+  dbKeys: Record<string, string> = {},
 ): Promise<{ review: string; stages: Record<string, string> }> {
   const systemPrompt = STYLE_PROMPTS[style];
   if (!systemPrompt) throw new Error(`Unknown style: ${style}`);
@@ -333,28 +380,28 @@ async function moaGenerateReview(
   stages.translator = await llmCall(env, t.provider, t.model, [
     { role: 'system', content: MOA_TRANSLATOR_PROMPT },
     { role: 'user', content: `Przygotuj bogaty opis tego filmu:\n\n${movieInfo}` },
-  ], t.temperature, t.max_tokens);
+  ], t.temperature, t.max_tokens, dbKeys);
 
   // ── Stage 2: WSTĘPNY TEKST — first draft in style ─────
   const d = getConf('draft');
   stages.draft = await llmCall(env, d.provider, d.model, [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: `Napisz recenzję tego filmu na podstawie poniższego opisu:\n\n${stages.translator}\n\nPisz WYŁĄCZNIE po polsku. Nie zaczynaj od "Jasne, oto recenzja" — od razu zacznij treścią recenzji.` },
-  ], d.temperature, d.max_tokens);
+  ], d.temperature, d.max_tokens, dbKeys);
 
   // ── Stage 3: ASYSTENT-FILOZOF — philosophical enrichment ─
   const p = getConf('philosopher');
   stages.philosopher = await llmCall(env, p.provider, p.model, [
     { role: 'system', content: MOA_PHILOSOPHER_PROMPT },
     { role: 'user', content: `Oto wstępna recenzja w stylu "${style}":\n\n${stages.draft}\n\nKontekst filmu: ${stages.translator}\n\nWzbogać tę recenzję filozoficznie, zachowując styl "${style}".` },
-  ], p.temperature, p.max_tokens);
+  ], p.temperature, p.max_tokens, dbKeys);
 
   // ── Stage 4: KOŃCOWY TEKST — final polish ─────────────
   const f = getConf('final');
   stages.final = await llmCall(env, f.provider, f.model, [
     { role: 'system', content: MOA_FINAL_PROMPT },
     { role: 'user', content: `Oto recenzja w stylu "${style}" do ostatecznej redakcji:\n\n${stages.philosopher}\n\nWygładź tekst i przygotuj ostateczną wersję. Styl: ${style}.` },
-  ], f.temperature, f.max_tokens);
+  ], f.temperature, f.max_tokens, dbKeys);
 
   return { review: stages.final, stages };
 }
@@ -453,15 +500,16 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
     body.overview && `Opis: ${body.overview}`,
   ].filter(Boolean).join('\n');
 
-  // Load MOA pipeline config from D1
+  // Load MOA pipeline config + DB API keys from D1
   const moaConfig = await getMoaConfig(env.DB);
+  const dbKeys = await loadDbApiKeys(env.DB);
 
   // Generate reviews for each style using MOA pipeline (sequentially)
   const reviews: Record<string, string> = {};
   const allStages: Record<string, Record<string, string>> = {};
   for (const style of selectedStyles) {
     try {
-      const result = await moaGenerateReview(env, movieInfo, style, moaConfig);
+      const result = await moaGenerateReview(env, movieInfo, style, moaConfig, dbKeys);
       reviews[style] = result.review;
       allStages[style] = result.stages;
     } catch (e: any) {
@@ -654,17 +702,18 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
 
   // Use MOA config philosopher stage model, or default
   const moaConfig = await getMoaConfig(env.DB);
+  const dbKeys = await loadDbApiKeys(env.DB);
   const philoConf = moaConfig.find(c => c.stage === 'philosopher');
   const provider = philoConf?.provider || 'openrouter';
   const model = philoConf?.model || 'google/gemini-2.0-flash-exp';
 
   try {
-    const reply = await llmCall(env, provider, model, messages, 0.8, 2048);
+    const reply = await llmCall(env, provider, model, messages, 0.8, 2048, dbKeys);
     return jsonResponse({ reply });
   } catch (e: any) {
     // Fallback to Workers AI
     try {
-      const reply = await llmCall(env, 'workers-ai', '@cf/meta/llama-3.1-8b-instruct', messages, 0.8, 2048);
+      const reply = await llmCall(env, 'workers-ai', '@cf/meta/llama-3.1-8b-instruct', messages, 0.8, 2048, dbKeys);
       return jsonResponse({ reply });
     } catch {
       return errorResponse(`Chat error: ${e.message}`, 500);
@@ -679,15 +728,16 @@ async function handleMoaConfig(request: Request, env: Env): Promise<Response> {
 
   if (request.method === 'GET') {
     const config = await getMoaConfig(env.DB);
-    // Return config + available providers + which API keys are set
+    const dbKeys = await loadDbApiKeys(env.DB);
+    // Return config + available providers + which API keys are set (DB or env)
     const availableKeys: Record<string, boolean> = {
-      openrouter: !!env.OPENROUTER_API_KEY,
-      anthropic: !!env.ANTHROPIC_API_KEY,
-      openai: !!env.OPENAI_API_KEY,
-      deepseek: !!env.DEEPSEEK_API_KEY,
-      gemini: !!env.GEMINI_API_KEY,
-      together: !!env.TOGETHER_API_KEY,
-      perplexity: !!env.PERPLEXITY_API_KEY,
+      openrouter: !!(dbKeys.openrouter || env.OPENROUTER_API_KEY),
+      anthropic: !!(dbKeys.anthropic || env.ANTHROPIC_API_KEY),
+      openai: !!(dbKeys.openai || env.OPENAI_API_KEY),
+      deepseek: !!(dbKeys.deepseek || env.DEEPSEEK_API_KEY),
+      gemini: !!(dbKeys.gemini || env.GEMINI_API_KEY),
+      together: !!(dbKeys.together || env.TOGETHER_API_KEY),
+      perplexity: !!(dbKeys.perplexity || env.PERPLEXITY_API_KEY),
       'workers-ai': true, // always available on CF
     };
     return jsonResponse({
@@ -725,6 +775,58 @@ async function handleMoaConfig(request: Request, env: Env): Promise<Response> {
   return errorResponse('Method not allowed', 405);
 }
 
+/* ── API Keys endpoint (admin) — web-configurable keys ───── */
+
+async function handleApiKeys(request: Request, env: Env): Promise<Response> {
+  if (!isAdmin(request, env)) return errorResponse('Unauthorized', 401);
+
+  if (request.method === 'GET') {
+    const dbKeys = await loadDbApiKeys(env.DB);
+    const keys: Record<string, { source: string; masked: string }> = {};
+    for (const provider of MOA_PROVIDERS) {
+      if (provider === 'workers-ai') {
+        keys[provider] = { source: 'built-in', masked: '(Cloudflare Workers AI)' };
+        continue;
+      }
+      const envKey = PROVIDER_ENV_MAP[provider];
+      const envVal = envKey ? (env as any)[envKey] : undefined;
+      const dbVal = dbKeys[provider];
+      if (dbVal) {
+        keys[provider] = { source: 'web', masked: dbVal.slice(0, 4) + '****' + dbVal.slice(-4) };
+      } else if (envVal) {
+        keys[provider] = { source: 'env', masked: envVal.slice(0, 4) + '****' + envVal.slice(-4) };
+      } else {
+        keys[provider] = { source: 'none', masked: '' };
+      }
+    }
+    return jsonResponse({ keys });
+  }
+
+  if (request.method === 'POST') {
+    const body = (await request.json()) as { keys: Record<string, string> };
+    if (!body.keys || typeof body.keys !== 'object') return errorResponse('Missing keys object', 400);
+
+    await ensureApiKeysTable(env.DB);
+    let saved = 0;
+    for (const [provider, key] of Object.entries(body.keys)) {
+      if (!PROVIDER_ENV_MAP[provider]) continue; // skip unknown providers
+      const trimmed = (key || '').trim();
+      if (!trimmed) {
+        // Empty key = delete from DB (fall back to env)
+        await env.DB.prepare('DELETE FROM api_keys WHERE provider = ?').bind(provider).run();
+      } else {
+        await env.DB.prepare(
+          'INSERT OR REPLACE INTO api_keys (provider, api_key, updated_at) VALUES (?, ?, datetime(\'now\'))',
+        ).bind(provider, trimmed).run();
+        saved++;
+      }
+    }
+    return jsonResponse({ message: `Saved ${saved} API keys`, saved });
+  }
+
+  return errorResponse('Method not allowed', 405);
+}
+
 /* ── Main router ─────────────────────────────────────────── */
 
 export const onRequest: PagesFunction<Env> = async (context) => {
@@ -746,6 +848,8 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         return handleChat(context.request, context.env);
       case 'moa-config':
         return handleMoaConfig(context.request, context.env);
+      case 'api-keys':
+        return handleApiKeys(context.request, context.env);
       case 'list':
         return handleList(context.env);
       case 'item':

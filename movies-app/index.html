@@ -722,6 +722,7 @@ init();
     <button class="admin-tab" data-tab="generate">⚡ Generuj</button>
     <button class="admin-tab" data-tab="philo">🏛️ Filozof</button>
     <button class="admin-tab" data-tab="moa">⚙️ MOA</button>
+    <button class="admin-tab" data-tab="apikeys">🔑 Klucze</button>
   </div>
   <div class="admin-content">
     <!-- TMDB Search Tab -->
@@ -763,6 +764,14 @@ init();
           <button onclick="philoSend()">➤</button>
         </div>
       </div>
+    </div>
+    <!-- API Keys Tab -->
+    <div class="admin-tab-panel" id="tab-apikeys" style="padding:14px;overflow-y:auto">
+      <div style="font-size:.78rem;color:var(--accent);font-weight:800;margin-bottom:6px;letter-spacing:1px">🔑 KLUCZE API</div>
+      <div style="font-size:.67rem;color:var(--text-dim);margin-bottom:12px">Klucze wpisane tutaj mają priorytet nad CF secrets. Puste pole = fallback na env secret.</div>
+      <div id="apiKeysForm"></div>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:10px" onclick="saveApiKeys()">💾 Zapisz klucze</button>
+      <div id="apiKeysStatus" style="font-size:.75rem;text-align:center;margin-top:8px;color:var(--text-dim)"></div>
     </div>
   </div>
 </div>
@@ -1189,6 +1198,93 @@ document.getElementById('adminPanel').addEventListener('transitionend', () => {
   if(document.getElementById('adminPanel').classList.contains('open') && isAdmin() && !moaConfigData.length) loadMoaConfig();
 });
 if(isAdmin()) setTimeout(loadMoaConfig, 600);
+
+/* ════════════════════════════════════════════
+   API KEYS MANAGEMENT (web-configurable)
+   ════════════════════════════════════════════ */
+const API_KEY_PROVIDERS = [
+  {id:'openrouter',label:'OpenRouter',placeholder:'sk-or-v1-...'},
+  {id:'anthropic',label:'Anthropic',placeholder:'sk-ant-...'},
+  {id:'openai',label:'OpenAI',placeholder:'sk-...'},
+  {id:'deepseek',label:'DeepSeek',placeholder:'sk-...'},
+  {id:'gemini',label:'Gemini',placeholder:'AIzaSy...'},
+  {id:'together',label:'Together',placeholder:'tgp_...'},
+  {id:'perplexity',label:'Perplexity',placeholder:'pplx-...'},
+];
+
+let apiKeysData = {};
+
+async function loadApiKeys(){
+  if(!isAdmin()) return;
+  try {
+    const r = await fetch(apiUrl('api-keys'),{headers:adminHeaders()});
+    if(!r.ok) return;
+    const data = await r.json();
+    apiKeysData = data.keys || {};
+    renderApiKeys();
+  } catch(e){ console.warn('API keys load error:',e); }
+}
+
+function renderApiKeys(){
+  const container = document.getElementById('apiKeysForm');
+  if(!container) return;
+  container.innerHTML = '';
+  API_KEY_PROVIDERS.forEach(p => {
+    const info = apiKeysData[p.id] || {source:'none',masked:''};
+    const srcColor = info.source==='web'?'#4ade80':info.source==='env'?'#60a5fa':'#6b7280';
+    const srcLabel = info.source==='web'?'WEB':info.source==='env'?'ENV':'\u2014';
+    const div = document.createElement('div');
+    div.style.cssText='padding:8px 10px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.02);margin-bottom:6px';
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:.75rem;font-weight:700;color:var(--text)">${esc(p.label)}</span>
+        <span style="font-size:.6rem;padding:2px 6px;border-radius:4px;background:${srcColor}22;color:${srcColor};font-weight:700">${srcLabel}${info.masked?' \u2022 '+esc(info.masked):''}</span>
+      </div>
+      <input type="password" class="ak-input" data-provider="${p.id}" placeholder="${esc(p.placeholder)}"
+        style="width:100%;padding:6px 8px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:.72rem;font-family:var(--font);box-sizing:border-box"
+        autocomplete="off">
+      <div style="display:flex;gap:4px;margin-top:3px">
+        <button onclick="this.previousElementSibling.previousElementSibling.type=this.previousElementSibling.previousElementSibling.type==='password'?'text':'password'" style="font-size:.6rem;background:none;border:none;color:var(--text-dim);cursor:pointer;padding:0">\uD83D\uDC41 poka\u017c</button>
+        ${info.source==='web'?`<button onclick="clearApiKey('${p.id}')" style="font-size:.6rem;background:none;border:none;color:#f87171;cursor:pointer;padding:0">\u274c usu\u0144</button>`:''}
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+async function saveApiKeys(){
+  const keys = {};
+  document.querySelectorAll('.ak-input').forEach(inp => {
+    const val = inp.value.trim();
+    if(val) keys[inp.dataset.provider] = val;
+  });
+  if(!Object.keys(keys).length){ document.getElementById('apiKeysStatus').textContent='Wpisz przynajmniej jeden klucz';return; }
+  const status = document.getElementById('apiKeysStatus');
+  try {
+    const r = await fetch(apiUrl('api-keys'),{method:'POST',
+      headers:{...adminHeaders(),'Content-Type':'application/json'},
+      body:JSON.stringify({keys})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data = await r.json();
+    status.textContent='\u2705 '+data.message;status.style.color='#4ade80';
+    document.querySelectorAll('.ak-input').forEach(inp => inp.value='');
+    setTimeout(()=>{ loadApiKeys(); loadMoaConfig(); }, 300);
+  } catch(e){ status.textContent='\u274c '+e.message;status.style.color='#f87171'; }
+}
+
+async function clearApiKey(provider){
+  try {
+    await fetch(apiUrl('api-keys'),{method:'POST',
+      headers:{...adminHeaders(),'Content-Type':'application/json'},
+      body:JSON.stringify({keys:{[provider]:''}})});
+    loadApiKeys(); loadMoaConfig();
+  } catch(e){ console.warn('Clear key error:',e); }
+}
+
+// Load API keys when tab opens
+document.addEventListener('click', e => {
+  if(e.target?.dataset?.tab==='apikeys' && isAdmin() && !Object.keys(apiKeysData).length) loadApiKeys();
+});
+if(isAdmin()) setTimeout(loadApiKeys, 800);
 
 /* ════════════════════════════════════════════
    VOICE CHATBOX — Polish AI Assistant (Film Vault)
