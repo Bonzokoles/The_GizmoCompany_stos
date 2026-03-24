@@ -493,11 +493,11 @@ export function BrowserUI() {
 }
 
 const navBtnStyle: React.CSSProperties = {
-  background: 'transparent',
   border: 'none',
   color: '#e0e0e0',
   cursor: 'pointer',
   padding: '4px 8px',
   fontSize: '16px',
   borderRadius: '4px',
+  transition: 'background 150ms ease-out, transform 150ms ease-out',
 };

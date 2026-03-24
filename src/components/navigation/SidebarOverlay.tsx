@@ -26,12 +26,26 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
   );
 
   return (
-    <div style={styles.backdrop} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div style={styles.sidebar}>
+    <>
+      <style>{`
+        @keyframes sidebarIn {
+          from { transform: translateX(-100%); opacity: 0; }
+          to   { transform: translateX(0);     opacity: 1; }
+        }
+        @keyframes backdropIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        .sb-btn:active { transform: scale(0.97); }
+        .sb-item:active { transform: scale(0.96); }
+      `}</style>
+    <div style={{ ...styles.backdrop, animation: 'backdropIn 150ms ease-out' }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div style={{ ...styles.sidebar, animation: 'sidebarIn 200ms cubic-bezier(0.23, 1, 0.32, 1)' }}>
         {/* Header */}
         <div style={styles.header}>
           <span style={styles.brand}>☰ Menu</span>
           <button
+            className="sb-btn"
             onClick={onClose}
             style={styles.closeBtn}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#ffffff15'; }}
@@ -44,6 +58,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
         {/* Quick Links */}
         <div style={styles.quickLinks}>
           <button
+            className="sb-btn"
             onClick={() => handleLinkClick('file:///C:/Users/Bonzo2/Desktop/TOOLS_CATALOG.html')}
             style={styles.quickLinkBtn}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4f8ef720'; (e.currentTarget as HTMLElement).style.borderColor = '#4f8ef7'; }}
@@ -52,6 +67,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
             📋 Katalog Narzędzi
           </button>
           <button
+            className="sb-btn"
             onClick={() => handleLinkClick('zeno://analytics')}
             style={styles.quickLinkBtn}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4f8ef720'; (e.currentTarget as HTMLElement).style.borderColor = '#4f8ef7'; }}
@@ -60,6 +76,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
             📊 Analytics (Umami)
           </button>
           <button
+            className="sb-btn"
             onClick={() => handleLinkClick('zeno://search')}
             style={styles.quickLinkBtn}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4f8ef720'; (e.currentTarget as HTMLElement).style.borderColor = '#4f8ef7'; }}
@@ -103,6 +120,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
                   {activeCat.items.map(item => (
                     <button
                       key={item.url}
+                      className="sb-item"
                       onClick={() => handleLinkClick(item.url)}
                       style={{ ...styles.itemBtn, borderColor: cat.color + '30' }}
                       onMouseEnter={e => {
@@ -126,6 +144,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
@@ -168,8 +187,8 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 14,
     cursor: 'pointer',
     padding: '4px 8px',
-    borderRadius: 0,
-    transition: 'background 0.12s',
+    borderRadius: 4,
+    transition: 'background 150ms ease-out, color 150ms ease-out, transform 150ms ease-out',
   },
   categoryList: {
     flex: 1,
@@ -189,10 +208,10 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#4f8ef7',
     background: '#16162e',
     border: '1px solid #2a2a4a',
-    borderRadius: 0,
+    borderRadius: 4,
     cursor: 'pointer',
     textAlign: 'left' as const,
-    transition: 'all 0.12s',
+    transition: 'background 150ms ease-out, border-color 150ms ease-out, transform 150ms ease-out',
     marginBottom: 8,
     fontFamily: "'Segoe UI', -apple-system, sans-serif",
   },
@@ -207,7 +226,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: 'none',
     borderRadius: 0,
     cursor: 'pointer',
-    transition: 'all 0.12s',
+    transition: 'background 150ms ease-out, color 150ms ease-out, transform 150ms ease-out',
     whiteSpace: 'nowrap' as const,
     fontFamily: "'Segoe UI', -apple-system, sans-serif",
   },
@@ -224,9 +243,9 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#ccccdd',
     background: '#16162e',
     border: '1px solid #2a2a4a',
-    borderRadius: 0,
+    borderRadius: 4,
     cursor: 'pointer',
-    transition: 'all 0.12s',
+    transition: 'background 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, transform 150ms ease-out',
     whiteSpace: 'nowrap' as const,
     fontFamily: "'Segoe UI', -apple-system, sans-serif",
   },

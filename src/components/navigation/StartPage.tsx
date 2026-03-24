@@ -422,6 +422,23 @@ export function StartPage({ onNavigate }: StartPageProps) {
 
   return (
     <div style={S.root}>
+      <style>{`
+        .sp-btn:active { transform: scale(0.97); }
+        .sp-chip:active { transform: scale(0.96); }
+        .sp-item:active { transform: scale(0.97); }
+        @keyframes spWidgetEnter {
+          from { opacity: 0; transform: translateY(-4px) scaleY(0.97); }
+          to   { opacity: 1; transform: translateY(0)  scaleY(1); }
+        }
+        @keyframes spOverlayEnter {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes spPanelEnter {
+          from { opacity: 0; transform: scale(0.97) translateY(6px); }
+          to   { opacity: 1; transform: scale(1)    translateY(0); }
+        }
+      `}</style>
       {/* ── Decorative lines ─────────────────────── */}
       <div style={S.lineV} />
       <div style={S.lineH} />
@@ -454,6 +471,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
           ].map(w => (
             <button
               key={w.id}
+              className="sp-btn"
               onClick={() => setOpenWidget(openWidget === w.id ? null : w.id)}
               style={{
                 ...S.widgetBarBtn,
@@ -465,7 +483,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
           ))}
         </div>
         {openWidget && (
-          <div style={S.widgetContent}>
+          <div style={{ ...S.widgetContent, animation: 'spWidgetEnter 150ms ease-out' }}>
             {openWidget === 'quotes' && <DevQuotes />}
             {openWidget === 'calendar' && <MiniCalendar />}
             {openWidget === 'trending' && (
@@ -476,7 +494,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
                   { icon: '🦀', label: 'r/rust', url: 'https://reddit.com/r/rust' },
                   { icon: '📱', label: 'React Blog', url: 'https://react.dev/blog' },
                 ].map(t => (
-                  <button key={t.url} onClick={() => handleLinkClick(t.url)} style={S.trendingItem}>
+                  <button key={t.url} className="sp-btn" onClick={() => handleLinkClick(t.url)} style={S.trendingItem}>
                     <span>{t.icon}</span>{t.label}
                   </button>
                 ))}
@@ -490,7 +508,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
                   { t: 'DEV.to', u: 'https://dev.to' },
                   { t: 'daily.dev', u: 'https://daily.dev' },
                 ].map(f => (
-                  <button key={f.u} onClick={() => handleLinkClick(f.u)} style={S.trendingItem}>{f.t}</button>
+                  <button key={f.u} className="sp-btn" onClick={() => handleLinkClick(f.u)} style={S.trendingItem}>{f.t}</button>
                 ))}
               </div>
             )}
@@ -502,7 +520,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
                   { t: 'Claude', u: 'https://claude.ai' },
                   { t: 'Vercel', u: 'https://vercel.com' },
                 ].map(b => (
-                  <button key={b.u} onClick={() => handleLinkClick(b.u)} style={S.trendingItem}>{b.t}</button>
+                  <button key={b.u} className="sp-btn" onClick={() => handleLinkClick(b.u)} style={S.trendingItem}>{b.t}</button>
                 ))}
               </div>
             )}
@@ -581,6 +599,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
         {/* Tools button — bottom right at line level */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
           <button
+            className="sp-btn"
             onClick={() => setShowAllTools(true)}
             style={S.allToolsBtn}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#888'; (e.currentTarget as HTMLElement).style.color = '#c0c0d8'; }}
@@ -593,8 +612,8 @@ export function StartPage({ onNavigate }: StartPageProps) {
 
       {/* ── All Tools overlay (subpage) ──── */}
       {showAllTools && (
-        <div style={S.allToolsBackdrop} onClick={e => { if (e.target === e.currentTarget) setShowAllTools(false); }}>
-          <div style={S.allToolsPanel}>
+        <div style={{ ...S.allToolsBackdrop, animation: 'spOverlayEnter 150ms ease-out' }} onClick={e => { if (e.target === e.currentTarget) setShowAllTools(false); }}>
+          <div style={{ ...S.allToolsPanel, animation: 'spPanelEnter 200ms cubic-bezier(0.23, 1, 0.32, 1)' }}>
             <div style={S.allToolsHeader}>
               <h2 style={S.allToolsTitle}>🛠 Wszystkie Narzędzia</h2>
               <button onClick={() => setShowAllTools(false)} style={S.allToolsCloseBtn}
@@ -608,7 +627,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
                 <h3 style={S.allToolsCatTitle}>⭐ Narzędzia Priorytet</h3>
                 <div style={S.allToolsChips}>
                   {TOOL_HIGHLIGHTS.map(t => (
-                    <button key={t.name} onClick={() => handleLinkClick(t.url)} style={S.allToolsItem}
+                    <button key={t.name} className="sp-item" onClick={() => handleLinkClick(t.url)} style={S.allToolsItem}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#00d4ff44'; (e.currentTarget as HTMLElement).style.background = '#0c0c22'; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#10102a'; (e.currentTarget as HTMLElement).style.background = '#070716'; }}
                     >
@@ -626,7 +645,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
                 <h3 style={S.allToolsCatTitle}>⚡ Szybkie Linki</h3>
                 <div style={S.allToolsChips}>
                   {QUICK_LINKS.map(l => (
-                    <button key={l.url} onClick={() => handleLinkClick(l.url)} style={S.allToolsChip}
+                    <button key={l.url} className="sp-chip" onClick={() => handleLinkClick(l.url)} style={S.allToolsChip}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#00d4ff44'; (e.currentTarget as HTMLElement).style.color = '#e0e0f0'; }}
                       onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#10102a'; (e.currentTarget as HTMLElement).style.color = '#9090aa'; }}
                     >{l.label}</button>
@@ -639,7 +658,7 @@ export function StartPage({ onNavigate }: StartPageProps) {
                   <h3 style={{ ...S.allToolsCatTitle, color: cat.color }}>{cat.title}</h3>
                   <div style={S.allToolsChips}>
                     {cat.items.map(item => (
-                      <button key={item.url} onClick={() => handleLinkClick(item.url)}
+                      <button key={item.url} className="sp-chip" onClick={() => handleLinkClick(item.url)}
                         style={{ ...S.allToolsChip, borderColor: cat.color + '25' }}
                         onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = cat.color; (e.currentTarget as HTMLElement).style.background = cat.color + '15'; (e.currentTarget as HTMLElement).style.color = '#e0e0f0'; }}
                         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = cat.color + '25'; (e.currentTarget as HTMLElement).style.background = '#0a0a1e'; (e.currentTarget as HTMLElement).style.color = '#9090aa'; }}
@@ -744,7 +763,7 @@ const S: Record<string, CSSProperties> = {
     border: 'none',
     padding: '3px 0',
     cursor: 'pointer',
-    transition: 'color 0.12s',
+    transition: 'color 150ms ease-out, transform 150ms ease-out',
     fontFamily: 'inherit',
   },
   /* Inline expanded items */
@@ -763,7 +782,7 @@ const S: Record<string, CSSProperties> = {
     border: '1px solid #14143a',
     borderRadius: 0,
     cursor: 'pointer',
-    transition: 'all 0.12s',
+    transition: 'background 150ms ease-out, border-color 150ms ease-out, color 150ms ease-out, transform 150ms ease-out',
     whiteSpace: 'nowrap' as const,
     fontFamily: 'inherit',
   },
@@ -785,7 +804,7 @@ const S: Record<string, CSSProperties> = {
     border: 'none',
     borderRadius: 0,
     cursor: 'pointer',
-    transition: 'all 0.12s',
+    transition: 'background 150ms ease-out, color 150ms ease-out, transform 150ms ease-out',
     whiteSpace: 'nowrap' as const,
   },
 
@@ -822,7 +841,7 @@ const S: Record<string, CSSProperties> = {
     border: 'none',
     borderBottom: '2px solid transparent',
     cursor: 'pointer',
-    transition: 'all 0.12s',
+    transition: 'background 150ms ease-out, color 150ms ease-out, transform 150ms ease-out',
     fontFamily: 'inherit',
     color: '#556',
     letterSpacing: 0.3,
@@ -846,6 +865,7 @@ const S: Record<string, CSSProperties> = {
     cursor: 'pointer',
     fontFamily: 'inherit',
     textAlign: 'left' as const,
+    transition: 'color 150ms ease-out, transform 150ms ease-out',
   },
 
   /* All tools button */
@@ -856,7 +876,7 @@ const S: Record<string, CSSProperties> = {
     fontSize: 11,
     padding: '6px 14px',
     cursor: 'pointer',
-    transition: 'all 0.12s',
+    transition: 'border-color 150ms ease-out, color 150ms ease-out, transform 150ms ease-out',
     fontFamily: 'inherit',
     letterSpacing: 0.3,
   },
@@ -876,7 +896,7 @@ const S: Record<string, CSSProperties> = {
     border: '1px solid #14142e',
     padding: '0 12px',
     height: 36,
-    transition: 'border-color 0.2s',
+    transition: 'border-color 150ms ease-out, box-shadow 150ms ease-out',
   },
   searchIcon: {
     fontSize: 15,

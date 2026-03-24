@@ -83,12 +83,18 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 150ms ease-out, color 150ms ease-out, transform 150ms ease-out;
 }
 
-.btn-icon:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-text);
+@media (hover: hover) and (pointer: fine) {
+  .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--color-text);
+  }
+}
+
+.btn-icon:active {
+  transform: scale(0.97);
 }
 
 .btn-icon[aria-pressed='true'] {
@@ -109,6 +115,7 @@ body {
   border-radius: var(--radius);
   padding: 0 10px;
   -webkit-app-region: no-drag;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out;
 }
 
 .address-bar input {
@@ -123,6 +130,7 @@ body {
 
 .address-bar:focus-within {
   border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
 }
 
 .address-bar .loading-indicator {
@@ -165,11 +173,17 @@ body {
   cursor: pointer;
   max-width: 200px;
   min-width: 80px;
-  transition: background 0.15s;
+  transition: background 150ms ease-out, transform 150ms ease-out;
 }
 
-.tab:hover {
-  background: rgba(255, 255, 255, 0.08);
+@media (hover: hover) and (pointer: fine) {
+  .tab:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.tab:active {
+  transform: scale(0.98);
 }
 
 .tab.active {
@@ -186,7 +200,8 @@ body {
   white-space: nowrap;
 }
 
-.tab .tab-close {
+.tab .tab-close,
+.tab .btn-close-tab {
   background: none;
   border: none;
   color: var(--color-text-muted);
@@ -195,15 +210,24 @@ body {
   padding: 0;
   line-height: 1;
   opacity: 0;
-  transition: opacity 0.15s;
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
 }
 
-.tab:hover .tab-close {
+.tab:hover .tab-close,
+.tab:hover .btn-close-tab {
   opacity: 1;
 }
 
-.tab-close:hover {
-  color: var(--color-danger);
+@media (hover: hover) and (pointer: fine) {
+  .tab-close:hover,
+  .btn-close-tab:hover {
+    color: var(--color-danger);
+  }
+}
+
+.tab-close:active,
+.btn-close-tab:active {
+  transform: scale(0.88);
 }
 
 /* ── Main content area ──────────────────────────────── */
@@ -235,16 +259,16 @@ body {
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow);
   z-index: 9000;
-  animation: slideIn 0.3s ease-out;
+  animation: panelEnter 200ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-@keyframes slideIn {
+@keyframes panelEnter {
   from {
-    transform: translateX(100%);
+    transform: translateY(8px) scale(0.97);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 }
