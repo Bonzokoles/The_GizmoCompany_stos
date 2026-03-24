@@ -1,0 +1,1 @@
+﻿export { KnowledgeHubPanel } from './KnowledgeHubPanel';

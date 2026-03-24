@@ -1,8 +1,9 @@
-  GET  /kb/categories     — lista dostępnych kategorii (cached)
-  GET  /kb/browse         — przeglądanie artykułów z biblioteki (z filtrem po temacie)
-  GET  /kb/details/:id    — szczegóły artykułu (pełna zawartość + metadane)
-  POST /kb/bulk-export    — export całej biblioteki do JSON
-  POST /datasets/create   — utwórz dataset z biblioteki (snapshot)
+/**
+ *   GET  /kb/categories     — lista dostępnych kategorii (cached)
+ *   GET  /kb/browse         — przeglądanie artykułów z biblioteki (z filtrem po temacie)
+ *   GET  /kb/details/:id    — szczegóły artykułu (pełna zawartość + metadane)
+ *   POST /kb/bulk-export    — export całej biblioteki do JSON
+ *   POST /datasets/create   — utwórz dataset z biblioteki (snapshot)
 /**
  * BUCH Chat Box Gateway Worker
  *

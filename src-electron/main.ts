@@ -33,6 +33,8 @@ import { MeilisearchService } from './services/meilisearch-service';
 import { WebsurfxService } from './services/websurfx-service';
 import { Sist2Service } from './services/sist2-service';
 import { SyncService } from './services/sync-service';
+import { KnowledgeHubService } from './services/knowledge-hub-service';
+import { AgentsCreatorService } from './services/agents-creator-service';
 import { createMCPServer, MCPServer } from './mcp-server';
 
 let mainWindow: BrowserWindow | null = null;
@@ -55,6 +57,8 @@ let meilisearchService: MeilisearchService;
 let websurfxService: WebsurfxService;
 let sist2Service: Sist2Service;
 let syncService: SyncService;
+let knowledgeHubService: KnowledgeHubService;
+let agentsCreatorService: AgentsCreatorService;
 
 /**
  * Create main window
@@ -255,6 +259,16 @@ async function initializeServices() {
     // Catalog — local file library
     catalogService = new CatalogService();
     console.log('✅ Catalog Service initialized');
+
+    // Knowledge Hub — local libraries + cloud D1/R2
+    knowledgeHubService = new KnowledgeHubService(catalogService);
+    knowledgeHubService.autoRegisterHubLibraries()
+      .then(r => console.log(`✅ Knowledge Hub: zarejestrowano ${r.registered} bibl. (pominięto: ${r.skipped})`))
+      .catch(() => console.log('⚠️ Knowledge Hub: auto-register failed (The_DEVz_HUB_of_work may not exist)'));
+
+    // Agents Creator — themed agents with personal knowledge bases
+    agentsCreatorService = new AgentsCreatorService(catalogService);
+    console.log('✅ Agents Creator Service initialized');
 
     // Search — unified orchestrator (SearXNG + AI + Catalog)
     searchService = new SearchService(searxngService, catalogService, aiGatewayService);
@@ -867,6 +881,192 @@ function setupIPCHandlers() {
 
   ipcMain.handle('catalog:get-stats', async () => {
     return catalogService.getStats();
+  });
+
+  // ═══════════════════════════════════════════════════════════
+  // Knowledge Hub — local libraries + D1/R2 cloud
+  // ═══════════════════════════════════════════════════════════
+
+  ipcMain.handle('hub:auto-register', async () => {
+    try {
+      const result = await knowledgeHubService.autoRegisterHubLibraries();
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('hub:get-stats', async () => {
+    return knowledgeHubService.getHubStats();
+  });
+
+  ipcMain.handle('hub:get-topics', async () => {
+    return knowledgeHubService.getKnowledgeTopics();
+  });
+
+  ipcMain.handle('hub:get-topic-files', async (_, topicId: string, limit?: number) => {
+    if (!isValidString(topicId)) return [];
+    return knowledgeHubService.readTopicFiles(topicId, limit);
+  });
+
+  ipcMain.handle('hub:get-agents', async () => {
+    return knowledgeHubService.getAgentDefinitions();
+  });
+
+  ipcMain.handle('hub:create-agent', async (_, agent: any) => {
+    if (!agent || !isValidString(agent.id) || !isValidString(agent.name)) {
+      return { success: false, error: 'Nieprawidłowe dane agenta' };
+    }
+    try {
+      const created = knowledgeHubService.createAgent(agent);
+      return { success: true, data: created };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('hub:get-cloud-resources', async () => {
+    return knowledgeHubService.getCloudResources();
+  });
+
+  ipcMain.handle('hub:search-knowledge', async (_, query: string, topicId?: string) => {
+    if (!isValidString(query)) return { success: false, error: 'Puste zapytanie' };
+    try {
+      const results = knowledgeHubService.searchKnowledge(query, topicId);
+      return { success: true, data: results };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  // ── Agents Creator ───────────────────────────────────────────
+
+  ipcMain.handle('ac:list-workspaces', async () => {
+    return agentsCreatorService.listWorkspaces();
+  });
+
+  ipcMain.handle('ac:create-workspace', async (_, config: any) => {
+    if (!config || !isValidString(config.name)) return { success: false, error: 'Nieprawidłowa nazwa' };
+    try {
+      const ws = agentsCreatorService.createWorkspace(config);
+      return { success: true, data: ws };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:delete-workspace', async (_, agentId: string) => {
+    if (!isValidString(agentId)) return { success: false, error: 'Nieprawidłowe ID' };
+    try {
+      agentsCreatorService.deleteWorkspace(agentId);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:get-workspace', async (_, agentId: string) => {
+    if (!isValidString(agentId)) return null;
+    return agentsCreatorService.getWorkspace(agentId);
+  });
+
+  ipcMain.handle('ac:update-workspace', async (_, agentId: string, updates: any) => {
+    if (!isValidString(agentId)) return { success: false, error: 'Nieprawidłowe ID' };
+    try {
+      const ws = agentsCreatorService.updateWorkspace(agentId, updates);
+      return { success: true, data: ws };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:get-kb-files', async (_, agentId: string) => {
+    if (!isValidString(agentId)) return [];
+    return agentsCreatorService.getKnowledgeFiles(agentId);
+  });
+
+  ipcMain.handle('ac:add-kb-file', async (_, agentId: string, sourcePath: string) => {
+    if (!isValidString(agentId) || !isValidString(sourcePath)) return { success: false, error: 'Brak danych' };
+    try {
+      const file = agentsCreatorService.addKnowledgeFile(agentId, sourcePath);
+      return { success: true, data: file };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:import-from-topic', async (_, agentId: string, topicId: string) => {
+    if (!isValidString(agentId) || !isValidString(topicId)) return { success: false, error: 'Brak danych' };
+    try {
+      const result = agentsCreatorService.importFromTopic(agentId, topicId);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:import-from-url', async (_, agentId: string, url: string) => {
+    if (!isValidString(agentId) || !isValidString(url)) return { success: false, error: 'Brak danych' };
+    try {
+      const file = await agentsCreatorService.importFromUrl(agentId, url);
+      return { success: true, data: file };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:remove-kb-file', async (_, agentId: string, fileName: string) => {
+    if (!isValidString(agentId) || !isValidString(fileName)) return { success: false, error: 'Brak danych' };
+    try {
+      agentsCreatorService.removeKnowledgeFile(agentId, fileName);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:read-kb-file', async (_, agentId: string, fileName: string) => {
+    if (!isValidString(agentId) || !isValidString(fileName)) return null;
+    return agentsCreatorService.readKnowledgeFile(agentId, fileName);
+  });
+
+  ipcMain.handle('ac:get-prompt-snippets', async (_, agentId: string) => {
+    if (!isValidString(agentId)) return [];
+    return agentsCreatorService.getPromptSnippets(agentId);
+  });
+
+  ipcMain.handle('ac:add-prompt-snippet', async (_, agentId: string, snippet: any) => {
+    if (!isValidString(agentId) || !snippet?.name) return { success: false, error: 'Brak danych' };
+    try {
+      agentsCreatorService.addPromptSnippet(agentId, snippet);
+      return { success: true };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:index-rag', async (_, agentId: string) => {
+    if (!isValidString(agentId)) return { success: false, error: 'Nieprawidłowe ID' };
+    try {
+      const result = await agentsCreatorService.indexForRag(agentId);
+      return { success: true, data: result };
+    } catch (error: any) {
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('ac:search-rag', async (_, agentId: string, query: string, limit?: number) => {
+    if (!isValidString(agentId) || !isValidString(query)) return [];
+    return agentsCreatorService.searchRag(agentId, query, limit);
+  });
+
+  ipcMain.handle('ac:get-domain-templates', async () => {
+    return agentsCreatorService.getDomainTemplates();
+  });
+
+  ipcMain.handle('ac:generate-context', async (_, agentId: string) => {
+    if (!isValidString(agentId)) return '';
+    return agentsCreatorService.generatePromptContext(agentId);
   });
 
   // Theme

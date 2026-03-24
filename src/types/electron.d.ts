@@ -410,6 +410,117 @@ export interface CatalogAPI {
   getStats(): Promise<{ libraries: number; files: number; totalSize: number }>;
 }
 
+// ── Knowledge Hub Types ────────────────────────────────────────
+
+export interface KnowledgeTopic {
+  id: string;
+  name: string;
+  category: string;
+  path: string;
+  fileCount: number;
+  description: string;
+  icon: string;
+}
+
+export interface AgentDefinition {
+  id: string;
+  name: string;
+  role: string;
+  knowledgeTopics: string[];
+  systemPrompt?: string;
+  model?: string;
+  createdAt: string;
+}
+
+export interface CloudResource {
+  type: 'd1' | 'r2';
+  id: string;
+  name: string;
+  description: string;
+  project: string;
+  category?: string;
+}
+
+export interface HubStats {
+  localLibraries: number;
+  knowledgeTopics: number;
+  agents: number;
+  indexedFiles: number;
+  totalSizeMB: number;
+  cloudDatabases: number;
+  cloudBuckets: number;
+}
+
+export interface KnowledgeHubAPI {
+  autoRegister(): Promise<APIResult<{ registered: number; skipped: number }>>;
+  getStats(): Promise<HubStats>;
+  getTopics(): Promise<KnowledgeTopic[]>;
+  getTopicFiles(topicId: string, limit?: number): Promise<Array<{ name: string; path: string; snippet: string; size: number }>>;
+  getAgents(): Promise<AgentDefinition[]>;
+  createAgent(agent: Omit<AgentDefinition, 'createdAt'>): Promise<APIResult<AgentDefinition>>;
+  getCloudResources(): Promise<CloudResource[]>;
+  searchKnowledge(query: string, topicId?: string): Promise<APIResult<Array<{ filePath: string; fileName: string; snippet: string; rank: number }>>>;
+}
+
+// ── Agents Creator Types ───────────────────────────────────────
+
+export interface AgentWorkspace {
+  id: string;
+  name: string;
+  domain: string;
+  model: string;
+  description: string;
+  systemPrompt: string;
+  knowledgeFiles: number;
+  ragIndexed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentKBFile {
+  name: string;
+  path: string;
+  size: number;
+  type: 'local' | 'imported' | 'web';
+  source?: string;
+  addedAt: string;
+}
+
+export interface DomainTemplate {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  suggestedTopics: string[];
+  systemPromptTemplate: string;
+  promptSnippets: Array<{ name: string; prompt: string }>;
+}
+
+export interface PromptSnippet {
+  name: string;
+  prompt: string;
+}
+
+export interface AgentsCreatorAPI {
+  listWorkspaces(): Promise<AgentWorkspace[]>;
+  createWorkspace(config: { name: string; domain: string; model: string; description: string; systemPrompt?: string }): Promise<APIResult<AgentWorkspace>>;
+  deleteWorkspace(agentId: string): Promise<APIResult<void>>;
+  getWorkspace(agentId: string): Promise<AgentWorkspace | null>;
+  updateWorkspace(agentId: string, updates: Partial<Pick<AgentWorkspace, 'name' | 'domain' | 'model' | 'description' | 'systemPrompt'>>): Promise<APIResult<AgentWorkspace>>;
+  getKBFiles(agentId: string): Promise<AgentKBFile[]>;
+  addKBFile(agentId: string, sourcePath: string): Promise<APIResult<AgentKBFile>>;
+  importFromTopic(agentId: string, topicId: string): Promise<APIResult<{ imported: number; errors: number }>>;
+  importFromUrl(agentId: string, url: string): Promise<APIResult<AgentKBFile>>;
+  removeKBFile(agentId: string, fileName: string): Promise<APIResult<void>>;
+  readKBFile(agentId: string, fileName: string): Promise<string | null>;
+  getPromptSnippets(agentId: string): Promise<PromptSnippet[]>;
+  addPromptSnippet(agentId: string, snippet: PromptSnippet): Promise<APIResult<void>>;
+  indexRag(agentId: string): Promise<APIResult<{ indexed: number; errors: number }>>;
+  searchRag(agentId: string, query: string, limit?: number): Promise<Array<{ filePath: string; fileName: string; snippet: string; rank: number }>>;
+  getDomainTemplates(): Promise<DomainTemplate[]>;
+  generateContext(agentId: string): Promise<string>;
+}
+
 export interface MeilisearchAPI {
   addHistory(entry: MeiliHistoryEntry): Promise<APIResult<void>>;
   searchHistory(query: string, limit?: number): Promise<APIResult<MeiliSearchResult<unknown>>>;
@@ -447,6 +558,8 @@ export interface ElectronAPI {
   plugin?: PluginAPI;
   search: SearchAPI;
   catalog: CatalogAPI;
+  knowledgeHub: KnowledgeHubAPI;
+  agentsCreator: AgentsCreatorAPI;
   meilisearch: MeilisearchAPI;
   websurfx: WebsurfxAPI;
   sist2: Sist2API;

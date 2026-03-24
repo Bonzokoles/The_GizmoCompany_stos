@@ -220,6 +220,49 @@ const api = {
     getStats: () => ipcRenderer.invoke('catalog:get-stats'),
   },
 
+  // Knowledge Hub — local libraries + cloud D1/R2
+  knowledgeHub: {
+    autoRegister: () => ipcRenderer.invoke('hub:auto-register'),
+    getStats: () => ipcRenderer.invoke('hub:get-stats'),
+    getTopics: () => ipcRenderer.invoke('hub:get-topics'),
+    getTopicFiles: (topicId: string, limit?: number) =>
+      ipcRenderer.invoke('hub:get-topic-files', topicId, limit),
+    getAgents: () => ipcRenderer.invoke('hub:get-agents'),
+    createAgent: (agent: any) => ipcRenderer.invoke('hub:create-agent', agent),
+    getCloudResources: () => ipcRenderer.invoke('hub:get-cloud-resources'),
+    searchKnowledge: (query: string, topicId?: string) =>
+      ipcRenderer.invoke('hub:search-knowledge', query, topicId),
+  },
+
+  // Agents Creator — themed agents with personal knowledge bases + mini RAG
+  agentsCreator: {
+    listWorkspaces: () => ipcRenderer.invoke('ac:list-workspaces'),
+    createWorkspace: (config: any) => ipcRenderer.invoke('ac:create-workspace', config),
+    deleteWorkspace: (agentId: string) => ipcRenderer.invoke('ac:delete-workspace', agentId),
+    getWorkspace: (agentId: string) => ipcRenderer.invoke('ac:get-workspace', agentId),
+    updateWorkspace: (agentId: string, updates: any) =>
+      ipcRenderer.invoke('ac:update-workspace', agentId, updates),
+    getKBFiles: (agentId: string) => ipcRenderer.invoke('ac:get-kb-files', agentId),
+    addKBFile: (agentId: string, sourcePath: string) =>
+      ipcRenderer.invoke('ac:add-kb-file', agentId, sourcePath),
+    importFromTopic: (agentId: string, topicId: string) =>
+      ipcRenderer.invoke('ac:import-from-topic', agentId, topicId),
+    importFromUrl: (agentId: string, url: string) =>
+      ipcRenderer.invoke('ac:import-from-url', agentId, url),
+    removeKBFile: (agentId: string, fileName: string) =>
+      ipcRenderer.invoke('ac:remove-kb-file', agentId, fileName),
+    readKBFile: (agentId: string, fileName: string) =>
+      ipcRenderer.invoke('ac:read-kb-file', agentId, fileName),
+    getPromptSnippets: (agentId: string) => ipcRenderer.invoke('ac:get-prompt-snippets', agentId),
+    addPromptSnippet: (agentId: string, snippet: any) =>
+      ipcRenderer.invoke('ac:add-prompt-snippet', agentId, snippet),
+    indexRag: (agentId: string) => ipcRenderer.invoke('ac:index-rag', agentId),
+    searchRag: (agentId: string, query: string, limit?: number) =>
+      ipcRenderer.invoke('ac:search-rag', agentId, query, limit),
+    getDomainTemplates: () => ipcRenderer.invoke('ac:get-domain-templates'),
+    generateContext: (agentId: string) => ipcRenderer.invoke('ac:generate-context', agentId),
+  },
+
   // CMS — local article management + publish
   cms: {
     createArticle: (data: { title?: string; content?: string; excerpt?: string; category?: string; tags?: string[]; status?: string; language?: string; author?: string; seoTitle?: string; seoDescription?: string }) =>

@@ -536,8 +536,109 @@ init();
 
 <!-- ═══════════════════════════════════════════════════════
      VOICE CHATBOX — Polish AI Assistant (Film Vault)
+     + ADMIN: TMDB Agent & Philosophical AI Assistant
      ═══════════════════════════════════════════════════════ -->
 <style>
+/* ── Admin login button ─────── */
+.admin-login-btn{position:fixed;bottom:28px;left:28px;z-index:9999;width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:var(--transition);opacity:.3;font-size:1rem}
+.admin-login-btn:hover{opacity:1;border-color:var(--accent);background:rgba(0,255,204,0.06)}
+.admin-login-btn.authed{opacity:1;background:rgba(0,255,204,0.1);border-color:var(--accent)}
+
+/* ── Admin overlay panel ────── */
+.admin-panel{position:fixed;top:0;left:0;bottom:0;width:420px;z-index:10000;
+  background:rgba(10,15,30,0.96);backdrop-filter:blur(24px);border-right:1px solid rgba(0,255,204,0.12);
+  transform:translateX(-100%);transition:transform .4s cubic-bezier(.25,.8,.25,1);
+  display:flex;flex-direction:column;overflow:hidden}
+.admin-panel.open{transform:translateX(0)}
+.admin-panel-hdr{padding:16px 20px;display:flex;align-items:center;gap:12px;
+  background:rgba(0,255,204,0.04);border-bottom:1px solid rgba(0,255,204,0.1)}
+.admin-panel-hdr h2{flex:1;font-size:1rem;color:var(--accent);font-weight:800;letter-spacing:1px}
+.admin-panel-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.3rem;padding:4px}
+.admin-panel-close:hover{color:var(--danger)}
+
+/* ── Admin tabs ─────────────── */
+.admin-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.06)}
+.admin-tab{flex:1;padding:10px;text-align:center;font-size:.78rem;font-weight:700;color:var(--text-dim);
+  border:none;background:none;cursor:pointer;transition:var(--transition);font-family:var(--font);
+  border-bottom:2px solid transparent}
+.admin-tab:hover{color:var(--text-muted);background:rgba(255,255,255,0.02)}
+.admin-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(0,255,204,0.03)}
+
+/* ── Tab content areas ──────── */
+.admin-content{flex:1;overflow-y:auto;position:relative}
+.admin-tab-panel{display:none;flex-direction:column;height:100%}
+.admin-tab-panel.active{display:flex}
+
+/* ── TMDB Search ────────────── */
+.tmdb-search{padding:16px;display:flex;flex-direction:column;gap:12px}
+.tmdb-input-row{display:flex;gap:8px}
+.tmdb-input-row input{flex:1;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);
+  border-radius:10px;color:var(--text);font-family:var(--font);font-size:.85rem;outline:none;transition:var(--transition)}
+.tmdb-input-row input:focus{border-color:var(--accent)}
+.tmdb-input-row .btn{white-space:nowrap}
+
+.tmdb-results{flex:1;overflow-y:auto;padding:0 16px 16px}
+.tmdb-card{display:flex;gap:12px;padding:12px;border-radius:12px;border:1px solid var(--glass-border);
+  background:rgba(255,255,255,0.02);cursor:pointer;transition:var(--transition);margin-bottom:8px}
+.tmdb-card:hover{border-color:rgba(0,255,204,0.3);background:rgba(0,255,204,0.03)}
+.tmdb-card img{width:60px;height:90px;border-radius:8px;object-fit:cover;flex-shrink:0}
+.tmdb-card-info{flex:1;min-width:0}
+.tmdb-card-title{font-size:.9rem;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tmdb-card-meta{font-size:.72rem;color:var(--text-dim);margin-bottom:4px}
+.tmdb-card-overview{font-size:.72rem;color:var(--text-muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── Generate panel ─────────── */
+.gen-panel{padding:16px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.gen-movie-hdr{display:flex;gap:12px;padding:14px;border-radius:12px;border:1px solid var(--glass-border);
+  background:rgba(0,255,204,0.02)}
+.gen-movie-hdr img{width:80px;border-radius:8px;object-fit:cover}
+.gen-movie-info h3{font-size:1rem;margin-bottom:4px}
+.gen-movie-info p{font-size:.75rem;color:var(--text-muted);line-height:1.4}
+.gen-styles-row{display:flex;flex-wrap:wrap;gap:6px}
+.gen-style-chk{display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:8px;
+  border:1px solid var(--glass-border);background:rgba(255,255,255,0.02);cursor:pointer;
+  font-size:.75rem;color:var(--text-muted);transition:var(--transition);user-select:none}
+.gen-style-chk.checked{border-color:rgba(0,255,204,0.3);color:var(--accent);background:rgba(0,255,204,0.06)}
+.gen-status{font-size:.8rem;color:var(--text-dim);padding:8px;text-align:center;line-height:1.5}
+
+/* ── Philo chat ─────────────── */
+.philo-chat{display:flex;flex-direction:column;height:100%}
+.philo-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;
+  scrollbar-width:thin;scrollbar-color:rgba(167,139,250,0.2) transparent}
+.philo-msgs::-webkit-scrollbar{width:4px}
+.philo-msgs::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.2);border-radius:2px}
+.philo-msg{max-width:90%;padding:11px 14px;border-radius:12px;font-size:.82rem;line-height:1.6;
+  font-family:var(--font);word-break:break-word;white-space:pre-wrap}
+.philo-msg.user{align-self:flex-end;background:rgba(0,255,204,0.1);color:#d1fae5;border-bottom-right-radius:4px}
+.philo-msg.ai{align-self:flex-start;background:rgba(167,139,250,0.08);color:#e2e8f0;border-bottom-left-radius:4px;
+  border-left:3px solid var(--accent2)}
+.philo-msg.system{align-self:center;color:var(--text-dim);font-size:.72rem;font-style:italic;background:none;padding:4px}
+.philo-input{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(3,4,11,0.5)}
+.philo-input input{flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:10px 14px;color:var(--text);font-size:.82rem;font-family:var(--font);outline:none;transition:.2s}
+.philo-input input:focus{border-color:rgba(167,139,250,0.4);box-shadow:0 0 0 2px rgba(167,139,250,0.1)}
+.philo-input button{width:38px;height:38px;border-radius:10px;border:none;cursor:pointer;
+  background:rgba(167,139,250,0.15);color:var(--accent2);display:flex;align-items:center;justify-content:center;transition:.2s}
+.philo-input button:hover{background:rgba(167,139,250,0.25)}
+
+/* ── Admin login dialog ─────── */
+.admin-login-dialog{position:fixed;inset:0;z-index:20000;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center}
+.admin-login-dialog.open{display:flex}
+.admin-login-box{background:#0a0e1a;border:1px solid var(--accent);border-radius:16px;padding:2rem;
+  max-width:340px;width:100%;text-align:center}
+.admin-login-box h3{color:var(--accent);margin-bottom:1rem;font-size:1rem;letter-spacing:2px}
+.admin-login-box input{width:100%;padding:10px 14px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);
+  border-radius:10px;color:var(--text);font-family:var(--font);font-size:.9rem;outline:none;text-align:center;margin-bottom:1rem}
+.admin-login-box input:focus{border-color:var(--accent)}
+.admin-login-box .btn{width:100%;justify-content:center}
+.admin-login-error{color:var(--danger);font-size:.78rem;margin-top:.5rem;display:none}
+
+/* ── Responsive admin panel ── */
+@media(max-width:480px){.admin-panel{width:100%}}
+
 .vchat-btn{position:fixed;bottom:28px;right:28px;z-index:9999;width:58px;height:58px;border-radius:50%;
   background:linear-gradient(135deg,#00ffcc,#a78bfa);border:none;cursor:pointer;box-shadow:0 4px 24px rgba(0,255,204,0.35);
   display:flex;align-items:center;justify-content:center;transition:.3s cubic-bezier(.25,.8,.25,1)}
@@ -597,6 +698,75 @@ init();
 }
 </style>
 
+<!-- Admin login button (always visible, small) -->
+<button class="admin-login-btn" id="adminLoginBtn" title="Admin">🔐</button>
+
+<!-- Admin login dialog -->
+<div class="admin-login-dialog" id="adminLoginDialog">
+  <div class="admin-login-box">
+    <h3>🔐 JIMBO ADMIN</h3>
+    <input type="password" id="adminTokenInput" placeholder="Admin token..." autocomplete="off">
+    <button class="btn" onclick="adminLogin()">Zaloguj</button>
+    <div class="admin-login-error" id="adminLoginError">Nieprawidłowy token</div>
+  </div>
+</div>
+
+<!-- Admin panel (TMDB Agent + Philo Chat) -->
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-panel-hdr">
+    <h2>🎬 JIMBO AGENT</h2>
+    <button class="admin-panel-close" id="adminPanelClose">&times;</button>
+  </div>
+  <div class="admin-tabs">
+    <button class="admin-tab active" data-tab="tmdb">🔍 TMDB</button>
+    <button class="admin-tab" data-tab="generate">⚡ Generuj</button>
+    <button class="admin-tab" data-tab="philo">🏛️ Filozof</button>
+    <button class="admin-tab" data-tab="moa">⚙️ MOA</button>
+  </div>
+  <div class="admin-content">
+    <!-- TMDB Search Tab -->
+    <div class="admin-tab-panel active" id="tab-tmdb">
+      <div class="tmdb-search">
+        <div class="tmdb-input-row">
+          <input type="text" id="tmdbSearchInput" placeholder="Szukaj filmu w TMDB..." autocomplete="off">
+          <button class="btn" onclick="tmdbSearch()">Szukaj</button>
+        </div>
+      </div>
+      <div class="tmdb-results" id="tmdbResults"></div>
+    </div>
+    <!-- Generate Reviews Tab -->
+    <div class="admin-tab-panel" id="tab-generate">
+      <div class="gen-panel" id="genPanel">
+        <div class="gen-status" id="genStatus">Wybierz film z zakładki TMDB, aby generować recenzje</div>
+      </div>
+    </div>
+    <!-- MOA Config Tab -->
+    <div class="admin-tab-panel" id="tab-moa" style="padding:14px;overflow-y:auto">
+      <div style="font-size:.78rem;color:var(--accent);font-weight:800;margin-bottom:10px;letter-spacing:1px">🔗 MOA PIPELINE CONFIG</div>
+      <div style="font-size:.7rem;color:var(--text-dim);margin-bottom:12px">Tłumacz → Wstępny tekst → Asystent-Filozof → Końcowy tekst</div>
+      <div id="moaStages"></div>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:10px" onclick="saveMoaConfig()">💾 Zapisz konfigurację</button>
+      <div id="moaStatus" style="font-size:.75rem;text-align:center;margin-top:8px;color:var(--text-dim)"></div>
+      <div style="margin-top:14px;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid var(--glass-border);font-size:.7rem;color:var(--text-dim)">
+        <div style="font-weight:700;margin-bottom:4px">🔑 Klucze API (env secrets):</div>
+        <div id="moaKeys">Ładuję...</div>
+      </div>
+    </div>
+    <!-- Philosopher Chat Tab -->
+    <div class="admin-tab-panel" id="tab-philo">
+      <div class="philo-chat">
+        <div class="philo-msgs" id="philoMsgs">
+          <div class="philo-msg system">🏛️ Jimbo Film Philosopher — analiza filmów przez pryzmat Nietzschego, Platona, Arystotelesa, Kanta, Gombrowicza, Mrożka, Thompsona, Bukowskiego...</div>
+        </div>
+        <div class="philo-input">
+          <input type="text" id="philoText" placeholder="Zapytaj filozofa o film..." autocomplete="off">
+          <button onclick="philoSend()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <button class="vchat-btn" id="vchatToggle" title="Asystent filmowy AI">
   <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/></svg>
 </button>
@@ -618,6 +788,411 @@ init();
 </div>
 
 <script>
+/* ════════════════════════════════════════════
+   ADMIN STATE & HELPERS
+   ════════════════════════════════════════════ */
+let ADMIN_TOKEN = sessionStorage.getItem('jimbo_admin_token') || '';
+function isAdmin(){ return !!ADMIN_TOKEN; }
+function adminHeaders(){ return ADMIN_TOKEN ? {'Authorization':'Bearer '+ADMIN_TOKEN} : {}; }
+function apiUrl(path){ return '/api/movies/' + path; }
+
+/* ── Admin login / logout ────────────────── */
+const adminLoginBtn = document.getElementById('adminLoginBtn');
+const adminLoginDialog = document.getElementById('adminLoginDialog');
+const adminTokenInput = document.getElementById('adminTokenInput');
+const adminLoginError = document.getElementById('adminLoginError');
+const adminPanel = document.getElementById('adminPanel');
+
+adminLoginBtn.onclick = () => {
+  if(isAdmin()){ adminPanel.classList.toggle('open'); }
+  else { adminLoginDialog.classList.add('open'); adminTokenInput.focus(); }
+};
+adminTokenInput.onkeydown = e => { if(e.key==='Enter') adminLogin(); };
+adminLoginDialog.onclick = e => { if(e.target===adminLoginDialog) adminLoginDialog.classList.remove('open'); };
+
+async function adminLogin(){
+  const token = adminTokenInput.value.trim();
+  if(!token) return;
+  adminLoginError.style.display='none';
+  try {
+    const r = await fetch(apiUrl('list'), { headers:{'Authorization':'Bearer '+token} });
+    if(r.ok){
+      ADMIN_TOKEN = token;
+      sessionStorage.setItem('jimbo_admin_token', token);
+      adminLoginDialog.classList.remove('open');
+      adminLoginBtn.classList.add('authed');
+      adminPanel.classList.add('open');
+      adminTokenInput.value='';
+      loadAgentMovies();
+      loadMoaConfig();
+    } else { adminLoginError.style.display='block'; }
+  } catch(e){ adminLoginError.textContent='Błąd połączenia';adminLoginError.style.display='block'; }
+}
+
+function adminLogout(){
+  ADMIN_TOKEN=''; sessionStorage.removeItem('jimbo_admin_token');
+  adminLoginBtn.classList.remove('authed'); adminPanel.classList.remove('open');
+}
+
+// auto-login if token saved
+if(ADMIN_TOKEN){ adminLoginBtn.classList.add('authed'); }
+
+/* ── Admin tabs ──────────────────────────── */
+document.querySelectorAll('.admin-tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+  };
+});
+document.getElementById('adminPanelClose').onclick=()=>adminPanel.classList.remove('open');
+
+/* ════════════════════════════════════════════
+   TMDB SEARCH AGENT
+   ════════════════════════════════════════════ */
+const tmdbInput = document.getElementById('tmdbSearchInput');
+const tmdbResults = document.getElementById('tmdbResults');
+let selectedMovie = null; // full TMDB details
+
+tmdbInput.onkeydown = e => { if(e.key==='Enter') tmdbSearch(); };
+
+async function tmdbSearch(){
+  const q = tmdbInput.value.trim(); if(!q) return;
+  tmdbResults.innerHTML='<div class="gen-status">Szukam...</div>';
+  try {
+    const r = await fetch(apiUrl('search?q='+encodeURIComponent(q)),{headers:adminHeaders()});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data = await r.json();
+    if(!data.results||!data.results.length){ tmdbResults.innerHTML='<div class="gen-status">Brak wyników</div>'; return; }
+    tmdbResults.innerHTML='';
+    data.results.forEach(m => {
+      const card = document.createElement('div');card.className='tmdb-card';
+      card.innerHTML=`<img src="${m.poster||''}" onerror="this.style.display='none'" alt="">
+        <div class="tmdb-card-info">
+          <div class="tmdb-card-title">${esc(m.title)}</div>
+          <div class="tmdb-card-meta">${m.year||'?'} · ⭐ ${m.rating||'?'}</div>
+          <div class="tmdb-card-overview">${esc(m.overview||'')}</div>
+        </div>`;
+      card.onclick = () => selectTmdbMovie(m.tmdb_id);
+      tmdbResults.appendChild(card);
+    });
+  } catch(e){ tmdbResults.innerHTML='<div class="gen-status" style="color:#f87171">Błąd: '+esc(e.message)+'</div>'; }
+}
+
+async function selectTmdbMovie(tmdbId){
+  tmdbResults.innerHTML='<div class="gen-status">Ładuję szczegóły...</div>';
+  try {
+    const r = await fetch(apiUrl('details?id='+tmdbId),{headers:adminHeaders()});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    selectedMovie = await r.json();
+    showGeneratePanel();
+    // switch to generate tab
+    document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelector('[data-tab="generate"]').classList.add('active');
+    document.getElementById('tab-generate').classList.add('active');
+  } catch(e){ tmdbResults.innerHTML='<div class="gen-status" style="color:#f87171">Błąd: '+esc(e.message)+'</div>'; }
+}
+
+function esc(s){ const d=document.createElement('div');d.textContent=s;return d.innerHTML; }
+
+/* ════════════════════════════════════════════
+   GENERATE REVIEWS
+   ════════════════════════════════════════════ */
+const STYLES = ['akademicki','bukowski','thompson','gombrowicz','mrozek'];
+const STYLE_LABELS = {akademicki:'📚 Akademicki',bukowski:'🥃 Bukowski',thompson:'💀 Thompson',gombrowicz:'🎭 Gombrowicz',mrozek:'🤡 Mrożek'};
+let selectedStyles = new Set(STYLES);
+
+function showGeneratePanel(){
+  const gp = document.getElementById('genPanel');
+  if(!selectedMovie){ gp.innerHTML='<div class="gen-status">Wybierz film z zakładki TMDB</div>';return; }
+  const m = selectedMovie;
+  const posterUrl = m.poster || '';
+  const director = m.director || '';
+  const cast = (m.cast||[]).slice(0,5).join(', ');
+  const genres = (m.genres||[]).join(', ');
+
+  gp.innerHTML = `
+    <div class="gen-movie-hdr">
+      ${posterUrl?'<img src="'+posterUrl+'" alt="">':''}
+      <div class="gen-movie-info">
+        <h3>${esc(m.title)} (${m.year||'?'})</h3>
+        <p>⭐ ${m.rating||'?'} · ${genres}</p>
+        <p>🎬 ${esc(director)} · ${esc(cast)}</p>
+      </div>
+    </div>
+    <div style="font-size:.78rem;color:var(--text-dim);font-weight:700">Wybierz style recenzji:</div>
+    <div class="gen-styles-row" id="genStylesRow"></div>
+    <button class="btn" onclick="generateReviews()" id="genBtn">⚡ Generuj recenzje (MOA)</button>
+    <div class="gen-status" id="genProgress"></div>`;
+
+  const row = document.getElementById('genStylesRow');
+  STYLES.forEach(s => {
+    const el = document.createElement('div');
+    el.className='gen-style-chk'+(selectedStyles.has(s)?' checked':'');
+    el.textContent=STYLE_LABELS[s]||s;
+    el.onclick=()=>{ if(selectedStyles.has(s)){selectedStyles.delete(s);el.classList.remove('checked')}
+      else{selectedStyles.add(s);el.classList.add('checked')} };
+    row.appendChild(el);
+  });
+}
+
+async function generateReviews(){
+  if(!selectedMovie||!selectedStyles.size) return;
+  const btn=document.getElementById('genBtn');
+  const prog=document.getElementById('genProgress');
+  btn.disabled=true;btn.textContent='Generuję (MOA)...';
+  prog.innerHTML='<div style="text-align:left;line-height:2">' +
+    '<div>\ud83c\udf10 Etap 1: T\u0142umacz — przygotowuje kontekst...</div>' +
+    '<div>\u270d\ufe0f Etap 2: Wst\u0119pny tekst — pisze draft...</div>' +
+    '<div>\ud83c\udfdb\ufe0f Etap 3: Asystent-Filozof — dodaje g\u0142\u0119bi\u0119...</div>' +
+    '<div>\u2728 Etap 4: Ko\u0144cowy tekst — poleruje...</div>' +
+    '</div><div style="margin-top:8px;color:var(--accent)">Pipeline MOA pracuje... To mo\u017ce zaj\u0105\u0107 par\u0119 minut.</div>';
+  prog.style.color='var(--text-muted)';
+  try {
+    const r = await fetch(apiUrl('generate'),{method:'POST',
+      headers:{...adminHeaders(),'Content-Type':'application/json'},
+      body:JSON.stringify({
+        tmdb_id:selectedMovie.tmdb_id,
+        title:selectedMovie.title,
+        year:selectedMovie.year,
+        overview:selectedMovie.overview,
+        runtime:selectedMovie.runtime,
+        rating:selectedMovie.rating,
+        genres:(selectedMovie.genres||[]),
+        director:selectedMovie.director,
+        cast:selectedMovie.cast||[],
+        poster:selectedMovie.poster,
+        backdrop:selectedMovie.backdrop,
+        styles:Array.from(selectedStyles)
+      })});
+    if(!r.ok){const t=await r.text();throw new Error(t.slice(0,200));}
+    const data = await r.json();
+    const pipeline = (data.moa_pipeline||[]).map(s=>`${s.label}: ${s.provider}/${s.model}`).join('<br>');
+    prog.style.color='#4ade80';
+    prog.innerHTML='\u2705 MOA Pipeline uko\u0144czony! Zapisano do D1.<br>' +
+      '<span style="font-size:.7rem;color:var(--text-dim)">'+pipeline+'</span><br>' +
+      'Recenzje: '+Object.keys(data.reviews||{}).join(', ');
+    loadAgentMovies(); // refresh
+  } catch(e){ prog.textContent='\u274c '+e.message;prog.style.color='#f87171'; }
+  btn.disabled=false;btn.textContent='\u26a1 Generuj recenzje (MOA)';
+}
+
+/* ════════════════════════════════════════════
+   LOAD AGENT MOVIES FROM D1
+   ════════════════════════════════════════════ */
+let agentMovies = [];
+
+async function loadAgentMovies(){
+  try {
+    const r = await fetch(apiUrl('list'));
+    if(!r.ok) return;
+    const data = await r.json();
+    agentMovies = data.movies || [];
+    mergeAgentMovies();
+  } catch(e){ console.warn('Agent movies load error:',e); }
+}
+
+function mergeAgentMovies(){
+  // Remove old agent movies from DB.movies array
+  // Add agent movies that are not already in static DB
+  agentMovies.forEach(am => {
+    const existing = DB.movies.find(m => m.metadata?.tmdb_id === am.tmdb_id);
+    if(!existing){
+      // Convert to same format as static movies
+      const meta = typeof am.metadata === 'string' ? JSON.parse(am.metadata) : (am.metadata||{});
+      const reviews = typeof am.reviews === 'string' ? JSON.parse(am.reviews) : (am.reviews||{});
+      DB.movies.push({
+        id: am.id || am.slug,
+        title: am.title,
+        slug: am.slug,
+        source: 'agent',
+        metadata: meta,
+        reviews: reviews
+      });
+    }
+  });
+  render();
+}
+
+/* ════════════════════════════════════════════
+   PHILOSOPHER CHAT
+   ════════════════════════════════════════════ */
+const philoMsgs = document.getElementById('philoMsgs');
+const philoText = document.getElementById('philoText');
+let philoHistory = [];
+
+philoText.onkeydown = e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();philoSend()} };
+
+function philoAddMsg(role, text){
+  const d = document.createElement('div');
+  d.className = 'philo-msg '+(role==='user'?'user':role==='system'?'system':'ai');
+  d.textContent = text;
+  philoMsgs.appendChild(d);
+  philoMsgs.scrollTop = philoMsgs.scrollHeight;
+  return d;
+}
+
+async function philoSend(){
+  const text = philoText.value.trim();
+  if(!text || !isAdmin()) return;
+  philoText.value='';
+  philoAddMsg('user', text);
+  philoHistory.push({role:'user',content:text});
+  const aiEl = philoAddMsg('ai','Myślę...');
+  try {
+    // Include current modal movie context if any
+    let movieCtx = '';
+    const modal = document.querySelector('.modal.active');
+    if(modal){
+      const titleEl = modal.querySelector('.modal-title, h2');
+      if(titleEl) movieCtx = titleEl.textContent;
+    }
+    const r = await fetch(apiUrl('chat'),{
+      method:'POST',
+      headers:{...adminHeaders(),'Content-Type':'application/json'},
+      body:JSON.stringify({
+        message: text,
+        history: philoHistory.slice(-10),
+        movieContext: movieCtx || undefined
+      })
+    });
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const data = await r.json();
+    const reply = data.reply || data.response || '(brak odpowiedzi)';
+    aiEl.textContent = reply;
+    philoHistory.push({role:'assistant',content:reply});
+  } catch(e){ aiEl.textContent='Błąd: '+e.message;aiEl.style.color='#f87171'; }
+}
+
+/* ════════════════════════════════════════════
+   DEEP LINKS — ?film=slug
+   ════════════════════════════════════════════ */
+function checkDeepLink(){
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('film');
+  if(!slug) return;
+  // Try to find movie in DB.movies by slug match
+  const allMovies = typeof getAllMovies==='function' ? getAllMovies() : DB.movies;
+  const idx = allMovies.findIndex(m => {
+    const s = (m.slug || m.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+    return s === slug;
+  });
+  if(idx >= 0){
+    // Use openMovieByTitle if available, otherwise openMovie with filtered index
+    if(typeof openMovieByTitle==='function'){
+      setTimeout(()=>openMovieByTitle(allMovies[idx].title),300);
+    }
+  } else {
+    // Try agent movie via API
+    fetch(apiUrl('item/'+encodeURIComponent(slug))).then(r=>r.ok?r.json():null).then(data=>{
+      if(data&&data.movie){
+        const meta = typeof data.movie.metadata==='string'?JSON.parse(data.movie.metadata):data.movie.metadata;
+        const reviews = typeof data.movie.reviews==='string'?JSON.parse(data.movie.reviews):data.movie.reviews;
+        const m = { id:data.movie.slug, title:data.movie.title, slug:data.movie.slug, source:'agent', metadata:meta, reviews:reviews };
+        // Add to DB and open
+        DB.movies.push(m);
+        render();
+        if(typeof openMovieByTitle==='function') openMovieByTitle(m.title);
+      }
+    }).catch(()=>{});
+  }
+}
+
+/* ════════════════════════════════════════════
+   MOA PIPELINE CONFIG
+   ════════════════════════════════════════════ */
+let moaConfigData = [];
+
+async function loadMoaConfig(){
+  if(!isAdmin()) return;
+  try {
+    const r = await fetch(apiUrl('moa-config'),{headers:adminHeaders()});
+    if(!r.ok) return;
+    const data = await r.json();
+    moaConfigData = data.config || [];
+    renderMoaConfig(data);
+  } catch(e){ console.warn('MOA config load error:',e); }
+}
+
+function renderMoaConfig(data){
+  const container = document.getElementById('moaStages');
+  if(!container) return;
+  const stageEmojis = {translator:'\ud83c\udf10',draft:'\u270d\ufe0f',philosopher:'\ud83c\udfdb\ufe0f',final:'\u2728'};
+  const labels = data.labels||{translator:'T\u0142umacz',draft:'Wst\u0119pny tekst',philosopher:'Asystent-Filozof',final:'Ko\u0144cowy tekst'};
+  container.innerHTML = '';
+  (data.config||[]).forEach((cfg,i) => {
+    const div = document.createElement('div');
+    div.style.cssText='padding:10px;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.02);margin-bottom:8px';
+    const provOpts = (data.providers||['openrouter','anthropic','openai','deepseek','workers-ai'])
+      .map(p=>`<option value="${p}"${p===cfg.provider?' selected':''}>${p}${data.availableKeys?.[p]?' \u2705':' \u274c'}</option>`).join('');
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span style="font-size:1.1rem">${stageEmojis[cfg.stage]||'\u2699\ufe0f'}</span>
+        <span style="font-size:.78rem;font-weight:700;color:var(--accent)">${i+1}. ${esc(labels[cfg.stage]||cfg.stage)}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div>
+          <label style="font-size:.65rem;color:var(--text-dim)">Provider</label>
+          <select class="moa-provider" data-stage="${cfg.stage}" style="width:100%;padding:6px 8px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:.75rem;font-family:var(--font)">
+            ${provOpts}
+          </select>
+        </div>
+        <div>
+          <label style="font-size:.65rem;color:var(--text-dim)">Model</label>
+          <input class="moa-model" data-stage="${cfg.stage}" value="${esc(cfg.model)}" style="width:100%;padding:6px 8px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:.75rem;font-family:var(--font);box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:.65rem;color:var(--text-dim)">Temp: ${cfg.temperature}</label>
+          <input type="range" class="moa-temp" data-stage="${cfg.stage}" min="0" max="1" step="0.05" value="${cfg.temperature}" style="width:100%" oninput="this.previousElementSibling.textContent='Temp: '+this.value">
+        </div>
+        <div>
+          <label style="font-size:.65rem;color:var(--text-dim)">Max tokens</label>
+          <input type="number" class="moa-tokens" data-stage="${cfg.stage}" value="${cfg.max_tokens}" min="500" max="8000" step="500" style="width:100%;padding:6px 8px;background:rgba(255,255,255,0.04);border:1px solid var(--glass-border);border-radius:8px;color:var(--text);font-size:.75rem;font-family:var(--font);box-sizing:border-box">
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+  // Show API keys status
+  const keysEl = document.getElementById('moaKeys');
+  if(keysEl && data.availableKeys){
+    keysEl.innerHTML = Object.entries(data.availableKeys).map(([k,v])=>
+      `<span style="margin-right:8px">${v?'\u2705':'\u274c'} ${k}</span>`
+    ).join('');
+  }
+}
+
+async function saveMoaConfig(){
+  const stages = [];
+  document.querySelectorAll('.moa-provider').forEach(sel => {
+    const stage = sel.dataset.stage;
+    const provider = sel.value;
+    const model = document.querySelector(`.moa-model[data-stage="${stage}"]`)?.value || '';
+    const temperature = parseFloat(document.querySelector(`.moa-temp[data-stage="${stage}"]`)?.value || '0.7');
+    const max_tokens = parseInt(document.querySelector(`.moa-tokens[data-stage="${stage}"]`)?.value || '3000');
+    stages.push({stage,provider,model,temperature,max_tokens});
+  });
+  const status = document.getElementById('moaStatus');
+  try {
+    const r = await fetch(apiUrl('moa-config'),{method:'POST',
+      headers:{...adminHeaders(),'Content-Type':'application/json'},
+      body:JSON.stringify({stages})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    status.textContent='\u2705 Zapisano!';status.style.color='#4ade80';
+    moaConfigData = stages;
+  } catch(e){ status.textContent='\u274c '+e.message;status.style.color='#f87171'; }
+}
+
+// Auto-load MOA config when admin panel opens
+document.getElementById('adminPanel').addEventListener('transitionend', () => {
+  if(document.getElementById('adminPanel').classList.contains('open') && isAdmin() && !moaConfigData.length) loadMoaConfig();
+});
+if(isAdmin()) setTimeout(loadMoaConfig, 600);
+
+/* ════════════════════════════════════════════
+   VOICE CHATBOX — Polish AI Assistant (Film Vault)
+   ════════════════════════════════════════════ */
 (function(){
   const toggle=document.getElementById('vchatToggle'),win=document.getElementById('vchatWin'),
     msgs=document.getElementById('vchatMsgs'),txt=document.getElementById('vchatText'),
@@ -674,14 +1249,12 @@ init();
     }catch(e){btn.classList.remove('playing');btn.textContent='🔊';console.error('TTS error:',e)}
   }
 
-  // Mic — toggle record with silence detection
   micBtn.onclick=async()=>{
     if(recording){stopRecording();return}
     if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('Przeglądarka nie obsługuje nagrywania.');return}
     try{
       const stream=await navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1}});
       audioChunks=[];
-      // Silence detection via AudioContext
       audioCtx=new (window.AudioContext||window.webkitAudioContext)();
       const source=audioCtx.createMediaStreamSource(stream);
       analyser=audioCtx.createAnalyser();analyser.fftSize=512;
@@ -728,6 +1301,19 @@ init();
     }catch(e){const s=document.createElement('div');s.className='vchat-msg system';s.textContent='Błąd STT: '+e.message;msgs.appendChild(s)}
     micBtn.textContent='🎤';msgs.scrollTop=msgs.scrollHeight;
   }
+})();
+
+/* ════════════════════════════════════════════
+   INIT — load agent movies + check deep links
+   ════════════════════════════════════════════ */
+(function(){
+  function postInit(){
+    loadAgentMovies();
+    checkDeepLink();
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(postInit,500));
+  } else { setTimeout(postInit,500); }
 })();
 </script>
 </body>

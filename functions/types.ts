@@ -34,6 +34,13 @@ export interface Env {
   WEBGATE_SECRET?: string;
   UMAMI_SITE_ID?: string;
 
+  // TMDB
+  TMDB_API_KEY?: string;
+  TMDB_READ_TOKEN?: string;
+
+  // Admin
+  ADMIN_TOKEN?: string;
+
   // CF Account (for Workers API monitoring)
   CF_ACCOUNT_ID?: string;
   CF_API_TOKEN?: string;
