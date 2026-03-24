@@ -1,0 +1,41 @@
+{
+  "generated": "2026-03-24",
+  "total_credits": 50,
+  "topics": [
+    {
+      "id": "business-trends-2026",
+      "category": "10_MARKET_ANALYSIS",
+      "queries": 10,
+      "sources": 80,
+      "has_summary": true
+    },
+    {
+      "id": "ai-in-business",
+      "category": "13_AI_NEWS",
+      "queries": 10,
+      "sources": 80,
+      "has_summary": true
+    },
+    {
+      "id": "financial-analytics",
+      "category": "06_FINANCE",
+      "queries": 10,
+      "sources": 80,
+      "has_summary": true
+    },
+    {
+      "id": "ecommerce-growth",
+      "category": "04_ECOMMERCE_SHOPS",
+      "queries": 10,
+      "sources": 80,
+      "has_summary": true
+    },
+    {
+      "id": "market-opportunities",
+      "category": "11_OPPORTUNITIES",
+      "queries": 10,
+      "sources": 80,
+      "has_summary": true
+    }
+  ]
+}

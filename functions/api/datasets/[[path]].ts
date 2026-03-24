@@ -27,6 +27,11 @@ const DATASET_META: Record<string, { name: string; cat: string; desc: string; ic
   'midjourney-prompts.json': { name: 'Midjourney Prompts', cat: 'art', desc: 'Kolekcja prompt\u00f3w do Midjourney', icon: '\u2728' },
   'sd-prompts.json': { name: 'Stable Diffusion Prompts', cat: 'art', desc: 'Prompty do Stable Diffusion', icon: '\uD83D\uDDBC\uFE0F' },
   'sdxl-prompts.json': { name: 'SDXL Prompts', cat: 'art', desc: 'Prompty do SDXL', icon: '\u26A1' },
+  'business-trends-2026.json': { name: 'Business Trends 2026', cat: 'research', desc: 'Trendy biznesowe 2026 \u2014 SaaS, praca zdalna, zr\u00f3wnowa\u017cony rozw\u00f3j', icon: '\uD83D\uDCC8' },
+  'ai-in-business.json': { name: 'AI in Business', cat: 'research', desc: 'AI w biznesie \u2014 automatyzacja, chatboty, agenci, ROI', icon: '\uD83E\uDD16' },
+  'financial-analytics.json': { name: 'Financial Analytics', cat: 'research', desc: 'Analityka finansowa \u2014 fintech, prognozy, VC, krypto', icon: '\uD83D\uDCB0' },
+  'ecommerce-growth.json': { name: 'E-commerce Growth', cat: 'research', desc: 'Wzrost e-commerce \u2014 headless, social commerce, BNPL', icon: '\uD83D\uDED2' },
+  'market-opportunities.json': { name: 'Market Opportunities', cat: 'research', desc: 'Okazje rynkowe \u2014 AI agency, micro-SaaS, pasywny doch\u00f3d', icon: '\uD83D\uDE80' },
 };
 
 export const onRequest: PagesFunction<Env> = async (context) => {
