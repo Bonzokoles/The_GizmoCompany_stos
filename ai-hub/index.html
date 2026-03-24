@@ -618,6 +618,40 @@ a:hover{color:#5effe0}
     </div>
     <div id="kb-action-result" style="margin-top:.8rem;font-size:.8rem;color:var(--text-muted)"></div>
   </div>
+
+  <!-- ── Dodaj artykuł / Import lokalny ── -->
+  <div class="glass" style="padding:1rem 1.2rem;margin-top:1rem">
+    <h3 style="margin-bottom:.8rem;color:var(--accent3)">➕ Dodaj do bazy wiedzy</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem">
+      <input id="kb-add-title" placeholder="Tytuł artykułu" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+      <input id="kb-add-library" placeholder="Biblioteka (np. ai, finance, devops)" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+    </div>
+    <textarea id="kb-add-content" placeholder="Treść artykułu..." rows="4" style="width:100%;padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text);resize:vertical;box-sizing:border-box"></textarea>
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.5rem;margin-top:.5rem;align-items:center">
+      <input id="kb-add-source" placeholder="Źródło URL (opcjonalne)" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+      <input id="kb-add-tags" placeholder="Tagi (przecinek)" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+      <button class="app-open-btn" onclick="kbAddArticle()" style="padding:.55rem 1rem;white-space:nowrap">💾 Zapisz</button>
+    </div>
+    <div id="kb-add-result" style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted)"></div>
+  </div>
+
+  <!-- ── Import lokalny (widoczny tylko na localhost) ── -->
+  <div id="kb-local-panel" class="glass" style="display:none;padding:1rem 1.2rem;margin-top:1rem">
+    <h3 style="margin-bottom:.5rem;color:var(--accent2)">📁 Import z lokalnego folderu</h3>
+    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Wybierz pliki lub folder z <code>U:\The_DEVz_HUB_of_work</code> (lub innego). Pliki .md, .txt, .json zostaną zaimportowane do wybranej biblioteki KB.</p>
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:.5rem;align-items:center">
+      <input id="kb-local-lib" placeholder="Biblioteka docelowa (np. devz-hub)" value="devz-hub" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+      <label class="app-open-btn" style="padding:.55rem 1rem;cursor:pointer;white-space:nowrap">
+        📂 Wybierz folder
+        <input type="file" id="kb-local-files" multiple accept=".md,.txt,.json,.yaml,.yml,.html,.ts,.tsx,.js" webkitdirectory style="display:none" onchange="kbImportLocalFiles()">
+      </label>
+      <label class="app-open-btn" style="padding:.55rem 1rem;cursor:pointer;white-space:nowrap;background:rgba(0,255,204,0.08)">
+        📄 Wybierz pliki
+        <input type="file" id="kb-local-files-single" multiple accept=".md,.txt,.json,.yaml,.yml,.html,.ts,.tsx,.js" style="display:none" onchange="kbImportLocalFilesSingle()">
+      </label>
+    </div>
+    <div id="kb-local-progress" style="margin-top:.8rem;font-size:.8rem;color:var(--text-muted)"></div>
+  </div>
 </div>
 
 <!-- ════════════════════════════════════════════════════ -->
@@ -900,11 +934,33 @@ function kbFilterByTopic(topic) {
   kbLoadArticles(topic);
 }
 
-function kbSearchArticles() {
+async function kbSearchArticles() {
   const q = prompt('Szukaj artykułów (pełny tekst):');
   if (!q) return;
-  // TODO: Integracja z /kb/search endpoint
-  alert('Wyszukiwanie będzie dostępne w następnej wersji');
+  const grid = document.getElementById('kb-articles');
+  grid.innerHTML = '<div style="grid-column:1/-1;color:var(--text-muted);text-align:center;padding:2rem">Szukam...</div>';
+  try {
+    const data = await kbFetch('/kb/search', {
+      method: 'POST',
+      body: JSON.stringify({ query: q, library: kbState.currentLib === 'all' ? undefined : kbState.currentLib, limit: 30 })
+    });
+    kbState.articles = data.results || [];
+    document.getElementById('kb-stats-count').textContent = kbState.articles.length;
+    grid.innerHTML = kbState.articles.map(a => `
+      <div class="glass" style="padding:1rem 1.2rem;display:grid;gap:.6rem;position:relative">
+        <div style="display:flex;gap:.5rem;align-items:start">
+          <input type="checkbox" style="width:18px;height:18px;cursor:pointer" onchange="kbToggleSelect(${a.id})">
+          <div style="flex:1">
+            <div style="font-weight:600;cursor:pointer;color:var(--accent)" onclick="kbShowDetail(${a.id})">${a.title}</div>
+            <div style="font-size:.78rem;color:var(--text-muted);margin-top:.3rem">${(a.content||a.excerpt||'').slice(0,200)}...</div>
+          </div>
+        </div>
+        <div style="font-size:.72rem;color:var(--accent2)">${a.library || ''}</div>
+      </div>
+    `).join('') || '<div style="grid-column:1/-1;color:var(--text-muted);text-align:center;padding:2rem">Brak wyników.</div>';
+  } catch(e) {
+    grid.innerHTML = `<div style="grid-column:1/-1;color:#f87171;text-align:center;padding:2rem">Błąd wyszukiwania: ${e.message}</div>`;
+  }
 }
 
 function kbAddToDataset() {
@@ -928,8 +984,19 @@ async function kbBulkCreateDataset() {
   result.textContent = 'Tworzenie datasetu...';
   
   try {
-    // TODO: Integracja z /datasets/create endpoint
-    result.textContent = `✅ Dataset "${name}" będzie utworzony z ${kbState.selectedIds.size} artykułami`;
+    const data = await kbFetch('/datasets/create', {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        topic,
+        library: kbState.currentLib,
+        tags: [...kbState.selectedIds].join(','),
+        limit: kbState.selectedIds.size
+      })
+    });
+    result.textContent = `✅ Dataset "${name}" utworzony (#${data.dataset?.id || '?'}) z ${kbState.selectedIds.size} artykułami`;
+    kbState.selectedIds.clear();
+    document.getElementById('kb-stats-selected').textContent = '0';
   } catch(e) {
     result.textContent = `❌ ${e.message}`;
   }
@@ -964,6 +1031,73 @@ async function kbExportLibrary() {
   } catch(e) {
     result.textContent = `❌ Błąd eksportu: ${e.message}`;
   }
+}
+
+/* ═══════════════════════════════════════════════════════
+   KB ADD / LOCAL IMPORT FUNCTIONS
+   ═══════════════════════════════════════════════════════ */
+
+async function kbAddArticle() {
+  const title = document.getElementById('kb-add-title').value.trim();
+  const content = document.getElementById('kb-add-content').value.trim();
+  const library = document.getElementById('kb-add-library').value.trim() || 'general';
+  const source = document.getElementById('kb-add-source').value.trim() || undefined;
+  const tags = document.getElementById('kb-add-tags').value.trim() || undefined;
+  const out = document.getElementById('kb-add-result');
+  if (!title || !content) { out.textContent = '⚠️ Wypełnij tytuł i treść'; return; }
+  out.textContent = 'Zapisywanie...';
+  try {
+    const data = await kbFetch('/kb/store', { method: 'POST', body: JSON.stringify({ title, content, library, source, tags }) });
+    out.textContent = `✅ Zapisano jako #${data.id || '?'} w bibliotece "${library}"`;
+    document.getElementById('kb-add-title').value = '';
+    document.getElementById('kb-add-content').value = '';
+    document.getElementById('kb-add-source').value = '';
+    document.getElementById('kb-add-tags').value = '';
+    try { await env.CACHE.delete('kb:categories'); } catch {}
+  } catch(e) { out.textContent = `❌ ${e.message}`; }
+}
+
+async function kbImportFiles(files) {
+  const library = document.getElementById('kb-local-lib').value.trim() || 'devz-hub';
+  const prog = document.getElementById('kb-local-progress');
+  const endpoint = document.getElementById('kb-endpoint').value;
+  let ok = 0, skip = 0, fail = 0;
+  for (const file of files) {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    if (!['md','txt','json','yaml','yml','html','ts','tsx','js'].includes(ext)) { skip++; continue; }
+    if (file.size > 500_000) { skip++; prog.textContent = `Pomijam duży plik: ${file.name}`; continue; }
+    try {
+      const text = await file.text();
+      const title = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+      const source = file.webkitRelativePath || file.name;
+      prog.textContent = `[${ok+fail+1}/${files.length}] Importuję: ${file.name}...`;
+      const r = await fetch(`${endpoint}/kb/store`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ title, content: text, library, source, tags: ext })
+      });
+      if (r.ok) ok++; else fail++;
+    } catch { fail++; }
+  }
+  prog.textContent = `✅ Import zakończony: ${ok} plików OK, ${skip} pominiętych, ${fail} błędów. Biblioteka: "${library}"`;
+  kbLoadLibraries();
+}
+
+function kbImportLocalFiles() {
+  const input = document.getElementById('kb-local-files');
+  if (input.files.length) kbImportFiles(Array.from(input.files));
+}
+
+function kbImportLocalFilesSingle() {
+  const input = document.getElementById('kb-local-files-single');
+  if (input.files.length) kbImportFiles(Array.from(input.files));
+}
+
+// Show local panel only on localhost
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const p = document.getElementById('kb-local-panel');
+    if (p) p.style.display = 'block';
+  });
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1542,15 +1676,33 @@ init();
     msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d;
   }
 
+  async function searchKbForContext(query) {
+    try {
+      const endpoint = document.getElementById('kb-endpoint')?.value || 'https://jimbo-gateway.stolarnia-ams.workers.dev';
+      const r = await fetch(`${endpoint}/kb/search`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({query, limit: 3})
+      });
+      if (!r.ok) return '';
+      const data = await r.json();
+      const results = data.results || [];
+      if (!results.length) return '';
+      return '\n\nKontekst z bazy wiedzy:\n' + results.map((d,i) => `[${i+1}] ${d.title}: ${(d.content||d.excerpt||'').slice(0,300)}`).join('\n');
+    } catch { return ''; }
+  }
+
   async function sendMsg(){
     const text=txt.value.trim();if(!text)return;txt.value='';
     addMsg('user',text);history.push({role:'user',content:text});
     const aiEl=addMsg('ai','...');
     try{
+      const kbCtx = await searchKbForContext(text);
+      const systemPrompt = 'Jesteś Jimbo — pomocnym asystentem AI tego portalu. Odpowiadaj po polsku, krótko i konkretnie. Masz dostęp do bazy wiedzy projektu — korzystaj z niej gdy to przydatne.' + kbCtx;
       const r=await fetch('/api/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({prompt:text,maxTokens:1024,systemPrompt:'Jesteś pomocnym asystentem AI. Odpowiadaj po polsku, krótko i konkretnie.'})});
+        body:JSON.stringify({prompt:text,maxTokens:1024,systemPrompt})});
       if(!r.ok)throw new Error('HTTP '+r.status);
-      const data=await r.json();const reply=data.response||data.text||'(brak odpowiedzi)';
+      const data=await r.json();
+      const reply=data.content||data.response||data.text||'(brak odpowiedzi)';
       aiEl.firstChild.textContent=reply;history.push({role:'assistant',content:reply});
     }catch(e){aiEl.firstChild.textContent='Błąd: '+e.message;aiEl.style.color='#f87171'}
     msgs.scrollTop=msgs.scrollHeight;
