@@ -147,6 +147,9 @@ a:hover{color:#5effe0}
 .app-open-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:8px;border:1px solid var(--accent);
   background:var(--accent-dim);color:var(--accent);font-family:var(--font);font-weight:700;font-size:.8rem;cursor:pointer;transition:var(--transition)}
 .app-open-btn:hover{background:var(--accent);color:#000}
+.kb-shortcut-btn{padding:.3rem .6rem;border-radius:6px;border:1px solid rgba(0,255,204,0.2);background:rgba(0,255,204,0.06);color:var(--text-muted);font-size:.72rem;cursor:pointer;transition:var(--transition);font-family:var(--font)}
+.kb-shortcut-btn:hover,.kb-shortcut-btn.active{background:rgba(0,255,204,0.18);color:var(--accent);border-color:rgba(0,255,204,0.5)}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ─── SEARCH BAR ─── */
 .hub-search{max-width:500px;position:relative;margin-bottom:2rem}
@@ -540,7 +543,7 @@ a:hover{color:#5effe0}
 
   <div class="glass" style="padding:1rem 1.2rem;margin-bottom:1rem;display:grid;grid-template-columns:auto 1fr auto;gap:.8rem;align-items:end">
     <label style="font-size:.8rem;color:var(--text-muted)">Endpoint Gateway
-      <input id="kb-endpoint" type="text" value="https://jimbo-gateway.stolarnia-ams.workers.dev" style="width:200px;margin-top:.35rem;padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text);font-size:.8rem">
+      <input id="kb-endpoint" type="text" value="https://jimbo-gateway.stolarnia-ams.workers.dev" style="width:200px;margin-top:.35rem;padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text);font-size:.8rem" oninput="localStorage.setItem('kb_endpoint',this.value)">
     </label>
     <button class="app-open-btn" onclick="kbLoadLibraries()" style="padding:.5rem 1rem">Załaduj biblioteki</button>
     <button class="app-open-btn" onclick="kbSearchArticles()" style="padding:.5rem 1rem;background:rgba(0,255,204,0.12)">Szukaj</button>
@@ -551,7 +554,9 @@ a:hover{color:#5effe0}
     <div class="glass" style="padding:1rem 1.2rem;display:flex;flex-direction:column;gap:.8rem;height:fit-content">
       <h3 style="color:var(--accent);font-size:.95rem">📚 Kategorie</h3>
       <div id="kb-categories" style="display:grid;gap:.4rem">
-        <div style="font-size:.8rem;color:var(--text-muted)">Wczytywanie...</div>
+        <div style="font-size:.8rem;color:var(--text-muted);display:flex;align-items:center;gap:.4rem">
+          <span style="animation:spin 1s linear infinite;display:inline-block">⏳</span> Ładowanie indeksu...
+        </div>
       </div>
       <hr style="border:none;border-top:1px solid var(--glass-border);margin:.5rem 0">
       <h3 style="color:var(--accent2);font-size:.95rem">🏷️ Tematy kategor</h3>
@@ -635,12 +640,49 @@ a:hover{color:#5effe0}
     <div id="kb-add-result" style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted)"></div>
   </div>
 
-  <!-- ── Import lokalny (widoczny tylko na localhost) ── -->
-  <div id="kb-local-panel" class="glass" style="display:none;padding:1rem 1.2rem;margin-top:1rem">
-    <h3 style="margin-bottom:.5rem;color:var(--accent2)">📁 Import z lokalnego folderu</h3>
-    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">Wybierz pliki lub folder z <code>U:\The_DEVz_HUB_of_work</code> (lub innego). Pliki .md, .txt, .json zostaną zaimportowane do wybranej biblioteki KB.</p>
+  <!-- ── Import lokalny (stały dostęp) ── -->
+  <div id="kb-local-panel" class="glass" style="display:block;padding:1rem 1.2rem;margin-top:1rem">
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem">
+      <h3 style="margin:0;color:var(--accent2)">📁 Import z lokalnego folderu</h3>
+      <span style="font-size:.7rem;padding:.2rem .5rem;border-radius:12px;background:rgba(0,255,204,0.12);color:var(--accent);border:1px solid rgba(0,255,204,0.2)">🔒 Stały dostęp</span>
+    </div>
+    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:.8rem">
+      Importuj pliki z <code>U:\The_DEVz_HUB_of_work</code>. Kliknij skrót biblioteki poniżej, następnie wybierz odpowiedni podfolder w oknie dialogowym.
+    </p>
+
+    <!-- DEVz HUB Shortcuts -->
+    <div style="margin-bottom:.8rem">
+      <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.4rem">⚡ Skróty DEVz HUB — knowledge_base:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.5rem" id="kb-devz-shortcuts-kb">
+        <button class="kb-shortcut-btn" onclick="kbSetLib('01_ai_seo')">01 AI SEO</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('02_whitecat')">02 WhiteCat</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('03_python')">03 Python</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('04_ecommerce')">04 eCommerce</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('05_agents_rag')">05 Agents/RAG</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('06_finance')">06 Finance</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('07_b2b_sales')">07 B2B Sales</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('08_marketplace')">08 Marketplace</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('09_buy_sell')">09 Buy&Sell</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('10_market_analysis')">10 Market</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('13_ai_news')">13 AI News</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('16_prompt_library')">16 Prompts</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('17_agent_knowledge')">17 Agents KB</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('18_mcp_tools')">18 MCP Tools</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('19_project_plans')">19 Projects</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('20_training')">20 Training</button>
+      </div>
+      <div style="font-size:.75rem;color:var(--text-muted);margin-bottom:.4rem">📚 LOCAL_LIBRARIES:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.3rem">
+        <button class="kb-shortcut-btn" onclick="kbSetLib('local_00_system')" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.3)">00 System</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('local_01_knowledge')" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.3)">01 Knowledge</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('local_02_history')" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.3)">02 History</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('local_03_connections')" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.3)">03 Connections</button>
+        <button class="kb-shortcut-btn" onclick="kbSetLib('local_04_finance')" style="background:rgba(167,139,250,0.1);border-color:rgba(167,139,250,0.3)">04 Finance</button>
+      </div>
+    </div>
+
     <div style="display:grid;grid-template-columns:1fr auto auto;gap:.5rem;align-items:center">
-      <input id="kb-local-lib" placeholder="Biblioteka docelowa (np. devz-hub)" value="devz-hub" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)">
+      <input id="kb-local-lib" placeholder="Biblioteka docelowa (np. devz-hub)" value="devz-hub" style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)" oninput="localStorage.setItem('kb_local_lib',this.value)">
       <label class="app-open-btn" style="padding:.55rem 1rem;cursor:pointer;white-space:nowrap">
         📂 Wybierz folder
         <input type="file" id="kb-local-files" multiple accept=".md,.txt,.json,.yaml,.yml,.html,.ts,.tsx,.js" webkitdirectory style="display:none" onchange="kbImportLocalFiles()">
@@ -1092,11 +1134,37 @@ function kbImportLocalFilesSingle() {
   if (input.files.length) kbImportFiles(Array.from(input.files));
 }
 
-// Show local panel only on localhost
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-  document.addEventListener('DOMContentLoaded', () => {
-    const p = document.getElementById('kb-local-panel');
-    if (p) p.style.display = 'block';
+// Restore persisted settings on load
+document.addEventListener('DOMContentLoaded', () => {
+  const savedEndpoint = localStorage.getItem('kb_endpoint');
+  if (savedEndpoint) {
+    const ep = document.getElementById('kb-endpoint');
+    if (ep) ep.value = savedEndpoint;
+    const ep2 = document.getElementById('jimbo-endpoint');
+    if (ep2) ep2.value = savedEndpoint;
+  }
+  const savedLib = localStorage.getItem('kb_local_lib');
+  if (savedLib) {
+    const lib = document.getElementById('kb-local-lib');
+    if (lib) lib.value = savedLib;
+  }
+  // Highlight active shortcut button
+  kbUpdateShortcutButtons();
+  // Auto-load KB index in background (after short delay to not block render)
+  setTimeout(() => kbLoadLibraries().catch(() => {}), 800);
+});
+
+function kbSetLib(name) {
+  const input = document.getElementById('kb-local-lib');
+  if (input) { input.value = name; localStorage.setItem('kb_local_lib', name); }
+  kbUpdateShortcutButtons();
+}
+
+function kbUpdateShortcutButtons() {
+  const current = (document.getElementById('kb-local-lib')?.value || '').toLowerCase();
+  document.querySelectorAll('.kb-shortcut-btn').forEach(btn => {
+    const btnLib = btn.getAttribute('onclick')?.match(/kbSetLib\('([^']+)'\)/)?.[1] || '';
+    btn.classList.toggle('active', btnLib === current);
   });
 }
 
@@ -1114,12 +1182,14 @@ setInterval(tickClock, 1000); tickClock();
 // Navigation
 let currentTab = 'dashboard';
 let dsInitialized = false;
+let kbInitialized = false;
 function switchTab(id) {
   currentTab = id;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
   if (id === 'datasets' && !dsInitialized) { dsInitialized = true; searchDatasets(''); }
+  if (id === 'kb' && !kbInitialized) { kbInitialized = true; kbLoadLibraries(); }
 }
 document.querySelectorAll('.nav-btn').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
 
