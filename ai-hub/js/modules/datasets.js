@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════
-   MODULE — Datasets (HuggingFace Hub + Local)
+   MODULE — Datasets (HuggingFace Hub + Cloud R2)
    ═══════════════════════════════════════════════════ */
 
 const DS_PRESET_QUERIES = {
@@ -8,17 +8,9 @@ const DS_PRESET_QUERIES = {
   local: '__local__',
 };
 
-const LOCAL_DATASETS = [
-  { id: 'b2b-sales-data', name: 'B2B Sales Data', file: 'b2b-sales-data.json', cat: 'business', desc: 'Dane sprzedażowe B2B — produkty, sprzedawcy, autorytety, konkurencja', icon: '💼' },
-  { id: 'ecommerce-chatbot', name: 'E-commerce Chatbot', file: 'ecommerce-chatbot-training.json', cat: 'business', desc: 'Dane treningowe chatbota e-commerce — instrukcje i odpowiedzi', icon: '🤖' },
-  { id: 'ecommerce-support', name: 'E-commerce Support QA', file: 'ecommerce-support-qa.json', cat: 'business', desc: 'Pytania i odpowiedzi supportu e-commerce — kategorie problemów', icon: '🛒' },
-  { id: 'financial-sentiment', name: 'Financial Sentiment', file: 'financial-sentiment.json', cat: 'business', desc: 'Analiza sentymentu tekstów finansowych — pozytywny/negatywny/neutralny', icon: '📈' },
-  { id: 'financial-tweets', name: 'Financial Tweets', file: 'financial-tweets-sentiment.json', cat: 'business', desc: 'Sentyment tweetów finansowych — analiza nastrojów rynkowych', icon: '🐦' },
-  { id: 'midjourney-detailed', name: 'Midjourney Detailed Prompts', file: 'midjourney-detailed-prompts.json', cat: 'art', desc: 'Szczegółowe prompty Midjourney z obrazami referencyjnymi', icon: '🎨' },
-  { id: 'midjourney-prompts', name: 'Midjourney Prompts', file: 'midjourney-prompts.json', cat: 'art', desc: 'Kolekcja promptów do Midjourney — różne style i tematy', icon: '✨' },
-  { id: 'sd-prompts', name: 'Stable Diffusion Prompts', file: 'sd-prompts.json', cat: 'art', desc: 'Prompty do Stable Diffusion — render, sci-fi, fotorealizm', icon: '🖼️' },
-  { id: 'sdxl-prompts', name: 'SDXL Prompts', file: 'sdxl-prompts.json', cat: 'art', desc: 'Prompty do SDXL — zaawansowane opisy do generowania obrazów', icon: '⚡' },
-];
+/* Cloud datasets served from /api/datasets/ (R2 bucket) */
+const DATASETS_API = '/api/datasets';
+let cloudDatasets = null;
 
 let dsCache = {};
 let localDataLoaded = {};
@@ -28,11 +20,11 @@ export async function searchDatasets(query) {
   const loading = document.getElementById('ds-loading');
   const empty = document.getElementById('ds-empty');
 
-  // Local datasets view
+  // Cloud datasets view
   if (query === '__local__') {
     loading.style.display = 'none';
     empty.style.display = 'none';
-    renderLocalDatasets();
+    renderCloudDatasets();
     return;
   }
 
@@ -116,26 +108,61 @@ export function initDatasets() {
     searchDatasets(query);
   }));
 
-  // Auto-load local datasets on start
-  renderLocalDatasets();
+  // Auto-load cloud datasets on start
+  renderCloudDatasets();
 }
 
-/* ── Local datasets renderer ── */
-function renderLocalDatasets() {
+/* ── Fetch dataset list from API ── */
+async function loadCloudDatasetList() {
+  if (cloudDatasets) return cloudDatasets;
+  try {
+    const r = await fetch(DATASETS_API + '/list');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    cloudDatasets = data.datasets || [];
+    return cloudDatasets;
+  } catch (e) {
+    console.warn('Cloud datasets unavailable, using fallback:', e.message);
+    // Fallback — hardcoded list so UI still works
+    cloudDatasets = [
+      { id: 'b2b-sales-data', file: 'b2b-sales-data.json', name: 'B2B Sales Data', cat: 'business', desc: 'Dane sprzeda\u017cowe B2B', icon: '\uD83D\uDCBC' },
+      { id: 'ecommerce-chatbot-training', file: 'ecommerce-chatbot-training.json', name: 'E-commerce Chatbot', cat: 'business', desc: 'Dane treningowe chatbota e-commerce', icon: '\uD83E\uDD16' },
+      { id: 'ecommerce-support-qa', file: 'ecommerce-support-qa.json', name: 'E-commerce Support QA', cat: 'business', desc: 'Pytania i odpowiedzi supportu', icon: '\uD83D\uDED2' },
+      { id: 'financial-sentiment', file: 'financial-sentiment.json', name: 'Financial Sentiment', cat: 'business', desc: 'Analiza sentymentu finansowego', icon: '\uD83D\uDCC8' },
+      { id: 'financial-tweets-sentiment', file: 'financial-tweets-sentiment.json', name: 'Financial Tweets', cat: 'business', desc: 'Sentyment tweet\u00f3w finansowych', icon: '\uD83D\uDC26' },
+      { id: 'midjourney-detailed-prompts', file: 'midjourney-detailed-prompts.json', name: 'Midjourney Detailed', cat: 'art', desc: 'Szczeg\u00f3\u0142owe prompty Midjourney', icon: '\uD83C\uDFA8' },
+      { id: 'midjourney-prompts', file: 'midjourney-prompts.json', name: 'Midjourney Prompts', cat: 'art', desc: 'Kolekcja prompt\u00f3w Midjourney', icon: '\u2728' },
+      { id: 'sd-prompts', file: 'sd-prompts.json', name: 'SD Prompts', cat: 'art', desc: 'Prompty Stable Diffusion', icon: '\uD83D\uDDBC\uFE0F' },
+      { id: 'sdxl-prompts', file: 'sdxl-prompts.json', name: 'SDXL Prompts', cat: 'art', desc: 'Prompty SDXL', icon: '\u26A1' },
+    ];
+    return cloudDatasets;
+  }
+}
+
+/* ── Cloud datasets renderer ── */
+async function renderCloudDatasets() {
   const grid = document.getElementById('ds-grid');
+  const loading = document.getElementById('ds-loading');
   const empty = document.getElementById('ds-empty');
   if (empty) empty.style.display = 'none';
+  if (loading) loading.style.display = 'block';
 
-  grid.innerHTML = LOCAL_DATASETS.map(d => {
-    const sizeStr = '';
-    return `
-    <div class="glass model-card" style="cursor:pointer" onclick="previewLocalDataset('${d.id}')">
+  const datasets = await loadCloudDatasetList();
+  if (loading) loading.style.display = 'none';
+
+  if (!datasets || datasets.length === 0) {
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+
+  grid.innerHTML = datasets.map(d => `
+    <div class="glass model-card" style="cursor:pointer" onclick="previewCloudDataset('${d.id}')">
       <div class="model-head">
         <div>
-          <div class="model-name" style="font-size:.95rem">${d.icon} ${d.name}</div>
+          <div class="model-name" style="font-size:.95rem">${d.icon || '\u2601\uFE0F'} ${d.name}</div>
           <div class="model-provider">${d.cat}</div>
         </div>
-        <span class="model-badge badge-local" style="font-size:.65rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700">LOKALNY</span>
+        <span class="model-badge badge-local" style="font-size:.65rem;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;font-weight:700">\u2601 R2</span>
       </div>
       <div class="model-desc" style="font-size:.8rem;-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden">
         ${d.desc}
@@ -145,16 +172,16 @@ function renderLocalDatasets() {
         <span class="model-chip" style="font-size:.65rem">JSON</span>
       </div>
       <div class="model-footer">
-        <span style="font-size:.78rem;color:var(--text-dim)">📁 ${d.file}</span>
-        <button class="app-open-btn" style="font-size:.7rem;padding:4px 10px" onclick="event.stopPropagation();previewLocalDataset('${d.id}')">👁️ Podgląd</button>
+        <span style="font-size:.78rem;color:var(--text-dim)">\u2601\uFE0F ${d.file}</span>
+        <button class="app-open-btn" style="font-size:.7rem;padding:4px 10px" onclick="event.stopPropagation();previewCloudDataset('${d.id}')">\uD83D\uDC41\uFE0F Podgl\u0105d</button>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
-/* ── Preview local dataset ── */
-async function previewLocalDataset(id) {
-  const ds = LOCAL_DATASETS.find(d => d.id === id);
+/* ── Preview cloud dataset ── */
+async function previewCloudDataset(id) {
+  const datasets = await loadCloudDatasetList();
+  const ds = datasets.find(d => d.id === id);
   if (!ds) return;
 
   const grid = document.getElementById('ds-grid');
@@ -164,16 +191,16 @@ async function previewLocalDataset(id) {
     return;
   }
 
-  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim)">⏳ Ładowanie ${ds.name}...</div>`;
+  grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-dim)">\u23F3 \u0141adowanie ${ds.name} z chmury...</div>`;
 
   try {
-    const r = await fetch(`js/data/datasets/${ds.file}`);
+    const r = await fetch(DATASETS_API + '/' + ds.id);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const data = await r.json();
     localDataLoaded[id] = data;
     showDatasetPreview(ds, data);
   } catch (e) {
-    grid.innerHTML = `<div class="glass" style="padding:2rem;grid-column:1/-1;text-align:center;color:var(--danger)">⚠️ Błąd: ${e.message}</div>`;
+    grid.innerHTML = `<div class="glass" style="padding:2rem;grid-column:1/-1;text-align:center;color:var(--danger)">\u26A0\uFE0F B\u0142\u0105d pobierania: ${e.message}<br><span style="font-size:.8rem;color:var(--text-dim)">Dataset b\u0119dzie dost\u0119pny po deploy na Cloudflare</span></div>`;
   }
 }
 
@@ -185,11 +212,11 @@ function showDatasetPreview(ds, data) {
 
   grid.innerHTML = `
     <div class="glass" style="grid-column:1/-1;padding:1.5rem">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
-        <h3 style="color:var(--accent);font-size:1rem;margin:0">${ds.icon} ${ds.name}</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+        <h3 style="color:var(--accent);font-size:1rem;margin:0">${ds.icon || ''} ${ds.name}</h3>
         <div style="display:flex;gap:.8rem;align-items:center">
-          <span style="font-size:.8rem;color:var(--text-dim)">${total} rekordów · ${keys.length} kolumn</span>
-          <button class="app-open-btn" style="font-size:.7rem;padding:4px 10px" onclick="searchDatasets('__local__')">← Wróć</button>
+          <span style="font-size:.8rem;color:var(--text-dim)">${total} rekord\u00f3w \u00b7 ${keys.length} kolumn</span>
+          <button class="app-open-btn" style="font-size:.7rem;padding:4px 10px" onclick="searchDatasets('__local__')">\u2190 Wr\u00f3\u0107</button>
         </div>
       </div>
       <div style="overflow-x:auto">
@@ -201,15 +228,15 @@ function showDatasetPreview(ds, data) {
             ${sample.map(row => `<tr>${keys.map(k => {
               let val = row[k];
               if (typeof val === 'object') val = JSON.stringify(val).slice(0, 60);
-              if (typeof val === 'string' && val.length > 80) val = val.slice(0, 80) + '…';
+              if (typeof val === 'string' && val.length > 80) val = val.slice(0, 80) + '\u2026';
               return `<td style="padding:5px 8px;border-bottom:1px solid rgba(255,255,255,0.03);color:var(--text-muted);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${val ?? ''}</td>`;
             }).join('')}</tr>`).join('')}
           </tbody>
         </table>
       </div>
-      <div style="margin-top:.8rem;font-size:.75rem;color:var(--text-dim)">Pokazano ${Math.min(8, total)} z ${total} rekordów</div>
+      <div style="margin-top:.8rem;font-size:.75rem;color:var(--text-dim)">Pokazano ${Math.min(8, total)} z ${total} rekord\u00f3w</div>
     </div>`;
 }
 
 // Expose for inline onclick
-window.previewLocalDataset = previewLocalDataset;
+window.previewCloudDataset = previewCloudDataset;

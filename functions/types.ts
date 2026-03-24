@@ -8,6 +8,7 @@ export interface Env {
   // AI_CACHE: KVNamespace;
   // SITE_REGISTRY: KVNamespace;
   // WEB_CACHE: R2Bucket;
+  STATIC_ASSETS: R2Bucket;
   AI: Ai;
 
   // Queues

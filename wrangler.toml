@@ -36,6 +36,11 @@ database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
 # binding = "WEB_CACHE"
 # bucket_name = "zeno-web-cache"
 
+# ─── R2 Bucket (static assets — datasets, media) ──────────
+[[r2_buckets]]
+binding = "STATIC_ASSETS"
+bucket_name = "zen-static-assets"
+
 # ─── Workers AI (CF built-in) ──────────────────────────────
 [ai]
 binding = "AI"
