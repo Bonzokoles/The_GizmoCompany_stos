@@ -28,6 +28,9 @@ coverage/
 .claude/
 *.swp
 *.swo
+
+# Wrangler local state
+.wrangler/
 *~
 
 # OS
