@@ -704,9 +704,10 @@ init();
 }
 
 @media(max-width:480px){
-  .vchat-win{right:8px;bottom:88px;width:calc(100vw - 16px);height:50vh;max-height:50vh}
-  .vchat-btn{bottom:18px;right:18px;width:52px;height:52px}
-  .admin-login-btn{opacity:1;width:48px;height:48px;font-size:1.2rem;bottom:18px;left:18px}
+  .vchat-win{right:8px;bottom:96px;width:calc(100vw - 16px);height:50vh;max-height:50vh}
+  .vchat-btn{bottom:18px;right:18px;width:60px!important;height:60px!important}
+  .vchat-btn svg{width:32px;height:32px}
+  .admin-login-btn{opacity:1!important;width:56px!important;height:56px!important;font-size:1.4rem!important;bottom:18px;left:18px}
   /* ── Mobile chat improvements ── */
   .vchat-msg{font-size:.92rem;padding:12px 16px;max-width:92%;line-height:1.6}
   .vchat-input{padding:10px 12px;gap:10px}
@@ -720,6 +721,7 @@ init();
   .philo-input button{width:48px;height:48px;border-radius:12px;font-size:1.2rem}
   .admin-panel{width:100%}
 }
+</style>
 
 <!-- Admin login button (always visible, small) -->
 <button class="admin-login-btn" id="adminLoginBtn" title="Admin">🔐</button>
