@@ -27,7 +27,7 @@ import { initVchat } from './modules/vchat.js';
 
 /* ── Expose globals for inline onclick= handlers ── */
 Object.assign(window, {
-  switchTab,
+  switchTab, daneSwitch: (...a) => window.daneSwitch?.(...a),
   openApp, openChatModal, closeChatModal,
   openSpaceEmbed, closeSpaceModal, openSpaceHF,
   kbSwitchLibrary, kbShowDetail, kbCloseDetail,

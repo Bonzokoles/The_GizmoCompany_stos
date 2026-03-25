@@ -20,6 +20,8 @@ export function switchTab(id) {
   if (id === 'datasets' && !dsInitialized) { dsInitialized = true; searchDatasets(''); }
   if (id === 'kb'       && !kbInitialized)  { kbInitialized  = true; kbLoadLibraries(); }
   if (id === 'jimbo'    && !jimboInitialized){ jimboInitialized = true; jimboReloadAll(); }
+  if (id === 'agents')  { if (window.agentRender) window.agentRender(); }
+  if (id === 'dane' && !dsInitialized) { dsInitialized = true; searchDatasets(''); }
 }
 
 export function initRouter() {

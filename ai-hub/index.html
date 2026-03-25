@@ -16,19 +16,9 @@
     <div>AI <span>HUB</span> Tools</div>
   </div>
   <nav class="nav" id="nav">
-    <button class="nav-btn active" data-tab="dashboard"><span class="icon">📊</span> Dashboard</button>
-    <button class="nav-btn" data-tab="models"><span class="icon">🧠</span> Modele AI</button>
-    <button class="nav-btn" data-tab="pricing"><span class="icon">💰</span> Cennik</button>
-    <button class="nav-btn" data-tab="providers"><span class="icon">🔌</span> Providerzy</button>
-    <button class="nav-btn" data-tab="tools"><span class="icon">🛠️</span> Narzędzia</button>
-    <button class="nav-btn" data-tab="datasets"><span class="icon">📚</span> Datasety</button>
-    <button class="nav-btn" data-tab="skills"><span class="icon">🎓</span> Skills</button>
-    <button class="nav-btn" data-tab="spaces"><span class="icon">🤗</span> Spaces</button>
-    <button class="nav-btn" data-tab="apps"><span class="icon">📦</span> Aplikacje</button>
-    <button class="nav-btn" data-tab="jimbo"><span class="icon">💬</span> JIMBO Studio</button>
-    <button class="nav-btn" data-tab="kb"><span class="icon">📖</span> Knowledge Browser</button>
-    <button class="nav-btn" onclick="window.open('dataset-viewer/index.html','_blank')" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2)" title="Dataset Viewer PL — tłumaczenie i przeglądanie datasetów"><span class="icon">🇵🇱</span> Dataset Viewer PL</button>
-    <button class="nav-btn" onclick="window.open('crawler-dashboard/index.html','_blank')" style="background:rgba(0,255,204,0.06);border-color:rgba(0,255,204,0.18)" title="Crawler Dashboard — weryfikacja wiedzy z crawlerów AI"><span class="icon">🕷️</span> Crawler Dashboard</button>
+    <button class="nav-btn active" data-tab="agents"><span class="icon">🤖</span> Agenci</button>
+    <button class="nav-btn" data-tab="filmvault"><span class="icon">🎬</span> Film Vault</button>
+    <button class="nav-btn" data-tab="dane"><span class="icon">📚</span> Dane</button>
   </nav>
   <div class="topbar-right">
     <div class="clock" id="clock"></div>
@@ -36,9 +26,175 @@
 </div>
 
 <!-- ════════════════════════════════════════════════════ -->
-<!-- DASHBOARD -->
+<!-- AGENCI — DOMYŚLNA STRONA -->
 <!-- ════════════════════════════════════════════════════ -->
-<div class="page active" id="page-dashboard">
+<div class="page active" id="page-agents">
+  <div class="section-head">
+    <h2>🤖 Kreator <span class="hl">Agentów</span></h2>
+    <p>Twórz agentów/pracowników do komponentów na <strong>zenbrowsers.org</strong> i <strong>mybonzo.com</strong></p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:1.5rem">
+    <!-- FORMULARZ TWORZENIA AGENTA -->
+    <div class="glass" style="padding:1.5rem;display:grid;gap:.9rem">
+      <h3 style="color:var(--accent);font-size:.85rem;text-transform:uppercase;letter-spacing:2px;margin-bottom:.3rem">➕ Nowy Agent</h3>
+
+      <div style="display:grid;gap:.4rem">
+        <label style="font-size:.78rem;color:var(--text-muted)">Nazwa agenta</label>
+        <input id="ag-name" placeholder="np. Agent Strony Głównej" style="padding:.6rem .8rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);color:var(--text);font-family:inherit">
+      </div>
+
+      <div style="display:grid;gap:.4rem">
+        <label style="font-size:.78rem;color:var(--text-muted)">Strona docelowa</label>
+        <select id="ag-site" style="padding:.6rem .8rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(15,23,42,0.9);color:var(--text);font-family:inherit">
+          <option value="zenbrowsers.org">zenbrowsers.org</option>
+          <option value="mybonzo.com">mybonzo.com</option>
+          <option value="ai-hub">ai-hub (lokalnie)</option>
+          <option value="inne">Inne</option>
+        </select>
+      </div>
+
+      <div style="display:grid;gap:.4rem">
+        <label style="font-size:.78rem;color:var(--text-muted)">Komponent / sekcja strony</label>
+        <input id="ag-component" placeholder="np. Hero, Newsletter, Katalog produktów, FAQ" style="padding:.6rem .8rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);color:var(--text);font-family:inherit">
+      </div>
+
+      <div style="display:grid;gap:.4rem">
+        <label style="font-size:.78rem;color:var(--text-muted)">Model AI</label>
+        <select id="ag-model" style="padding:.6rem .8rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(15,23,42,0.9);color:var(--text);font-family:inherit">
+          <option value="deepseek-chat">DeepSeek Chat (najtańszy)</option>
+          <option value="gpt-4o-mini">GPT-4o Mini</option>
+          <option value="gpt-4o">GPT-4o</option>
+          <option value="claude-3-haiku">Claude 3 Haiku</option>
+          <option value="claude-sonnet-4">Claude Sonnet 4</option>
+          <option value="gemini-flash">Gemini Flash</option>
+        </select>
+      </div>
+
+      <div style="display:grid;gap:.4rem">
+        <label style="font-size:.78rem;color:var(--text-muted)">Instrukcje / System Prompt</label>
+        <textarea id="ag-prompt" rows="5" placeholder="Opisz co robi ten agent, jakie ma zadania, czego powinien unikać..." style="padding:.6rem .8rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);color:var(--text);font-family:inherit;resize:vertical;line-height:1.5"></textarea>
+      </div>
+
+      <div style="display:grid;gap:.4rem">
+        <label style="font-size:.78rem;color:var(--text-muted)">Endpoint Gateway (opcjonalnie)</label>
+        <input id="ag-endpoint" placeholder="https://jimbo-gateway.stolarnia-ams.workers.dev" style="padding:.6rem .8rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.04);color:var(--text);font-family:inherit;font-size:.82rem">
+      </div>
+
+      <div style="display:flex;gap:.6rem">
+        <button class="app-open-btn" onclick="agentSave()" style="flex:1;justify-content:center;padding:.7rem">💾 Zapisz agenta</button>
+        <button class="app-open-btn" onclick="agentClear()" style="padding:.7rem 1rem;background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.2)">🗑️ Wyczyść</button>
+      </div>
+      <div id="ag-result" style="font-size:.8rem;color:var(--text-muted);min-height:1.2rem"></div>
+    </div>
+
+    <!-- LISTA AGENTÓW -->
+    <div class="glass" style="padding:1.5rem;display:flex;flex-direction:column;gap:.8rem">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h3 style="color:var(--accent2);font-size:.85rem;text-transform:uppercase;letter-spacing:2px">📋 Moi Agenci</h3>
+        <button class="app-open-btn" onclick="agentExportAll()" style="font-size:.75rem;padding:.35rem .7rem">⬇️ Eksport JSON</button>
+      </div>
+      <div id="ag-list" style="display:grid;gap:.6rem;overflow-y:auto;max-height:520px"></div>
+      <div id="ag-empty" style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.85rem">
+        Brak agentów — utwórz pierwszego po lewej ➜
+      </div>
+    </div>
+  </div>
+
+  <!-- SZCZEGÓŁY AGENTA (modal-like) -->
+  <div id="ag-detail" style="display:none" class="glass" style="padding:1.5rem;margin-top:1rem">
+    <h3 id="ag-detail-title" style="color:var(--accent);margin-bottom:1rem"></h3>
+    <pre id="ag-detail-json" style="background:rgba(255,255,255,0.03);padding:1rem;border-radius:8px;overflow-x:auto;font-size:.78rem;color:var(--text-muted);white-space:pre-wrap;border:1px solid var(--glass-border)"></pre>
+    <button onclick="document.getElementById('ag-detail').style.display='none'" style="margin-top:.8rem;background:none;border:1px solid var(--glass-border);color:var(--text-muted);padding:.4rem 1rem;border-radius:8px;cursor:pointer">Zamknij</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- FILM VAULT -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-filmvault">
+  <div class="section-head">
+    <h2>🎬 <span class="hl">JIMBO Film Vault</span></h2>
+    <p>Baza filmów i recenzji — JIMBO personal collection</p>
+  </div>
+  <div style="border-radius:14px;overflow:hidden;border:1px solid var(--glass-border);height:calc(100vh - 200px)">
+    <iframe src="../movies-app/index.html" style="width:100%;height:100%;border:none;background:var(--bg)" loading="lazy"></iframe>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- DANE — DATASETY + KNOWLEDGE BROWSER -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-dane">
+  <div class="section-head">
+    <h2>📚 <span class="hl">Dane</span> — Datasety &amp; Baza Wiedzy</h2>
+    <p>Datasety R2 i baza wiedzy AI z centralnego gateway</p>
+  </div>
+
+  <!-- Sub-tabs -->
+  <div class="pills" style="margin-bottom:1.2rem" id="dane-pills">
+    <button class="pill active" onclick="daneSwitch('datasety',this)">☁️ Datasety (36)</button>
+    <button class="pill" onclick="daneSwitch('kb',this)">📖 Baza Wiedzy</button>
+    <button class="pill" onclick="window.open('dataset-viewer/index.html','_blank')">🇵🇱 Dataset Viewer</button>
+    <button class="pill" onclick="window.open('crawler-dashboard/index.html','_blank')">🕷️ Crawler</button>
+  </div>
+
+  <!-- Datasety panel -->
+  <div id="dane-datasety">
+    <div class="hub-search">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" id="ds-search" placeholder="Szukaj datasetów (np. polish, sentiment, NER, translation...)">
+    </div>
+    <div class="pills" id="ds-pills">
+      <button class="pill active" data-ds="local">☁️ Wszystkie R2 (36)</button>
+      <button class="pill" data-ds="analytics">📊 Analytics</button>
+      <button class="pill" data-ds="finanse">💰 Finanse</button>
+      <button class="pill" data-ds="business">🤖 AI/Biznes</button>
+      <button class="pill" data-ds="ecommerce">🛒 E-commerce</button>
+      <button class="pill" data-ds="art">🎨 Art/Prompts</button>
+      <button class="pill" data-ds="trending">🔥 Trending HF</button>
+      <button class="pill" data-ds="polish">🇵🇱 Polski</button>
+    </div>
+    <div id="ds-loading" style="text-align:center;padding:3rem;color:var(--text-dim);display:none"><div style="font-size:1.5rem;margin-bottom:.5rem">⏳</div>Wyszukiwanie datasetów...</div>
+    <div class="grid-3" id="ds-grid"></div>
+    <div id="ds-empty" style="text-align:center;padding:3rem;color:var(--text-dim)"><div style="font-size:2rem;margin-bottom:.5rem">📚</div><p>Kliknij kategorię lub wpisz frazę</p></div>
+  </div>
+
+  <!-- Knowledge Browser panel (hidden by default) -->
+  <div id="dane-kb" style="display:none">
+    <div class="glass" style="padding:1rem 1.2rem;margin-bottom:1rem;display:grid;grid-template-columns:auto 1fr auto auto;gap:.8rem;align-items:end">
+      <label style="font-size:.8rem;color:var(--text-muted)">Gateway
+        <input id="kb-endpoint" type="text" value="https://jimbo-gateway.stolarnia-ams.workers.dev"
+          style="width:240px;margin-top:.35rem;padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text);font-size:.8rem">
+      </label>
+      <div></div>
+      <button class="app-open-btn" onclick="kbLoadLibraries()" style="padding:.5rem 1rem">Załaduj</button>
+      <button class="app-open-btn" onclick="kbSearchArticles()" style="padding:.5rem 1rem;background:rgba(0,255,204,0.12)">Szukaj</button>
+    </div>
+    <div style="display:grid;grid-template-columns:220px 1fr;gap:1.2rem">
+      <div class="glass" style="padding:1rem 1.2rem;height:fit-content">
+        <h3 style="color:var(--accent);font-size:.95rem;margin-bottom:.8rem">📚 Kategorie</h3>
+        <div id="kb-categories" style="display:grid;gap:.4rem"><div style="font-size:.8rem;color:var(--text-muted)">⏳ Załaduj aby zobaczyć...</div></div>
+        <hr style="border:none;border-top:1px solid var(--glass-border);margin:.8rem 0">
+        <h3 style="color:var(--accent2);font-size:.95rem;margin-bottom:.5rem">🏷️ Tematy</h3>
+        <div id="kb-topics" style="display:flex;flex-wrap:wrap;gap:.4rem;min-height:60px"></div>
+      </div>
+      <div>
+        <div class="glass" style="padding:.8rem 1.2rem;margin-bottom:1rem;display:flex;gap:2rem">
+          <div><span id="kb-stats-count" style="color:var(--accent);font-weight:700;font-size:1.2rem">—</span> <span style="font-size:.75rem;color:var(--text-muted)">artykułów</span></div>
+          <div><span id="kb-stats-lib" style="color:var(--accent2);font-weight:700;font-size:1.2rem">—</span> <span style="font-size:.75rem;color:var(--text-muted)">bibliotek</span></div>
+          <div><span id="kb-stats-selected" style="color:var(--accent3);font-weight:700;font-size:1.2rem">0</span> <span style="font-size:.75rem;color:var(--text-muted)">zaznaczonych</span></div>
+        </div>
+        <div id="kb-articles" style="display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- DASHBOARD (ukryty — legacy) -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard" style="display:none">
   <div class="section-head">
     <h2>⚡ AI <span class="hl">Hub</span> — Przegląd</h2>
     <p>Centralny hub do zarządzania modelami AI, narzędziami, aplikacjami i kosztami</p>
@@ -570,6 +726,127 @@
 <!-- ════════════════════════════════════════════════════ -->
 <!-- ENTRY POINT -->
 <!-- ════════════════════════════════════════════════════ -->
+<script>
+// ─── AGENT CREATOR ────────────────────────────────────────────────────────
+const AG_KEY = 'zeno_agents_v1';
+
+function agentLoad() {
+  return JSON.parse(localStorage.getItem(AG_KEY) || '[]');
+}
+function agentStore(list) {
+  localStorage.setItem(AG_KEY, JSON.stringify(list));
+}
+
+function agentRender() {
+  const list = agentLoad();
+  const el = document.getElementById('ag-list');
+  const empty = document.getElementById('ag-empty');
+  if (!list.length) { el.innerHTML = ''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  el.innerHTML = list.map((a, i) => `
+    <div style="padding:.8rem 1rem;border-radius:10px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.02);display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:start">
+      <div>
+        <div style="font-weight:700;color:var(--text);font-size:.9rem">${a.name}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);margin-top:.2rem">
+          <span style="color:var(--accent)">${a.site}</span> · ${a.component} · <span style="color:var(--accent2)">${a.model}</span>
+        </div>
+        <div style="font-size:.72rem;color:var(--text-dim);margin-top:.3rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:350px">${a.prompt.slice(0,80)}${a.prompt.length>80?'…':''}</div>
+      </div>
+      <div style="display:flex;gap:.4rem;flex-shrink:0">
+        <button onclick="agentEdit(${i})" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;padding:.3rem .6rem;border-radius:6px;cursor:pointer;font-size:.75rem">✏️</button>
+        <button onclick="agentExport(${i})" style="background:rgba(0,255,204,0.08);border:1px solid rgba(0,255,204,0.2);color:var(--accent);padding:.3rem .6rem;border-radius:6px;cursor:pointer;font-size:.75rem">⬇️</button>
+        <button onclick="agentDelete(${i})" style="background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.25);color:#f87171;padding:.3rem .6rem;border-radius:6px;cursor:pointer;font-size:.75rem">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function agentSave() {
+  const name = document.getElementById('ag-name').value.trim();
+  const site = document.getElementById('ag-site').value;
+  const component = document.getElementById('ag-component').value.trim();
+  const model = document.getElementById('ag-model').value;
+  const prompt = document.getElementById('ag-prompt').value.trim();
+  const endpoint = document.getElementById('ag-endpoint').value.trim();
+  const res = document.getElementById('ag-result');
+
+  if (!name || !component || !prompt) {
+    res.style.color = '#f87171';
+    res.textContent = '⚠️ Wypełnij: nazwa, komponent i instrukcje';
+    return;
+  }
+
+  const agent = { id: Date.now(), name, site, component, model, prompt, endpoint, created: new Date().toISOString() };
+  const list = agentLoad();
+  const editIdx = parseInt(document.getElementById('ag-name').dataset.editIdx || '-1');
+  if (editIdx >= 0) { list[editIdx] = agent; } else { list.unshift(agent); }
+  agentStore(list);
+  agentRender();
+  agentClear();
+  res.style.color = '#4ade80';
+  res.textContent = '✅ Agent zapisany!';
+  setTimeout(() => { res.textContent = ''; }, 3000);
+}
+
+function agentClear() {
+  ['ag-name','ag-component','ag-prompt','ag-endpoint'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    delete el.dataset.editIdx;
+  });
+  document.getElementById('ag-site').value = 'zenbrowsers.org';
+  document.getElementById('ag-model').value = 'deepseek-chat';
+  document.getElementById('ag-result').textContent = '';
+}
+
+function agentEdit(i) {
+  const a = agentLoad()[i];
+  document.getElementById('ag-name').value = a.name;
+  document.getElementById('ag-name').dataset.editIdx = i;
+  document.getElementById('ag-site').value = a.site;
+  document.getElementById('ag-component').value = a.component;
+  document.getElementById('ag-model').value = a.model;
+  document.getElementById('ag-prompt').value = a.prompt;
+  document.getElementById('ag-endpoint').value = a.endpoint || '';
+  document.getElementById('ag-name').focus();
+}
+
+function agentDelete(i) {
+  if (!confirm('Usunąć agenta?')) return;
+  const list = agentLoad();
+  list.splice(i, 1);
+  agentStore(list);
+  agentRender();
+}
+
+function agentExport(i) {
+  const a = agentLoad()[i];
+  const blob = new Blob([JSON.stringify(a, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  Object.assign(document.createElement('a'), { href: url, download: `agent-${a.name.replace(/\s+/g,'-').toLowerCase()}.json` }).click();
+  URL.revokeObjectURL(url);
+}
+
+function agentExportAll() {
+  const list = agentLoad();
+  if (!list.length) { alert('Brak agentów do eksportu'); return; }
+  const blob = new Blob([JSON.stringify(list, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  Object.assign(document.createElement('a'), { href: url, download: 'zeno-agents.json' }).click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── DANE SUB-TABS ─────────────────────────────────────────────────────────
+function daneSwitch(view, btn) {
+  document.getElementById('dane-datasety').style.display = view === 'datasety' ? '' : 'none';
+  document.getElementById('dane-kb').style.display = view === 'kb' ? '' : 'none';
+  document.querySelectorAll('#dane-pills .pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+// Init
+agentRender();
+</script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>
