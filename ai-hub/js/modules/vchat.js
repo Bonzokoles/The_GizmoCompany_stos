@@ -11,6 +11,8 @@ export function initVchat() {
   const micBtn   = document.getElementById('vchatMic');
   const closeBtn = document.getElementById('vchatClose');
 
+  const getEndpoint = () => document.getElementById('kb-endpoint')?.value?.trim() || 'https://jimbo-gateway.stolarnia-ams.workers.dev';
+
   let history = [], mediaRec = null, audioChunks = [], recording = false, currentAudio = null;
   let silenceTimer = null, audioCtx = null, analyser = null, silenceStart = 0;
   const SILENCE_THRESHOLD = 0.01, SILENCE_DURATION = 3000;
@@ -66,7 +68,7 @@ export function initVchat() {
     try {
       const kbCtx = await searchKbForContext(text);
       const systemPrompt = 'Jesteś Jimbo — pomocnym asystentem AI tego portalu. Odpowiadaj po polsku, krótko i konkretnie. Masz dostęp do bazy wiedzy projektu — korzystaj z niej gdy to przydatne.' + kbCtx;
-      const r = await fetch('/api/ai/chat', {
+      const r = await fetch(`${getEndpoint()}/chat`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: text, maxTokens: 1024, systemPrompt }),
       });
@@ -86,9 +88,9 @@ export function initVchat() {
     }
     btn.classList.add('playing'); btn.textContent = '⏳';
     try {
-      const r = await fetch('/api/ai/tts', {
+      const r = await fetch(`${getEndpoint()}/speech/tts`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voice: 'nova' }),
+        body: JSON.stringify({ text, voice: 'nova', provider: 'openai' }),
       });
       if (!r.ok) throw new Error('TTS HTTP ' + r.status);
       const blob = await r.blob(); const url = URL.createObjectURL(blob);
@@ -149,7 +151,8 @@ export function initVchat() {
     if (blob.size < 500) return;
     micBtn.textContent = '⏳';
     try {
-      const r = await fetch('/api/ai/stt', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: blob });
+      const fd = new FormData(); fd.append('file', blob, 'audio.webm');
+      const r = await fetch(`${getEndpoint()}/speech/stt`, { method: 'POST', body: fd });
       if (!r.ok) { const t = await r.text(); throw new Error('STT ' + r.status + ': ' + t.slice(0,100)); }
       const data = await r.json();
       if (data.text?.trim()) { txt.value = data.text.trim(); sendMsg(); }
