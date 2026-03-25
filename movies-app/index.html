@@ -160,6 +160,75 @@ a{color:var(--accent);text-decoration:none}
   .form-row{grid-template-columns:1fr}
   .filters{padding:.5rem 1rem}
 }
+
+/* ═════════ CINEMA OVERLAY ═════════ */
+#cinema-ol{position:fixed;inset:0;z-index:8000;background:#000;display:none;flex-direction:column}
+#cinema-ol.open{display:flex;animation:cinIn .35s ease both}
+@keyframes cinIn{from{opacity:0}to{opacity:1}}
+.cin-bar{width:100%;background:#000;display:flex;align-items:center;padding:0 20px;flex-shrink:0}
+.cin-bar-top{height:clamp(44px,7vh,70px);justify-content:space-between}
+.cin-bar-bottom{height:clamp(36px,5vh,54px);justify-content:space-between}
+#cin-title{font-size:.82rem;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.4px}
+.cin-close{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;
+  padding:.4rem 1rem;border-radius:6px;cursor:pointer;font-size:.78rem;font-family:inherit;
+  transition:background .15s;display:flex;align-items:center;gap:.4rem}
+.cin-close:hover{background:rgba(248,113,113,.25);border-color:rgba(248,113,113,.4)}
+#cin-frame{flex:1;position:relative;background:#000;overflow:hidden}
+#cin-iframe{width:100%;height:100%;border:none;filter:contrast(1.04) saturate(1.07)}
+.cin-grain{position:absolute;inset:0;pointer-events:none;opacity:.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px;background-repeat:repeat}
+.cin-badge{font-size:.6rem;color:rgba(255,255,255,.28);letter-spacing:1.5px;text-transform:uppercase}
+
+/* ═════════ MODAL TABS ═════════ */
+.modal-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+.modal-tab{flex:1;padding:.7rem .4rem;text-align:center;font-size:.7rem;font-weight:700;
+  letter-spacing:.4px;text-transform:uppercase;color:var(--text-dim);cursor:pointer;
+  border:none;background:none;font-family:var(--font);
+  border-bottom:2px solid transparent;transition:color .16s,border-color .16s}
+.modal-tab:hover{color:var(--text-muted)}
+.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.modal-tab-panel{display:none;padding:1.5rem 2rem;overflow-y:auto;max-height:calc(80vh - 260px)}
+.modal-tab-panel.active{display:block}
+
+/* ═════════ TRAILER BUTTON ═════════ */
+.btn-trailer{display:inline-flex;align-items:center;gap:.5rem;
+  padding:.6rem 1.4rem;border-radius:8px;
+  border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.07);
+  color:#fbbf24;font-size:.85rem;font-weight:700;cursor:pointer;font-family:var(--font);
+  transition:background .15s,border-color .15s,transform .12s}
+.btn-trailer:hover{background:rgba(251,191,36,.18);border-color:rgba(251,191,36,.55)}
+.btn-trailer:active{transform:scale(.97)}
+.btn-trailer svg{width:15px;height:15px;flex-shrink:0}
+.btn-trailer.loading{opacity:.55;pointer-events:none}
+.trailer-unavail{color:var(--text-dim);font-size:.82rem;font-style:italic;padding:.4rem 0}
+
+/* ═════════ CAST GRID ═════════ */
+.cast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:1rem}
+.cast-card{text-align:center}
+.cast-photo{width:66px;height:66px;border-radius:50%;object-fit:cover;background:#1a2035;
+  margin:0 auto .45rem;display:block;border:2px solid rgba(255,255,255,.07)}
+.cast-photo.no-photo{display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;font-weight:700;color:var(--text-dim)}
+.cast-name{font-size:.68rem;color:var(--text-muted);line-height:1.3;font-weight:600}
+.cast-char{font-size:.6rem;color:var(--text-dim);margin-top:.12rem}
+.cast-msg{color:var(--text-dim);font-size:.82rem;font-style:italic;padding:.4rem 0}
+
+/* ═════════ CIEKAWOSTKI ═════════ */
+.facts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:.7rem;margin-bottom:1.2rem}
+.fact-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:9px;padding:.85rem 1rem}
+.fact-label{font-size:.58rem;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:.28rem;font-weight:700}
+.fact-value{font-size:.86rem;color:var(--text);line-height:1.35}
+.keywords-wrap{display:flex;flex-wrap:wrap;gap:.3rem}
+.kw-tag{font-size:.69rem;padding:.18rem .52rem;border-radius:8px;
+  background:rgba(167,139,250,.07);color:var(--accent2);border:1px solid rgba(167,139,250,.14)}
+
+@media(max-width:600px){
+  .modal-tab{font-size:.62rem;padding:.6rem .25rem;letter-spacing:.1px}
+  .modal-tab-panel{padding:1rem}
+  .facts-grid{grid-template-columns:1fr 1fr}
+  .cin-bar{padding:0 10px}
+}
     </style>
 </head>
 <body>
@@ -222,6 +291,27 @@ a{color:var(--accent);text-decoration:none}
         <h3>Brak wyników</h3>
         <p>Spróbuj zmienić wyszukiwanie lub filtry</p>
     </div>
+</div>
+
+<!-- CINEMA OVERLAY -->
+<div id="cinema-ol">
+  <div class="cin-bar cin-bar-top">
+    <span id="cin-title"></span>
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="cin-badge">Now Playing</span>
+      <button class="cin-close" onclick="closeCinema()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Zamknij
+      </button>
+    </div>
+  </div>
+  <div id="cin-frame">
+    <iframe id="cin-iframe" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    <div class="cin-grain"></div>
+  </div>
+  <div class="cin-bar cin-bar-bottom">
+    <span id="cin-sub" style="font-size:.62rem;color:rgba(255,255,255,.22);letter-spacing:.3px"></span>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -351,50 +441,70 @@ function openMovie(idx) {
     const genres = m.metadata?.genres || [];
     const cast = m.metadata?.cast || [];
     const overview = m.metadata?.overview;
+    const tmdbId = m.metadata?.tmdb_id;
     const styles = m.reviews?.styles || {};
     const personal = m.reviews?.personal;
     const styleNames = Object.keys(styles);
 
     let heroImg = poster ? `<img src="${escHtml(poster)}" alt="">` : '';
-
     let metaParts = [];
     if (year) metaParts.push(year);
     if (dir) metaParts.push(escHtml(dir));
     if (runtime) metaParts.push(runtime + ' min');
     if (rating) metaParts.push('★ ' + Number(rating).toFixed(1));
 
-    let genresHtml = genres.length ? `<div class="chips">${genres.map(g => `<span class="chip">${escHtml(g)}</span>`).join('')}</div>` : '';
-    let castHtml = cast.length ? `<div class="chips">${cast.slice(0, 8).map(c => `<span class="chip">${escHtml(c)}</span>`).join('')}</div>` : '';
-
+    let genresHtml = genres.length
+        ? `<div class="chips">${genres.map(g => `<span class="chip">${escHtml(g)}</span>`).join('')}</div>`
+        : '';
     let overviewHtml = overview ? `<p class="modal-overview">${escHtml(overview)}</p>` : '';
 
-    // Review tabs
-    let tabsHtml = '';
-    let reviewsHtml = '';
+    // ── TAB: INFO / TRAILER ──────────────────────────────
+    let trailerBtn = tmdbId
+        ? `<button class="btn-trailer" id="trailerBtn" onclick="openTrailer(${tmdbId},'${escJs(m.title)}')"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Odtwórz Trailer</button>`
+        : `<p class="trailer-unavail">Brak ID TMDB — trailer niedostępny</p>`;
+    let trailerPanel = `
+        ${overviewHtml}
+        ${genresHtml ? `<div class="modal-section" style="margin-bottom:1rem"><h3>Gatunki</h3>${genresHtml}</div>` : ''}
+        <div class="modal-section"><h3>Trailer</h3>${trailerBtn}</div>`;
+
+    // ── TAB: OBSADA ──────────────────────────────────────
+    let castFallback = cast.length
+        ? `<div class="chips">${cast.slice(0, 12).map(c => `<span class="chip">${escHtml(c)}</span>`).join('')}</div>`
+        : '<p class="cast-msg">Brak danych obsady.</p>';
+    let obsadaPanel = `<div id="cast-container">${tmdbId ? '<p class="cast-msg">Ładowanie obsady...</p>' : castFallback}</div>`;
+
+    // ── TAB: CIEKAWOSTKI ─────────────────────────────────
+    let kws = (m.metadata?.keywords || []).slice(0, 20);
+    let kwsHtml = kws.length
+        ? `<div class="modal-section" style="margin-top:1rem"><h3>Słowa kluczowe</h3><div class="keywords-wrap">${kws.map(k => `<span class="kw-tag">${escHtml(k)}</span>`).join('')}</div></div>`
+        : '';
+    let faktyPanel = `<div id="facts-container"><p class="cast-msg">${tmdbId ? 'Ładowanie ciekawostek...' : 'Brak ID TMDB.'}</p></div>${kwsHtml}`;
+
+    // ── TAB: RECENZJE ────────────────────────────────────
+    let tabsHtml = '', reviewsHtml = '';
     if (styleNames.length > 0 || personal) {
         const allTabs = [...styleNames];
         if (personal) allTabs.push('osobista');
         tabsHtml = `<div class="review-tabs">${allTabs.map((t, i) =>
             `<button class="review-tab${i === 0 ? ' active' : ''}" onclick="switchTab(this,'${escHtml(t)}','${escHtml(m.title)}')">${escHtml(t.toUpperCase())}</button>`
         ).join('')}</div>`;
-
-        const firstKey = allTabs[0];
-        const firstText = firstKey === 'osobista' ? personal : styles[firstKey];
+        const firstText = allTabs[0] === 'osobista' ? personal : styles[allTabs[0]];
         reviewsHtml = `<div class="review-text" id="reviewText">${escHtml(firstText || '')}</div>`;
     }
-
-    // Personal review section
     let personalSection = `
-    <div class="modal-section">
-        <h3>Twoja recenzja</h3>
-        <div class="personal-review">
-            <textarea id="personalInput" placeholder="Napisz swoją recenzję...">${escHtml(personal || '')}</textarea>
-            <div class="personal-actions">
-                ${personal ? `<button class="btn btn-danger btn-sm" onclick="deletePersonal('${escJs(m.title)}')">Usuń</button>` : ''}
-                <button class="btn btn-sm" onclick="savePersonal('${escJs(m.title)}')">Zapisz</button>
+        <div class="modal-section" style="margin-top:1.5rem">
+            <h3>Twoja recenzja</h3>
+            <div class="personal-review">
+                <textarea id="personalInput" placeholder="Napisz swoją recenzję...">${escHtml(personal || '')}</textarea>
+                <div class="personal-actions">
+                    ${personal ? `<button class="btn btn-danger btn-sm" onclick="deletePersonal('${escJs(m.title)}')">Usuń</button>` : ''}
+                    <button class="btn btn-sm" onclick="savePersonal('${escJs(m.title)}')">Zapisz</button>
+                </div>
             </div>
-        </div>
-    </div>`;
+        </div>`;
+    let recenzjePanel = `
+        ${(styleNames.length || personal) ? `<div class="modal-section"><h3>Style recenzji</h3>${tabsHtml}${reviewsHtml}</div>` : ''}
+        ${personalSection}`;
 
     document.getElementById('modalContent').innerHTML = `
         <button class="modal-close" onclick="closeModal()">✕</button>
@@ -406,16 +516,24 @@ function openMovie(idx) {
                 <div class="meta">${metaParts.join(' · ')}</div>
             </div>
         </div>
-        <div class="modal-content">
-            ${overviewHtml}
-            ${genres.length ? `<div class="modal-section"><h3>Gatunki</h3>${genresHtml}</div>` : ''}
-            ${cast.length ? `<div class="modal-section"><h3>Obsada</h3>${castHtml}</div>` : ''}
-            ${(styleNames.length || personal) ? `<div class="modal-section"><h3>Recenzje</h3>${tabsHtml}${reviewsHtml}</div>` : ''}
-            ${personalSection}
-        </div>`;
+        <div class="modal-tabs">
+            <button class="modal-tab active" onclick="switchModalTab(this,'mt-trailer')">▶ Info</button>
+            <button class="modal-tab" onclick="switchModalTab(this,'mt-obsada')">Obsada</button>
+            <button class="modal-tab" onclick="switchModalTab(this,'mt-fakty')">Ciekawostki</button>
+            <button class="modal-tab" onclick="switchModalTab(this,'mt-recenzje')">Recenzje</button>
+        </div>
+        <div class="modal-tab-panel active" id="mt-trailer">${trailerPanel}</div>
+        <div class="modal-tab-panel" id="mt-obsada">${obsadaPanel}</div>
+        <div class="modal-tab-panel" id="mt-fakty">${faktyPanel}</div>
+        <div class="modal-tab-panel" id="mt-recenzje">${recenzjePanel}</div>`;
 
     document.getElementById('modal').classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    if (tmdbId) {
+        loadTmdbCast(tmdbId);
+        loadTmdbFacts(tmdbId);
+    }
 }
 
 function switchTab(btn, key, title) {
@@ -428,9 +546,146 @@ function switchTab(btn, key, title) {
     document.getElementById('reviewText').textContent = text;
 }
 
+function switchModalTab(btn, panelId) {
+    document.querySelectorAll('.modal-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.modal-tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(panelId)?.classList.add('active');
+}
+
 function closeModal() {
     document.getElementById('modal').classList.remove('open');
     document.body.style.overflow = '';
+}
+
+/* ════════════════════════════════════════════
+   TMDB + TRAILER + CINEMA
+   ════════════════════════════════════════════ */
+const TMDB_KEY = 'f1044d027d1751fec72a3b6d8129249c';
+
+async function openTrailer(tmdbId, title) {
+    const btn = document.getElementById('trailerBtn');
+    if (btn) { btn.classList.add('loading'); btn.innerHTML = '<svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Szukam...'; }
+    try {
+        const r = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/videos?api_key=${TMDB_KEY}&language=en-US`);
+        const data = await r.json();
+        const trailers = (data.results || []).filter(v => v.site === 'YouTube' && (v.type === 'Trailer' || v.type === 'Teaser'));
+        if (btn) { btn.classList.remove('loading'); btn.innerHTML = '<svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Odtwórz Trailer'; }
+        if (!trailers.length) {
+            const sec = document.querySelector('#mt-trailer .modal-section:last-child');
+            if (sec && !sec.querySelector('.trailer-unavail')) {
+                const p = document.createElement('p'); p.className = 'trailer-unavail';
+                p.textContent = 'Nie znaleziono trailera dla tego tytułu na YouTube.';
+                sec.appendChild(p);
+            }
+            return;
+        }
+        showCinema(trailers[0].key, title, trailers[0].name);
+    } catch(e) {
+        if (btn) { btn.classList.remove('loading'); btn.innerHTML = '<svg fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Odtwórz Trailer'; }
+    }
+}
+
+function showCinema(ytKey, movieTitle, trailerTitle) {
+    const ol = document.getElementById('cinema-ol');
+    const iframe = document.getElementById('cin-iframe');
+    if (!ol || !iframe) return;
+    iframe.src = `https://www.youtube-nocookie.com/embed/${ytKey}?autoplay=1&rel=0&modestbranding=1&color=white`;
+    document.getElementById('cin-title').textContent = movieTitle || '';
+    const sub = document.getElementById('cin-sub');
+    if (sub) sub.textContent = trailerTitle || '';
+    ol.classList.add('open');
+    cineBass();
+}
+
+function closeCinema() {
+    const ol = document.getElementById('cinema-ol');
+    const iframe = document.getElementById('cin-iframe');
+    if (iframe) iframe.src = '';
+    ol?.classList.remove('open');
+    stopBass();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeCinema(); closeModal(); } });
+
+// ── Cinematic bass drone ─────────────────────────────────
+let _bCtx = null, _bOsc = null, _bGain = null;
+function cineBass() {
+    try {
+        _bCtx = new (window.AudioContext || window.webkitAudioContext)();
+        _bOsc = _bCtx.createOscillator();
+        _bGain = _bCtx.createGain();
+        _bOsc.type = 'sine';
+        _bOsc.frequency.setValueAtTime(42, _bCtx.currentTime);
+        _bGain.gain.setValueAtTime(0, _bCtx.currentTime);
+        _bGain.gain.linearRampToValueAtTime(0.04, _bCtx.currentTime + 1.8);
+        _bGain.gain.linearRampToValueAtTime(0, _bCtx.currentTime + 7);
+        _bOsc.connect(_bGain);
+        _bGain.connect(_bCtx.destination);
+        _bOsc.start();
+        _bOsc.stop(_bCtx.currentTime + 7);
+    } catch(e) {}
+}
+function stopBass() {
+    try { _bOsc?.stop?.(); } catch(_) {}
+    try { _bCtx?.close?.(); } catch(_) {}
+    _bCtx = _bOsc = _bGain = null;
+}
+
+// ── TMDB: Obsada ─────────────────────────────────────────
+async function loadTmdbCast(tmdbId) {
+    const c = document.getElementById('cast-container');
+    if (!c) return;
+    try {
+        const r = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/credits?api_key=${TMDB_KEY}`);
+        const data = await r.json();
+        const cast = (data.cast || []).slice(0, 18);
+        if (!cast.length) { c.innerHTML = '<p class="cast-msg">Brak danych obsady.</p>'; return; }
+        c.innerHTML = `<div class="cast-grid">${cast.map(a => {
+            const ph = a.profile_path
+                ? `<img class="cast-photo" src="https://image.tmdb.org/t/p/w185${a.profile_path}" alt="${escHtml(a.name)}" loading="lazy" onerror="this.outerHTML='<div class=\'cast-photo no-photo\'>${escHtml((a.name||'?')[0])}</div>'">`
+                : `<div class="cast-photo no-photo">${escHtml((a.name||'?')[0])}</div>`;
+            return `<div class="cast-card">${ph}<div class="cast-name">${escHtml(a.name)}</div><div class="cast-char">${escHtml(a.character||'')}</div></div>`;
+        }).join('')}</div>`;
+    } catch(e) { if (c) c.innerHTML = '<p class="cast-msg">Błąd ładowania obsady.</p>'; }
+}
+
+// ── TMDB: Ciekawostki ────────────────────────────────────
+async function loadTmdbFacts(tmdbId) {
+    const c = document.getElementById('facts-container');
+    if (!c) return;
+    try {
+        const [detRes, kwRes] = await Promise.all([
+            fetch(`https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${TMDB_KEY}&language=pl-PL`),
+            fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/keywords?api_key=${TMDB_KEY}`)
+        ]);
+        const det = await detRes.json();
+        const kw = await kwRes.json();
+        const items = [];
+        if (det.budget > 100000) items.push({ l: 'Budżet', v: '$' + (det.budget/1e6).toFixed(1) + 'M' });
+        if (det.revenue > 100000) items.push({ l: 'Przychód', v: '$' + (det.revenue/1e6).toFixed(1) + 'M' });
+        if (det.vote_count) items.push({ l: 'Głosy TMDB', v: det.vote_count.toLocaleString('pl') });
+        if (det.original_language) items.push({ l: 'Oryg. język', v: det.original_language.toUpperCase() });
+        if (det.production_countries?.length) items.push({ l: 'Kraj prod.', v: det.production_countries.map(c=>c.name).join(', ') });
+        if (det.production_companies?.length) items.push({ l: 'Producent', v: det.production_companies.slice(0,2).map(c=>c.name).join(', ') });
+        if (det.belongs_to_collection) items.push({ l: 'Kolekcja', v: det.belongs_to_collection.name });
+        if (det.tagline) items.push({ l: 'Tagline', v: det.tagline });
+        if (det.status) items.push({ l: 'Status', v: det.status });
+        if (det.spoken_languages?.length) items.push({ l: 'Języki', v: det.spoken_languages.map(l=>l.name).join(', ') });
+        const keywords = (kw.keywords || []).slice(0, 24);
+        let html = '';
+        if (items.length) {
+            html += `<div class="modal-section"><h3>Fakty</h3><div class="facts-grid">${items.map(f =>
+                `<div class="fact-card"><div class="fact-label">${escHtml(f.l)}</div><div class="fact-value">${escHtml(f.v)}</div></div>`
+            ).join('')}</div></div>`;
+        }
+        if (keywords.length) {
+            html += `<div class="modal-section"><h3>Słowa kluczowe</h3><div class="keywords-wrap">${keywords.map(k =>
+                `<span class="kw-tag">${escHtml(k.name)}</span>`
+            ).join('')}</div></div>`;
+        }
+        c.innerHTML = html || '<p class="cast-msg">Brak dodatkowych danych.</p>';
+    } catch(e) { if (c) c.innerHTML = '<p class="cast-msg">Błąd ładowania danych.</p>'; }
 }
 
 function savePersonal(title) {
@@ -520,8 +775,6 @@ document.getElementById('filters').addEventListener('click', e => {
 document.getElementById('modal').addEventListener('click', e => {
     if (e.target === document.getElementById('modal')) closeModal();
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
 // Utils
 function escHtml(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
 function escJs(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\"'); }
