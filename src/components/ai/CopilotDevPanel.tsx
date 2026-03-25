@@ -108,7 +108,7 @@ export function CopilotDevPanel({ onClose }: CopilotDevPanelProps) {
     startTransition(() => {
       void (async () => {
         try {
-          const s = await (electronAPI.copilot as { status: () => Promise<CopilotStatus> }).status();
+          const s = await electronAPI.copilot.status();
           setStatus(s);
         } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
@@ -122,7 +122,7 @@ export function CopilotDevPanel({ onClose }: CopilotDevPanelProps) {
     startTransition(() => {
       void (async () => {
         try {
-          const s = await (electronAPI.copilot as { start: () => Promise<CopilotStatus> }).start();
+          const s = await electronAPI.copilot.start();
           setStatus(s);
           setOutput(`✅ start() → state: ${s.state}`);
         } catch (e) {
@@ -139,9 +139,7 @@ export function CopilotDevPanel({ onClose }: CopilotDevPanelProps) {
     startTransition(() => {
       void (async () => {
         try {
-          const res = await (electronAPI.copilot as {
-            runPrompt: (r: { prompt: string; model: string }) => Promise<CopilotPromptResponse>
-          }).runPrompt({ prompt, model });
+          const res = await electronAPI.copilot.runPrompt({ prompt, model });
 
           if (res.success) {
             setOutput(
