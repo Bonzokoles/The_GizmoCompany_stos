@@ -130,6 +130,14 @@ const api = {
     serverStatus: () => ipcRenderer.invoke('mcp:server-status'),
   },
 
+  // Copilot SDK — project-scoped bridge to Copilot CLI
+  copilot: {
+    status: () => ipcRenderer.invoke('copilot:status'),
+    start: () => ipcRenderer.invoke('copilot:start'),
+    runPrompt: (request: { prompt: string; model?: string; cwd?: string }) =>
+      ipcRenderer.invoke('copilot:run-prompt', request),
+  },
+
   // Umami Analytics
   umami: {
     status: () => ipcRenderer.invoke('umami:status'),

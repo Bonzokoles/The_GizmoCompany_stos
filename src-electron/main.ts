@@ -36,6 +36,7 @@ import { Sist2Service } from './services/sist2-service';
 import { SyncService } from './services/sync-service';
 import { KnowledgeHubService } from './services/knowledge-hub-service';
 import { AgentsCreatorService } from './services/agents-creator-service';
+import { CopilotSdkService } from './services/copilot-sdk-service';
 import { createMCPServer, MCPServer } from './mcp-server';
 
 let mainWindow: BrowserWindow | null = null;
@@ -60,6 +61,7 @@ let sist2Service: Sist2Service;
 let syncService: SyncService;
 let knowledgeHubService: KnowledgeHubService;
 let agentsCreatorService: AgentsCreatorService;
+let copilotSdkService: CopilotSdkService;
 
 /**
  * Create main window
@@ -270,6 +272,10 @@ async function initializeServices() {
     // Agents Creator — themed agents with personal knowledge bases
     agentsCreatorService = new AgentsCreatorService(catalogService);
     console.log('✅ Agents Creator Service initialized');
+
+    // Copilot SDK — project-scoped adapter for Copilot CLI
+    copilotSdkService = new CopilotSdkService();
+    console.log('✅ Copilot SDK Service initialized');
 
     // Search — unified orchestrator (SearXNG + AI + Catalog)
     searchService = new SearchService(searxngService, catalogService, aiGatewayService);
@@ -643,6 +649,23 @@ function setupIPCHandlers() {
       toolCount: mcpServer.getToolNames().length,
       tools: mcpServer.getToolNames(),
     };
+  });
+
+  // Copilot SDK
+  ipcMain.handle('copilot:status', async () => {
+    return copilotSdkService.getStatus();
+  });
+
+  ipcMain.handle('copilot:start', async () => {
+    return copilotSdkService.start();
+  });
+
+  ipcMain.handle('copilot:run-prompt', async (_, request: { prompt: string; model?: string; cwd?: string }) => {
+    if (!request || typeof request.prompt !== 'string') {
+      return { success: false, error: 'Invalid Copilot request' };
+    }
+
+    return copilotSdkService.runPrompt(request);
   });
 
   // ═══════════════════════════════════════════════════════════

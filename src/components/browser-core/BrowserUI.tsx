@@ -26,6 +26,7 @@ const SearchPanel = lazy(() => import('../navigation/SearchPanel').then(m => ({ 
 const CatalogBrowser = lazy(() => import('../tools/CatalogBrowser').then(m => ({ default: m.CatalogBrowser })));
 const KnowledgeHubPanel = lazy(() => import('../knowledge-hub/KnowledgeHubPanel').then(m => ({ default: m.KnowledgeHubPanel })));
 const AgentsCreatorPanel = lazy(() => import('../agents-creator/AgentsCreatorPanel').then(m => ({ default: m.AgentsCreatorPanel })));
+const CopilotDevPanel = lazy(() => import('../ai/CopilotDevPanel').then(m => ({ default: m.CopilotDevPanel })));
 
 function PanelFallback() {
   return <div className="panel-loading">Ładowanie panelu...</div>;
@@ -68,6 +69,7 @@ export function BrowserUI() {
   const [showCatalogBrowser, setShowCatalogBrowser] = useState(false);
   const [showKnowledgeHub, setShowKnowledgeHub] = useState(false);
   const [showAgentsCreator, setShowAgentsCreator] = useState(false);
+  const [showCopilotDev, setShowCopilotDev] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showUpdateNotification, setShowUpdateNotification] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -351,6 +353,15 @@ export function BrowserUI() {
             >
               🧑‍💻
             </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowCopilotDev(v => !v)}
+              title="Copilot Dev — @github/copilot-sdk panel"
+              aria-pressed={showCopilotDev}
+              style={navBtnStyle}
+            >
+              🪁
+            </button>
             <button className="btn-icon" onClick={handleNewTab} title="Nowa karta" style={navBtnStyle}>
               +
             </button>
@@ -477,6 +488,11 @@ export function BrowserUI() {
             {showAgentsCreator && (
               <ErrorBoundary>
                 <AgentsCreatorPanel onClose={() => setShowAgentsCreator(false)} />
+              </ErrorBoundary>
+            )}
+            {showCopilotDev && (
+              <ErrorBoundary>
+                <CopilotDevPanel onClose={() => setShowCopilotDev(false)} />
               </ErrorBoundary>
             )}
           </Suspense>
