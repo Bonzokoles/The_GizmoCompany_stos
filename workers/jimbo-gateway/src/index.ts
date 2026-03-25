@@ -39,7 +39,7 @@ export interface Env {
   AI: Ai;
   DB: D1Database;
   STORAGE: R2Bucket;
-  CACHE: KVNamespace;
+  CACHE?: KVNamespace;
   CF_GATEWAY_BASE: string;
   // Provider API Keys (secrets)
   OPENAI_API_KEY: string;
@@ -53,6 +53,26 @@ export interface Env {
   ELEVENLABS_API_KEY: string;
   HUGGINGFACE_API_KEY: string;
   PERPLEXITY_API_KEY: string;
+}
+
+async function cacheGet(env: Env, key: string): Promise<string | null> {
+  try {
+    return await env.CACHE?.get(key) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function cachePut(
+  env: Env,
+  key: string,
+  value: string,
+  opts?: { expirationTtl?: number },
+): Promise<void> {
+  try {
+    if (!env.CACHE) return;
+    await env.CACHE.put(key, value, opts);
+  } catch {}
 }
 
 // ── Provider / Model Registry ─────────────────────────────────────────────
@@ -251,7 +271,7 @@ async function runChat(body: ChatBody, env: Env, providers: ProviderDef[]): Prom
   // Cache key from last user message
   const lastUser = [...messages].reverse().find((m: { role: string; content: string }) => m.role === "user")?.content ?? "";
   const cacheKey = `chat:${model}:${btoa(lastUser).slice(0, 40)}`;
-  const cached = await env.CACHE.get(cacheKey);
+  const cached = await cacheGet(env, cacheKey);
   if (cached) return json({ text: cached, cached: true, model });
 
   // Resolve provider
@@ -284,7 +304,7 @@ async function runChat(body: ChatBody, env: Env, providers: ProviderDef[]): Prom
     if (!res.ok) return err(`Anthropic error ${res.status}: ${await res.text()}`, 502);
     const data = await res.json<{ content: { text: string }[] }>();
     const text = data.content?.[0]?.text ?? "";
-    await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
+    await cachePut(env, cacheKey, text, { expirationTtl: 3600 });
     return json({ text, cached: false, model, provider: "anthropic" });
   }
 
@@ -314,7 +334,7 @@ async function runChat(body: ChatBody, env: Env, providers: ProviderDef[]): Prom
     if (!res.ok) return err(`Gemini error ${res.status}: ${await res.text()}`, 502);
     const data = await res.json<{ candidates: { content: { parts: { text: string }[] } }[] }>();
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-    await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
+    await cachePut(env, cacheKey, text, { expirationTtl: 3600 });
     return json({ text, cached: false, model, provider: "gemini" });
   }
 
@@ -346,7 +366,7 @@ async function runChat(body: ChatBody, env: Env, providers: ProviderDef[]): Prom
 
   const gwData = await gwRes.json<{ choices: { message: { content: string } }[] }>();
   const text = gwData.choices?.[0]?.message?.content ?? "";
-  await env.CACHE.put(cacheKey, text, { expirationTtl: 3600 });
+  await cachePut(env, cacheKey, text, { expirationTtl: 3600 });
   return json({ text, cached: false, model, provider: provider.name });
 }
 
@@ -389,59 +409,30 @@ async function collectContextSnippets(
 
 // ── Init DB schema ────────────────────────────────────────────────────────
 async function ensureSchema(db: D1Database) {
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS jimbo_kb (
-      id        INTEGER PRIMARY KEY AUTOINCREMENT,
-      library   TEXT    NOT NULL DEFAULT 'general',
-      title     TEXT    NOT NULL,
-      content   TEXT    NOT NULL,
-      source    TEXT,
-      tags      TEXT,
-      created_at TEXT   NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE INDEX IF NOT EXISTS idx_jimbo_kb_library ON jimbo_kb(library);
-    CREATE VIRTUAL TABLE IF NOT EXISTS jimbo_kb_fts
+  const statements = [
+    "CREATE TABLE IF NOT EXISTS jimbo_kb (id INTEGER PRIMARY KEY AUTOINCREMENT, library TEXT NOT NULL DEFAULT 'general', title TEXT NOT NULL, content TEXT NOT NULL, source TEXT, tags TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')));",
+    "CREATE INDEX IF NOT EXISTS idx_jimbo_kb_library ON jimbo_kb(library);",
+    "CREATE TABLE IF NOT EXISTS jimbo_datasets (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, topic TEXT NOT NULL, library TEXT NOT NULL DEFAULT 'general', description TEXT, source TEXT, tags TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')));",
+    "CREATE INDEX IF NOT EXISTS idx_jimbo_datasets_library ON jimbo_datasets(library);",
+    "CREATE TABLE IF NOT EXISTS jimbo_dataset_items (id INTEGER PRIMARY KEY AUTOINCREMENT, dataset_id INTEGER NOT NULL, kb_id INTEGER, title TEXT NOT NULL, excerpt TEXT, source TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), FOREIGN KEY (dataset_id) REFERENCES jimbo_datasets(id));",
+    "CREATE INDEX IF NOT EXISTS idx_jimbo_dataset_items_dataset ON jimbo_dataset_items(dataset_id);",
+    "CREATE TABLE IF NOT EXISTS jimbo_agents (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, topic TEXT NOT NULL, library TEXT NOT NULL DEFAULT 'general', dataset_id INTEGER, model TEXT NOT NULL DEFAULT 'gpt-4o-mini', system_prompt TEXT NOT NULL, tools TEXT, created_at TEXT NOT NULL DEFAULT (datetime('now')), FOREIGN KEY (dataset_id) REFERENCES jimbo_datasets(id));",
+    "CREATE INDEX IF NOT EXISTS idx_jimbo_agents_topic ON jimbo_agents(topic);",
+    "CREATE INDEX IF NOT EXISTS idx_jimbo_agents_library ON jimbo_agents(library);",
+  ];
+
+  for (const sql of statements) {
+    await db.exec(sql);
+  }
+
+  try {
+    await db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS jimbo_kb_fts
       USING fts5(title, content, content='jimbo_kb', content_rowid='id');
-
-    CREATE TABLE IF NOT EXISTS jimbo_datasets (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      name        TEXT NOT NULL,
-      topic       TEXT NOT NULL,
-      library     TEXT NOT NULL DEFAULT 'general',
-      description TEXT,
-      source      TEXT,
-      tags        TEXT,
-      created_at  TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE INDEX IF NOT EXISTS idx_jimbo_datasets_library ON jimbo_datasets(library);
-
-    CREATE TABLE IF NOT EXISTS jimbo_dataset_items (
-      id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      dataset_id  INTEGER NOT NULL,
-      kb_id       INTEGER,
-      title       TEXT NOT NULL,
-      excerpt     TEXT,
-      source      TEXT,
-      created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (dataset_id) REFERENCES jimbo_datasets(id)
-    );
-    CREATE INDEX IF NOT EXISTS idx_jimbo_dataset_items_dataset ON jimbo_dataset_items(dataset_id);
-
-    CREATE TABLE IF NOT EXISTS jimbo_agents (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      name          TEXT NOT NULL,
-      topic         TEXT NOT NULL,
-      library       TEXT NOT NULL DEFAULT 'general',
-      dataset_id    INTEGER,
-      model         TEXT NOT NULL DEFAULT 'gpt-4o-mini',
-      system_prompt TEXT NOT NULL,
-      tools         TEXT,
-      created_at    TEXT NOT NULL DEFAULT (datetime('now')),
-      FOREIGN KEY (dataset_id) REFERENCES jimbo_datasets(id)
-    );
-    CREATE INDEX IF NOT EXISTS idx_jimbo_agents_topic ON jimbo_agents(topic);
-    CREATE INDEX IF NOT EXISTS idx_jimbo_agents_library ON jimbo_agents(library);
-  `);
+    `);
+  } catch {
+    // FTS5 jest opcjonalne — podstawowe wyszukiwanie LIKE nadal działa.
+  }
 }
 
 // ── Router ────────────────────────────────────────────────────────────────
@@ -458,7 +449,7 @@ export default {
       let dbOk = false;
       try { await env.DB.exec("SELECT 1"); dbOk = true; } catch {}
       let kvOk = false;
-      try { await env.CACHE.get("__ping__"); kvOk = true; } catch {}
+      try { if (env.CACHE) { await env.CACHE.get("__ping__"); kvOk = true; } } catch {}
 
       const providerStatus = providers.map(p => ({
         name: p.name,
@@ -848,7 +839,7 @@ export default {
 
       // Also cache in KV for fast access
       const kvKey = `kb:${result.meta.last_row_id}`;
-      await env.CACHE.put(kvKey, JSON.stringify(body), { expirationTtl: 86400 });
+      await cachePut(env, kvKey, JSON.stringify(body), { expirationTtl: 86400 });
 
       return json({ id: result.meta.last_row_id, stored: true });
     }
@@ -1130,7 +1121,7 @@ export default {
     if (path === "/kb/categories" && req.method === "GET") {
       await ensureSchema(env.DB);
       try {
-        const cached = await env.CACHE.get("kb:categories");
+        const cached = await cacheGet(env, "kb:categories");
         if (cached) return json(JSON.parse(cached));
       } catch {}
 
@@ -1140,7 +1131,7 @@ export default {
 
       const categories = (rows.results ?? []).map(r => r.library);
       const resp = { categories, total: categories.length };
-      try { await env.CACHE.put("kb:categories", JSON.stringify(resp), { expirationTtl: 3600 }); } catch {}
+      try { await cachePut(env, "kb:categories", JSON.stringify(resp), { expirationTtl: 3600 }); } catch {}
       return json(resp);
     }
 

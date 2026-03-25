@@ -1,0 +1,42 @@
+{
+  "id": "website-analytics-free-tools",
+  "category": "08_ANALYTICS",
+  "generated": "2026-03-24",
+  "source": "Tavily Search API",
+  "queries_count": 1,
+  "credits_used": 1,
+  "summary": "Darmowe i privacy-first alternatywy dla GA4 w 2026: Matomo (self-host), Plausible CE, Umami, PostHog oraz Microsoft Clarity. Najlepszy setup dla małego biznesu to zwykle stack: GSC + GA4/Matomo + Clarity + audyty Lighthouse/GTmetrix.",
+  "raw_searches": [
+    {
+      "query": "best free website analytics tools 2026 alternative Google Analytics Plausible Matomo",
+      "answer": "Fathom Analytics, Plausible Analytics, and Matomo are top free alternatives to Google Analytics in 2026, offering privacy-focused, self-hosted solutions. Plausible provides a simple, cookie-less dashboard, while Matomo offers comprehensive analytics with full data control.",
+      "results": [
+        {
+          "title": "12 Best Free Web Analytics Tools for Startups in 2026 | Swetrix",
+          "url": "https://swetrix.com/blog/free-web-analytics-tools",
+          "score": 0.99994564
+        },
+        {
+          "title": "Best Google Analytics Alternatives in 2026 (Compared) - Clicky Blog",
+          "url": "https://clicky.com/blog/best-google-analytics-alternatives",
+          "score": 0.9999318
+        },
+        {
+          "title": "13 Best Google Analytics Alternatives & Competitors in 2026",
+          "url": "https://segmentstream.com/blog/articles/google-analytics-alternatives",
+          "score": 0.99983656
+        },
+        {
+          "title": "Comparing the top data analytics platforms of 2026 - Matomo",
+          "url": "https://matomo.org/blog/2026/01/data-analytics-platforms/",
+          "score": 0.9994766
+        },
+        {
+          "title": "Umami vs Plausible vs Matomo for Self-Hosted Analytics",
+          "url": "https://aaronjbecker.com/posts/umami-vs-plausible-vs-matomo-self-hosted-analytics/",
+          "score": 0.9991573
+        }
+      ]
+    }
+  ]
+}

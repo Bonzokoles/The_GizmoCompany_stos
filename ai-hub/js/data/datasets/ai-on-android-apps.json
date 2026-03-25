@@ -1,0 +1,43 @@
+{
+  "id": "ai-on-android-apps",
+  "category": "mobile-ai",
+  "generated": "2026-03-24T00:00:00.000Z",
+  "source": "curated",
+  "queries_count": 4,
+  "credits_used": 1,
+  "summary": "Praktyczny przegląd wdrażania AI na Androidzie: on-device vs cloud, narzędzia, use-case'y i checklista produkcyjna.",
+  "raw_searches": [
+    {
+      "query": "AI na Android: on-device vs cloud",
+      "answer": "Strategia hybrydowa jest najbezpieczniejsza: on-device dla prywatności, niskich opóźnień i działania offline (np. klasyfikacja obrazu, OCR lokalny, proste podpowiedzi), a cloud dla ciężkich modeli, RAG i zadań wymagających większego kontekstu. Kluczowe metryki: latency P50/P95, koszt na 1k żądań, zużycie baterii, rozmiar APK i crash-free sessions.",
+      "sources": [
+        "https://developer.android.com/ai",
+        "https://www.tensorflow.org/lite"
+      ]
+    },
+    {
+      "query": "Narzędzia AI dla Android developers",
+      "answer": "Najczęściej używane ścieżki: TensorFlow Lite / LiteRT, ML Kit, Gemini API/Vertex AI, ONNX Runtime Mobile. Dla produkcji warto dodać feature flags, fallback modelu, telemetry model quality oraz wersjonowanie promptów/modeli.",
+      "sources": [
+        "https://developers.google.com/ml-kit",
+        "https://onnxruntime.ai/docs/tutorials/mobile/"
+      ]
+    },
+    {
+      "query": "Use-case biznesowe AI w aplikacjach Android",
+      "answer": "Największy ROI zwykle dają: inteligentne wyszukiwanie, rekomendacje, automatyczne podsumowania, asystent in-app, OCR dokumentów i klasyfikacja leadów. Dla e-commerce: visual search i personalizacja. Dla B2B: notatki ze spotkań, ekstrakcja danych i scoring ticketów.",
+      "sources": [
+        "https://firebase.google.com/docs/ml",
+        "https://developer.android.com/topic/performance"
+      ]
+    },
+    {
+      "query": "Checklista wdrożenia AI Android",
+      "answer": "Checklist: (1) wybór architektury hybrydowej, (2) polityka prywatności danych i consent, (3) testy na low-end devices, (4) obserwowalność i A/B testy, (5) fallback i retry policy, (6) limity kosztowe API, (7) monitoring jakości odpowiedzi (hallucination rate, task success rate).",
+      "sources": [
+        "https://developer.android.com/topic/architecture",
+        "https://developer.android.com/topic/performance/vitals"
+      ]
+    }
+  ]
+}

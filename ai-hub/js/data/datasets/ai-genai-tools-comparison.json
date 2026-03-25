@@ -1,0 +1,128 @@
+{
+  "id": "ai-genai-tools-comparison",
+  "title": "GenAI Tools & Enterprise Platform Comparison 2025",
+  "category": "business",
+  "description": "A practical comparison of ChatGPT, Microsoft Copilot, GitHub Copilot, Perplexity, and adjacent enterprise GenAI platforms in 2025.",
+  "created": "2026-03-24T06:00:00Z",
+  "updated": "2026-03-24T06:00:00Z",
+  "tags": ["genai-tools", "chatgpt", "copilot", "perplexity", "enterprise-ai"],
+  "articles": [
+    {
+      "id": "article_1",
+      "title": "ChatGPT Enterprise leads on general-purpose versatility",
+      "url": "https://intuitionlabs.ai/chatgpt-vs-copilot-enterprise-feature-comparison-2025/",
+      "published": "2025-07-18",
+      "category": "platform-comparison",
+      "summary": "ChatGPT Enterprise is positioned as the most flexible general-purpose assistant thanks to broad reasoning coverage, custom GPTs, and company knowledge workflows.",
+      "key_points": [
+        "ChatGPT Enterprise is strong for multi-department use cases",
+        "Custom GPTs and company knowledge patterns improve adaptability",
+        "OpenAI was cited as having more than 1M business customers in one 2025 comparison set",
+        "Weekly active users were cited as growing from roughly 400M to 800M during 2025",
+        "It is strongest where organizations want one broad assistant before fine-grained specialization"
+      ],
+      "use_case": "Enterprise assistant standardization"
+    },
+    {
+      "id": "article_2",
+      "title": "Microsoft Copilot wins when the workflow already lives in Microsoft",
+      "url": "https://intuitionlabs.ai/chatgpt-vs-copilot-enterprise-feature-comparison-2025/",
+      "published": "2025-07-18",
+      "category": "productivity-suite",
+      "summary": "Microsoft Copilot becomes especially compelling inside M365, Teams, Power Platform, and Windows-centric organizations where context and permissions already live in the stack.",
+      "key_points": [
+        "Microsoft 365 Copilot pricing is commonly cited around $30 per user per month",
+        "Deep integration with Office and Teams lowers adoption friction in large enterprises",
+        "Security, admin controls, and identity integration are major purchase drivers",
+        "Barclays was cited as deploying around 100,000 Copilot licenses",
+        "Copilot is strongest when the productivity layer itself is the product surface"
+      ],
+      "use_case": "M365-native AI deployment planning"
+    },
+    {
+      "id": "article_3",
+      "title": "GitHub Copilot is a category leader in developer productivity",
+      "url": "https://github.blog/news-insights/product-news/github-copilot-updates/",
+      "published": "2025-10-09",
+      "category": "developer-tools",
+      "summary": "GitHub Copilot remains one of the clearest examples of AI product-market fit because it is embedded directly inside a high-frequency workflow: writing and reviewing code.",
+      "key_points": [
+        "GitHub Copilot pricing is commonly cited in the $10-$20 per user per month range depending on plan",
+        "Developer adoption was cited around 20M users in one 2025 source set",
+        "The product benefits from daily in-editor usage rather than occasional assistant interaction",
+        "The strongest value appears in acceleration, suggestions, and context-aware coding help",
+        "Copilot succeeds because it reduces friction inside an already digital workflow"
+      ],
+      "use_case": "Engineering tool stack evaluation"
+    },
+    {
+      "id": "article_4",
+      "title": "Perplexity differentiates through live search and citations",
+      "url": "https://www.sentisight.ai/perplexity-vs-chatgpt-vs-claude-vs-gemini/",
+      "published": "2025-09-27",
+      "category": "research-tools",
+      "summary": "Perplexity is best understood as an AI-native research engine rather than a general office copilot. Its core value is current information and transparent citation behavior.",
+      "key_points": [
+        "Perplexity Pro pricing is commonly cited at $20 per month",
+        "A June 2025 valuation reference placed Perplexity around $14B",
+        "One 2025 source cited roughly 780M search queries in May alone",
+        "Source citations and web-grounded answers are its strongest differentiators",
+        "It is especially useful for analysts, researchers, marketers, and fast-turnaround knowledge work"
+      ],
+      "use_case": "Research stack selection and analyst workflows"
+    },
+    {
+      "id": "article_5",
+      "title": "The real comparison is workflow fit, not feature count",
+      "url": "https://intuitionlabs.ai/chatgpt-vs-copilot-enterprise-feature-comparison-2025/",
+      "published": "2025-07-18",
+      "category": "selection-framework",
+      "summary": "Enterprises often ask which platform is best. The more useful question is: best for which workflow, with which security model, and with what governance expectations?",
+      "key_points": [
+        "ChatGPT is strongest for flexibility and cross-functional ideation",
+        "Microsoft Copilot is strongest for Microsoft-native productivity workflows",
+        "GitHub Copilot is strongest for engineering productivity",
+        "Perplexity is strongest for research and citation-rich exploration",
+        "The best enterprise stack often combines multiple tools instead of forcing one universal winner"
+      ],
+      "use_case": "Procurement and tool portfolio design"
+    }
+  ],
+  "comparison_matrix": {
+    "chatgpt_enterprise": {
+      "best_for": "general-purpose knowledge work and ideation",
+      "strengths": ["flexibility", "custom GPTs", "broad reasoning", "cross-functional adoption"],
+      "watchouts": ["needs governance and role clarity", "can overlap with existing suites"]
+    },
+    "microsoft_365_copilot": {
+      "best_for": "M365-native productivity and collaboration",
+      "strengths": ["Teams and Office integration", "identity/admin controls", "workflow proximity"],
+      "watchouts": ["best value depends on Microsoft stack depth", "cost adds up at scale"]
+    },
+    "github_copilot": {
+      "best_for": "developer productivity",
+      "strengths": ["editor integration", "high-frequency usage", "code assistance"],
+      "watchouts": ["needs secure coding guardrails", "not a general enterprise assistant"]
+    },
+    "perplexity": {
+      "best_for": "research and source-grounded discovery",
+      "strengths": ["citations", "fresh web results", "fast knowledge synthesis"],
+      "watchouts": ["not a full productivity-suite replacement", "less suited to internal workflow automation"]
+    }
+  },
+  "data_points": {
+    "chatgpt_business_customers_cited": "1M+",
+    "chatgpt_wau_cited_2025": "400M to 800M",
+    "m365_copilot_price_reference": "$30/user/month",
+    "github_copilot_price_reference": "$10-$20/user/month",
+    "perplexity_pro_price": "$20/month",
+    "perplexity_valuation_reference": "$14B"
+  },
+  "use_cases": [
+    "Enterprise AI procurement",
+    "Tool comparison for productivity teams",
+    "Developer platform evaluation",
+    "Research workflow optimization"
+  ],
+  "credits": 150
+}

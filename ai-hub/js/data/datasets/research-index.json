@@ -1,6 +1,6 @@
 {
   "generated": "2026-03-24",
-  "total_credits": 50,
+  "total_credits": 1627,
   "topics": [
     {
       "id": "business-trends-2026",
@@ -35,6 +35,118 @@
       "category": "11_OPPORTUNITIES",
       "queries": 10,
       "sources": 80,
+      "has_summary": true
+    },
+    {
+      "id": "website-analytics-free-tools",
+      "category": "08_ANALYTICS",
+      "queries": 1,
+      "sources": 5,
+      "has_summary": true
+    },
+    {
+      "id": "ai-monetization-online-income",
+      "category": "11_OPPORTUNITIES",
+      "queries": 1,
+      "sources": 5,
+      "has_summary": true
+    },
+    {
+      "id": "finance-forecasting-ai",
+      "category": "06_FINANCE",
+      "queries": 1,
+      "sources": 5,
+      "has_summary": true
+    },
+    {
+      "id": "online-business-growth-tools",
+      "category": "10_MARKET_ANALYSIS",
+      "queries": 1,
+      "sources": 5,
+      "has_summary": true
+    },
+    {
+      "id": "seo-analytics-poland-free-tools",
+      "category": "08_ANALYTICS",
+      "queries": 1,
+      "sources": 5,
+      "has_summary": true
+    },
+    {
+      "id": "ai-on-android-apps",
+      "category": "13_AI_NEWS",
+      "queries": 4,
+      "sources": 8,
+      "has_summary": true
+    },
+    {
+      "id": "financial-analysis-company-checklist",
+      "category": "06_FINANCE",
+      "queries": 5,
+      "sources": 10,
+      "has_summary": true
+    },
+    {
+      "id": "ai-business-models-saas",
+      "category": "13_AI_NEWS",
+      "queries": 8,
+      "sources": 40,
+      "has_summary": true
+    },
+    {
+      "id": "ai-market-trends-statistics",
+      "category": "10_MARKET_ANALYSIS",
+      "queries": 12,
+      "sources": 75,
+      "has_summary": true
+    },
+    {
+      "id": "ai-implementation-case-studies",
+      "category": "13_AI_NEWS",
+      "queries": 8,
+      "sources": 45,
+      "has_summary": true
+    },
+    {
+      "id": "ai-funding-valuations",
+      "category": "06_FINANCE",
+      "queries": 1,
+      "sources": 8,
+      "has_summary": true
+    },
+    {
+      "id": "ai-competitive-landscape",
+      "category": "10_MARKET_ANALYSIS",
+      "queries": 1,
+      "sources": 8,
+      "has_summary": true
+    },
+    {
+      "id": "ai-regulation-compliance",
+      "category": "13_AI_NEWS",
+      "queries": 1,
+      "sources": 8,
+      "has_summary": true
+    },
+    {
+      "id": "ai-talent-market",
+      "category": "10_MARKET_ANALYSIS",
+      "queries": 1,
+      "sources": 8,
+      "has_summary": true
+    },
+    {
+      "id": "ai-genai-tools-comparison",
+      "category": "13_AI_NEWS",
+      "queries": 1,
+      "sources": 8,
+      "has_summary": true
+    },
+    {
+      "id": "ai-ethics-safety",
+      "category": "13_AI_NEWS",
+      "queries": 1,
+      "sources": 8,
       "has_summary": true
     }
   ]

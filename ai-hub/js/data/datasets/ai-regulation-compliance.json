@@ -1,0 +1,106 @@
+{
+  "id": "ai-regulation-compliance",
+  "title": "AI Regulation, Compliance & Enterprise Controls 2025",
+  "category": "business",
+  "description": "Practical regulatory and compliance guidance for enterprises deploying AI systems, with emphasis on the EU AI Act, GPAI obligations, and operational governance controls.",
+  "created": "2026-03-24T06:00:00Z",
+  "updated": "2026-03-24T06:00:00Z",
+  "tags": ["regulation", "compliance", "eu-ai-act", "gpai", "governance"],
+  "articles": [
+    {
+      "id": "article_1",
+      "title": "EU AI Act implementation is phased, not instantaneous",
+      "url": "https://www.cranium.ai/resources/eu-ai-act-august-2025-deadline",
+      "published": "2025-08-01",
+      "category": "eu-ai-act",
+      "summary": "The EU AI Act introduces staged obligations, which means enterprises need a roadmap instead of a one-time compliance project.",
+      "key_points": [
+        "The EU AI Act entered into force in 2024 with phased obligations through 2027",
+        "Prohibited practices apply from February 2, 2025",
+        "GPAI obligations apply from August 2, 2025",
+        "High-risk system obligations escalate from August 2, 2026",
+        "Remaining obligations and enforcement milestones continue into 2027"
+      ],
+      "use_case": "Executive planning and compliance roadmapping"
+    },
+    {
+      "id": "article_2",
+      "title": "General-purpose AI providers face distinct obligations",
+      "url": "https://medialaws.eu/eu-ai-act-obligations-for-general-purpose-ai-models/",
+      "published": "2025-09-10",
+      "category": "gpai-obligations",
+      "summary": "Providers of general-purpose AI models are expected to maintain documentation, support downstream deployers, and address copyright and transparency requirements.",
+      "key_points": [
+        "GPAI providers must maintain technical documentation",
+        "Downstream deployers need sufficient information for compliant use",
+        "Copyright compliance and training-data summaries are recurring obligations",
+        "Systemic-risk GPAI models face added evaluation and incident-reporting duties",
+        "Cybersecurity and risk mitigation become explicit governance requirements"
+      ],
+      "use_case": "Policy design for model providers and API integrators"
+    },
+    {
+      "id": "article_3",
+      "title": "High-risk AI requires operational controls, not just legal review",
+      "url": "https://www.secureprivacy.ai/blog/eu-ai-act-compliance-checklist",
+      "published": "2025-11-15",
+      "category": "high-risk-systems",
+      "summary": "For high-risk systems, compliance is inseparable from engineering, data governance, monitoring, and documentation practices.",
+      "key_points": [
+        "High-risk systems require formal risk management and data governance",
+        "Technical documentation and logging must support audits and traceability",
+        "Human oversight needs to be designed into workflows",
+        "Conformity assessment, registration, and CE marking may apply",
+        "Post-market monitoring is part of the lifecycle, not an afterthought"
+      ],
+      "use_case": "Compliance-by-design for product and engineering teams"
+    },
+    {
+      "id": "article_4",
+      "title": "Penalties make AI governance a board-level issue",
+      "url": "https://www.quantamix.ai/blog/eu-ai-act-compliance-guide",
+      "published": "2025-10-05",
+      "category": "risk-management",
+      "summary": "Potential penalties under the EU AI Act are large enough that AI compliance is now a governance, procurement, and enterprise risk management topic.",
+      "key_points": [
+        "Penalty ranges are repeatedly cited up to €35M or 7% of global turnover for severe violations",
+        "Lesser breaches still carry material penalties, including multi-million-euro exposure",
+        "Vendor management and contracting must reflect AI risk categories",
+        "Model inventories and use-case classification are essential baseline controls",
+        "Cross-functional governance committees help align legal, security, data, and product teams"
+      ],
+      "use_case": "Board reporting and enterprise risk framing"
+    }
+  ],
+  "checklist": {
+    "governance": [
+      "Create an AI system inventory",
+      "Classify use cases by risk level",
+      "Assign accountable owners across legal, product, security, and data teams"
+    ],
+    "technical_controls": [
+      "Implement logging, auditability, and model-change records",
+      "Design human oversight for material decisions",
+      "Document data provenance, evaluation, and incident response"
+    ],
+    "vendor_management": [
+      "Request technical documentation from providers",
+      "Review usage restrictions and copyright terms",
+      "Assess model providers for systemic-risk and security obligations"
+    ]
+  },
+  "data_points": {
+    "prohibited_practices_start": "2025-02-02",
+    "gpai_obligations_start": "2025-08-02",
+    "high_risk_requirements_start": "2026-08-02",
+    "extended_enforcement_window": "through 2027",
+    "max_penalty_cited": "€35M or 7% global turnover"
+  },
+  "use_cases": [
+    "EU AI Act readiness programs",
+    "Vendor due diligence for AI tools",
+    "Board and audit committee reporting",
+    "Compliance requirements for AI product launches"
+  ],
+  "credits": 140
+}

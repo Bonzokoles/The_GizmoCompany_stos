@@ -13,7 +13,7 @@ import type { Env } from '../../types';
 import { jsonResponse, errorResponse, corsHeaders } from '../../types';
 
 const D1_DATABASES: Record<string, { name: string; description: string; project: string }> = {
-  'ddac77ec-c59b-4c19-895f-19e5b8e0b335': {
+  'ddac77ec-fe9e-4b5b-b3f5-ba0793152917': {
     name: 'zeno-browser-db',
     description: 'Zen Browser main database',
     project: 'zenbrowsers.org',

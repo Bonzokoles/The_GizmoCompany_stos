@@ -27,6 +27,8 @@
     <button class="nav-btn" data-tab="apps"><span class="icon">📦</span> Aplikacje</button>
     <button class="nav-btn" data-tab="jimbo"><span class="icon">💬</span> JIMBO Studio</button>
     <button class="nav-btn" data-tab="kb"><span class="icon">📖</span> Knowledge Browser</button>
+    <button class="nav-btn" onclick="window.open('dataset-viewer/index.html','_blank')" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.2)" title="Dataset Viewer PL — tłumaczenie i przeglądanie datasetów"><span class="icon">🇵🇱</span> Dataset Viewer PL</button>
+    <button class="nav-btn" onclick="window.open('crawler-dashboard/index.html','_blank')" style="background:rgba(0,255,204,0.06);border-color:rgba(0,255,204,0.18)" title="Crawler Dashboard — weryfikacja wiedzy z crawlerów AI"><span class="icon">🕷️</span> Crawler Dashboard</button>
   </nav>
   <div class="topbar-right">
     <div class="clock" id="clock"></div>
@@ -198,20 +200,26 @@
 <div class="page" id="page-datasets">
   <div class="section-head">
     <h2>📚 <span class="hl">Datasety</span> HuggingFace</h2>
-    <p>9 lokalnych datasetów + przeglądaj 200 000+ zbiorów z HuggingFace Hub</p>
+    <p>36 datasetów R2 (Analytics, Finanse, AI/Biznes, E-commerce, Art) + 200 000+ z HuggingFace Hub</p>
   </div>
   <div class="hub-search">
     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
     <input type="text" id="ds-search" placeholder="Szukaj datasetów (np. polish, sentiment, NER, translation...)">
   </div>
   <div class="pills" id="ds-pills">
-    <button class="pill active" data-ds="local">☁️ Biblioteka R2 (14)</button>
+    <button class="pill active" data-ds="local">☁️ Wszystkie R2 (36)</button>
+    <button class="pill" data-ds="analytics">📊 Analytics</button>
+    <button class="pill" data-ds="finanse">💰 Finanse</button>
+    <button class="pill" data-ds="business">🤖 AI/Biznes</button>
+    <button class="pill" data-ds="ecommerce">🛒 E-commerce</button>
+    <button class="pill" data-ds="art">🎨 Art/Prompts</button>
     <button class="pill" data-ds="trending">🔥 Trending HF</button>
     <button class="pill" data-ds="polish">🇵🇱 Polski</button>
     <button class="pill" data-ds="nlp">💬 NLP</button>
     <button class="pill" data-ds="code">💻 Code</button>
     <button class="pill" data-ds="vision">👁️ Vision</button>
     <button class="pill" data-ds="audio">🎵 Audio</button>
+    <button class="pill" data-ds="tools">🔧 Narzędzia (CF AI)</button>
   </div>
   <div id="ds-loading" style="text-align:center;padding:3rem;color:var(--text-dim);display:none">
     <div style="font-size:1.5rem;margin-bottom:.5rem">⏳</div>Wyszukiwanie datasetów...
@@ -513,11 +521,11 @@
       <input id="kb-local-lib" placeholder="Biblioteka docelowa (np. devz-hub)" value="devz-hub"
         style="padding:.55rem .7rem;border-radius:8px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.03);color:var(--text)"
         oninput="localStorage.setItem('kb_local_lib',this.value)">
-      <label class="app-open-btn" style="padding:.55rem 1rem;cursor:pointer;white-space:nowrap">
+      <label id="kb-folder-label" class="app-open-btn" style="padding:.55rem 1rem;cursor:pointer;white-space:nowrap">
         📂 Wybierz folder
         <input type="file" id="kb-local-files" multiple accept=".md,.txt,.json,.yaml,.yml,.html,.ts,.tsx,.js" webkitdirectory style="display:none">
       </label>
-      <label class="app-open-btn" style="padding:.55rem 1rem;cursor:pointer;white-space:nowrap;background:rgba(0,255,204,0.08)">
+      <label id="kb-files-label" class="app-open-btn" style="padding:.55rem 1rem;cursor:pointer;white-space:nowrap;background:rgba(0,255,204,0.08)">
         📄 Wybierz pliki
         <input type="file" id="kb-local-files-single" multiple accept=".md,.txt,.json,.yaml,.yml,.html,.ts,.tsx,.js" style="display:none">
       </label>

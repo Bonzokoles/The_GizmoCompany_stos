@@ -303,6 +303,18 @@ const api = {
       ipcRenderer.invoke('file:save-to-disk', data),
   },
 
+  // Dialog — native folder/file picker with defaultPath
+  dialog: {
+    openFolder: (opts?: { defaultPath?: string; title?: string }) =>
+      ipcRenderer.invoke('dialog:open-folder', opts) as Promise<string | null>,
+    openFiles: (opts?: { defaultPath?: string; title?: string }) =>
+      ipcRenderer.invoke('dialog:open-files', opts) as Promise<string[] | null>,
+    readFiles: (paths: string[]) =>
+      ipcRenderer.invoke('dialog:read-files', paths) as Promise<Array<{ name: string; content: string; path: string }>>,
+    readDirFiles: (dirPath: string) =>
+      ipcRenderer.invoke('dialog:read-dir-files', dirPath) as Promise<{ success: boolean; files: Array<{ name: string; content: string; path: string }>; error?: string }>,
+  },
+
   // System info
   system: {
     platform: process.platform,

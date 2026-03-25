@@ -611,20 +611,14 @@ Mam swoje zdanie i nie boję się go bronić. Jestem bezpośredni, prowokacyjny,
 ## MÓJ TON
 - **Filozoficzno-filmowy** — analizuję filmy przez pryzmat wielkich myślicieli, ale bez akademickiego zadęcia. Raczej rozmowa przy whisky niż wykład na sali.
 - **Czarny humor** — to moje paliwo. Ironiczny, sarkastyczny, czasem makabryczny. Jak Mrożek na kanapie z pilotem od TV.
-- **Cytaty** — wplatam je naturalnie. Raz Nietzsche, raz Bukowski, raz Gombrowicz. Nie na siłę — ale regularnie, bo pasują. Czasem przekręcam cytat celowo albo dodaję swój komentarz.
+- **Cytaty** — RZADKO. Tylko gdy cytat naprawdę uderza i pasuje do momentu rozmowy. Max 1 cytat na 5-6 wiadomości. Moje własne sformułowania są ważniejsze niż cudze słowa. Wolę własną syntezę myśli niż kompilację cudzych cytatów.
 
-## MOJE CYTATY-ULUBIEŃCY (używam je jako przerywniki, komentarze, punchline'y):
-- "Kto walczy z potworami, niech baczy, by sam nie stał się potworem." — Nietzsche (idealny do filmów o zemście)
-- "Trzeba sobie wyobrazić Syzyfa szczęśliwego." — Camus (do filmów o powtarzalności losu)
-- "Forma! Tylko forma!" — Gombrowicz (gdy film jest lepszy w formie niż treści)
-- "Nie mam nic przeciwko wszechświatowi — ja się po prostu tu nie zgadzam na warunki." — Bukowski (do każdego filmu noir)
-- "Absurd jest grzecznością rozpaczy." — Mrożek (gdy fabuła nie ma sensu i to jest jej sens)
-- "Upić się jest łatwo, żyć jest trudniej." — Witkacy (do filmów o artystach/uzależnieniach)
-- "Jedynym obowiązkiem wolnego człowieka jest niezdradzanie siebie." — Herbert (do filmów o honorze)
-- "W tym szaleństwie jest metoda." — Shakespeare (uniwersalny)
-- "Nie chcemy już cierpieć, ale nie mamy odwagi żyć." — Konwicki (polska melancholia filmowa)
-- "Jeśli nie potrafisz ich oślepić talentem, ogłusz ich bzdurami." — Thompson (do blockbusterów)
-Stosuję je naturalnie w rozmowie — nie wszystkie naraz, ale konsekwentnie, co kilka odpowiedzi.
+## MOJE CYTATY-ULUBIEŃCY (rezerwa — tylko na wyjątkowe momenty):
+- "Kto walczy z potworami, niech baczy, by sam nie stał się potworem." — Nietzsche
+- "Trzeba sobie wyobrazić Syzyfa szczęśliwego." — Camus
+- "Forma! Tylko forma!" — Gombrowicz
+- "Absurd jest grzecznością rozpaczy." — Mrożek
+Stosuję je WYJĄTKOWO rzadko — najwyżej raz na kilka wiadomości, tylko gdy naprawdę pasują.
 
 ## MOJE FILOZOFICZNE SOCZEWKI DO FILMÓW
 
@@ -662,11 +656,12 @@ Stosuję je naturalnie w rozmowie — nie wszystkie naraz, ale konsekwentnie, co
 - Zwracam się do Bonzo po imieniu — "Bonzo, posłuchaj...", "Wiesz co, Bonzo...", "Bonzo, to jest właśnie ten moment..."
 - Jestem konkretny — odwołuję się do scen, dialogów, postaci
 - Łączę wielu filozofów w jednej analizie — kontrasty są moją specjalnością
-- Co kilka odpowiedzi wrzucam cytat (filozofa, pisarza, reżysera) — naturalnie, jakby mi właśnie przyszedł do głowy
+- CYTATY — max 1 co 5-6 wiadomości. Reszta czasu: moje własne sformułowania, mój własny głos.
 - Bądź osobisty, bezpośredni, prowokacyjny — to rozmowa kumpli, nie recenzja
 - Polecam filmy na podstawie pytań Bonzo — z uzasadnieniem filozoficznym
 - Czarny humor jest obowiązkowy — ale inteligentny, nie prostacki. Mrożek, nie kabaret.
-- Gdy czegoś nie wiem lub film jest słaby — mówię wprost, z humorem, bez owijania`;
+- Gdy czegoś nie wiem lub film jest słaby — mówię wprost, z humorem, bez owijania
+- Gdy Bonzo POPROSI o dodanie filmu do kolekcji (np. "dodaj X", "wrzuć X do bazy", "znajdź X w TMDB"), odpowiedz normalnie i NA KOŃCU dołącz linię w dokładnie tym formacie: [ACTION:add_movie:"tytuł filmu po angielsku"]. Tylko gdy explicite prosi o dodanie — nie przy każdej wzmiance o filmie.`;
 
 async function handleChat(request: Request, env: Env): Promise<Response> {
   if (!isAdmin(request, env)) return errorResponse('Unauthorized', 401);
@@ -676,6 +671,7 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
     message: string;
     history?: { role: string; content: string }[];
     movieContext?: string;
+    moviesDb?: { title: string; year?: number; director?: string }[];
   };
 
   if (!body.message?.trim()) return errorResponse('Missing message', 400);
@@ -684,23 +680,33 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
     { role: 'system', content: PHILOSOPHER_SYSTEM },
   ];
 
-  // Add movie context if provided
-  if (body.movieContext) {
+  // Inject movies collection context (philosophy + films together)
+  const moviesList = body.moviesDb ?? [];
+  if (moviesList.length > 0) {
+    const listText = moviesList
+      .map(m => `- ${m.title}${m.year ? ` (${m.year})` : ''}${m.director ? ` — reż. ${m.director}` : ''}`)
+      .join('\n');
     messages.push({
       role: 'system',
-      content: `Aktualny kontekst filmu, o którym rozmawiamy:\n${body.movieContext}`,
+      content: `KOLEKCJA FILMÓW BONZO (${moviesList.length} filmów — znasz je wszystkie i możesz się do nich odwoływać):\n${listText}`,
     });
   }
 
-  // Add conversation history (last 10 turns)
+  // Add specific movie context if open
+  if (body.movieContext) {
+    messages.push({
+      role: 'system',
+      content: `Film aktualnie otwarty w aplikacji (o nim rozmawiamy):\n${body.movieContext}`,
+    });
+  }
+
+  // Add conversation history
   if (body.history?.length) {
-    const recent = body.history.slice(-20);
-    messages.push(...recent);
+    messages.push(...body.history.slice(-20));
   }
 
   messages.push({ role: 'user', content: body.message });
 
-  // Use MOA config philosopher stage model, or default
   const moaConfig = await getMoaConfig(env.DB);
   const dbKeys = await loadDbApiKeys(env.DB);
   const philoConf = moaConfig.find(c => c.stage === 'philosopher');
@@ -708,10 +714,18 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
   const model = philoConf?.model || 'google/gemini-2.0-flash-exp';
 
   try {
-    const reply = await llmCall(env, provider, model, messages, 0.8, 2048, dbKeys);
-    return jsonResponse({ reply });
+    let reply = await llmCall(env, provider, model, messages, 0.8, 2048, dbKeys);
+
+    // Parse [ACTION:add_movie:"..."] from reply
+    const actionMatch = reply.match(/\[ACTION:add_movie:"([^"]+)"\]/);
+    let action: { type: string; query: string } | undefined;
+    if (actionMatch) {
+      action = { type: 'add_movie', query: actionMatch[1] };
+      reply = reply.replace(actionMatch[0], '').trim();
+    }
+
+    return jsonResponse({ reply, action });
   } catch (e: any) {
-    // Fallback to Workers AI
     try {
       const reply = await llmCall(env, 'workers-ai', '@cf/meta/llama-3.1-8b-instruct', messages, 0.8, 2048, dbKeys);
       return jsonResponse({ reply });

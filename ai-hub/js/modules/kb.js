@@ -215,6 +215,46 @@ export async function kbAddArticle() {
   } catch (e) { out.textContent = `❌ ${e.message}`; }
 }
 
+// ─── Electron-native file/folder import ───────────────────────────────────────
+
+const KB_DEFAULT_PATH = 'U:\\The_DEVz_HUB_of_work';
+
+function pathFilesToPseudo(files) {
+  return files.map(f => ({
+    name: f.name,
+    size: new TextEncoder().encode(f.content).length,
+    webkitRelativePath: f.path,
+    text: () => Promise.resolve(f.content),
+  }));
+}
+
+export async function kbOpenFolderElectron() {
+  const api = window.electronAPI;
+  if (!api?.dialog) return;
+  const prog = document.getElementById('kb-local-progress');
+  const dirPath = await api.dialog.openFolder({ defaultPath: KB_DEFAULT_PATH, title: 'Wybierz folder biblioteki' });
+  if (!dirPath) return;
+  prog.textContent = `📂 Wczytuję pliki z: ${dirPath}…`;
+  const result = await api.dialog.readDirFiles(dirPath);
+  if (!result.success) { prog.textContent = `❌ Błąd odczytu: ${result.error}`; return; }
+  if (!result.files.length) { prog.textContent = '⚠️ Brak obsługiwanych plików w tym folderze.'; return; }
+  await kbImportFiles(pathFilesToPseudo(result.files));
+}
+
+export async function kbOpenFilesElectron() {
+  const api = window.electronAPI;
+  if (!api?.dialog) return;
+  const prog = document.getElementById('kb-local-progress');
+  const paths = await api.dialog.openFiles({ defaultPath: KB_DEFAULT_PATH, title: 'Wybierz pliki do importu' });
+  if (!paths || !paths.length) return;
+  prog.textContent = `📄 Wczytuję ${paths.length} plików…`;
+  const files = await api.dialog.readFiles(paths);
+  if (!files.length) { prog.textContent = '⚠️ Żaden z wybranych plików nie mógł być odczytany.'; return; }
+  await kbImportFiles(pathFilesToPseudo(files));
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+
 export async function kbImportFiles(files) {
   const library = document.getElementById('kb-local-lib').value.trim() || 'devz-hub';
   const prog = document.getElementById('kb-local-progress');
@@ -277,6 +317,20 @@ export function initKb() {
   document.getElementById('kb-local-files-single')?.addEventListener('change', e => {
     if (e.target.files.length) kbImportFiles(Array.from(e.target.files));
   });
+
+  // In Electron: override folder/files buttons to use native dialog with defaultPath
+  if (window.electronAPI?.dialog) {
+    const folderLabel = document.getElementById('kb-folder-label');
+    const filesLabel = document.getElementById('kb-files-label');
+    if (folderLabel) {
+      folderLabel.style.cursor = 'pointer';
+      folderLabel.addEventListener('click', e => { e.preventDefault(); kbOpenFolderElectron(); });
+    }
+    if (filesLabel) {
+      filesLabel.style.cursor = 'pointer';
+      filesLabel.addEventListener('click', e => { e.preventDefault(); kbOpenFilesElectron(); });
+    }
+  }
 
   // Auto-load in background
   setTimeout(() => kbLoadLibraries().catch(() => {}), 800);

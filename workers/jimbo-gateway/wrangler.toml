@@ -26,9 +26,9 @@ binding = "STORAGE"
 bucket_name = "mybonzo-media"
 
 # ─── KV (session cache / chat history) ──────────────────────
-[[kv_namespaces]]
-binding = "CACHE"
-id = "jimbo_cache_placeholder"   # npx wrangler kv namespace create jimbo-cache → podmień ID
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "<valid_kv_namespace_id>"   # opcjonalne: cache może działać bez KV
 
 # ─── Vars ───────────────────────────────────────────────────
 [vars]

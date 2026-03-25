@@ -1,0 +1,95 @@
+{
+  "id": "ai-ethics-safety",
+  "title": "AI Ethics, Safety & Governance Frameworks 2025",
+  "category": "business",
+  "description": "Responsible AI principles, operating models, safety controls, and governance frameworks for enterprise AI programs in 2025.",
+  "created": "2026-03-24T06:00:00Z",
+  "updated": "2026-03-24T06:00:00Z",
+  "tags": ["ethics", "safety", "responsible-ai", "governance", "risk-management"],
+  "articles": [
+    {
+      "id": "article_1",
+      "title": "Responsible AI programs share a common core",
+      "url": "https://www.lumenova.ai/blog/ai-ethics-governance-framework/",
+      "published": "2025-08-19",
+      "category": "responsible-ai",
+      "summary": "Across enterprise guides, the same pillars recur: fairness, accountability, transparency, privacy, security, and human oversight.",
+      "key_points": [
+        "Fairness and bias management remain foundational expectations",
+        "Transparency and explainability improve accountability and auditability",
+        "Privacy and security must be treated as design requirements",
+        "Human oversight is necessary for high-impact use cases",
+        "Monitoring is essential because risks evolve after deployment"
+      ],
+      "use_case": "Responsible AI policy design"
+    },
+    {
+      "id": "article_2",
+      "title": "Governance needs an operating model, not just principles",
+      "url": "https://www.athena-solutions.com/enterprise-ai-governance-guide",
+      "published": "2025-10-01",
+      "category": "operating-model",
+      "summary": "Mature AI governance combines policies, risk assessment, technical controls, review checkpoints, and continuous assurance across the system lifecycle.",
+      "key_points": [
+        "Policies must connect to development and deployment workflows",
+        "Risk assessment should be tied to use-case criticality",
+        "Technical controls include testing, logging, access management, and evaluation",
+        "Monitoring and periodic audits are necessary for drift, bias, and misuse detection",
+        "Governance should cover vendors and third-party models, not only internal systems"
+      ],
+      "use_case": "AI governance operating model design"
+    },
+    {
+      "id": "article_3",
+      "title": "Three lines of defense works well for enterprise AI",
+      "url": "https://www.pwc.com/us/en/services/consulting/library/responsible-ai.html",
+      "published": "2025-09-14",
+      "category": "risk-model",
+      "summary": "The three-lines-of-defense model translates effectively to AI: builders own responsible delivery, oversight functions review and challenge, and internal assurance validates effectiveness.",
+      "key_points": [
+        "First line builds and operates AI responsibly",
+        "Second line governs, reviews, and sets policy expectations",
+        "Third line audits and provides independent assurance",
+        "This model helps enterprises scale oversight without stopping delivery",
+        "It also clarifies who approves, who monitors, and who escalates incidents"
+      ],
+      "use_case": "Risk governance and audit design"
+    },
+    {
+      "id": "article_4",
+      "title": "AI safety and AI security are related but distinct",
+      "url": "https://www.obsidiansecurity.com/blog/ai-governance-security-guide",
+      "published": "2025-11-08",
+      "category": "safety-vs-security",
+      "summary": "Safety focuses on reliability, alignment, and harmful outcomes; security focuses on protecting systems against misuse, attacks, exfiltration, and adversarial manipulation.",
+      "key_points": [
+        "Safety covers model behavior, errors, and harmful outputs",
+        "Security covers access, abuse, prompt injection, data leakage, and adversarial threats",
+        "Both need explicit controls in enterprise AI programs",
+        "Vendor review must include both safety posture and security controls",
+        "Incident response plans should include model-specific failure scenarios"
+      ],
+      "use_case": "Security architecture and governance alignment"
+    }
+  ],
+  "governance_framework": {
+    "principles": ["fairness", "accountability", "transparency", "privacy", "security", "human oversight"],
+    "controls": ["risk assessments", "bias audits", "model evaluations", "access controls", "incident response", "continuous monitoring"],
+    "operating_model": ["policy", "review forums", "technical guardrails", "assurance and audit"],
+    "external_alignment": ["NIST AI RMF", "ISO/IEC 42001", "sector regulation", "internal risk appetite"]
+  },
+  "data_points": {
+    "common_governance_pattern": "three lines of defense",
+    "key_maturity_indicator": "continuous monitoring after deployment",
+    "safety_focus": "alignment, reliability, harmful outcomes",
+    "security_focus": "misuse, adversarial attacks, leakage, unauthorized access",
+    "board_expectation": "AI risks tied to enterprise risk management"
+  },
+  "use_cases": [
+    "Responsible AI program design",
+    "Board and risk committee updates",
+    "Vendor governance and oversight",
+    "Bias, explainability, and monitoring control frameworks"
+  ],
+  "credits": 135
+}

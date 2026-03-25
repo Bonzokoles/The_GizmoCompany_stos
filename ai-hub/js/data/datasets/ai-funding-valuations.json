@@ -1,0 +1,95 @@
+{
+  "id": "ai-funding-valuations",
+  "title": "AI Funding, Valuations & Venture Capital Landscape 2025",
+  "category": "business",
+  "description": "Funding trends, valuation benchmarks, capital intensity, and venture patterns shaping the AI market in 2025.",
+  "created": "2026-03-24T06:00:00Z",
+  "updated": "2026-03-24T06:00:00Z",
+  "tags": ["funding", "valuations", "venture-capital", "ai-startups", "market-intelligence"],
+  "articles": [
+    {
+      "id": "article_1",
+      "title": "AI venture funding accelerated despite a tighter macro market",
+      "url": "https://axis-intelligence.com/ai-statistics-2026-key-data-market-trends/",
+      "published": "2026-02-22",
+      "category": "funding-trends",
+      "summary": "AI remained one of the few venture categories with strong capital inflows, supported by hyperscaler demand, model infrastructure spending, and enterprise software optimism.",
+      "key_points": [
+        "AI VC funding was cited at roughly $211B in 2025 in one market summary",
+        "Capital increasingly concentrated in foundation-model, chips, and infrastructure plays",
+        "Enterprise GenAI tooling attracted funding where there was a credible ROI narrative",
+        "Investors rewarded distribution, proprietary data, and deployment speed more than generic demos",
+        "Model training and inference costs raised the bar for efficient business models"
+      ],
+      "use_case": "Investor briefings and market landscape overviews"
+    },
+    {
+      "id": "article_2",
+      "title": "Mega-rounds distort averages but confirm capital concentration",
+      "url": "https://www.cbinsights.com/research/report/artificial-intelligence-trends-2025/",
+      "published": "2025-12-01",
+      "category": "venture-patterns",
+      "summary": "The AI market increasingly behaves like a barbell: a small number of giant rounds at the top and a long tail of startups that must prove efficient monetization early.",
+      "key_points": [
+        "Top-tier AI deals pushed median expectations upward across adjacent categories",
+        "Infrastructure, data, and tooling companies benefited from the race to productionize AI",
+        "Late-stage rounds favored firms with enterprise contracts instead of consumer-only traction",
+        "Capital efficiency became a differentiator because compute remains strategically scarce",
+        "Valuation multiples increasingly depend on retention and usage quality, not just logo growth"
+      ],
+      "use_case": "VC due diligence and startup fundraising prep"
+    },
+    {
+      "id": "article_3",
+      "title": "Valuation logic shifted from hype to revenue quality",
+      "url": "https://www.menlovc.com/perspectives/ai-valuations/",
+      "published": "2025-11-18",
+      "category": "valuation-framework",
+      "summary": "The strongest AI valuations now rest on a combination of recurring revenue, gross-margin durability, proprietary workflows, and evidence that customers expand over time.",
+      "key_points": [
+        "Enterprise recurring revenue remains the cleanest signal for durable AI value",
+        "Usage-based revenue is attractive when margins and predictability are visible",
+        "Foundational model risk is priced into application-layer businesses without moats",
+        "Vertical AI companies gain valuation support when they own domain workflows and data loops",
+        "Capital markets increasingly question businesses that depend on expensive third-party inference without pricing power"
+      ],
+      "use_case": "Board decks and valuation narrative design"
+    },
+    {
+      "id": "article_4",
+      "title": "Capital intensity is now part of product strategy",
+      "url": "https://a16z.com/ai-infrastructure-builders-guide/",
+      "published": "2025-10-30",
+      "category": "capital-efficiency",
+      "summary": "In AI, financing decisions and technical architecture are intertwined. Training, inference, caching, model selection, and procurement strategy all shape how much capital a company must raise.",
+      "key_points": [
+        "Compute-heavy categories need more upfront capital than classic SaaS",
+        "Inference optimization and routing improve margin resilience",
+        "Multi-model strategies can reduce vendor concentration risk",
+        "Teams that manage unit economics early gain fundraising leverage",
+        "Capital discipline matters more in AI than in feature-light SaaS because serving costs are real"
+      ],
+      "use_case": "Operating plans and infrastructure budgeting"
+    }
+  ],
+  "data_points": {
+    "vc_funding_2025": "$211 billion",
+    "dominant_capital_targets": "foundation models, chips, cloud infrastructure, enterprise copilots",
+    "primary_valuation_drivers": "ARR quality, net revenue retention, margin durability, proprietary data",
+    "key_risk_factor": "high compute and inference costs",
+    "board_level_question": "Can the company turn usage growth into profitable recurring revenue?"
+  },
+  "market_signals": [
+    "Mega-rounds continue, but scrutiny of gross margins is increasing",
+    "Enterprise contracts matter more than vanity usage metrics",
+    "Infrastructure and orchestration layers stay attractive because they monetize the entire ecosystem",
+    "Founding teams are expected to explain both technical edge and cost curve"
+  ],
+  "use_cases": [
+    "Fundraising preparation for AI startups",
+    "Competitive intelligence for investors and operators",
+    "Valuation benchmarking in board and finance discussions",
+    "Capital allocation planning for AI product lines"
+  ],
+  "credits": 130
+}

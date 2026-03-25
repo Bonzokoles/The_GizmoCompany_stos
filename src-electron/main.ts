@@ -8,6 +8,7 @@ dotenvConfig({ override: true });
 import {
   app,
   BrowserWindow,
+  dialog,
   ipcMain,
   Menu,
   nativeTheme,
@@ -1090,6 +1091,69 @@ function setupIPCHandlers() {
 
   ipcMain.handle('window:close', async () => {
     mainWindow?.close();
+  });
+
+  // Dialog — native folder/file picker with defaultPath support
+  ipcMain.handle('dialog:open-folder', async (_, opts?: { defaultPath?: string; title?: string }) => {
+    if (!mainWindow) return null;
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: opts?.title || 'Wybierz folder',
+      defaultPath: opts?.defaultPath || 'U:\\The_DEVz_HUB_of_work',
+      properties: ['openDirectory'],
+    });
+    return result.canceled ? null : result.filePaths[0];
+  });
+
+  ipcMain.handle('dialog:open-files', async (_, opts?: { defaultPath?: string; title?: string }) => {
+    if (!mainWindow) return null;
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: opts?.title || 'Wybierz pliki',
+      defaultPath: opts?.defaultPath || 'U:\\The_DEVz_HUB_of_work',
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Knowledge files', extensions: ['md', 'txt', 'json', 'yaml', 'yml', 'html', 'ts', 'tsx', 'js'] }],
+    });
+    return result.canceled ? null : result.filePaths;
+  });
+
+  // Read files from a list of paths — returns [{name, content, path}]
+  ipcMain.handle('dialog:read-files', async (_, paths: string[]) => {
+    const { readFileSync, statSync } = await import('fs');
+    const { extname, basename } = await import('path');
+    const ALLOWED = ['.md', '.txt', '.json', '.yaml', '.yml', '.html', '.ts', '.tsx', '.js'];
+    const MAX_SIZE = 500_000;
+    const results: Array<{ name: string; content: string; path: string }> = [];
+    for (const p of paths) {
+      try {
+        if (!ALLOWED.includes(extname(p).toLowerCase())) continue;
+        if (statSync(p).size > MAX_SIZE) continue;
+        results.push({ name: basename(p), content: readFileSync(p, 'utf-8'), path: p });
+      } catch { /* skip unreadable */ }
+    }
+    return results;
+  });
+
+  // Read all eligible files from a directory (recursive)
+  ipcMain.handle('dialog:read-dir-files', async (_, dirPath: string) => {
+    const { readFileSync, readdirSync, statSync } = await import('fs');
+    const nodePath = await import('path');
+    const ALLOWED = ['.md', '.txt', '.json', '.yaml', '.yml', '.html', '.ts', '.tsx', '.js'];
+    const MAX_SIZE = 500_000;
+    const results: Array<{ name: string; content: string; path: string }> = [];
+    function walk(dir: string) {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = nodePath.join(dir, entry.name);
+        if (entry.isDirectory()) { walk(full); }
+        else if (ALLOWED.includes(nodePath.extname(entry.name).toLowerCase())) {
+          try {
+            if (statSync(full).size <= MAX_SIZE) {
+              results.push({ name: entry.name, content: readFileSync(full, 'utf-8'), path: full });
+            }
+          } catch { /* skip */ }
+        }
+      }
+    }
+    try { walk(dirPath); return { success: true, files: results }; }
+    catch (e: any) { return { success: false, files: [], error: e.message }; }
   });
 }
 

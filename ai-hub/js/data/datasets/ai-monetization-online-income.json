@@ -1,0 +1,42 @@
+{
+  "id": "ai-monetization-online-income",
+  "category": "11_OPPORTUNITIES",
+  "generated": "2026-03-24",
+  "source": "Tavily Search API",
+  "queries_count": 1,
+  "credits_used": 1,
+  "summary": "Najczęstsze modele zarabiania na AI: usługi (copy/video/automations), produkty cyfrowe (kursy, szablony, newsletter), kanały treści (YouTube + afiliacja), konsulting wdrożeń AI oraz mikro-SaaS. Klucz: łączenie narzędzi w pipeline i dystrybucja treści.",
+  "raw_searches": [
+    {
+      "query": "AI tools for making money online 2026 monetization passive income",
+      "answer": "AI can generate passive income through online courses, content creation, and consulting. Leveraging AI tools for marketing and automation can also create profitable streams. Investing in AI-driven companies is another potential avenue.",
+      "results": [
+        {
+          "title": "3 AI Passive Income Ideas To Make $1,000+ a Month in 2026 - Forbes",
+          "url": "https://www.forbes.com/sites/rachelwells/2025/12/22/3-passive-income-ideas-to-make-up-to--1000month-from-ai-in-2026/",
+          "score": 0.9999609
+        },
+        {
+          "title": "How to make money with AI: tap into the digital gold rush - Wix.com",
+          "url": "https://www.wix.com/blog/how-to-make-money-with-ai",
+          "score": 0.9998727
+        },
+        {
+          "title": "How to Make Money Using AI in 2026 - Coursera",
+          "url": "https://www.coursera.org/articles/how-to-make-money-using-ai",
+          "score": 0.99986124
+        },
+        {
+          "title": "Make Money Using AI in 2026 – 6 Real Side Hustles That Work",
+          "url": "https://techputs.com/make-money-using-ai-in-2026/",
+          "score": 0.9998287
+        },
+        {
+          "title": "7 Ways to Make Money With AI in 2026 | The Motley Fool",
+          "url": "https://www.fool.com/investing/stock-market/market-sectors/information-technology/ai-stocks/how-to-make-money-with-ai/",
+          "score": 0.99979013
+        }
+      ]
+    }
+  ]
+}

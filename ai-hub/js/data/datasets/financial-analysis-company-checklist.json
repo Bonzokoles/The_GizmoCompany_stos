@@ -1,0 +1,51 @@
+{
+  "id": "financial-analysis-company-checklist",
+  "category": "finance",
+  "generated": "2026-03-24T00:00:00.000Z",
+  "source": "curated",
+  "queries_count": 5,
+  "credits_used": 1,
+  "summary": "Co analizować finansowo w firmie: rentowność, płynność, cash flow, unit economics, zadłużenie i scenariusze forecastowe.",
+  "raw_searches": [
+    {
+      "query": "Co analizować finansowo co miesiąc w firmie",
+      "answer": "Miesięczny pakiet zarządczy powinien zawierać: przychody vs plan, marża brutto, EBITDA, cash burn/runway, należności i zobowiązania przeterminowane, struktura kosztów stałych/zmiennych oraz rentowność per produkt/kanał. Krytyczne są odchylenia i ich przyczyny.",
+      "sources": [
+        "https://www.investopedia.com/terms/e/ebitda.asp",
+        "https://corporatefinanceinstitute.com/resources/accounting/cash-flow-statement/"
+      ]
+    },
+    {
+      "query": "KPI płynności i bezpieczeństwa finansowego",
+      "answer": "W praktyce monitoruje się Current Ratio, Quick Ratio, DSO, DPO, cykl konwersji gotówki (CCC), poziom bufora gotówki oraz koncentrację przychodu na top klientach. Dla MŚP ważne są alarmy progowe i plan awaryjny finansowania.",
+      "sources": [
+        "https://www.investopedia.com/terms/c/currentratio.asp",
+        "https://www.investopedia.com/terms/c/cashconversioncycle.asp"
+      ]
+    },
+    {
+      "query": "Unit economics i opłacalność wzrostu",
+      "answer": "Dla sprzedaży online i usług: CAC, LTV, LTV/CAC, payback period, marża kontrybucyjna oraz churn. Wzrost jest zdrowy tylko gdy marża i cash flow nie pogarszają się szybciej niż skala przychodu.",
+      "sources": [
+        "https://www.shopify.com/blog/customer-acquisition-cost",
+        "https://www.investopedia.com/terms/l/lifetime-value.asp"
+      ]
+    },
+    {
+      "query": "Forecast i scenariusze w firmie",
+      "answer": "Zalecane są 3 scenariusze: base, downside, upside. Forecast minimum 13-tygodniowego cash flow + rolling 12 miesięcy P&L. Dla decyzji inwestycyjnych: analiza wrażliwości na cenę, koszt zakupu, kurs walut i sezonowość.",
+      "sources": [
+        "https://www.coursera.org/articles/financial-forecasting",
+        "https://corporatefinanceinstitute.com/resources/financial-modeling/"
+      ]
+    },
+    {
+      "query": "Sygnały ostrzegawcze w analizie finansowej",
+      "answer": "Red flags: rosnące przychody przy spadającej marży, wzrost należności szybciej niż sprzedaży, stale wydłużający się CCC, nadmierne rabaty maskujące spadek popytu, brak zgodności między EBITDA a cash flow operacyjnym.",
+      "sources": [
+        "https://www.ifrs.org/",
+        "https://www.investopedia.com/"
+      ]
+    }
+  ]
+}

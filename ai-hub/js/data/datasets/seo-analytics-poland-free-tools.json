@@ -1,0 +1,42 @@
+{
+  "id": "seo-analytics-poland-free-tools",
+  "category": "08_ANALYTICS",
+  "generated": "2026-03-24",
+  "source": "Tavily Search API",
+  "queries_count": 1,
+  "credits_used": 1,
+  "summary": "Dla rynku PL najczęściej rekomendowane darmowe narzędzia to: Google Search Console, GA4, Google Trends, Screaming Frog (limit 500 URL), GTmetrix oraz rank checkery. W praktyce: GSC + GA4 + crawler + monitoring pozycji daje solidną bazę SEO.",
+  "raw_searches": [
+    {
+      "query": "darmowe narzedzia SEO analityka stron internetowych polska 2026",
+      "answer": "Essential free SEO tools in 2026 include Google Trends, Ubersuggest, and Screaming Frog SEO Spider for technical audits. Google Analytics 4, Google Search Console, and Senuto are also crucial for ongoing SEO analysis and performance tracking.",
+      "results": [
+        {
+          "title": "Narzędzia SEO (darmowe i płatne) - Wybierz najlepsze w 2026",
+          "url": "https://octamedia.pl/blog/narzedzia-seo/",
+          "score": 0.89030397
+        },
+        {
+          "title": "28 darmowych narzędzi SEO, które poprawią widoczność strony w 2026 r.",
+          "url": "https://www.shopify.com/pl/blog/darmowe-narzedzia-seo",
+          "score": 0.77589405
+        },
+        {
+          "title": "Darmowe narzędzia SEO – lista propozycji",
+          "url": "https://www.devagroup.pl/blog/darmowe-narzedzia-seo-lista-propozycji",
+          "score": 0.6762998
+        },
+        {
+          "title": "Najlepsze darmowe narzędzia SEO! [Ranking TOP 24]",
+          "url": "https://kreacjamarki.pl/blog/darmowe-narzedzia-seo-ranking/",
+          "score": 0.6698534
+        },
+        {
+          "title": "Jakie są najlepsze darmowe narzędzia SEO?",
+          "url": "https://widoczni.com/blog/darmowe-narzedzia-seo/",
+          "score": 0.5735118
+        }
+      ]
+    }
+  ]
+}

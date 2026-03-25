@@ -22,6 +22,14 @@
     },
     "huggingface-skills": {
       "url": "https://huggingface.co/mcp?login"
+    },
+    "tavily": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "tavily-mcp@0.1.4"],
+      "env": {
+        "TAVILY_API_KEY": "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"
+      }
     }
   }
 }

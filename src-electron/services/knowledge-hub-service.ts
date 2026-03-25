@@ -288,7 +288,7 @@ export class KnowledgeHubService {
   getCloudResources(): CloudResource[] {
     return [
       // D1 Databases
-      { type: 'd1', id: 'ddac77ec-c59b-4c19-895f-19e5b8e0b335', name: 'zeno-browser-db', description: 'Zen Browser main database', project: 'zenbrowsers.org' },
+      { type: 'd1', id: 'ddac77ec-fe9e-4b5b-b3f5-ba0793152917', name: 'zeno-browser-db', description: 'Zen Browser main database', project: 'zenbrowsers.org' },
       { type: 'd1', id: '5c46da23-b3ae-42d3-91a2-0a2b81d8f3ec', name: 'jimbo77-community-db', description: 'Jimbo77 community data', project: 'jimbo77.com' },
       { type: 'd1', id: '7cd9d679-77d5-466d-930e-a5c57ba18621', name: 'jimbo77-social-db', description: 'Jimbo77 social features', project: 'jimbo77.com' },
       { type: 'd1', id: '84f0f3cb-9cfa-4c18-abd1-ab3f13d2e6ea', name: 'mybonzo', description: 'MyBonzo main database', project: 'mybonzo.com' },

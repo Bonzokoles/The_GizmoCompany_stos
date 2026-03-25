@@ -1,0 +1,42 @@
+{
+  "id": "finance-forecasting-ai",
+  "category": "06_FINANCE",
+  "generated": "2026-03-24",
+  "source": "Tavily Search API",
+  "queries_count": 1,
+  "credits_used": 1,
+  "summary": "W finansach 2026 dominują AI-driven forecasting i scenario planning. Najczęściej wymieniane platformy: Planful, Anaplan, Clari/Aviso, narzędzia predictive analytics oraz integracja ERP/CRM + governance danych.",
+  "raw_searches": [
+    {
+      "query": "financial analytics AI forecasting tools business 2026 predictive analytics revenue",
+      "answer": "In 2026, Mosaic and Planful are leading AI financial forecasting tools, offering real-time predictive analytics and integration with ERP systems for enhanced revenue forecasting.",
+      "results": [
+        {
+          "title": "AI Financial Forecasting 2026 | Predictive Analytics - ChatFin",
+          "url": "https://chatfin.ai/blog/ai-financial-forecasting-2026-predictive-analytics/",
+          "score": 0.9999913
+        },
+        {
+          "title": "The 7 Best Sales Forecasting Tools in 2026 - Revenue.io",
+          "url": "https://www.revenue.io/blog/best-sales-forecasting-tools",
+          "score": 0.99994934
+        },
+        {
+          "title": "Best AI Analytics Tools for Finance and Forecasting February 2026",
+          "url": "https://www.kaelio.com/blog/best-ai-analytics-tools-for-finance-and-forecasting",
+          "score": 0.99993074
+        },
+        {
+          "title": "Top AI Tools for Financial Planning and Forecasting in 2026",
+          "url": "https://everworker.ai/blog/ai_tools_financial_planning_forecasting_2026",
+          "score": 0.99991584
+        },
+        {
+          "title": "20 Best FP&A Tools for 2026 (AI Features Included)",
+          "url": "https://bojanfin.com/20-best-fpa-tools-for-2026-ai-features-included/",
+          "score": 0.999764
+        }
+      ]
+    }
+  ]
+}

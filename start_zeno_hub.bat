@@ -68,7 +68,7 @@ echo.
 :: =============================================
 :: PHASE 3: KONTENERY (10 serwisow)
 :: =============================================
-echo [PHASE 3/8] Kontenery (10 serwisow)...
+echo [PHASE 3/8] Kontenery (11 serwisow)...
 
 echo   [01/10] zeno-umami-db (PostgreSQL)
 podman start zeno-umami-db >nul 2>&1
@@ -176,15 +176,30 @@ if errorlevel 1 (
         ghcr.io/plausible/community-edition:v3.2.0 >nul 2>&1
 )
 
-echo   [10/10] zeno-superset (Apache Superset BI)
+echo   [10/11] zeno-superset (Apache Superset BI)
 podman start zeno-superset >nul 2>&1
 if errorlevel 1 echo          [INFO] Superset niedostepny - brak kontenera
+
+echo   [11/11] mydia (Media Manager :4100)
+podman start mydia >nul 2>&1
+if errorlevel 1 (
+    podman run -d --name mydia ^
+        -e SECRET_KEY_BASE=tZobFJrMXyfwmjaUj28AiOwfqO4UPbeunhulE0k4JM1K/wJBtZKGH14IRf9qM1h0 ^
+        -e GUARDIAN_SECRET_KEY=1lmw61uwVhMvVHvGOQsXZBJP1fmB5p3bq0E9UfUhewd68G4l5hGZewPRx1ZStgUW ^
+        -e TZ=Europe/Warsaw -e PUID=1000 -e PGID=1000 ^
+        -e PHX_HOST=localhost -e PORT=4100 ^
+        -e MOVIES_PATH=/media/movies -e TV_PATH=/media/tv ^
+        -p 4100:4100 ^
+        --restart unless-stopped ^
+        ghcr.io/getmydia/mydia:latest >nul 2>&1
+)
 
 echo.
 echo   Status kontenerow:
 timeout /t 2 /nobreak >nul
 podman ps --filter "name=zeno-" --format "    {{.Names}} -> {{.Status}}"
 podman ps --filter "name=plausible" --format "    {{.Names}} -> {{.Status}}"
+podman ps --filter "name=mydia" --format "    {{.Names}} -> {{.Status}}"
 echo.
 
 :: =============================================
@@ -337,6 +352,7 @@ echo     sist2          http://localhost:8085
 echo     Umami          http://localhost:5183
 echo     Plausible      http://localhost:8100
 echo     Superset       http://localhost:8088
+echo     Mydia          http://localhost:4100
 echo.
 echo   Tunele (telefon):
 echo     URL w: logs\tunnel_zeno.log
