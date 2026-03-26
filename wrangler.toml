@@ -3,6 +3,7 @@
 #  Deploy: CF Pages (Vite SPA) + Functions (Workers API)
 #  URL: https://zenbrowsers.org
 #  Dev: npx wrangler pages dev dist --port 8788
+#  CopilotKit runtime: /api/copilotkit (AnthropicAdapter)
 # ═══════════════════════════════════════════════════════════════
 
 name = "zeno-browser-web"
