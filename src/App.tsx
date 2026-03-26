@@ -7,10 +7,19 @@ import './styles/web-landing.css';
 
 const isElectron = typeof window !== 'undefined' && !!(window.electronAPI);
 
+function openCopilotSidebar() {
+  const btn = document.querySelector<HTMLButtonElement>('.copilotKitButton');
+  if (btn) btn.click();
+}
+
 export function App() {
   return (
     <CopilotKit runtimeUrl="/api/copilotkit">
-      {isElectron ? <BrowserUI /> : <WebLanding />}
+      {isElectron ? (
+        <BrowserUI />
+      ) : (
+        <WebLanding onOpenCopilot={openCopilotSidebar} />
+      )}
       <CopilotSidebar
         defaultOpen={false}
         labels={{
