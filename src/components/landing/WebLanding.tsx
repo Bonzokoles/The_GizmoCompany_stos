@@ -4,7 +4,7 @@
  * Deployed on zenbrowsers.org (CF Pages)
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { PageAgent } from 'page-agent';
+
 
 /* ─── Types ──────────────────────────────────────── */
 
@@ -21,21 +21,21 @@ interface DbInfo { id: string; name: string; description: string; project: strin
 /* ─── Constants ─────────────────────────────────── */
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: 'overview', label: 'Overview', icon: '📊' },
-  { id: 'workers', label: 'Workers', icon: '⚙️' },
-  { id: 'content', label: 'Content', icon: '📝' },
-  { id: 'analytics', label: 'Analytics', icon: '📈' },
-  { id: 'pipelines', label: 'Pipelines', icon: '🔀' },
-  { id: 'crawlers', label: 'Crawlers', icon: '🕷️' },
-  { id: 'storage', label: 'Storage', icon: '💾' },
-  { id: 'databases', label: 'Databases', icon: '🗄️' },
-  { id: 'images', label: 'Images', icon: '🖼️' },
-  { id: 'moa', label: 'MOA', icon: '🧬' },
-  { id: 'render', label: 'Render', icon: '🌐' },
-  { id: 'queues', label: 'Queues', icon: '📨' },
-  { id: 'aihub', label: 'AI Hub', icon: '🤖' },
-  { id: 'biztools', label: 'BizTools', icon: '💹' },
-  { id: 'workflows', label: 'Workflows', icon: '⚡' },
+  { id: 'overview',   label: 'Overview',  icon: '◉' },
+  { id: 'workers',    label: 'Workers',   icon: '▲' },
+  { id: 'content',    label: 'Content',   icon: '◇' },
+  { id: 'analytics',  label: 'Analytics', icon: '◆' },
+  { id: 'pipelines',  label: 'Pipelines', icon: '▶' },
+  { id: 'crawlers',   label: 'Crawlers',  icon: '◎' },
+  { id: 'storage',    label: 'Storage',   icon: '▣' },
+  { id: 'databases',  label: 'Databases', icon: '▦' },
+  { id: 'images',     label: 'Images',    icon: '◧' },
+  { id: 'moa',        label: 'MOA',       icon: '⊕' },
+  { id: 'render',     label: 'Render',    icon: '◕' },
+  { id: 'queues',     label: 'Queues',    icon: '▷' },
+  { id: 'aihub',      label: 'AI Hub',    icon: '◈' },
+  { id: 'biztools',   label: 'BizTools',  icon: '▨' },
+  { id: 'workflows',  label: 'Workflows', icon: '⚡' },
 ];
 
 const API_SERVICES: ApiStatus[] = [
@@ -145,7 +145,11 @@ async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T | n
 
 /* ─── Main Component ─────────────────────────────── */
 
-export function WebLanding() {
+interface WebLandingProps {
+  onOpenCopilot?: () => void;
+}
+
+export function WebLanding({ onOpenCopilot }: WebLandingProps) {
   const [tab, setTab] = useState<TabId>('overview');
   const [apis, setApis] = useState(API_SERVICES);
   const [sites, setSites] = useState<SiteStatus[]>([]);
@@ -294,9 +298,7 @@ export function WebLanding() {
   const [workflowStatuses, setWorkflowStatuses] = useState<{ id: string; status: 'active' | 'idle' | 'error'; instances: number; lastRun?: Date }[]>([]);
   const [workflowEndpoint, setWorkflowEndpoint] = useState('https://mybonzo-ai-workflow.stolarnia-ams.workers.dev');
 
-  // Page Agent (AI GUI assistant)
-  const pageAgentRef = useRef<PageAgent | null>(null);
-  const [agentReady, setAgentReady] = useState(false);
+
 
   /* ─── Init ─── */
   useEffect(() => {
@@ -670,31 +672,7 @@ export function WebLanding() {
     setAiProvidersStatus(statuses);
   }, []);
 
-  // Initialize page-agent
-  useEffect(() => {
-    if (pageAgentRef.current) return;
-    const agent = new PageAgent({
-      baseURL: '/api/ai/v1',
-      model: 'deepseek-chat',
-      language: 'en-US',
-      customFetch: (url: string | URL | Request, init?: RequestInit) =>
-        fetch(url, { ...init, credentials: 'same-origin' }),
-      instructions: {
-        system: `Jesteś asystentem dashboardu ZENO Ops (zenbrowsers.org). Odpowiadasz TYLKO po polsku. Pomagasz użytkownikowi nawigować po zakładkach: Overview, Workers, Content/CMS, Analytics, Pipelines, Crawlers, Storage, Databases, Images, MOA, Render, Queues, AI Hub, BizTools. Możesz klikać, wypełniać pola i obsługiwać interfejs użytkownika.`,
-        getPageInstructions: (url: string) =>
-          `Aktualny URL: ${url}. To dashboard operacyjny ZENO na Cloudflare Pages. Nawiguj po zakładkach i pomagaj użytkownikowi obsługiwać Workers, bazy danych D1, buckety R2, pipeline AI i inne serwisy.`,
-      },
-    });
-    pageAgentRef.current = agent;
-    setAgentReady(true);
-    return () => { pageAgentRef.current = null; };
-  }, []);
 
-  const togglePageAgent = useCallback(() => {
-    const agent = pageAgentRef.current;
-    if (!agent) return;
-    try { agent.panel.show(); } catch { /* panel already visible */ }
-  }, []);
 
   const handleTavilySearch = useCallback(async (queryOverride?: string) => {
     const q = queryOverride || tavilyQuery;
@@ -2551,12 +2529,11 @@ export function WebLanding() {
         <p>ZENO Ops &copy; {new Date().getFullYear()} — Powered by Cloudflare Workers &amp; AI</p>
       </footer>
 
-      {/* ─── PAGE AGENT TRIGGER ─── */}
-      {agentReady && (
-        <button className="chat-toggle" onClick={togglePageAgent} title="Page Agent — AI asystent">
-          🤖
-        </button>
-      )}
+      {/* ─── COPILOTKIT TRIGGER ─── */}
+      <button className="chat-toggle" onClick={() => onOpenCopilot?.()} title="ZENO Asystent AI">
+        <span className="ct-dot" />
+        AI Chat
+      </button>
     </div>
   );
 }
