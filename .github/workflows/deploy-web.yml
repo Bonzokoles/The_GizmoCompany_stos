@@ -47,19 +47,19 @@ jobs:
       - name: Copy ai-hub to dist
         run: cp -r ai-hub dist/ai-hub
 
-- name: Check secrets
-              run: |
-                  if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "❌ CLOUDFLARE_API_TOKEN is not set!"; exit 1; fi
-                  if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then echo "❌ CLOUDFLARE_ACCOUNT_ID is not set!"; exit 1; fi
-                  echo "✅ Secrets present"
-              env:
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      - name: Check secrets
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "❌ CLOUDFLARE_API_TOKEN is not set!"; exit 1; fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then echo "❌ CLOUDFLARE_ACCOUNT_ID is not set!"; exit 1; fi
+          echo "✅ Secrets present"
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-            - name: Deploy to Cloudflare Pages
-              uses: cloudflare/wrangler-action@v3
-              with:
-                  apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-                  wranglerVersion: "3"
-                  command: pages deploy dist --project-name=zeno-browser-web --commit-dirty=true --config wrangler.pages.toml
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "3"
+          command: pages deploy dist --project-name=zeno-browser-web --commit-dirty=true --config wrangler.pages.toml
