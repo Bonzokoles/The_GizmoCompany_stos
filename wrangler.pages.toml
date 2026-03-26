@@ -1,0 +1,8 @@
+# Cloudflare Pages — deploy config (oddzielny od Worker bindings)
+# Używany przez GitHub Actions workflow: deploy-web.yml
+# wrangler pages deploy dist --config wrangler.pages.toml
+
+name = "zeno-browser-web"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
