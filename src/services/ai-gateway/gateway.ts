@@ -4,6 +4,9 @@
 
 import { LRUCache } from 'lru-cache';
 import { AIRequest, AIResponse, AIProvider, AIProviderType } from './providers/index';
+import { DeepSeekProvider } from './providers/deepseek';
+import { OpenRouterProvider } from './providers/openrouter';
+import { EdenAIProvider } from './providers/edenai';
 
 interface AIGatewayConfig {
   providers: {
@@ -46,14 +49,10 @@ export class AIGateway {
   }
 
   private initializeProviders(config: AIGatewayConfig) {
-    // Dynamically import and initialize providers
-    const providerMap: Record<AIProviderType, any> = {
-      deepseek: require('./providers/deepseek').DeepSeekProvider,
-      openrouter: require('./providers/openrouter').OpenRouterProvider,
-      edenai: require('./providers/edenai').EdenAIProvider,
-      openai: require('./providers/openai').OpenAIProvider,
-      anthropic: require('./providers/anthropic').AnthropicProvider,
-      local: require('./providers/local').LocalProvider,
+    const providerMap: Partial<Record<AIProviderType, new (...args: any[]) => AIProvider>> = {
+      deepseek: DeepSeekProvider,
+      openrouter: OpenRouterProvider,
+      edenai: EdenAIProvider,
     };
 
     for (const [key, providerConfig] of Object.entries(config.providers)) {

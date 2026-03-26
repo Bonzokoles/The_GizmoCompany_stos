@@ -104,7 +104,7 @@ const statBox: React.CSSProperties = {
   marginBottom: 6,
 };
 
-const api = typeof window !== 'undefined' ? (window as any).electronAPI : null;
+const api = typeof window !== 'undefined' ? window.electronAPI : null;
 
 // ═══════════════════════════════════════════════════════════════
 // NETWORK TAB

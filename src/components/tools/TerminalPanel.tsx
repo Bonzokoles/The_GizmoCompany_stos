@@ -33,7 +33,7 @@ interface CommandCategory {
   commands: QuickCommand[];
 }
 
-const api = () => (window as any).electronAPI;
+const api = () => window.electronAPI;
 
 // ── Pre-built command categories ───────────────────────────────
 
@@ -321,7 +321,7 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
           try {
             const result = await api()?.terminal?.setCwd?.(dir);
             if (result?.success) {
-              setCwd(result.cwd);
+              setCwd(result.cwd ?? '');
               addLine('info', `📁 ${result.cwd}`);
             } else {
               addLine('error', result?.error ?? 'Nie można zmienić katalogu');

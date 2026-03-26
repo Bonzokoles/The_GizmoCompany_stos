@@ -2,7 +2,7 @@
  * AI Gateway Types & Interfaces
  */
 
-export type AIProviderType = 'deepseek' | 'openrouter' | 'edenai' | 'openai' | 'anthropic' | 'local';
+export type AIProviderType = 'deepseek' | 'openrouter' | 'edenai';
 
 export type AICapability =
   | 'text-generation'

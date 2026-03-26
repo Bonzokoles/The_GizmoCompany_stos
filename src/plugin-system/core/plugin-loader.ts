@@ -63,16 +63,12 @@ export class PluginLoader {
   /**
    * Execute code in sandboxed context
    */
-  private executeCode(code: string, options: LoaderOptions): any {
-    if (options.sandboxed) {
-      return this.executeSandboxed(code);
-    } else {
-      return this.executeUnsafe(code);
-    }
+  private executeCode(code: string, _options: LoaderOptions): any {
+    return this.executeSandboxed(code);
   }
 
   /**
-   * Execute code in sandboxed environment
+   * Execute code in sandboxed environment using new Function with limited scope
    */
   private executeSandboxed(code: string): any {
     try {
@@ -90,18 +86,6 @@ export class PluginLoader {
       return result;
     } catch (error) {
       throw new Error(`Sandboxed execution failed: ${error}`);
-    }
-  }
-
-  /**
-   * Execute code unsafely (use with caution)
-   */
-  private executeUnsafe(code: string): any {
-    try {
-      // eslint-disable-next-line no-eval
-      return eval(`(function() { ${code}; return { default: exports.default || null }; })()`);
-    } catch (error) {
-      throw new Error(`Execution failed: ${error}`);
     }
   }
 }

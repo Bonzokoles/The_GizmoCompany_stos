@@ -2,10 +2,28 @@
  * Plugin IPC Bridge - Communication between React and Electron for plugin system
  */
 
-import { ipcMain } from 'electron';
+import { ipcMain, app } from 'electron';
+import * as path from 'path';
 import { pluginManager } from '../../src/plugin-system/core/plugin-manager';
 import { marketplaceService } from '../../src/plugin-system/marketplace/marketplace-service';
 import { PluginAutoUpdater } from '../../src/plugin-system/marketplace/auto-updater';
+
+const ALLOWED_PLUGIN_ORIGINS = [
+  'https://marketplace.zeno-browser.com',
+  'https://plugins.mybonzo.com',
+];
+
+function isAllowedPluginSource(source: string): boolean {
+  if (!source || typeof source !== 'string') return false;
+  // Allow HTTPS URLs from trusted origins
+  if (source.startsWith('https://')) {
+    return ALLOWED_PLUGIN_ORIGINS.some(origin => source.startsWith(origin));
+  }
+  // Allow local file paths only within userData plugins dir
+  const pluginsDir = path.join(app.getPath('userData'), 'plugins');
+  const resolved = path.resolve(source);
+  return resolved.startsWith(pluginsDir + path.sep) || resolved === pluginsDir;
+}
 
 let autoUpdater: PluginAutoUpdater;
 
@@ -29,6 +47,9 @@ export class PluginIPCBridge {
   private setupHandlers() {
     // Load plugin
     ipcMain.handle('plugin:load', async (_, source: string) => {
+      if (!isAllowedPluginSource(source)) {
+        return { success: false, error: 'Plugin source not allowed' };
+      }
       try {
         const plugin = await pluginManager.loadPlugin(source);
         return { success: true, pluginId: plugin.constructor.name };

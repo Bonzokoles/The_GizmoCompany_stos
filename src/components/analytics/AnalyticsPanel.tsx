@@ -82,7 +82,7 @@ export function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
   const [activeVisitors, setActiveVisitors] = useState<number>(0);
   const [tab, setTab] = useState<'overview' | 'pages' | 'referrers' | 'settings'>('overview');
   const chartRef = useRef<HTMLCanvasElement>(null);
-  const api = (window as any).electronAPI?.umami;
+  const api = window.electronAPI?.umami;
 
   // Initial connection check
   useEffect(() => {
@@ -102,7 +102,7 @@ export function AnalyticsPanel({ onClose }: AnalyticsPanelProps) {
 
   // Fetch data when site or range changes
   useEffect(() => {
-    if (status !== 'ready' || !selectedSite) return;
+    if (status !== 'ready' || !selectedSite || !api) return;
     const range = getDateRange(timeRange);
     (async () => {
       const [s, pv, tp, ref, rt] = await Promise.all([
@@ -332,7 +332,7 @@ function MetricList({ title, items }: { title: string; items: Metric[] }) {
 }
 
 function SettingsTab() {
-  const api = (window as any).electronAPI?.umami;
+  const api = window.electronAPI?.umami;
   const [baseUrl, setBaseUrl] = useState('http://localhost:5183');
   const [username, setUsername] = useState('Jimbo77');
   const [password, setPassword] = useState('');

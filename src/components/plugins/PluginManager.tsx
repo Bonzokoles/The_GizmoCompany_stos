@@ -23,7 +23,7 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ onClose }) => {
   const [plugins, setPlugins] = useState<InstalledPlugin[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const electronAPI = (window as any).electronAPI;
+  const electronAPI = window.electronAPI;
 
   useEffect(() => {
     loadPlugins();

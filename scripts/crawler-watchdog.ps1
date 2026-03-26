@@ -206,7 +206,8 @@ function Invoke-CrawlerWithWatchdog {
             # Pokaż progress co 60 sekund
             if ($remaining % 60 -lt 5) {
                 $mins = [math]::Floor($remaining / 60)
-                Write-Host -NoNewline "`r  ⚙  Crawler działa... pozostało max ${mins}m ${($remaining % 60)}s    "
+                $secs = $remaining % 60
+                Write-Host -NoNewline "`r  ⚙  Crawler działa... pozostało max ${mins}m ${secs}s    "
             }
         }
 

@@ -163,6 +163,15 @@ export interface TabsAPI {
   shareAuth(fromTabId: string, toTabId?: string): Promise<void>;
 }
 
+export interface UmamiAPI {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [method: string]: (...args: any[]) => Promise<any>;
+}
+
+export interface McpAPI {
+  listTools(): Promise<string[]>;
+}
+
 export interface WorkflowAPI {
   create(id: string, steps: unknown[]): Promise<void>;
   execute(workflowId: string): Promise<{ executionId: string }>;
@@ -576,6 +585,10 @@ export interface ElectronAPI {
   websurfx: WebsurfxAPI;
   sist2: Sist2API;
   copilot: CopilotAPI;
+  workflow?: WorkflowAPI;
+  crawler?: CrawlerAPI;
+  umami?: UmamiAPI;
+  mcp?: McpAPI;
 
   /** Subscribe to IPC events from main process. Returns unsubscribe function. */
   on(channel: string, callback: (...args: unknown[]) => void): () => void;

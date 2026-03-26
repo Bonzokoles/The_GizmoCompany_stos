@@ -21,7 +21,7 @@ export const PluginInstaller: React.FC<PluginInstallerProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
 
-  const electronAPI = (window as any).electronAPI;
+  const electronAPI = window.electronAPI;
 
   const handleInstall = async () => {
     setStage('installing');

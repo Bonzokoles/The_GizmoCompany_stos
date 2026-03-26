@@ -26,16 +26,6 @@ const gatewayConfig: AIGatewayConfig = {
       enabled: !!process.env.EDENAI_API_KEY,
       priority: 3,
     },
-    openai: {
-      apiKey: process.env.OPENAI_API_KEY || '',
-      enabled: process.env.USE_CLASSIC_AI === 'true',
-      priority: 99,
-    },
-    anthropic: {
-      apiKey: process.env.ANTHROPIC_API_KEY || '',
-      enabled: process.env.USE_CLASSIC_AI === 'true',
-      priority: 100,
-    },
   },
   cacheConfig: {
     enabled: true,

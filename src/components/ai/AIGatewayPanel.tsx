@@ -23,7 +23,7 @@ interface ChatMessage {
   cached?: boolean;
 }
 
-const api = () => (window as any).electronAPI;
+const api = () => window.electronAPI;
 
 export function AIGatewayPanel({ onClose }: AIGatewayPanelProps) {
   const [activeTab, setActiveTab] = useState<GatewayTab>('chat');
