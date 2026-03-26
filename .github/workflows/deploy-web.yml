@@ -62,4 +62,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: "3"
-          command: pages deploy dist --project-name=zeno-browser-web --commit-dirty=true
+          command: pages deploy dist --project-name=zeno-browser-web

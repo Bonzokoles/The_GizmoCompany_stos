@@ -1,4 +1,4 @@
-/* ZENO Browser — Operations Dashboard Styles — v2 */
+/* ZENO Browser — Operations Dashboard Styles — v3 */
 
 /* ── CopilotKit overrides ────────────────────────── */
 .copilotKitButton { display: none !important; }
@@ -1650,3 +1650,4 @@ footer {
 @media (max-width: 480px) {
   .chat-toggle { bottom: 16px; right: 16px; }
 }
+
