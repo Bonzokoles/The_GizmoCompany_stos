@@ -2529,8 +2529,15 @@ export function WebLanding({ onOpenCopilot }: WebLandingProps) {
         <p>ZENO Ops &copy; {new Date().getFullYear()} — Powered by Cloudflare Workers &amp; AI</p>
       </footer>
 
-      {/* ─── COPILOTKIT TRIGGER ─── */}
-      <button className="chat-toggle" onClick={() => onOpenCopilot?.()} title="ZENO Asystent AI">
+      {/* ─── AI CHAT TRIGGER (fallback when CopilotKit backend unavailable) ─── */}
+      <button
+        className="chat-toggle"
+        onClick={() => {
+          setTab('aihub');
+          try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch { /* noop */ }
+        }}
+        title="ZENO Asystent AI"
+      >
         <span className="ct-dot" />
         AI Chat
       </button>

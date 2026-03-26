@@ -185,7 +185,7 @@ a:hover{color:#5effe0}
 .vchat-btn.active{background:linear-gradient(135deg,#f87171,#a78bfa)}
 
 .vchat-win{position:fixed;bottom:96px;right:28px;z-index:9998;width:380px;max-width:calc(100vw - 24px);
-  height:520px;max-height:calc(100vh - 120px);border-radius:4px;overflow:hidden;display:none;flex-direction:column;
+  height:50vh;max-height:50vh;min-height:320px;border-radius:4px;overflow:hidden;display:none;flex-direction:column;
   background:rgba(10,15,30,0.92);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,0.08);
   box-shadow:0 12px 48px rgba(0,0,0,0.6)}
 .vchat-win.open{display:flex}
@@ -308,6 +308,6 @@ a:hover{color:#5effe0}
   .section-head h2{font-size:1.4rem}
 }
 @media(max-width:480px){
-  .vchat-win{right:8px;bottom:88px;width:calc(100vw - 16px);height:calc(100vh - 100px)}
+  .vchat-win{right:8px;bottom:88px;width:calc(100vw - 16px);height:55vh;max-height:55vh}
   .vchat-btn{bottom:18px;right:18px;width:52px;height:52px}
 }
