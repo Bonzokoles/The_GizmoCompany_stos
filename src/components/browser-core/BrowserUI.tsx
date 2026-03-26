@@ -10,6 +10,7 @@ import { AddressBar } from './AddressBar';
 import { WebViewPanel } from './WebViewPanel';
 import { StartPage } from '../navigation/StartPage';
 import { SidebarOverlay } from '../navigation/SidebarOverlay';
+import { useBrowserCopilotActions } from '../../hooks/useBrowserCopilotActions';
 import type { WebViewPanelHandle } from './WebViewPanel';
 import type { Tab } from '../../types/electron';
 
@@ -192,6 +193,34 @@ export function BrowserUI() {
       return prev.map(t => ({ ...t, isActive: t.id === tabId }));
     });
   }, []);
+
+  // ── CopilotKit Actions ───────────────────────────────────────────────────
+  useBrowserCopilotActions({
+    navigate:   handleNavigate,
+    newTab:     handleNewTab,
+    closeTab:   handleCloseTab,
+    goBack:     handleGoBack,
+    goForward:  handleGoForward,
+    reload:     handleReload,
+    currentUrl,
+    tabs,
+    setPanels: {
+      ai:           setShowAIPanel,
+      security:     setShowSecurityPanel,
+      tunnel:       setShowTunnelPanel,
+      plugins:      setShowPluginHub,
+      tools:        setShowToolsPanel,
+      gateway:      setShowAIGateway,
+      terminal:     setShowTerminal,
+      analytics:    setShowAnalytics,
+      search:       setShowSearchPanel,
+      catalog:      setShowCatalogBrowser,
+      knowledgeHub: setShowKnowledgeHub,
+      agents:       setShowAgentsCreator,
+      copilotDev:   setShowCopilotDev,
+      sidebar:      setShowSidebar,
+    },
+  });
 
   return (
     <ErrorBoundary>

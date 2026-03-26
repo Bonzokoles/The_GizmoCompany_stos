@@ -30,6 +30,9 @@
   },
   "dependencies": {
     "@cloudflare/tanstack-ai": "^0.1.4",
+    "@copilotkit/react-core": "^1.54.1",
+    "@copilotkit/react-ui": "^1.54.1",
+    "@copilotkit/runtime": "^1.54.1",
     "@github/copilot-sdk": "^0.2.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "agents": "^0.7.9",
@@ -41,6 +44,7 @@
     "electron-log": "^5.4.3",
     "electron-updater": "^6.8.3",
     "lru-cache": "^10.1.0",
+    "openai": "^6.33.0",
     "page-agent": "^1.6.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
@@ -48,6 +52,7 @@
     "workers-ai-provider": "^3.1.4"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260317.1",
     "@playwright/test": "^1.40.1",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^16.3.2",
