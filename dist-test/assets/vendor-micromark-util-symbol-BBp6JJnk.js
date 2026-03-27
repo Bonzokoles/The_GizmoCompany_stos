@@ -1,0 +1,1 @@
+const e={eof:null,asterisk:42,underscore:95,tilde:126},s={attentionSideAfter:2,characterGroupPunctuation:2,characterGroupWhitespace:1},t={data:"data",characterEscape:"characterEscape",emphasis:"emphasis",emphasisSequence:"emphasisSequence",emphasisText:"emphasisText",strong:"strong",strongSequence:"strongSequence",strongText:"strongText"};export{s as a,e as c,t};

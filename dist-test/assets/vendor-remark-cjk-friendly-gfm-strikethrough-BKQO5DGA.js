@@ -1,0 +1,1 @@
+import{g as t}from"./vendor-micromark-extension-cjk-friendly-gfm-strikethrough-BEFE2327.js";function s(o){const r=this.data();(r.micromarkExtensions||(r.micromarkExtensions=[])).push(t(o))}export{s as r};

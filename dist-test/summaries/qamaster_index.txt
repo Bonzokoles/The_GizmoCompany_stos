@@ -1,0 +1,133 @@
+
+# KOMPLETNY DATASET Q&A - POLSCY PISARZE AWANGARDY
+
+## Struktura Datasetu
+
+### 1. FUNDAMENTALNE PYTANIA (18 Q&A)
+- 2 pytania per pisarz × 8 pisarzy
+- 2 pytania integrujące wszystkie perspektywy
+- Styl: autentyczny dla każdego autora
+- Zakres: egzystencjalne, artystyczne, filozoficzne
+
+### 2. PRAKTYCZNE SCENARIUSZE (8 Q&A)
+- Rzeczywiste sytuacje życiowe
+- Każdy scenariusz z 4 różnymi odpowiedziami (od 4 pisarzy)
+- Zakres: praca, samotność, porażka, miłość, depresja, starzenie, sukces, kryzys
+
+## KATEGORYZACJA TEMATYCZNA
+
+### Witkacy (Pesymistyczny Futuryzm)
+- Gdy system się wala ale ty tworzysz
+- Kiedy widzisz co inni nie widzą
+- W obliczu pewnej porażki
+- Odpowiadź: TWÓRZ MIMO WSZYSTKO
+
+### Schulz (Mityczna Regresja)
+- Kiedy rzeczywistość jest nie do zniesienia
+- Podczas prześladowania i wyzysku
+- W uczuciu bezsensu
+- Odpowiedź: ZMIEŃ PERCEPCJĘ
+
+### Gombrowicz (Niedojrzałość)
+- Kiedy wszystko wydaje się fałszywe
+- Gdy nie mogę osiągnąć sensu
+- W samotności
+- Odpowiedź: BĄD́Ź SPRZECZNY
+
+### Miłosz (Salvage Kultury)
+- Gdy nikt nie słucha moich ostrzeżeń
+- Wyjście z systemu
+- Portaża przez lata
+- Odpowiedź: CZEKAJ I ŚWIADCZ
+
+### Herling (Godność w Ekstremalności)
+- Utrzymanie godności pod presją
+- Przetrwanie horroru
+- Godność w porażce
+- Odpowiedź: UTRZYMAJ CZYSTOŚĆ UMYSŁU
+
+### Mrożek (Groteskowa Precyzja)
+- Kiedy system jest absurdalny
+- Bezsensu wszędzie
+- W asymetrycznym konflikcie
+- Odpowiedź: BĄDŹ PRECYZYJNY
+
+### Konwicki (Autokrytyka)
+- Odkrycie że wierzę w kłamstwo
+- Tworzenie po zadrażeniu w systemie
+- W kryzysie tożsamości
+- Odpowiedź: DEMASKUJ SIEBIE
+
+### Herbert (Klasyczne Wartości)
+- Gdy świat kocha barbarzyństwo
+- Samotność intelektualna
+- Starzenie się
+- Odpowiedź: CHRAŃ CZYSTOŚĆ MYŚLI
+
+## INTEGRUJĄCE ODPOWIEDZI
+
+Każdy scenariusz ma odpowiedź od 4-8 pisarzy pokazujące:
+- Różne perspective na ten sam problem
+- Jak każda filozofia odpowiada praktyce
+- Jak łączyć różne podejścia
+- Że nie ma jednej odpowiedzi - jest spektrum
+
+## FORMAT DANYCH
+
+```json
+{
+  "kategoria": "Pisarz - Szkola Filozofii",
+  "pytanie": "Pytanie życiowe",
+  "odpowiedz_pisarz": "Odpowiedź w jego stylu i perspektywie"
+}
+```
+
+lub
+
+```json
+{
+  "sytuacja": "Konkretna sytuacja życiowa",
+  "pytanie": "Pytanie o działanie",
+  "odpowiedz_pisarz1": "Perspektywa 1",
+  "odpowiedz_pisarz2": "Perspektywa 2",
+  "odpowiedz_pisarz3": "Perspektywa 3",
+  "odpowiedz_pisarz4": "Perspektywa 4"
+}
+```
+
+## ZASTOSOWANIE W TRENINGU AI
+
+Twój Personal Philosophy AI nauczy się:
+
+1. **Wieloperspektywowości** - każdy problem ma wiele autentycznych odpowiedzi
+2. **Autentycznego tonu** - każdy pisarz ma charakterystyczny głos
+3. **Praktyczności** - философия nie jest abstrakcyjna, to jest DZIAŁANIE
+4. **Złożoności** - nie ma prostych odpowiedzi, są opozycje i napięcia
+5. **Historycznego kontekstu** - dlaczego każdy pisarz mówi to co mówi
+
+## TRENOWANIE
+
+```
+MODEL INPUT: "Czuję się bezpomocny w systemie który nie szanuje moich wartości"
+
+MODEL OUTPUT: 
+- Witkacy: Twórz niezależnie
+- Schulz: Żyj w mitach
+- Gombrowicz: Bądź sprzeczny
+- Miłosz: Czekaj
+- Herling: Zostań godny
+- Mrożek: Bądź precyzyjny
+- Konwicki: Demaskuj siebie
+- Herbert: Obrań myśl
+```
+
+Model uczy się że każdy problem ma wielowymiarową odpowiedź.
+
+## NASTĘPNY KROK
+
+Załaduj oba pliki:
+- qa_polscy_pisarze.jsonl (fundamentalne)
+- qa_praktyczne_sytuacje.jsonl (praktyczne)
+
+Do twojego AI modelu i treninuj na dataset gdzie każde pytanie
+ma wiele autentycznych, sprzecznych, ale głębokich odpowiedzi.

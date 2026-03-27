@@ -1,0 +1,16 @@
+{
+  "skins": [
+    {
+      "id": "zeno",
+      "label": "ZENO",
+      "description": "Domyślna maskotka ZENO Browser",
+      "icon": "/mascot/zeno/icon.png",
+      "clips": {
+        "idle": [],
+        "action": [],
+        "intro": [],
+        "outro": []
+      }
+    }
+  ]
+}

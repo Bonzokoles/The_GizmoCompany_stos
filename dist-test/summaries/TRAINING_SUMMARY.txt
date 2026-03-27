@@ -1,0 +1,81 @@
+
+LAYER 1: PHILOSOPHICAL FOUNDATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[208] 8 Polskich Pisarzy jako Systemy Wartości - JSONL
+[209] Przewodnik po Mistrzach (PL) - TXT
+[236] Deep Research Master/Slave Morality - TXT (20,000+ słów)
+
+LAYER 2: MULTI-PERSPECTIVE Q&A TRAINING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[210] 18 Fundamentalnych Pytań (8 pisarzy + syntetyczne) - JSONL
+[211] 9 Praktycznych Scenariuszy (4 perspektywy każdy) - JSONL
+[212] Master Index Q&A - TXT
+[213] Kompletny Q&A Przewodnik - TXT
+
+LAYER 3: DEEP RESEARCH - NIETZSCHE/CAMUS/THOMPSON/BUKOWSKI
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[238] 15 Zaawansowanych Scenariuszy - JSONL
+       - Vegas Manager Dilemma
+       - Cocaine Dealer Eternal Recurrence
+       - Post Office Worker Sisyphean Task
+       - Lawyer Master/Slave Morality
+       - Financial Crash Value Destruction
+       - Authentic Rebel Paradox
+       - Terminal Patient Ultimate Test
+       - Artist Self-Overcoming
+       - CEO Black Humor
+       - Gonzo Journalist
+       - Whistleblower Sisyphean Burden
+       - Junkie Eternal Recurrence
+       - Artist in Regime
+       - Tech CEO Value Paradox
+       - Soldier Cosmic Perspective
+
+[237] 6 Master Prompt Templates - JSONL
+      - Master Morality Dilemma
+      - Eternal Recurrence Test
+      - Sisyphean Task Recognition
+      - Value Creation vs Destruction
+      - Black Humor as Rebellion
+      - [Extensible framework]
+
+[236] Complete Integration Guide - TXT (25,000+ słów)
+      - Philosophical synthesis
+      - Thompson/Bukowski integration
+      - Polish context mapping
+      - Value matrix framework
+
+TOTAL STATISTICS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Files Generated: 14 data files
+✓ Scenarios Created: 50+ (Q&A + Advanced + Practical)
+✓ Philosophical Perspectives: 8 Polish + 3 Western = 11 voices
+✓ Total Text: 50,000+ words
+✓ Training Pairs: 200+ unique prompt-completion variations
+✓ Languages: Polski + Angielski
+✓ Philosophical Schools: Nietzschean, Camusian, Stoic, Gonzo, Bukowskian
+✓ Literary Coverage: 8 Polish avant-garde writers
+✓ Ready for AI Training: YES (JSONL format optimized)
+✓ Knowledge Graph: Complete (Master/Slave, Eternal Recurrence, Sisyphean)
+
+RECOMMENDED TRAINING ORDER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Phase 1: [208], [209], [236] - Load philosophy foundations
+Phase 2: [210], [211], [212], [213] - Multi-perspective learning
+Phase 3: [238], [237] - Master/Slave scenarios & templates
+Phase 4: All together - System integration & validation
+
+EXPECTED AI CAPABILITIES AFTER TRAINING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Recognize authentic vs inauthentic choices (Master/Slave test)
+✓ Apply Eternal Recurrence diagnostic
+✓ Identify Sisyphean tasks and responses
+✓ Generate value creation vs destruction analysis
+✓ Respond from 8 distinct authentic philosophical voices
+✓ Use black humor as consciousness tool
+✓ Maintain cosmic/stoic perspective
+✓ Understand Polish literary context in universal philosophy
+✓ Generate novel scenarios using templates
+✓ Present ambiguity honestly without false certainty
+
+NEXT STEP: Load files into training pipeline in recommended order
