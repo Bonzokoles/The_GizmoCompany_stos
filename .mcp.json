@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "zeno-browser": {
+      "type": "http",
+      "url": "https://zeno-mcp.stolarnia-ams.workers.dev/mcp"
+    },
+    "zeno-browser-local": {
+      "type": "http",
+      "url": "http://localhost:8788/mcp"
+    },
     "cloudflare-api": {
       "type": "http",
       "url": "https://mcp.cloudflare.com/mcp"
@@ -28,7 +36,7 @@
       "command": "npx",
       "args": ["-y", "tavily-mcp@0.1.4"],
       "env": {
-        "TAVILY_API_KEY": "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"
+        "TAVILY_API_KEY": "${env:TAVILY_API_KEY}"
       }
     }
   }

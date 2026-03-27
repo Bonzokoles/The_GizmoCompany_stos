@@ -1,7 +1,6 @@
 /* ZENO Browser — Operations Dashboard Styles — v3 */
 
 /* ── CopilotKit overrides ────────────────────────── */
-.copilotKitButton { display: none !important; }
 .copilotKitSidebar,
 .copilotKitSidebarContentWrapper { z-index: 9999 !important; }
 

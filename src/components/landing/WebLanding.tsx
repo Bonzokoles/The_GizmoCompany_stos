@@ -3,8 +3,7 @@
  * Central operations hub for all sites, Workers, AI, storage and databases
  * Deployed on zenbrowsers.org (CF Pages)
  */
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { PageAgent } from 'page-agent';
+import { useState, useEffect, useCallback } from 'react';
 
 
 /* ─── Types ──────────────────────────────────────── */
@@ -149,33 +148,15 @@ async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T | n
 export function WebLanding() {
   const [tab, setTab] = useState<TabId>('overview');
 
-  // ─── Page Agent (Alibaba) ───────────────────────────
-  const pageAgentRef = useRef<PageAgent | null>(null);
-  const [agentReady, setAgentReady] = useState(false);
-
-  useEffect(() => {
-    if (pageAgentRef.current) return;
-    const agent = new PageAgent({
-      baseURL: '/api/ai/v1',
-      model: 'deepseek-chat',
-      language: 'en-US',
-      customFetch: (url: string | URL | Request, init?: RequestInit) =>
-        fetch(url, { ...init, credentials: 'same-origin' }),
-      instructions: {
-        system: `Jesteś asystentem dashboardu ZENO Ops (zenbrowsers.org). Odpowiadasz TYLKO po polsku. Pomagasz użytkownikowi nawigować po zakładkach: Overview, Workers, Content/CMS, Analytics, Pipelines, Crawlers, Storage, Databases, Images, MOA, Render, Queues, AI Hub, BizTools. Możesz klikać, wypełniać pola i obsługiwać interfejs użytkownika.`,
-        getPageInstructions: (url: string) =>
-          `Aktualny URL: ${url}. To dashboard operacyjny ZENO na Cloudflare Pages. Nawiguj po zakładkach i pomagaj użytkownikowi obsługiwać Workers, bazy danych D1, buckety R2, pipeline AI i inne serwisy.`,
-      },
-    });
-    pageAgentRef.current = agent;
-    setAgentReady(true);
-    return () => { pageAgentRef.current = null; };
-  }, []);
-
-  const togglePageAgent = useCallback(() => {
-    const agent = pageAgentRef.current;
-    if (!agent) return;
-    try { agent.panel.show(); } catch { /* panel already visible */ }
+  const openCopilotKit = useCallback(() => {
+    const trigger = document.querySelector<HTMLButtonElement>('.copilotKitButton');
+    if (trigger) {
+      trigger.click();
+      return;
+    }
+    const url = new URL(window.location.href);
+    url.searchParams.set('copilot', 'open');
+    window.location.href = url.toString();
   }, []);
   const [apis, setApis] = useState(API_SERVICES);
   const [sites, setSites] = useState<SiteStatus[]>([]);
@@ -2555,12 +2536,15 @@ export function WebLanding() {
         <p>ZENO Ops &copy; {new Date().getFullYear()} — Powered by Cloudflare Workers &amp; AI</p>
       </footer>
 
-      {/* ─── PAGE AGENT TRIGGER (Alibaba page-agent) ─── */}
-      {agentReady && (
-        <button className="chat-toggle" onClick={togglePageAgent} title="Page Agent — AI asystent">
-          🤖
-        </button>
-      )}
+      {/* ─── CopilotKit trigger ─── */}
+      <button
+        className="chat-toggle"
+        onClick={openCopilotKit}
+        title="Otwórz CopilotKit"
+      >
+        <span className="ct-dot" />
+        CopilotKit
+      </button>
     </div>
   );
 }

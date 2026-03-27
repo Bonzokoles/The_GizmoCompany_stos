@@ -11,7 +11,7 @@
     "build:vite": "vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "build:web": "vite build",
-    "deploy:web": "vite build && npx shx cp -r ai-hub dist/ai-hub && npx shx cp -r movies-app dist/movies-app && npx wrangler pages deploy dist --project-name zeno-browser-web",
+    "deploy:web": "vite build && npx shx cp -r ai-hub dist/ai-hub && npx wrangler pages deploy dist --project-name zeno-browser-web",
     "dev:web": "npx wrangler pages dev dist --port 8788",
     "studio": "npx localflare",
     "studio:attach": "npx localflare attach",

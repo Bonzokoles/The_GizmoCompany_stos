@@ -7,7 +7,7 @@ export const APPS = [
     id: 'movie-buch',
     name: '🎬 Movie Buch App',
     desc: 'Kolekcja 66 filmów z recenzjami w 5 stylach literackich (akademicki, Bukowski, Thompson, Gombrowicz, Mrożek) + osobiste recenzje. Plakaty TMDB, wyszukiwanie, filtry.',
-    url: '../movies-app/index.html',
+    url: 'https://bonzokoles.github.io/BONZO_madia_HUB/',
     banner_bg: 'linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0a192f 100%)',
     icon: '🎬',
     stats: { movies: 66, reviews: 50, styles: 5 },

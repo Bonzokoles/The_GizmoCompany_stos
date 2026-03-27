@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════
+#  ZENO Browser — MCP Server Worker
+#  Exposes ZENO project tools via Model Context Protocol
+#  Endpoint: /mcp  (StreamableHTTP + SSE)
+#
+#  Dev:    cd workers/zeno-mcp && npx wrangler dev
+#  Deploy: cd workers/zeno-mcp && npx wrangler deploy
+#  Test:   npx @modelcontextprotocol/inspector http://localhost:8788/mcp
+#
+#  .mcp.json (dla Claude Desktop / Cursor):
+#    "zeno": { "type": "http", "url": "https://zeno-mcp.<account>.workers.dev/mcp" }
+# ═══════════════════════════════════════════════════════════════
+
+name = "zeno-mcp"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── Durable Objects (wymagane przez McpAgent) ──────────────
+[[durable_objects.bindings]]
+name = "MCP_DO"
+class_name = "ZenoMCP"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["ZenoMCP"]
+
+# ─── D1 (zeno-browser-db) ───────────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "zeno-browser-db"
+database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
+
+# ─── Secrets (wrangler secret put ...) ──────────────────────
+# OPENROUTER_API_KEY  — OpenRouter do zapytań AI (opcjonalny)
+# CF_ACCOUNT_ID       — account ID do listowania workerów
+# CF_API_TOKEN        — CF API token (workers:read scope)

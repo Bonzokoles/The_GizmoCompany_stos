@@ -68,6 +68,24 @@
 - **Problem:** Brak `@types/react` w devDeps — wpływa na typowanie (pre-existing)
 - **Problem:** tsconfig targets ES5 — niezgodne z React 19 patterns
 
+### 2026-03-27: Cloudflare Pages deploy ZENO zweryfikowany
+
+- **Projekt Pages:** `zeno-browser-web`
+- **Autoryzacja:** `wrangler` działa poprawnie na koncie Cloudflare z projektem przypiętym do `zenbrowsers.org`
+- **Deploy:** lokalny deploy na Cloudflare Pages zakończony sukcesem
+- **Konfiguracja:** dodano brakujący `[[env.production.r2_buckets]]` dla `STATIC_ASSETS` w `wrangler.toml`
+- **Weryfikacja:** preview deployment i domena produkcyjna zwracają HTTP 200
+
+### 2026-03-27: Hardening secrets, bindingów i lokalnego runtime dla Cloudflare
+
+- **CI:** workflow `.github/workflows/deploy-web.yml` rozszerzono o walidację `wrangler check` przed deployem
+- **Local runtime:** `scripts/sync-env.ps1` generuje teraz rozdzielone pliki `.env` oraz `.dev.vars`
+- **Bezpieczeństwo:** `.gitignore` rozszerzono o `.dev.vars` i `.dev.vars.*`
+- **Templates:** dodano `.env.example` oraz `.dev.vars.example` dla bezpiecznego onboardingu lokalnego środowiska
+- **Dokumentacja:** dodano `docs/CLOUDFLARE_SECRETS_SETUP.md` z rozdziałem CI secrets vs Pages runtime secrets
+- **Functions audit:** `functions/api/images/[[path]].ts` preferuje teraz binding `AI` i `STATIC_ASSETS`, a Management API zostaje tylko jako fallback dla scenariuszy administracyjnych
+- **Weryfikacja:** `npm run build:web` przechodzi po zmianach hardeningowych
+
 ---
 
 ## Znane problemy

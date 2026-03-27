@@ -6,7 +6,6 @@ on:
     paths:
       - "src/**"
       - "public/**"
-      - "movies-app/**"
       - "ai-hub/**"
       - "functions/**"
       - ".github/workflows/deploy-web.yml"
@@ -42,9 +41,6 @@ jobs:
       - name: Build Vite app
         run: npm run build:vite
 
-      - name: Copy movies-app to dist
-        run: cp -r movies-app dist/movies-app
-
       - name: Copy ai-hub to dist
         run: cp -r ai-hub dist/ai-hub
 
@@ -59,6 +55,9 @@ jobs:
 
       - name: Install Wrangler CLI
         run: npm i -g wrangler@4
+
+      - name: Validate Wrangler configuration
+        run: wrangler check
 
       - name: Deploy to Cloudflare Pages (direct CLI)
         run: |

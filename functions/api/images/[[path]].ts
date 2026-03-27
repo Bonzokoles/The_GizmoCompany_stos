@@ -14,6 +14,24 @@ import { jsonResponse, errorResponse, corsHeaders } from '../../types';
 
 const IMAGE_BUCKETS = ['zen-blog-images', 'zen-static-assets', 'jimbo77-community-images', 'mybonzo-media'];
 
+async function runWorkersAiImage(env: Env, prompt: string, style: string | undefined, width: number, height: number, model?: string) {
+  if (!env.AI) return null;
+
+  const aiModel = model || '@cf/bytedance/stable-diffusion-xl-lightning';
+  const result = await (env.AI as any).run(aiModel, {
+    prompt: style ? `${prompt}, ${style} style` : prompt,
+    width,
+    height,
+  });
+
+  const body = result instanceof ReadableStream ? result : new Response(result).body;
+  return {
+    body,
+    model: aiModel,
+    generator: 'workers-ai-binding',
+  };
+}
+
 async function handleGenerate(env: Env, request: Request): Promise<Response> {
   let body: any;
   try {
@@ -28,7 +46,22 @@ async function handleGenerate(env: Env, request: Request): Promise<Response> {
   const imgWidth = Math.min(width || 1024, 2048);
   const imgHeight = Math.min(height || 1024, 2048);
 
-  // Try Cloudflare Workers AI (via account API)
+  // Prefer production AI binding configured in wrangler/pages.
+  try {
+    const generated = await runWorkersAiImage(env, prompt, style, imgWidth, imgHeight, model);
+    if (generated?.body) {
+      return new Response(generated.body, {
+        headers: {
+          'Content-Type': 'image/png',
+          'Access-Control-Allow-Origin': '*',
+          'X-Generator': generated.generator,
+          'X-Model': generated.model,
+        },
+      });
+    }
+  } catch {}
+
+  // Fallback for management/API-token based setups.
   const cfAccountId = env.CF_ACCOUNT_ID;
   const cfToken = env.CF_API_TOKEN;
 
@@ -86,6 +119,30 @@ async function handleGallery(env: Env, request: Request): Promise<Response> {
 
   if (!IMAGE_BUCKETS.includes(bucket)) {
     return errorResponse(`Invalid image bucket. Available: ${IMAGE_BUCKETS.join(', ')}`, 400);
+  }
+
+  if (bucket === 'zen-static-assets' && env.STATIC_ASSETS) {
+    try {
+      const listing = await env.STATIC_ASSETS.list({ prefix, limit });
+      const objects = listing.objects.filter((obj) => {
+        const key = obj.key?.toLowerCase() || '';
+        return key.endsWith('.png') || key.endsWith('.jpg') || key.endsWith('.jpeg') || key.endsWith('.webp') || key.endsWith('.gif') || key.endsWith('.svg');
+      });
+
+      return jsonResponse({
+        bucket,
+        images: objects.map((obj) => ({
+          key: obj.key,
+          size: obj.size,
+          uploaded: obj.uploaded,
+        })),
+        totalImages: objects.length,
+        prefix,
+        source: 'r2-binding',
+      });
+    } catch (e: any) {
+      return errorResponse(`Gallery binding error: ${e.message}`, 500);
+    }
   }
 
   const cfAccountId = env.CF_ACCOUNT_ID;

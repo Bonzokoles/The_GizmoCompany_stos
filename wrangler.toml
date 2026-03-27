@@ -89,6 +89,10 @@ binding = "DB"
 database_name = "zeno-browser-db"
 database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
 
+[[env.production.r2_buckets]]
+binding = "STATIC_ASSETS"
+bucket_name = "zen-static-assets"
+
 # ─── Production Queues ──────────────────────────────────────
 [[env.production.queues.producers]]
 queue = "agent-tasks"

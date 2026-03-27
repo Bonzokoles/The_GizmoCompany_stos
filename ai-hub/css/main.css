@@ -176,13 +176,14 @@ a:hover{color:#5effe0}
 @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ─── VOICE CHAT WIDGET ─── */
-.vchat-btn{position:fixed;bottom:28px;right:28px;z-index:9999;width:58px;height:58px;border-radius:50%;
-  background:linear-gradient(135deg,#00ffcc,#a78bfa);border:none;cursor:pointer;box-shadow:0 4px 24px rgba(0,255,204,0.35);
-  display:flex;align-items:center;justify-content:center;transition:.3s cubic-bezier(.25,.8,.25,1)}
-.vchat-btn:hover{transform:scale(1.05);box-shadow:0 6px 32px rgba(0,255,204,0.5)}
+.vchat-btn{position:fixed;bottom:28px;right:28px;z-index:9999;height:auto;min-height:44px;padding:10px 14px;border-radius:4px;
+  background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.3);cursor:pointer;box-shadow:0 4px 24px rgba(0,255,204,0.22);
+  display:flex;align-items:center;justify-content:center;gap:8px;color:#00ffcc;font-family:var(--font);font-size:.8rem;font-weight:700;
+  letter-spacing:.4px;transition:.2s cubic-bezier(.23,1,.32,1);white-space:nowrap}
+.vchat-btn:hover{background:rgba(0,255,204,0.18);box-shadow:0 6px 32px rgba(0,255,204,0.34)}
 .vchat-btn:active{transform:scale(0.97)}
-.vchat-btn svg{width:28px;height:28px;fill:#03040b}
-.vchat-btn.active{background:linear-gradient(135deg,#f87171,#a78bfa)}
+.vchat-btn svg{width:18px;height:18px;fill:#00ffcc;flex-shrink:0}
+.vchat-btn.active{background:rgba(0,255,204,0.2)}
 
 .vchat-win{position:fixed;bottom:96px;right:28px;z-index:9998;width:380px;max-width:calc(100vw - 24px);
   height:50vh;max-height:50vh;min-height:320px;border-radius:4px;overflow:hidden;display:none;flex-direction:column;
@@ -309,5 +310,5 @@ a:hover{color:#5effe0}
 }
 @media(max-width:480px){
   .vchat-win{right:8px;bottom:88px;width:calc(100vw - 16px);height:55vh;max-height:55vh}
-  .vchat-btn{bottom:18px;right:18px;width:52px;height:52px}
+  .vchat-btn{bottom:16px;right:16px;padding:9px 12px;min-height:40px}
 }
