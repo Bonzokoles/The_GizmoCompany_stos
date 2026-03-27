@@ -12,7 +12,22 @@ function copyMoviesApp() {
       const dest = path.resolve(__dirname, 'dist', 'movies');
       if (existsSync(src)) {
         cpSync(src, dest, { recursive: true });
-        console.log('✓ movies-app copied to dist/movies/');
+        console.log('✔ movies-app copied to dist/movies/');
+      }
+    },
+  };
+}
+
+// Plugin: copy ai-hub to dist/ai-hub/ after build
+function copyAiHub() {
+  return {
+    name: 'copy-ai-hub',
+    closeBundle() {
+      const src = path.resolve(__dirname, 'ai-hub');
+      const dest = path.resolve(__dirname, 'dist', 'ai-hub');
+      if (existsSync(src)) {
+        cpSync(src, dest, { recursive: true });
+        console.log('✔ ai-hub copied to dist/ai-hub/');
       }
     },
   };

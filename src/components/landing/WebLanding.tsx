@@ -33,7 +33,7 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'moa',        label: 'MOA',       icon: '⊕' },
   { id: 'render',     label: 'Render',    icon: '◕' },
   { id: 'queues',     label: 'Queues',    icon: '▷' },
-  { id: 'aihub',      label: 'AI Hub',    icon: '◈' },
+  { id: 'aihub',      label: 'AI Chat',   icon: '◈' },
   { id: 'biztools',   label: 'BizTools',  icon: '▨' },
   { id: 'workflows',  label: 'Workflows', icon: '⚡' },
 ];
@@ -2008,7 +2008,7 @@ export function WebLanding({ onOpenCopilot }: WebLandingProps) {
       {/* ─── AI HUB TAB ─── */}
       {tab === 'aihub' && (
         <div className="tab-content">
-          <h2>🤖 AI Hub — Centrum Sztucznej Inteligencji</h2>
+          <h2>🤖 AI Chat — Centrum Sztucznej Inteligencji</h2>
           <p className="muted" style={{ marginBottom: 16 }}>
             Czat z wieloma providerami AI, generowanie treści, obrazów i transkrypcji przez kolejki
           </p>
