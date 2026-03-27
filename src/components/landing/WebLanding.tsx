@@ -4,6 +4,7 @@
  * Deployed on zenbrowsers.org (CF Pages)
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { PageAgent } from 'page-agent';
 
 
 /* ─── Types ──────────────────────────────────────── */
@@ -145,12 +146,37 @@ async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T | n
 
 /* ─── Main Component ─────────────────────────────── */
 
-interface WebLandingProps {
-  onOpenCopilot?: () => void;
-}
-
-export function WebLanding({ onOpenCopilot }: WebLandingProps) {
+export function WebLanding() {
   const [tab, setTab] = useState<TabId>('overview');
+
+  // ─── Page Agent (Alibaba) ───────────────────────────
+  const pageAgentRef = useRef<PageAgent | null>(null);
+  const [agentReady, setAgentReady] = useState(false);
+
+  useEffect(() => {
+    if (pageAgentRef.current) return;
+    const agent = new PageAgent({
+      baseURL: '/api/ai/v1',
+      model: 'deepseek-chat',
+      language: 'en-US',
+      customFetch: (url: string | URL | Request, init?: RequestInit) =>
+        fetch(url, { ...init, credentials: 'same-origin' }),
+      instructions: {
+        system: `Jesteś asystentem dashboardu ZENO Ops (zenbrowsers.org). Odpowiadasz TYLKO po polsku. Pomagasz użytkownikowi nawigować po zakładkach: Overview, Workers, Content/CMS, Analytics, Pipelines, Crawlers, Storage, Databases, Images, MOA, Render, Queues, AI Hub, BizTools. Możesz klikać, wypełniać pola i obsługiwać interfejs użytkownika.`,
+        getPageInstructions: (url: string) =>
+          `Aktualny URL: ${url}. To dashboard operacyjny ZENO na Cloudflare Pages. Nawiguj po zakładkach i pomagaj użytkownikowi obsługiwać Workers, bazy danych D1, buckety R2, pipeline AI i inne serwisy.`,
+      },
+    });
+    pageAgentRef.current = agent;
+    setAgentReady(true);
+    return () => { pageAgentRef.current = null; };
+  }, []);
+
+  const togglePageAgent = useCallback(() => {
+    const agent = pageAgentRef.current;
+    if (!agent) return;
+    try { agent.panel.show(); } catch { /* panel already visible */ }
+  }, []);
   const [apis, setApis] = useState(API_SERVICES);
   const [sites, setSites] = useState<SiteStatus[]>([]);
 
@@ -2529,11 +2555,12 @@ export function WebLanding({ onOpenCopilot }: WebLandingProps) {
         <p>ZENO Ops &copy; {new Date().getFullYear()} — Powered by Cloudflare Workers &amp; AI</p>
       </footer>
 
-      {/* ─── PAGE AGENT TRIGGER — opens CopilotKit sidebar (web page agent) ─── */}
-      <button className="chat-toggle" onClick={() => onOpenCopilot?.()} title="ZENO Asystent AI — Page Agent">
-        <span className="ct-dot" />
-        AI Chat
-      </button>
+      {/* ─── PAGE AGENT TRIGGER (Alibaba page-agent) ─── */}
+      {agentReady && (
+        <button className="chat-toggle" onClick={togglePageAgent} title="Page Agent — AI asystent">
+          🤖
+        </button>
+      )}
     </div>
   );
 }
