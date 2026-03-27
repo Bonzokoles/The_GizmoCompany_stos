@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback } from 'react';
 
 /* ─── Types ──────────────────────────────────────── */
 
-type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub' | 'biztools' | 'workflows';
+type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub' | 'biztools' | 'workflows' | 'mediahub';
 type Status = 'online' | 'offline' | 'checking' | 'unknown';
 type AnalyticsSource = 'local' | 'mybonzo';
 
@@ -34,6 +34,7 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'render',     label: 'Render',    icon: '◕' },
   { id: 'queues',     label: 'Queues',    icon: '▷' },
   { id: 'aihub',      label: 'AI Chat',   icon: '◈' },
+  { id: 'mediahub',   label: 'Media Hub', icon: '♫' },
   { id: 'biztools',   label: 'BizTools',  icon: '▨' },
   { id: 'workflows',  label: 'Workflows', icon: '⚡' },
 ];
@@ -2529,6 +2530,46 @@ export function WebLanding() {
               </div>
             </div>
           </section>
+        </div>
+      )}
+
+      {/* ─── MEDIA HUB TAB ─── */}
+      {tab === 'mediahub' && (
+        <div className="tab-content" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
+          {/* Toolbar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderBottom: '1px solid #1e293b', background: '#0f172a', flexShrink: 0 }}>
+            <span style={{ fontSize: 18 }}>♫</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#60a5fa' }}>BONZO Media Hub</span>
+            <span style={{ fontSize: 12, color: '#64748b', marginLeft: 4 }}>
+              — muzyka · filmy · streams · AI biblioteka
+            </span>
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+              <a
+                href="/media-hub/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: 11, color: '#60a5fa', textDecoration: 'none', border: '1px solid #1e3a5f', padding: '3px 10px', borderRadius: 4 }}
+              >
+                ↗ Otwórz pełnoekranowo
+              </a>
+              <a
+                href="https://github.com/Bonzokoles/BONZO_media_HUB"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: 11, color: '#64748b', textDecoration: 'none', border: '1px solid #1e293b', padding: '3px 10px', borderRadius: 4 }}
+              >
+                GitHub ↗
+              </a>
+            </div>
+          </div>
+          {/* Iframe */}
+          <iframe
+            src="/media-hub/"
+            title="BONZO Media Hub"
+            style={{ flex: 1, width: '100%', border: 'none', background: '#0a0a12' }}
+            allow="autoplay; fullscreen; picture-in-picture"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-downloads"
+          />
         </div>
       )}
 
