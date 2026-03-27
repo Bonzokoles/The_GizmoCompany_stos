@@ -23,7 +23,7 @@ function patchStreamdownShiki() {
 export default defineConfig({
   plugins: [react(), patchStreamdownShiki()],
   root: '.',
-  base: '/',
+  base: './',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
