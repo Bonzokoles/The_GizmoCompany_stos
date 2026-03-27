@@ -1,0 +1,114 @@
+{
+  "name": "BONZO_media_HUB",
+  "short_name": "BONZO_HUB",
+  "description": "Comprehensive multimedia app — music, video, films, streams, AI library",
+  "start_url": "/BONZO_media_HUB/",
+  "scope": "/BONZO_media_HUB/",
+  "id": "/BONZO_media_HUB/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#0a0a12",
+  "theme_color": "#00d4aa",
+  "orientation": "any",
+  "lang": "pl",
+  "dir": "ltr",
+  "categories": ["entertainment", "music", "video", "multimedia"],
+  "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Music Player",
+      "short_name": "Music",
+      "description": "Open music player with visualizer",
+      "url": "/BONZO_media_HUB/?view=music",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Streams",
+      "short_name": "Streams",
+      "description": "SoundCloud, Tidal, IndieShuffle discovery",
+      "url": "/BONZO_media_HUB/?view=streams",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Film Library",
+      "short_name": "Films",
+      "description": "Browse film library with AI reviews",
+      "url": "/BONZO_media_HUB/?view=films",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Video Player",
+      "short_name": "Video",
+      "description": "Open video player",
+      "url": "/BONZO_media_HUB/?view=video",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "BONZO_media_HUB Desktop"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "BONZO_media_HUB Mobile"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}
