@@ -23,7 +23,7 @@ function patchStreamdownShiki() {
 export default defineConfig({
   plugins: [react(), patchStreamdownShiki()],
   root: '.',
-  base: './',
+  base: '/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -50,14 +50,6 @@ export default defineConfig({
 
           if (id.includes('/page-agent/')) {
             return 'vendor-page-agent';
-          }
-
-          if (
-            id.includes('/@copilotkit/') ||
-            id.includes('/@copilotkitnext/') ||
-            id.includes('/@ag-ui/')
-          ) {
-            return 'vendor-copilotkit';
           }
 
           if (id.includes('/mermaid/')) {
