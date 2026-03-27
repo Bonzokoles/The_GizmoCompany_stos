@@ -57,7 +57,7 @@ jobs:
           npm ci --legacy-peer-deps
 
           echo "🔨 Building Media Hub (basePath=/media-hub)..."
-          NEXT_PUBLIC_BASE_PATH=/media-hub NODE_ENV=production npx next build
+          NEXT_PUBLIC_BASE_PATH=/media-hub NODE_ENV=production npm run build
 
           echo "📂 Copying output to dist/media-hub/..."
           mkdir -p "$GITHUB_WORKSPACE/dist/media-hub"
