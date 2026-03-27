@@ -52,6 +52,20 @@ export default defineConfig({
             return 'vendor-page-agent';
           }
 
+          if (
+            id.includes('/@copilotkit/') ||
+            id.includes('/@copilotkitnext/') ||
+            id.includes('/@ag-ui/')
+          ) {
+            return 'vendor-copilotkit';
+          }
+
+          // Group all @radix-ui/* together — per-package splitting breaks their
+          // internal initialization order and causes "Cannot access 'X' before initialization"
+          if (id.includes('/@radix-ui/')) {
+            return 'vendor-radix-ui';
+          }
+
           if (id.includes('/mermaid/')) {
             return 'vendor-mermaid';
           }
