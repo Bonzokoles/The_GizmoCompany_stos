@@ -2535,41 +2535,30 @@ export function WebLanding() {
 
       {/* ─── MEDIA HUB TAB ─── */}
       {tab === 'mediahub' && (
-        <div className="tab-content" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)' }}>
-          {/* Toolbar */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 20px', borderBottom: '1px solid #1e293b', background: '#0f172a', flexShrink: 0 }}>
-            <span style={{ fontSize: 18 }}>♫</span>
-            <span style={{ fontWeight: 700, fontSize: 14, color: '#60a5fa' }}>BONZO Media Hub</span>
-            <span style={{ fontSize: 12, color: '#64748b', marginLeft: 4 }}>
-              — muzyka · filmy · streams · AI biblioteka
-            </span>
-            <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-              <a
-                href="/media-hub/"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontSize: 11, color: '#60a5fa', textDecoration: 'none', border: '1px solid #1e3a5f', padding: '3px 10px', borderRadius: 4 }}
-              >
-                ↗ Otwórz pełnoekranowo
-              </a>
-              <a
-                href="https://github.com/Bonzokoles/BONZO_media_HUB"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontSize: 11, color: '#64748b', textDecoration: 'none', border: '1px solid #1e293b', padding: '3px 10px', borderRadius: 4 }}
-              >
-                GitHub ↗
-              </a>
-            </div>
+        <div className="tab-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 120px)', gap: 32 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>♫</div>
+            <h2 style={{ fontSize: 28, fontWeight: 800, color: '#60a5fa', margin: '0 0 8px' }}>BONZO Media Hub</h2>
+            <p style={{ color: '#64748b', fontSize: 14, margin: 0 }}>muzyka · filmy · streams · AI biblioteka</p>
           </div>
-          {/* Iframe */}
-          <iframe
-            src="/media-hub/"
-            title="BONZO Media Hub"
-            style={{ flex: 1, width: '100%', border: 'none', background: '#0a0a12' }}
-            allow="autoplay; fullscreen; picture-in-picture"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-presentation allow-downloads"
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+            <a
+              href="https://bonzokoles.github.io/BONZO_media_HUB/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', background: '#60a5fa', textDecoration: 'none', padding: '12px 32px', borderRadius: 8, letterSpacing: 0.5 }}
+            >
+              ↗ Otwórz BONZO Media Hub
+            </a>
+            <a
+              href="https://github.com/Bonzokoles/BONZO_media_HUB"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontSize: 12, color: '#64748b', textDecoration: 'none', border: '1px solid #1e293b', padding: '6px 16px', borderRadius: 6 }}
+            >
+              GitHub ↗
+            </a>
+          </div>
         </div>
       )}
 

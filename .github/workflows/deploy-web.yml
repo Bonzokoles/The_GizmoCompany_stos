@@ -48,26 +48,6 @@ jobs:
       - name: Copy ai-hub to dist
         run: cp -r ai-hub dist/ai-hub
 
-      # ─── BONZO Media Hub (Next.js static export → dist/media-hub/) ───────
-      # continue-on-error: browser deploys even if media-hub build fails
-      - name: Build BONZO Media Hub
-        continue-on-error: true
-        run: |
-          echo "📦 Cloning BONZO_media_HUB..."
-          git clone --depth=1 https://github.com/Bonzokoles/BONZO_media_HUB.git /tmp/bonzo-media-hub
-
-          echo "📦 Installing Media Hub dependencies..."
-          cd /tmp/bonzo-media-hub
-          npm ci --legacy-peer-deps
-
-          echo "🔨 Building Media Hub (basePath=/media-hub)..."
-          NEXT_PUBLIC_BASE_PATH=/media-hub NODE_ENV=production npm run build
-
-          echo "📂 Copying output to dist/media-hub/..."
-          mkdir -p "$GITHUB_WORKSPACE/dist/media-hub"
-          cp -r /tmp/bonzo-media-hub/out/. "$GITHUB_WORKSPACE/dist/media-hub/"
-          echo "✅ Media Hub embedded at /media-hub/"
-
       # ─── Deploy ───────────────────────────────────────────────────────────
       - name: Check secrets
         run: |
