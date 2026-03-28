@@ -37,19 +37,26 @@ Write-Info "Root workspace: $resolvedRoot"
 
 $packageJsonPath = Join-Path $resolvedRoot 'package.json'
 if (-not (Test-Path $packageJsonPath)) {
-    Write-Info 'Brak package.json — pomijam instalację @github/copilot-sdk (to nie jest workspace Node.js).'
+    Write-Info 'Brak package.json — pomijam instalację CopilotKit (to nie jest workspace Node.js).'
     exit 0
 }
 
 $packageJson = Get-Content -Raw -Path $packageJsonPath | ConvertFrom-Json
 $packageManagerField = $packageJson.packageManager
 
-$alreadyInstalled = $false
-if ($packageJson.dependencies -and $packageJson.dependencies.'@github/copilot-sdk') { $alreadyInstalled = $true }
-if ($packageJson.devDependencies -and $packageJson.devDependencies.'@github/copilot-sdk') { $alreadyInstalled = $true }
+$hasReactCore = $false
+$hasReactUi = $false
+
+if ($packageJson.dependencies -and $packageJson.dependencies.'@copilotkit/react-core') { $hasReactCore = $true }
+if ($packageJson.devDependencies -and $packageJson.devDependencies.'@copilotkit/react-core') { $hasReactCore = $true }
+
+if ($packageJson.dependencies -and $packageJson.dependencies.'@copilotkit/react-ui') { $hasReactUi = $true }
+if ($packageJson.devDependencies -and $packageJson.devDependencies.'@copilotkit/react-ui') { $hasReactUi = $true }
+
+$alreadyInstalled = ($hasReactCore -and $hasReactUi)
 
 if ($alreadyInstalled) {
-    Write-Info '@github/copilot-sdk jest już wpisany w package.json — nic do zrobienia.'
+    Write-Info 'Pakiety CopilotKit (@copilotkit/react-core i @copilotkit/react-ui) są już wpisane w package.json — nic do zrobienia.'
 }
 else {
     $pm = Get-PackageManager -RootPath $resolvedRoot -PackageManagerField $packageManagerField
@@ -60,19 +67,19 @@ else {
         switch ($pm) {
             'pnpm' {
                 Ensure-Command 'pnpm'
-                & pnpm add @github/copilot-sdk
+                & pnpm add @copilotkit/react-core @copilotkit/react-ui
             }
             'yarn' {
                 Ensure-Command 'yarn'
-                & yarn add @github/copilot-sdk
+                & yarn add @copilotkit/react-core @copilotkit/react-ui
             }
             'bun' {
                 Ensure-Command 'bun'
-                & bun add @github/copilot-sdk
+                & bun add @copilotkit/react-core @copilotkit/react-ui
             }
             default {
                 Ensure-Command 'npm'
-                & npm install @github/copilot-sdk
+                & npm install @copilotkit/react-core @copilotkit/react-ui
             }
         }
     }
@@ -80,7 +87,7 @@ else {
         Pop-Location
     }
 
-    Write-Info 'Dodano @github/copilot-sdk do zależności workspace.'
+    Write-Info 'Dodano @copilotkit/react-core oraz @copilotkit/react-ui do zależności workspace.'
 }
 
 if ($AlsoInstallCopilotCli) {
