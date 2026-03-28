@@ -1,5 +1,7 @@
 /* ZENO Browser — Operations Dashboard Styles — v3 */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
 /* ── CopilotKit overrides ────────────────────────── */
 .copilotKitSidebar,
 .copilotKitSidebarContentWrapper { z-index: 9999 !important; }
@@ -9,10 +11,14 @@
    Dark glass (#03040b), teal accent (#00ffcc), Inter,
    4 px sharp radius, 200 ms cubic-bezier transitions.
 ══════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
-
 /* ── Design token overrides ── */
 .web-landing.ops-dashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   --color-bg:         #03040b;
   --color-surface:    rgba(15,23,42,0.45);
   --color-border:     rgba(255,255,255,0.08);

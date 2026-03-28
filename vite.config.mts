@@ -27,6 +27,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
+      '@copilotkit/react-ui/styles.css': path.resolve(__dirname, 'src/vendor/copilotkit-react-ui-stub.css'),
+      '@copilotkit/react-core': path.resolve(__dirname, 'src/vendor/copilotkit-react-core-stub.tsx'),
+      '@copilotkit/react-ui': path.resolve(__dirname, 'src/vendor/copilotkit-react-ui-stub.tsx'),
     },
   },
   server: {

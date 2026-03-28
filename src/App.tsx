@@ -1,10 +1,8 @@
-import { useEffect } from 'react';
-import { CopilotKit } from '@copilotkit/react-core';
-import { CopilotSidebar } from '@copilotkit/react-ui';
-import '@copilotkit/react-ui/styles.css';
-import { BrowserUI } from './components/browser-core/BrowserUI';
+import { Suspense, lazy, useEffect } from 'react';
 import { WebLanding } from './components/landing/WebLanding';
 import './styles/web-landing.css';
+
+const ElectronApp = lazy(() => import('./ElectronApp').then((m) => ({ default: m.ElectronApp })));
 
 const isElectron = typeof window !== 'undefined' && !!(window.electronAPI);
 
@@ -23,13 +21,13 @@ export function App() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  if (!isElectron) {
+    return <WebLanding />;
+  }
+
   return (
-    <CopilotKit runtimeUrl="/api/copilotkit">
-      {isElectron ? <BrowserUI /> : <WebLanding />}
-      <CopilotSidebar
-        defaultOpen={false}
-        labels={{ title: 'ZENO Asystent AI', initial: 'Cześć! Jak mogę pomóc?' }}
-      />
-    </CopilotKit>
+    <Suspense fallback={<div style={{ padding: 16 }}>Ładowanie trybu Electron...</div>}>
+      <ElectronApp />
+    </Suspense>
   );
 }
