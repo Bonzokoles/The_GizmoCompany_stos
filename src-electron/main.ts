@@ -17,17 +17,17 @@ import {
 import path from 'path';
 import isDev from 'electron-is-dev';
 import { BrowserManager } from './services/browser-manager';
-import { AIGatewayService } from './services/ai-gateway-service';
+import { AIGatewayService, type AIRequest } from './services/ai-gateway-service';
 import { NetworkMonitor } from './services/network-monitor';
 import { SecuritySandbox } from './services/security-sandbox';
 import { PluginIPCBridge } from './services/plugin-ipc-bridge';
 import { AutoUpdaterService } from './services/auto-updater';
 import { NetworkManager } from './services/network-manager';
 import { TabCommunicationManager } from './services/tab-communication';
-import { WorkflowEngine } from './services/workflow-engine';
-import { CrawlerService } from './services/crawler-service';
+import { WorkflowEngine, type WorkflowStep } from './services/workflow-engine';
+import { CrawlerService, type CrawlConfig } from './services/crawler-service';
 import { UmamiService } from './services/umami-service';
-import { SearXNGService } from './services/searxng-service';
+import { SearXNGService, type SearchFilters } from './services/searxng-service';
 import { CatalogService } from './services/catalog-service';
 import { SearchService } from './services/search-service';
 import { MeilisearchService } from './services/meilisearch-service';
@@ -44,8 +44,6 @@ let browserManager: BrowserManager;
 let aiGatewayService: AIGatewayService;
 let networkMonitor: NetworkMonitor;
 let securitySandbox: SecuritySandbox;
-let pluginBridge: PluginIPCBridge;
-let autoUpdaterService: AutoUpdaterService;
 let mcpServer: MCPServer;
 let advancedNetworkManager: NetworkManager;
 let tabComm: TabCommunicationManager;
@@ -225,12 +223,12 @@ async function initializeServices() {
     console.log('✅ Security Sandbox initialized');
 
     // Plugin IPC Bridge
-    pluginBridge = new PluginIPCBridge();
+    new PluginIPCBridge();
     console.log('✅ Plugin IPC Bridge initialized');
 
     // Auto-Updater
     if (!isDev) {
-      autoUpdaterService = new AutoUpdaterService();
+      new AutoUpdaterService();
       console.log('✅ Auto-Updater initialized');
     }
 
@@ -361,12 +359,12 @@ function setupIPCHandlers() {
   // AI Gateway
   ipcMain.handle(
     'ai:execute',
-    async (_, request: any) => {
+    async (_, request: AIRequest) => {
       try {
         const response = await aiGatewayService.execute(request);
         return { success: true, data: response };
-      } catch (error: any) {
-        return { success: false, error: error.message };
+      } catch (error: unknown) {
+        return { success: false, error: getErrorMessage(error) };
       }
     }
   );
@@ -437,7 +435,7 @@ function setupIPCHandlers() {
   });
 
   // Workflow Engine
-  ipcMain.handle('workflow:create', async (_, id: string, steps: any[]) => {
+  ipcMain.handle('workflow:create', async (_, id: string, steps: WorkflowStep[]) => {
     if (!isValidString(id) || !Array.isArray(steps)) return null;
     return workflowEngine.createWorkflow(id, steps);
   });
@@ -461,7 +459,7 @@ function setupIPCHandlers() {
   });
 
   // Crawler
-  ipcMain.handle('crawler:start', async (_, config: any) => {
+  ipcMain.handle('crawler:start', async (_, config: CrawlConfig) => {
     if (!config || !Array.isArray(config.startUrls)) return null;
     // Validate URLs
     for (const u of config.startUrls) {
@@ -531,6 +529,16 @@ function setupIPCHandlers() {
     return dangerousPatterns.some(p => p.test(cmd));
   }
 
+  function getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  function getExecOutput(error: unknown, field: 'stdout' | 'stderr'): string {
+    if (typeof error !== 'object' || error === null) return '';
+    const value = (error as Record<'stdout' | 'stderr', unknown>)[field];
+    return typeof value === 'string' ? value : '';
+  }
+
   ipcMain.handle('terminal:execute', async (_, command: string, cwd?: string) => {
     if (!isValidString(command)) return { success: false, error: 'Nieprawidłowe polecenie' };
     if (isBlockedCommand(command)) {
@@ -547,11 +555,11 @@ function setupIPCHandlers() {
         windowsHide: true,
       });
       return { success: true, stdout, stderr: '', cwd: workDir };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return {
         success: true,
-        stdout: error.stdout ?? '',
-        stderr: error.stderr ?? error.message ?? 'Nieznany błąd',
+        stdout: getExecOutput(error, 'stdout'),
+        stderr: getExecOutput(error, 'stderr') || getErrorMessage(error) || 'Nieznany błąd',
         cwd: workDir,
       };
     }
@@ -572,8 +580,8 @@ function setupIPCHandlers() {
         return { success: true, cwd: terminalCwd };
       }
       return { success: false, error: `Katalog nie istnieje: ${resolved}` };
-    } catch (e: any) {
-      return { success: false, error: e.message };
+    } catch (e: unknown) {
+      return { success: false, error: getErrorMessage(e) };
     }
   });
 
@@ -614,8 +622,8 @@ function setupIPCHandlers() {
     try {
       process.kill(pid, 'SIGTERM');
       return { success: true };
-    } catch (e: any) {
-      return { success: false, error: e.message };
+    } catch (e: unknown) {
+      return { success: false, error: getErrorMessage(e) };
     }
   });
 
@@ -672,7 +680,7 @@ function setupIPCHandlers() {
   // Search — Unified 3-layer search
   // ═══════════════════════════════════════════════════════════
 
-  ipcMain.handle('search:web', async (_, query: string, filters?: any) => {
+  ipcMain.handle('search:web', async (_, query: string, filters?: SearchFilters) => {
     if (!isValidString(query)) return { success: false, error: 'Nieprawidłowe zapytanie' };
     try {
       const results = await searchService.webSearch(query, filters);
@@ -682,7 +690,7 @@ function setupIPCHandlers() {
     }
   });
 
-  ipcMain.handle('search:deep', async (_, query: string, filters?: any) => {
+  ipcMain.handle('search:deep', async (_, query: string, filters?: SearchFilters) => {
     if (!isValidString(query)) return { success: false, error: 'Nieprawidłowe zapytanie' };
     try {
       const report = await searchService.deepSearch(query, filters);
