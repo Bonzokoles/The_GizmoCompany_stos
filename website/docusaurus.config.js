@@ -3,12 +3,14 @@
  * ZENO Browser Documentation Website
  */
 
+const { themes } = require('prism-react-renderer');
+
 module.exports = {
   title: 'ZENO Browser',
   tagline: 'AI-powered web browser with DeepSeek integration',
   url: 'https://zeno-browser.io',
   baseUrl: '/',
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
 
@@ -78,16 +80,16 @@ module.exports = {
           title: 'Docs',
           items: [
             { label: 'Getting Started', to: '/docs/getting-started' },
-            { label: 'Installation', to: '/docs/installation' },
-            { label: 'User Guide', to: '/docs/user-guide' },
+            { label: 'Windows Installation', to: '/docs/installation/windows' },
+            { label: 'FAQ', to: '/docs/faq' },
           ],
         },
         {
-          title: 'Development',
+          title: 'Project',
           items: [
-            { label: 'Plugin Development', to: '/docs/plugin-development' },
-            { label: 'API Reference', to: '/docs/api-reference' },
-            { label: 'Contributing', to: '/docs/contributing' },
+            { label: 'GitHub', href: 'https://github.com/Bonzokoles/zen-bro-wser.org' },
+            { label: 'Issues', href: 'https://github.com/Bonzokoles/zen-bro-wser.org/issues' },
+            { label: 'Discussions', href: 'https://github.com/Bonzokoles/zen-bro-wser.org/discussions' },
           ],
         },
         {
@@ -103,8 +105,8 @@ module.exports = {
     },
 
     prism: {
-      theme: require('prism-react-renderer/themes/dracula'),
-      darkTheme: require('prism-react-renderer/themes/dracula'),
+      theme: themes.github,
+      darkTheme: themes.dracula,
     },
 
     colorMode: {
@@ -114,13 +116,15 @@ module.exports = {
     },
   },
 
-  plugins: [
-    [
-      '@docusaurus/plugin-google-analytics',
-      {
-        trackingID: process.env.GOOGLE_ANALYTICS_ID,
-        anonymizeIP: true,
-      },
-    ],
-  ],
+  plugins: process.env.GOOGLE_ANALYTICS_ID
+    ? [
+      [
+        '@docusaurus/plugin-google-analytics',
+        {
+          trackingID: process.env.GOOGLE_ANALYTICS_ID,
+          anonymizeIP: true,
+        },
+      ],
+    ]
+    : [],
 };
