@@ -1,9 +1,10 @@
 /**
  * Plugin Installer - Handle plugin installation process
+ * React 19 refactor: Real IPC progress instead of fake setTimeout
  */
 
-import React, { useState } from 'react';
-import { MarketplacePlugin } from '../../plugin-system/marketplace/marketplace-service';
+import React, { useState, useEffect } from 'react';
+import type { MarketplacePlugin } from '../../types/electron';
 import './PluginInstaller.css';
 
 interface PluginInstallerProps {
@@ -23,17 +24,29 @@ export const PluginInstaller: React.FC<PluginInstallerProps> = ({
 
   const electronAPI = window.electronAPI;
 
+  useEffect(() => {
+    // Listen for real-time installation progress events
+    const handleProgress = (data: { pluginId: string; progress: number }) => {
+      if (data.pluginId === plugin.id) {
+        setProgress(data.progress);
+      }
+    };
+
+    // Subscribe to progress events (assumes IPC event channel exists)
+    electronAPI.plugin?.onInstallProgress?.(handleProgress);
+
+    return () => {
+      // Cleanup listener on unmount
+      electronAPI.plugin?.offInstallProgress?.(handleProgress);
+    };
+  }, [plugin.id, electronAPI]);
+
   const handleInstall = async () => {
     setStage('installing');
-    try {
-      // Simulate installation progress
-      setProgress(0);
-      for (let i = 0; i <= 100; i += 10) {
-        await new Promise(resolve => setTimeout(resolve, 200));
-        setProgress(i);
-      }
+    setProgress(0);
 
-      // Call Electron API to install plugin
+    try {
+      // Real IPC call — progress updates come through event listener
       await electronAPI.plugin?.install?.(plugin.id);
 
       setStage('complete');

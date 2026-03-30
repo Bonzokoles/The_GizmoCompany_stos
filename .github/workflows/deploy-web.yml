@@ -7,6 +7,7 @@ on:
       - "src/**"
       - "public/**"
       - "ai-hub/**"
+      - "BONZO_media_HUB/**"
       - "functions/**"
       - ".github/workflows/deploy-web.yml"
       - "index.html"
@@ -47,6 +48,9 @@ jobs:
 
       - name: Copy ai-hub to dist
         run: cp -r ai-hub dist/ai-hub
+
+      - name: Copy BONZO_media_HUB to dist
+        run: cp -r BONZO_media_HUB dist/BONZO_media_HUB
 
       # ─── Deploy ───────────────────────────────────────────────────────────
       - name: Check secrets

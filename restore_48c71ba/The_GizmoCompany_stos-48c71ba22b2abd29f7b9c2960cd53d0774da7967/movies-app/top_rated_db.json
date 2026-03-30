@@ -1,0 +1,2570 @@
+{
+  "movies": [
+    {
+      "id": "tmdb-movie-278",
+      "title": "Skazani na Shawshank",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 278,
+        "tmdb_rating": 8.717,
+        "vote_count": 29981,
+        "year": "1994",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Adaptacja powieści Stephena Kinga. Nominowany  Andy Dufresne w 1995 roku do Oscara w 7 kategoriach!  Andy Dufresne jest młodym, obiecującym bankierem. Jego życie zmienia się drastycznie, kiedy zostaje niesłusznie oskarżony o zamordowanie swojej żony i jej kochanka. Skazany na dożywocie, trafia do więzienia Shawshank, gdzie rządy sprawują sadystyczni strażnicy oraz dyrektor hipokryta i oszust. Andy żeby przeżyć lata, jakie przyjdzie mu spędzić w celi, Andy będzie musiał wykazać się sprytem i wolą przetrwania. Przygotowuje również misterny plan zemsty - tak zaskakujący, że zmyli nawet najbliższych współwięźniów.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/sBnhJ4f5KAzg6C3FwnEb8QFj8SB.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/zfbjgQE1uSd9wiPTX4VzsLi0rGG.jpg",
+        "original_title": "The Shawshank Redemption",
+        "popularity": 46.0482
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-238",
+      "title": "Ojciec chrzestny",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 238,
+        "tmdb_rating": 8.687,
+        "vote_count": 22650,
+        "year": "1972",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Akcja filmu toczy się pod koniec II wojny światowej w Ameryce. Don Vito Corleone jest głową jednej z pięciu mafijnych rodzin w Nowym Jorku. Wraz z pomocą synów Sonny'ego i Freda oraz Toma Hagena -który oferuje swoje usługi w zakresie prawnym - cieszą się uznaniem wśród wielu znanych i ważnych osobistości. Wszystko zaczyna się komplikować, gdy Don Vito odmawia współpracy w handlu narkotykami.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/g1BqW6xfiztwUVSQY9hevjtYyMr.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/tSPT36ZKlP2WVHJLM4cQPLSzv3b.jpg",
+        "original_title": "The Godfather",
+        "popularity": 36.2695
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-240",
+      "title": "Ojciec chrzestny II",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 240,
+        "tmdb_rating": 8.6,
+        "vote_count": 13717,
+        "year": "1974",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Ta mistrzowska kontynuacja \"Ojca chrzestnego\" opisuje losy dwóch pokoleń rodu Corleone w bezwzględnym dążeniu do władzy. Francis Ford Coppola podzielił swą powieść na dwie części: w pierwszej przedstawił losy młodego Don Vito, zagranego bezbłędnie przez Roberta De Niro, w drugiej -  przejmowanie przez Michaela (Al Pacino) władzy w mafijnej rodzinie. Ponownie, gromadząc na planie wielu znakomitych artystów, Coppola stworzył bez wątpienia najlepszy sequel w dziejach kina.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/sWQjhhK9AidSLExyn7M26Tz4V6U.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/kGzFbGhp99zva6oZODW5atUtnqi.jpg",
+        "original_title": "The Godfather Part II",
+        "popularity": 20.7597
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-424",
+      "title": "Lista Schindlera",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 424,
+        "tmdb_rating": 8.6,
+        "vote_count": 17240,
+        "year": "1993",
+        "genres": [
+          "Dramat",
+          "Historyczny",
+          "Wojenny"
+        ],
+        "overview": "Oskar Schindler jest poważanym niemieckim przemysłowcem, który podczas II wojny światowej jest właścicielem dużej fabryki, w której w nieludzkich warunkach pracują Żydzi. Widząc cierpienie tych ludzi zaczyna ratować ich przed śmiercią w obozach koncentracyjnych. Film oparty jest na prawdziwej historii Oskara Schindlera, który podczas wojny ocalił przed śmiercią około 1100 ludzkich istnień.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/7mYojklW12jrWzvjxipWFeUnO9M.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/zb6fM1CX41D9rF9hdgclu0peUmy.jpg",
+        "original_title": "Schindler's List",
+        "popularity": 22.4777
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-389",
+      "title": "12 gniewnych ludzi",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 389,
+        "tmdb_rating": 8.6,
+        "vote_count": 9834,
+        "year": "1957",
+        "genres": [
+          "Dramat"
+        ],
+        "overview": "Tuż po zakończonej rozprawie sądowej zaczyna się zebranie przysięgłych. Mają oni rozstrzygnąć o losie jednego imigranta, który rzekomo dopuścił się morderstwa na swoim ojcu. Obradom przewodniczy Przysięgły nr 1. Pierwsze głosowanie dla wielu ławników kończy się rozczarowaniem - jeden przysięgły nie jest przekonany, co do winy oskarżonego.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/zASEq60XYKIPZ4kHOzP9f1pC06P.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/w4bTBXcqXc2TUyS5Fc4h67uWbPn.jpg",
+        "original_title": "12 Angry Men",
+        "popularity": 16.2894
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-1181678",
+      "title": "¿Quieres ser mi hijo?",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1181678,
+        "tmdb_rating": 8.5,
+        "vote_count": 303,
+        "year": "2023",
+        "genres": [
+          "Komedia",
+          "Romans"
+        ],
+        "overview": "Lu, konformistyczna kobieta po czterdziestce, dowiaduje się, że jej 15-letni partner ma pozamałżeńskie romanse. Zaczynając od zera, angażuje się w nieoczekiwany związek z młodym kobieciarzem.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/9GuvODahvuFqdhuZ16aBLR4UJoP.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/xyWKrni8WrYzqn7ztvI5nIY0h62.jpg",
+        "original_title": "¿Quieres ser mi hijo?",
+        "popularity": 7.6197
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-129",
+      "title": "Spirited Away: W krainie Bogów",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 129,
+        "tmdb_rating": 8.534,
+        "vote_count": 18091,
+        "year": "2001",
+        "genres": [
+          "Animacja",
+          "Familijny",
+          "Fantasy"
+        ],
+        "overview": "Chihiro jest kapryśną, upartą dziesięcioletnią dziewczynką, która uważa, że cały świat powinien spełniać jej zachcianki. Gdy rodzice oznajmiają jej, że trzeba będzie wyprowadzić się z domu, Chihiro jest z tego powodu zła i nie myśli tego ukrywać. Zabrnąwszy w tajemniczą ślepą uliczkę, rodzina staje nagle przed ogromnym czerwonym domem, do którego wnętrza prowadzi niekończący się tunel, rozwarty jak ogromne usta. Wkrótce okazuje się, że Chihiro i jej rodzice wtargnęli do świata zamieszkanego przez starożytnych bogów i magiczne stworzenia, świata, którym rządzi demoniczna czarownica, okrutna Yubaba.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/gSqglWhte6Q3zT71ovD1Ww4ckzd.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/ukfI9QkU1aIhOhKXYWE9n3z1mFR.jpg",
+        "original_title": "千と千尋の神隠し",
+        "popularity": 26.8686
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-155",
+      "title": "Mroczny Rycerz",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 155,
+        "tmdb_rating": 8.528,
+        "vote_count": 35371,
+        "year": "2008",
+        "genres": [
+          "Akcja",
+          "Kryminał",
+          "Thriller"
+        ],
+        "overview": "Kontynuacja filmu \"Batman: Początek\", \"Mroczny Rycerz\", to kolejne wspólne dzieło reżysera Christophera Nolana i gwiazdora Christiana Bale'a, który ponownie wciela się w postać Batmana / Bruce'a Wayne'a toczącego zażartą wojnę ze światem przestępczym. Batmanowi udaje się na dobre rozbić kryminalne podziemie Gotham z pomocą porucznika Jima Gordona (Gary Oldman) i Prokuratora Okręgowego Harveya Denta (Aaron Eckhart). Ich współpraca okazuje się niezwykle skuteczna, ale szybko trzej mężczyźni stają się celem nowego geniusza zbrodni, Jokera (Heath Ledger), którego celem jest wprowadzenie w Gotham anarchii i zmuszenie Batmana, by ten przeszedł na stronę zła, przestał być bohaterem, a stał się złoczyńcą.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/gKMDmGde8aAD8M6dvm6j7wciSbJ.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/dqK9Hag1054tghRQSqLSfrkvQnA.jpg",
+        "original_title": "The Dark Knight",
+        "popularity": 29.7555
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-19404",
+      "title": "Żona dla zuchwałych",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 19404,
+        "tmdb_rating": 8.5,
+        "vote_count": 4566,
+        "year": "1995",
+        "genres": [
+          "Komedia",
+          "Dramat",
+          "Romans"
+        ],
+        "overview": "\"Żona dla zuchwałych\", dziś już bollywoodzki klasyk, to jeden z najbardziej znanych i najdłużej granych indyjskich filmów w historii, nagrodzony wieloma nagrodami, w tym za najlepszy film 1995 roku. To właśnie w \"Żonie dla zuchwałych\" dzisiejsze megagwiazdy Bollywood -Shahrukh Khan (w roli Raja) i Kajol (w roli Simran) -stworzyły swój najsłynniejszy duet. Raj i Simran to młodzi Pendżabczycy mieszkający z rodzinami w Londynie. Ta dwójka poznaje się i prawie natychmiast zakochują w czasie podróży z przyjaciółmi po Europie. Ojciec Simran jest jednak silnie związany ze swą ojczyzną, dlatego postanawia, że córka wyjdzie za syna jego przyjaciela i osiądzie w Pendżabie. Gdy dowiaduje się, że Simran kocha kogoś innego, natychmiast wywozi do Indii całą rodzinę. Raj rusza w ślad za nimi. Będzie musiał się pokonać szereg przeszkód, by przekonać do siebie rodziców ukochanej, przechytrzyć upatrzonego przez nich kandydata na męża i samemu nie dać się wyswatać z inną",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/2CAL2433ZeIihfX1Hb2139CX0pW.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/6N5d02quKqMKqvTpOdFmBDy9scY.jpg",
+        "original_title": "दिलवाले दुल्हनिया ले जायेंगे",
+        "popularity": 9.0525
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-497",
+      "title": "Zielona mila",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 497,
+        "tmdb_rating": 8.505,
+        "vote_count": 18987,
+        "year": "1999",
+        "genres": [
+          "Fantasy",
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Paul Edgecomb jest pensjonariuszem domu starców. Kiedy pewnego razu ogląda w telewizji przedwojenny film, wzrusza się i przypomina sobie dawne czasy. Ze wspomnień zwierza się koleżance, opowiadając historię ze swojej młodości, kiedy jako strażnik bloku śmierci w 1935 roku odprowadzał więźniów na krzesło elektryczne. Ostatnia droga skazańców wiodła przez korytarz wyłożony zielonym linoleum nazywany \"zieloną milą\". Pewnego razu na blok trafił ogromny czarnoskóry więzień - John Coffey, skazany za zabójstwo dwóch dziewczynek. Szybko okazało się jednak, że ma on zdolność uzdrawiania, a Edgecomb postawiony został przed decyzją, która zaważy na całym jego życiu.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/brSYDZZ2epodl8lxdzaQqYapNlM.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/b6HWTOxn1xevvyHU2K9ICvaRU6g.jpg",
+        "original_title": "The Green Mile",
+        "popularity": 21.5277
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-122",
+      "title": "Władca Pierścieni: Powrót króla",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 122,
+        "tmdb_rating": 8.495,
+        "vote_count": 26216,
+        "year": "2003",
+        "genres": [
+          "Przygodowy",
+          "Fantasy",
+          "Akcja"
+        ],
+        "overview": "Ostateczna bitwa o Śródziemie rozpoczęła się. Frodo i Sam, prowadzeni przez Golluma, kontynuują swą niebezpieczną wyprawę w kierunku Góry Przeznaczenia, w celu zniszczenia Pierścienia Władzy. Aragorn walczy, aby wypełnić przepowiednię i poprowadzić swoich zwolenników przeciw rosnącej sile Władcy Ciemności Saurona, aby Powiernik Pierścienia mógł zakończyć swoją misję.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/75KNIheWdy7eLe4RWsbJmVjvJPU.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/2u7zbn8EudG6kLlBzUYqP8RyFU4.jpg",
+        "original_title": "The Lord of the Rings: The Return of the King",
+        "popularity": 30.5539
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-496243",
+      "title": "Parasite",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 496243,
+        "tmdb_rating": 8.494,
+        "vote_count": 20311,
+        "year": "2019",
+        "genres": [
+          "Komedia",
+          "Thriller",
+          "Dramat"
+        ],
+        "overview": "Żywot rodziny pana Ki-taeka nie należy do najbardziej udanych. Rodzice z dwójką dorosłych dzieci żyją w nędzy, wszyscy są bezrobotni, a przyszłość rysuje się tylko w szarych barwach. Jednak pomimo niedoli, potrafią być ze sobą blisko, kochać się i trwać w zgodzie - nikt tu nie krzyczy w desperacji \"Jak żyć?!\". Pewnego dnia otrzymują prezent od losu, który przepełnia ich nadzieją oraz wizją stałego dochodu. Syn Ki-woo zostaje polecony przez kolegę, studenta prestiżowego uniwersytetu, na dobrze płatną posadę korepetytora. Chłopak udaje się na rozmowę kwalifikacyjną do domu rodziny Parków, żyjących w zupełnie innym świecie. Pan Park jest właścicielem międzynarodowej firmy z branży IT, ma też piękną żonę Yeon-kyo. Spotkanie dwóch jakże odmiennych rodzin prowadzi do ciągu tragikomicznych wydarzeń.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/jjHccoFjbqlfr4VGLVLT7yek0Xn.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/hiKmpZMGZsrkA3cdce8a7Dpos1j.jpg",
+        "original_title": "기생충",
+        "popularity": 26.2811
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-680",
+      "title": "Pulp Fiction",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 680,
+        "tmdb_rating": 8.486,
+        "vote_count": 29870,
+        "year": "1994",
+        "genres": [
+          "Thriller",
+          "Kryminał",
+          "Komedia"
+        ],
+        "overview": "Płatni mordercy, Jules i Vincent, dostają zlecenie, by odzyskać z rąk przypadkowych rabusiów tajemniczą walizkę bossa mafii. Nie dość tego, Vincent dostaje kolejną robotę - na czas nieobecności gangstera w mieście ma zaopiekować się jego poszukującą wrażeń żoną Mią. Vincent i Jules niespodziewanie wpadają po uszy, gdy przypadkowo zabijają zakładnika. Kłopoty ma też podupadły bokser, który otrzymał dużą sumę za przegranie swojej walki. Walkę jednak wygrywa, a Los Angeles staje się od tej chwili dla niego za małe. Specjaliści od mokrej roboty będą mieli co robić...",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/5Whi9po8MTPyUTxAioXfyXGHNQE.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/suaEOtk1N1sgg2MTM7oZd2cfVp3.jpg",
+        "original_title": "Pulp Fiction",
+        "popularity": 24.8779
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-372058",
+      "title": "Twoje imię.",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 372058,
+        "tmdb_rating": 8.478,
+        "vote_count": 12368,
+        "year": "2016",
+        "genres": [
+          "Animacja",
+          "Romans",
+          "Dramat"
+        ],
+        "overview": "Historia nastolatków Mitsuhy i Takiego. Dziewczyna mieszka na wsi z babcią i młodszą siostrą. Natomiast Taki to przeciętny obywatel stolicy, rezyduje w Tokio, gdzie uczy się i pracuje po lekcjach. Pewnej nocy, Mitsuha i Taki zamieniają się ciałami na jeden dzień. Ten incydent zaczyna się powtarzać coraz częściej. W międzyczasie do Ziemi zbliża się kometa, która prawdopodobnie stanowi źródło opisanego fenomenu.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/yLglTwyFOUZt5fNKm0PWL1PK5gm.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/8x9iKH8kWA0zdkgNdpAew7OstYe.jpg",
+        "original_title": "君の名は。",
+        "popularity": 21.8903
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-157336",
+      "title": "Interstellar",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 157336,
+        "tmdb_rating": 8.468,
+        "vote_count": 39195,
+        "year": "2014",
+        "genres": [
+          "Przygodowy",
+          "Dramat",
+          "Sci-Fi"
+        ],
+        "overview": "Ziemia w niedalekiej przyszłości. Planeta jest sukcesywnie niszczona przez klęski suszy, a ludziom grozi wyginięcie. Nieoczekiwanie naukowcy odkrywają możliwość podróżowania poza granice Układu Słonecznego. Grupa astronautów wyrusza w najważniejszą w dziejach ludzkości podróż – muszą znaleźć miejsce, gdzie nasz gatunek będzie mógł przetrwać. Na czele załogi staje Cooper, były pilot NASA, który obecnie zajmuje się uprawą roli.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/q4emCJmjNomEE2pVGgqr3nDEIzI.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/2ssWTSVklAEc98frZUQhgtGHx7s.jpg",
+        "original_title": "Interstellar",
+        "popularity": 46.7159
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-429",
+      "title": "Dobry, zły i brzydki",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 429,
+        "tmdb_rating": 8.5,
+        "vote_count": 9501,
+        "year": "1966",
+        "genres": [
+          "Western"
+        ],
+        "overview": "Obraz ten jest ostatnią częścią \"dolarowej\" trylogii Sergia Leone. Bohaterami filmu są trzej mężczyźni: Zły - bezwzględny łowca nagród, Brzydki - wielokrotny przestępca, Dobry - łowca głów z zasadami. Wszyscy trzej usiłują dotrzeć do ukrytego przez wojsko skarbu. Brzydki jest w posiadaniu informacji o nazwie cmentarza, na którym został on zakopany, Dobry zna nazwisko na poszukiwanym grobie. Czyni to z nich mimowolny zespół. Po piętach depcze im Zły.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/48UDOsbi1D47Iu0h2JnkZU2GXna.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/Adrip2Jqzw56KeuV2nAxucKMNXA.jpg",
+        "original_title": "Il buono, il brutto, il cattivo",
+        "popularity": 19.1901
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-13",
+      "title": "Forrest Gump",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 13,
+        "tmdb_rating": 8.463,
+        "vote_count": 29416,
+        "year": "1994",
+        "genres": [
+          "Komedia",
+          "Dramat",
+          "Romans"
+        ],
+        "overview": "W ciągu trzech burzliwych dekad, Forrest zmienia się z lekceważonego inwalidy w gwiazdę amerykańskiego futbolu; z bohatera wojny w Wietnamie staje się królem krewetek; od honorów Białego Domu przechodzi w ramiona ukochanej. Jest odzwierciedleniem naszej epoki, ostatnim niewinnym w czasach, kiedy Ameryka utraciła swą niewinność. Serce podpowiada mu w sprawach, których nie ogarnia jego umysł. Jest człowiekiem zasad, a jego sukcesy inspirują wszystkich. \"Forrest Gump\". Oto historia pewnego życia.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/iixrNXX79OR7knBx1i9S51PfVlz.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/67HggiWaP9ZLv5sPYmyRV37yAJM.jpg",
+        "original_title": "Forrest Gump",
+        "popularity": 23.6969
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-769",
+      "title": "Chłopcy z ferajny",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 769,
+        "tmdb_rating": 8.5,
+        "vote_count": 14134,
+        "year": "1990",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "W filmie \"Chłopcy z ferajny\" w formie epizodów opowiedziana zostaje autentyczna historia kariery nowojorskiego mafiozo, Henry'ego Hilla (Ray Liotta), który w ciągu 30 lat, od popełniającego małe przestępstwa gangstera, dochodzi do kierowniczego stanowiska w mafijnej hierarchii. Na podstawie relacji jednego z wtajemniczonych w sprawy mafii, film pokazuje kompleksowy obraz życia pojedynczego mafiozo, które nacechowane jest dążeniem do władzy, śmiertelnym strachem i męskimi rytuałami.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/m9taboMOrt6h7sTLkGfOBSqp3qr.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/gILte6Zd7m1YneIr6MVhh30S9pr.jpg",
+        "original_title": "GoodFellas",
+        "popularity": 20.8282
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-346",
+      "title": "Siedmiu samurajów",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 346,
+        "tmdb_rating": 8.5,
+        "vote_count": 4149,
+        "year": "1954",
+        "genres": [
+          "Akcja",
+          "Dramat"
+        ],
+        "overview": "Dramat samurajski. Epicka opowieść, której treścią jest historia mieszkańców pewnej japońskiej wioski nękanej i co roku najeżdżanej przez bandę 40-tu opryszków zabierających jej mieszkańcom coroczny dorobek ich ciężkiej pracy na roli. Zdesperowani rolnicy wynajmują do obrony przed bandytami roninów - samurajów \"bez pana\", którzy za przysłowiową \"garstkę ryżu\" podejmują walkę z najeźdźcami.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/8G8a4UeEpC20ieFBMnZYYKkJUgS.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/qvZ91FwMq6O47VViAr8vZNQz3WI.jpg",
+        "original_title": "七人の侍",
+        "popularity": 11.6577
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-12477",
+      "title": "Grobowiec świetlików",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 12477,
+        "tmdb_rating": 8.444,
+        "vote_count": 6416,
+        "year": "1988",
+        "genres": [
+          "Animacja",
+          "Dramat",
+          "Wojenny"
+        ],
+        "overview": "Rozgrywająca się pod koniec II wojny światowej w Japonii historia 14-letniego chłopca i jego młodszej siostry, których rodzice zginęli podczas nalotu. Rodzeństwo jest zdane tylko na siebie, próbując przetrwać w świecie ogarniętym koszmarem wojny…",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/pc5mkSMjNrTXfR3zt2DHFE6PUXb.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/aHaqZpOL7UyVu0nKqp3SMz0o2E1.jpg",
+        "original_title": "火垂るの墓",
+        "popularity": 0.01
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-637",
+      "title": "Życie jest piękne",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 637,
+        "tmdb_rating": 8.44,
+        "vote_count": 13866,
+        "year": "1997",
+        "genres": [
+          "Komedia",
+          "Dramat"
+        ],
+        "overview": "Komedia, której głównym tematem jest... holocaust. Błaznowaty wieśniak przybywa do dużego miasta w Toskanii, zakłada rodzinę. Wybucha wojna, wkraczają Niemcy, wieśniak, jako pół-Żyd trafia do obozu koncentracyjnego wraz z najbliższą rodziną. Próbuje jednak przekonać syna, że pobyt w obozie jest jedynie pewną formą zabawy dla dorosłych",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/Moz0CzJ44U9L3ADxlVE24LTwY4.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/6aNKD81RHR1DqUUa8kOZ1TBY1Lp.jpg",
+        "original_title": "La vita è bella",
+        "popularity": 11.226
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-550",
+      "title": "Podziemny krąg",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 550,
+        "tmdb_rating": 8.4,
+        "vote_count": 31656,
+        "year": "1999",
+        "genres": [
+          "Dramat",
+          "Thriller"
+        ],
+        "overview": "Co ty możesz o sobie wiedzieć, jeśli nigdy nie walczyłeś? W tym niezwykłym, pełnym niespodziewanych zwrotów akcji i nie pozbawionym swoistego humoru filmie w reżyserii Davida Finchera (\"Siedem\") oryginalne i dynamiczne kreacje stworzyli Brad Pitt (\"Siedem\") i Edward Norton (\"Lęk pierwotny\"). Jack (Norton) cierpi na chroniczną bezsenność i jest całkowicie znudzony swym dotychczasowym życiem. Do czasu, gdy spotyka charyzmatycznego Tylera Durdena (Pitt) - sprzedawcę mydła o dość pokrętnej filozofii życia... Uważa on bowiem, że samo-doskonalenie jest dla słabeuszy, a to co rzeczywiście sprawia, że warto żyć to samo-destrukcja.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/efBb4gjjKneUoBVgfFOUu2OwihS.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/xRyINp9KfMLVjRiO5nCsoRDdvvF.jpg",
+        "original_title": "Fight Club",
+        "popularity": 22.8281
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-14537",
+      "title": "Harakiri",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 14537,
+        "tmdb_rating": 8.4,
+        "vote_count": 1178,
+        "year": "1962",
+        "genres": [
+          "Akcja",
+          "Dramat",
+          "Historyczny"
+        ],
+        "overview": "Japonia, XVII wiek. Na dwór potężnego klanu przybywa ronin, by prosić o zezwolenie na popełnienie rytualnego samobójstwa. W odpowiedzi słyszy historię samuraja, który kilka miesięcy wcześniej przybył z taką samą prośbą. Wkrótce okazuje się, że historie obu roninów w zaskakujący sposób łączą się ze sobą...  \"Harakiri\" jest dziś uważane za jedno z największych arcydzieł japońskiego kina, dzieło tej klasy co \"Rashomon\" czy \"Siedmiu samurajów\" (filmy te łączy również osoba scenarzysty, legendarnego Shinobu Hashimoto). Niezwykły wizualnie film Masakiego Kobayashiego wyróżniono Specjalną Nagrodą Jury na festiwalu w Cannes.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/5pXaYCB7z9C6kvMBiCnJxm5ztKK.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/e3hG3uadtcP0pYdRa5ch4ysQW76.jpg",
+        "original_title": "切腹",
+        "popularity": 7.2101
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-120",
+      "title": "Władca Pierścieni: Drużyna Pierścienia",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 120,
+        "tmdb_rating": 8.429,
+        "vote_count": 27203,
+        "year": "2001",
+        "genres": [
+          "Przygodowy",
+          "Fantasy",
+          "Akcja"
+        ],
+        "overview": "Ekranizacja pierwszej części trylogii Tolkiena, \"Drużyna Pierścienia\" zapoznaje widzów z czarodziejskim światem Śródziemia i jego mieszkańcami - ludźmi, hobbitami, elfami, krasnoludami, czarodziejami, trollami i orkami. W tej części trylogii młody i nieśmiały hobbit Frodo Baggins (Elijah Wood) odziedzicza pierścień - Jedyny Pierścień, narzędzie władzy absolutnej, które pozwoliłoby Sauronowi, mrocznemu Władcy Mordoru, rządzić Śródziemiem i zniewolić zamieszkujące je ludy. Frodo, wraz z lojalną kompanią hobbitów, ludzi, czarodzieja, krasnoluda i elfa, musi zabrać Pierścień do Szczelin Zagłady, gdzie został kiedyś wykuty, i zniszczyć go raz na zawsze. Taka podróż oznacza zapuszczenie się głęboko do krainy Czarnego Władcy, gdzie gromadzi on armię orków. Drużyna musi walczyć nie tylko ze złem czającym się wokół, ale i z wewnętrznymi waśniami, oraz niszczącym wpływem samego Pierścienia. Przyszłość świata i przeznaczenie drużyny są ze sobą splecione.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/bjWRzhXUXTNPnwptBkXQzCflVBE.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/a0lfia8tk8ifkrve0Tn8wkISUvs.jpg",
+        "original_title": "The Lord of the Rings: The Fellowship of the Ring",
+        "popularity": 29.4167
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-598",
+      "title": "Miasto Boga",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 598,
+        "tmdb_rating": 8.428,
+        "vote_count": 8068,
+        "year": "2002",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Rakietę ma 10 lat. Jego brat, noszący ksywkę Kaczor, należy do bandy o osobliwej nazwie Trio Czułość. Przez jakiś czas trio rządzi osiedlem, budząc podziw młodszych dzieciaków. O dorównaniu im marzy zwłaszcza Kostka, najbliższy przyjaciel Bene. Podsuwa on bandzie pomysł napadu na dom schadzek. W czasie akcji Kostka zabija wszystkich okradzionych wcześniej klientów domu. Następnie zabija Kaczora - dotychczasowego przywódcę i przejmuje władzę w Mieście Boga. Przybiera imię Mały Ze.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/19HfNrUgf0Qe7NG7NZOEFEE8z9q.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/uvitbjFU4JqvMwIkMWHp69bmUzG.jpg",
+        "original_title": "Cidade de Deus",
+        "popularity": 10.0841
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-11216",
+      "title": "Cinema Paradiso",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 11216,
+        "tmdb_rating": 8.4,
+        "vote_count": 4761,
+        "year": "1988",
+        "genres": [
+          "Dramat",
+          "Romans"
+        ],
+        "overview": "Włoski reżyser Salvatore po latach powraca pamięcią do czasów dzieciństwa spędzonego w małym sycylijskim miasteczku. Cały świat zaaferowany jest wydarzeniami politycznymi po II wojnie światowej, jednak tutaj, w prowincjonalnym miasteczku, ludzie żyją swoimi sprawami, a ich jedyną rozrywką są filmy wyświetlane w kinie parafialnym 'Paradiso'. Toto, jak nazywają w mieście małego Salvatore, przyjaźni się z miejscowym kinowym operatorem Alfredo, który wprowadza chłopca w magiczny świat ruchomych obrazków.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/3hcXpztAe9L6VLpDGwohS01ZSxw.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/zoVeIgKzGJzpdG6Gwnr7iOYfIMU.jpg",
+        "original_title": "Nuovo Cinema Paradiso",
+        "popularity": 7.6393
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-40096",
+      "title": "Testament psa",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 40096,
+        "tmdb_rating": 8.4,
+        "vote_count": 1209,
+        "year": "2000",
+        "genres": [
+          "Komedia",
+          "Dramat",
+          "Fantasy",
+          "Romans"
+        ],
+        "overview": "Film nagrodzony na MFF w Kartagenie i Mar del Plata oraz Brazylijskimi Nagrodami Filmowymi, a w Polsce pokazywany w ramach 3. Festiwalu Filmów Latynoamerykańskich.  \"Testament psa\" to zabawna komedia pełna magii i surrealizmu, która podbiła serca milionów widzów w Brazylii. Główny bohater to przebiegły biedak, który aby zdobyć kawałek chleba wodzi za nos bogatszych, choć głupszych mieszkańców swojej wioski. Konsekwencje jego intryg są katastrofalne dlatego staje przed obliczem (czarnego) Jezusa Chrystusa i Matki Boskiej, aby wytłumaczyć się ze swoich czynów.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/imcOp1kJsCsAFCoOtY5OnPrFbAf.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/alQqTpmEkxSLgajfEYTsTH6nAKB.jpg",
+        "original_title": "O Auto da Compadecida",
+        "popularity": 3.2682
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-667257",
+      "title": "Cosas imposibles",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 667257,
+        "tmdb_rating": 8.4,
+        "vote_count": 420,
+        "year": "2021",
+        "genres": [
+          "Familijny",
+          "Dramat"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/eaf7GQj0ieOwm08rrvjJQNbN0kN.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/bxSBOAD8AuMHYMdW3jso9npAkgt.jpg",
+        "original_title": "Cosas imposibles",
+        "popularity": 2.8863
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-539",
+      "title": "Psychoza",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 539,
+        "tmdb_rating": 8.4,
+        "vote_count": 10876,
+        "year": "1960",
+        "genres": [
+          "Horror",
+          "Thriller",
+          "Tajemnica"
+        ],
+        "overview": "Marion Crane jest sekretarką spotykającą się po kryjomu z Samem, drobnym handlarzem. Nie mają pieniędzy, by mogli żyć razem. Więc przy nadarzającej się okazji Marion kradnie z pracy dużą kwotę pieniędzy i ucieka z miasta. Chce pojechać do Sama. Podczas jazdy nocą zaczyna mocno padać deszcz, więc uciekinierka skręca do małego moteliku - Motelu Batesa. Motel wygląda przytulnie, do momentu, gdy Marion poznaje alter ego jego właściciela...",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/7ZaJxINKJz0QW0gu5CyG4k8bz6w.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/mufF1aYvwdpKerhq5R1YrVcbJLY.jpg",
+        "original_title": "Psycho",
+        "popularity": 11.9516
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-121",
+      "title": "Władca Pierścieni: Dwie wieże",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 121,
+        "tmdb_rating": 8.4,
+        "vote_count": 23602,
+        "year": "2002",
+        "genres": [
+          "Przygodowy",
+          "Fantasy",
+          "Akcja"
+        ],
+        "overview": "Mrok gęstnieje nad światem. Po rozpadzie drużyny cel misji staje się coraz bardziej odległy. Frodo i Sam wędrują samotnie do Mordoru. Na ich drodze staje jednak Gollum, dawny właściciel pierścienia. Gandalf zwycięża Barloga, ale to dopiero początek jego zmagań z siłami zła. Pozostała część drużyny idąc tropem orków trafia do Fangornu, gdzie spotykają Gandalfa. Nadszedł czas, aby rozprawić się Sarumanem, który opętał władcę Rohanu, królestwa ludzi. Frodo i Sam prowadzeni przez Golluma, któremu Frodo darował życie, docierają do Czarnej Bramy. Tymczasem Merry i Pippin uciekają orkom i trafiają na Drzewca, starego Enta. Kiedy wszystko zaczyna się układać, Saruman, który stworzył potężną armię, postanawia zaatakować Rohańczyków. Rozpoczyna się bitwa, która może zadecydować o losie wyprawy - bitwa o Helmowy Jar.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/4oDm6P1FUAegMFfQBVhWIkNcaqk.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/kWYfW2Re0rUDE6IHhy4CRuKWeFr.jpg",
+        "original_title": "The Lord of the Rings: The Two Towers",
+        "popularity": 18.6904
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-510",
+      "title": "Lot nad kukułczym gniazdem",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 510,
+        "tmdb_rating": 8.412,
+        "vote_count": 11290,
+        "year": "1975",
+        "genres": [
+          "Dramat"
+        ],
+        "overview": "Wprowadzając bohatera, skierowanego wprawdzie do zakładu psychiatrycznego, ale niewydającego się ani trochę szaleńcem, reżyser sugeruje jednocześnie pytanie o granice między normalnością a obłąkaniem. Widz z przerażeniem uświadamia sobie, jak są one kruche. Oto bowiem drobny złodziejaszek i awanturnik Randall Patrick McMurphy, skazany za liczne przestępstwa, w tym także gwałt, pragnąc uniknąć obozu pracy, symuluje obłęd. Zostaje wysłany na obserwację do szpitala psychiatrycznego, gdzie trafia na oddział kierowany przez siostrę Ratched.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/3ICRZ5DOBwapO25lphA8yiCWi4v.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/6Oa3zTiluBz2W8D2ou1MY16dUiF.jpg",
+        "original_title": "One Flew Over the Cuckoo's Nest",
+        "popularity": 11.028
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-255709",
+      "title": "소원",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 255709,
+        "tmdb_rating": 8.4,
+        "vote_count": 829,
+        "year": "2013",
+        "genres": [
+          "Dramat"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/PZlNvDwKwHeHUsXnd6SEDXWZNn.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/4Nx40jwpoTHPjCWNGoaZ6kaoGxa.jpg",
+        "original_title": "소원",
+        "popularity": 5.2067
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-696374",
+      "title": "Gabriel's Inferno",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 696374,
+        "tmdb_rating": 8.4,
+        "vote_count": 2445,
+        "year": "2020",
+        "genres": [
+          "Romans",
+          "Dramat"
+        ],
+        "overview": "Intrygująca i grzeszna eksploracja uwodzenia, zakazanej miłości i odkupienia, Gabriel's Inferno to wciągająca i szalenie namiętna opowieść o ucieczce jednego mężczyzny z własnego piekła, gdy próbuje zasłużyć na niemożliwe - przebaczenie i miłość.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/oyG9TL7FcRP4EZ9Vid6uKzwdndz.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/nIkcTtuhmkl1GZO2LfZi7SwFz7F.jpg",
+        "original_title": "Gabriel's Inferno",
+        "popularity": 2.9956
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-324857",
+      "title": "Spider-Man Uniwersum",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 324857,
+        "tmdb_rating": 8.4,
+        "vote_count": 16978,
+        "year": "2018",
+        "genres": [
+          "Animacja",
+          "Akcja",
+          "Przygodowy",
+          "Sci-Fi"
+        ],
+        "overview": "Miles Morales jest nastolatkiem, który odkrywa w sobie moce podobne do tych, jakimi posługuje się Spider-Man, podobnie zresztą jak on, jest superbohaterem; nazywany jest często Ultimate Spider-Man, działa w uniwersum zwanym Ziemia-1610. Jest nadzwyczajnie silny, potrafi wdrapywać się po ścianach, ma pajęczy zmysł i umiejętność paraliżowania wroga.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/grU91DJPDzJv0sqDyEhzOEgwWEH.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/8mnXR9rey5uQ08rZAvzojKWbDQS.jpg",
+        "original_title": "Spider-Man: Into the Spider-Verse",
+        "popularity": 22.2235
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-1891",
+      "title": "Gwiezdne wojny: Część V - Imperium kontratakuje",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1891,
+        "tmdb_rating": 8.4,
+        "vote_count": 18189,
+        "year": "1980",
+        "genres": [
+          "Przygodowy",
+          "Akcja",
+          "Sci-Fi"
+        ],
+        "overview": "Kolejna część Gwiezdnej Sagi opowiada o wydarzeniach toczących się kilka lat po zniszczeniu pierwszej Gwiazdy Śmierci. Luke Skywalker i pozostali Rebelianci uciekają po całej Galaktyce przed zakusami okrutnego Imperium. Bezpieczną ostoję znajdują na lodowej planecie Hoth. Jednak Imperium lokalizuje tę bazę. Rebelianci muszą uciekać. Luke udaje się do układu Dagobah, żeby spotkać się z Mistrzem Jedi, Yodą i pobrać od niego nauki. Natomiast Han, Leia, Chewie i roboty uciekają na planetę Bespin, do dawnego przyjaciela Hana ― Lando Calrissiana. Nie wiedzą, że wpadli w podstępnie uknutą przez Imperium pułapkę...",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/rWIWEQiUVSA9JSQ8pIHkUy3Fbiq.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/aJCtkxLLzkk1pECehVjKHA2lBgw.jpg",
+        "original_title": "The Empire Strikes Back",
+        "popularity": 10.7734
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-4935",
+      "title": "Ruchomy zamek Hauru",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 4935,
+        "tmdb_rating": 8.4,
+        "vote_count": 10904,
+        "year": "2004",
+        "genres": [
+          "Fantasy",
+          "Animacja",
+          "Przygodowy"
+        ],
+        "overview": "Sophie zostaje zamieniona przez demoniczną Czarownicę w starą kobietę. Zrozpaczona próbuje odzyskać swoje ciało i wyrusza w magiczną podróż pełną niebezpieczeństw. W poszukiwaniu samej siebie Sophie trafia do dziwnego Ruchomego Zamku należącego do czarodzieja Hauru. Spotyka w nim demona ognia - Karushifâ, który przedstawia jej propozycję. Jeśli Sophie uwolni go spod mocy Hauru, on w zamian przywróci jej 18-letnie ciało. Co stanie się z Sophie w Ruchomym Zamku? Czy wszystkie części magicznej układanki znajdą swoje miejsce?",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/pCHfm0Icmk0rJiBJjY1XAfYMTd7.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/nv5wwZou159v5OC61i4ElR7OqyY.jpg",
+        "original_title": "ハウルの動く城",
+        "popularity": 14.0828
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-378064",
+      "title": "Kształt twojego głosu",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 378064,
+        "tmdb_rating": 8.385,
+        "vote_count": 4399,
+        "year": "2016",
+        "genres": [
+          "Animacja",
+          "Dramat",
+          "Romans"
+        ],
+        "overview": "Shouya Ishida zaczyna znęcać się nad nową dziewczyną z klasy, Shouko Nishimiya, ponieważ jest głucha. Jednakże, gdy jego dokuczanie trwa dalej, reszta klasy zaczyna zwracać się przeciwko Shouyi z powodu jego braku współczucia. Po ukończeniu szkoły podstawowej, Shouko i Shouya nie rozmawiają ze sobą ... dopóki starszy, mądrzejszy Shouya, dręczony swoim dawnym zachowaniem, decyduje, że musi jeszcze raz zobaczyć Shouko. Chce odpokutować za swoje grzechy, ale czy jest już za późno ...?",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/ndlHzeb0WwdorqDzikjuQg9Lxw1.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/5lAMQMWpXMsirvtLLvW7cJgEPkU.jpg",
+        "original_title": "映画 聲の形",
+        "popularity": 9.4127
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-311",
+      "title": "Dawno temu w Ameryce",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 311,
+        "tmdb_rating": 8.4,
+        "vote_count": 5944,
+        "year": "1984",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Lata 20. i 30. XX wieku. David i Max razem dorastali w żydowskim getcie w Nowym Jorku. Byli członkami gangu młodzieżowego, żyli z drobnych oszustw. Po latach przyjaciele kierują własną grupą przestępczą, mają wspólne fundusze, nad którymi pieczę sprawuje ich kompan Moe. Robią wielkie pieniądze na nielegalnym handlu alkoholem. Wraz z nadejściem końca prohibicji w 1933 roku gang przeżywa kryzys finansowy. Zgrana niegdyś paczka powoli się rozpada.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/k6I9E24k3CwrV0upnvNyzGlau53.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/xlDUjb0Q5Dv6jPQRF5VE4IMjIy.jpg",
+        "original_title": "Once Upon a Time in America",
+        "popularity": 9.4462
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-807",
+      "title": "Siedem",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 807,
+        "tmdb_rating": 8.379,
+        "vote_count": 22797,
+        "year": "1995",
+        "genres": [
+          "Kryminał",
+          "Tajemnica",
+          "Thriller"
+        ],
+        "overview": "Odchodzący na emeryturę stary policyjny wyga William Somerset ma przekazać swoje obowiązki młodemu detektywowi Davidovi Millsowi. Różni ich wszystko: spokój, rozsądek, zmęczenie życiem i zawodem Somerseta kontrastuje z energią, porywczością i młodzieńczym optymizmem Millsa. Współpraca nie układa się więc najlepiej, ale niestety jest konieczna. Miastem wstrząsa seria okrutnych zabójstw. Pierwsza ofiara to otyły mężczyzna, który zmarł z przejedzenia. Następnego dnia ginie znany z chciwości prawnik. Wygląda na to, że morderca wybiera sobie na ofiary ludzi, którzy popełnili jeden z siedmiu grzechów głównych i w wyrafinowany, perfekcyjnie przygotowany sposób przeprowadza ich egzekucję.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/jKstsinBR4nXRzmOItLjmpt9CQ4.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/wivWTbadzu3YLyEFzfvNUdo4Xn4.jpg",
+        "original_title": "Se7en",
+        "popularity": 20.6989
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-423",
+      "title": "Pianista",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 423,
+        "tmdb_rating": 8.4,
+        "vote_count": 9999,
+        "year": "2002",
+        "genres": [
+          "Dramat",
+          "Wojenny"
+        ],
+        "overview": "Władysław Szpilman wraz z rodziną mieszka w Warszawie. Jest młodym, zdolnym pianistą, żydowskiego pochodzenia. Gdy do miasta wkraczają Niemcy, i wkrótce potem zakładają getta, młody Władek zarabia jako pianista w kawiarniach. Z biegiem czasu Niemcy rozpoczynają wywóz Żydów, a Szpilmanowi w ostatniej chwili udaje się uniknąć losu rodziny, którą zagnano do wagonu pociągu. Wkrótce potem Władysław ucieka z getta i dzięki polskim przyjaciołom znajduje ukrycie przed okupantami. Niestety nie zaznaje spokoju na długo. Zaraz po wybuchu Powstania Warszawskiego Szpilman musi uciekać.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/72ponXpzVO1kPKtEYFKTEqWIwdK.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/c0fB9xk7D1aVb3Bg2rk2SVJcGn.jpg",
+        "original_title": "The Pianist",
+        "popularity": 11.2194
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-770156",
+      "title": "Lucy Shimmers and the Prince of Peace",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 770156,
+        "tmdb_rating": 8.4,
+        "vote_count": 352,
+        "year": "2020",
+        "genres": [
+          "Dramat",
+          "Familijny"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/yfnJ5qIYx7q33fY4jqv9Pu95RSg.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/7jS69IM8bK7ooOWGFmM9G6JcenO.jpg",
+        "original_title": "Lucy Shimmers and the Prince of Peace",
+        "popularity": 4.0116
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-244786",
+      "title": "Whiplash",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 244786,
+        "tmdb_rating": 8.4,
+        "vote_count": 16417,
+        "year": "2014",
+        "genres": [
+          "Dramat",
+          "Muzyczny",
+          "Thriller"
+        ],
+        "overview": "Andrew (Miles Teller) jest utalentowanym młodym perkusistą, uczniem konserwatorium muzycznego na Manhattanie. Chłopak marzy o wielkiej karierze. Aby zrealizować plany, postanawia dołączyć do szkolnej orkiestry jazzowej prowadzonej przez okrutnego nauczyciela Terence'a Fletchera (J.K. Simmons), który często wyładowuje swoje frustracje na uczniach. Pod kierunkiem bezwzględnego Fletchera, Andrew zaczyna dążyć do doskonałości za wszelką cenę - nawet własnego człowieczeństwa.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/4Twi6WFaiGHc0SrIhdtZRNt45xg.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/wbQa0EnWUyRzQ5d1pHLNRlmsCUP.jpg",
+        "original_title": "Whiplash",
+        "popularity": 15.5741
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-27205",
+      "title": "Incepcja",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 27205,
+        "tmdb_rating": 8.371,
+        "vote_count": 38886,
+        "year": "2010",
+        "genres": [
+          "Akcja",
+          "Sci-Fi",
+          "Przygodowy"
+        ],
+        "overview": "Dom Cobb jest niezwykle sprawnym złodziejem, mistrzem w wydobywaniu wartościowych sekretów ukrytych głęboko w świadomości podczas fazy snu, kiedy umysł jest najbardziej wrażliwy. Wyjątkowe umiejętności Cobba uczyniły z niego ważnego gracza w świecie szpiegostwa przemysłowego, ale i najbardziej poszukiwanego zbiega, a za swoją pozycję zapłacił utratą wszystkiego, co kocha. Teraz Cobb otrzymuje szansę na odkupienie. Za sprawą jednego, ostatniego zadania może odzyskać stracone życie. Musi tylko wraz ze swym zespołem dokonać rzeczy niemożliwej: zamiast skraść myśl, zaszczepić ją w śpiącym umyśle. Jeśli im się to uda, dokonają zbrodni doskonałej. Jednak nawet najbardziej precyzyjne planowanie nie jest w stanie przygotować ich na spotkanie z niezwykłym przeciwnikiem, który potrafi przewidzieć każdy ich ruch. Wróg, którego tylko Cobb mógł się spodziewać.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/efvcvRgOAZgFC2hrPUa6YqrE1KG.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
+        "original_title": "Inception",
+        "popularity": 27.039
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-724089",
+      "title": "Gabriel's Inferno: Part II",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 724089,
+        "tmdb_rating": 8.4,
+        "vote_count": 1538,
+        "year": "2020",
+        "genres": [
+          "Romans",
+          "Dramat"
+        ],
+        "overview": "Profesor Gabriel Emerson w końcu poznaje prawdę o tożsamości Julii Mitchell, ale uświadamia sobie to o chwilę za późno. Julia ma dość czekania, aż szanowany specjalista od Dantego sobie o niej przypomni i nie chce mieć z nim nic więcej wspólnego. Czy Gabrielowi uda się odzyskać jej serce, zanim znajdzie miłość w ramionach innej osoby?",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/x5o8cLZfEXMoZczTYWLrUo1P7UJ.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/jtAI6OJIWLWiRItNSZoWjrsUtmi.jpg",
+        "original_title": "Gabriel's Inferno: Part II",
+        "popularity": 1.9447
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-761053",
+      "title": "Gabriel's Inferno: Part III",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 761053,
+        "tmdb_rating": 8.4,
+        "vote_count": 1074,
+        "year": "2020",
+        "genres": [
+          "Romans",
+          "Dramat"
+        ],
+        "overview": "Ostatnia część filmowej adaptacji erotycznego romansu Gabriel's Inferno, napisanego przez anonimowego kanadyjskiego autora pod pseudonimem Sylvain Reynard.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/fYtHxTxlhzD4QWfEbrC1rypysSD.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/fQq1FWp1rC89xDrRMuyFJdFUdMd.jpg",
+        "original_title": "Gabriel's Inferno: Part III",
+        "popularity": 3.5098
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-12493",
+      "title": "Niebo i piekło",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 12493,
+        "tmdb_rating": 8.4,
+        "vote_count": 1097,
+        "year": "1963",
+        "genres": [
+          "Dramat",
+          "Kryminał",
+          "Thriller"
+        ],
+        "overview": "Kurosawa opowiada tu historię bogatego właściciela fabryki Gondo. W momencie, kiedy ma on zainwestować majątek całego swojego życia, zostaje telefonicznie poinformowany o porwaniu syna. Suma, którą ma zapłacić w zamian za jego uwolnienie jest praktycznie równa tej, którą chciał zainwestować. Gondo staje przed dylematem moralnym, bowiem okazuje się, że porwano nie jego syna, lecz dziecko jego szofera. Policja wpada na trop kidnapera...",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/hWsJ92ERvlaJSKBmUaN0TURQb98.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/A62quSOB8otoZvGiLvMVZ9G4BiO.jpg",
+        "original_title": "天国と地獄",
+        "popularity": 6.6156
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-274",
+      "title": "Milczenie owiec",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 274,
+        "tmdb_rating": 8.345,
+        "vote_count": 17726,
+        "year": "1991",
+        "genres": [
+          "Kryminał",
+          "Thriller",
+          "Dramat"
+        ],
+        "overview": "Psychopata porywa i morduje młode kobiety na środkowym zachodzie. Wierząc, że w ujęciu tego mordercy dopomoże tylko inny przestępca, F.B.I. wysyła agentkę Clarice Starling (Jodie Foster) na wywiad z obłąkanym więźniem, który może dostarczyć psychologicznych przesłanek i tropów do kolejnych działań zabójcy. Więzień, psychiatra, dr. Hannibal Lecter (Anthony Hopkins) jest genialnym mordercą-kanibalem, który pomoże Agentce Starling, jeżeli ona będzie karmić jego chorą ciekawość detalami ze swojego skomplikowanego życia. Ta pokręcona relacja zmusza Starling nie tylko do konfrontacji z jej psychicznymi demonami, ale doprowadza ją również do spotkania twarzą w twarz z szalonym, ohydnym mordercą, wcieleniem zła tak potężnym, że nie będzie miała odwagi - ani siły - by go zatrzymać!",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/qWG1nSFlp4oNwSSTCPk3Q3n4FlD.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/aYcnDyLMnpKce1FOYUpZrXtgUye.jpg",
+        "original_title": "The Silence of the Lambs",
+        "popularity": 3.7237
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-567",
+      "title": "Okno na podwórze",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 567,
+        "tmdb_rating": 8.3,
+        "vote_count": 7062,
+        "year": "1954",
+        "genres": [
+          "Thriller",
+          "Tajemnica"
+        ],
+        "overview": "Kiedy fotograf J.B. „Jeff” Jeffries łamie nogę i zostaje przykuty do wózka inwalidzkiego, jego obsesją staje się obserwowanie życia prywatnego sąsiadów. Podejrzewając pewnego sprzedawcę o zamordowanie żony, Jeffries prosi swoją przyjaciółkę – bywającą w towarzystwie, elegancką kobietę – aby pomogła mu ustalić rzeczywisty bieg wydarzeń. Wydarzeń, które doprowadzą do jednego z najbardziej emocjonujących zakończeń w historii filmu.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/oQVvQbwMa4Td1rWWYZCjIUMgyv4.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/zGs5tZOlvc9cprdcU6kDOVNpujf.jpg",
+        "original_title": "Rear Window",
+        "popularity": 7.0176
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-569094",
+      "title": "Spider-Man: Poprzez multiwersum",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 569094,
+        "tmdb_rating": 8.3,
+        "vote_count": 8369,
+        "year": "2023",
+        "genres": [
+          "Animacja",
+          "Akcja",
+          "Przygodowy",
+          "Sci-Fi"
+        ],
+        "overview": "Z Brooklynu Miles trafia do multiwersum. Razem z Gwen Stacy, spotykają innych Spider-Man’ów, którzy mają za zadanie ochronę świata przed zagrożeniami. Kiedy bohaterowie spierają się o to, jak poradzić sobie z nowymi niebezpieczeństwami, Miles musi na nowo zdefiniować, co to znaczy być bohaterem i jak ocalić ludzi, których kocha.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/aSQijwZ3o2qtUczdhFHdqtp9NZm.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/9xfDWXAUbFXQK585JvByT5pEAhe.jpg",
+        "original_title": "Spider-Man: Across the Spider-Verse",
+        "popularity": 21.85
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-movie-1218925",
+      "title": "Chainsaw Man – The Movie: Reze Arc",
+      "type": "movie",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1218925,
+        "tmdb_rating": 8.3,
+        "vote_count": 770,
+        "year": "2025",
+        "genres": [
+          "Animacja",
+          "Akcja",
+          "Romans",
+          "Fantasy"
+        ],
+        "overview": "Denji pracował dla yakuzy jako łowca demonów, próbując spłacić odziedziczony po rodzicach dług. Gangsterzy dopuścili się jednak zdrady i zlecili jego zabójstwo. Tracący przytomność Denji zawarł układ z Pochitą, ukochanym pieskiem-demonem, który uratował mu życie. W ten sposób połączyli się ze sobą i tak powstał niepowstrzymany Chainsaw Man. Teraz, w samym środku brutalnej wojny między demonami, łowcami i tajemniczymi przeciwnikami, pojawia się tajemnicza Reze. Denjiego czeka najgroźniejsza dotąd bitwa — wywołana przez miłość w świecie, w którym, by przetrwać, dozwolone jest wszystko.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/aZwfY1P57MrEQKW5m9JrtcWg0IB.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/kfXgo2rMF1A19celCwLyQ4Xwpf8.jpg",
+        "original_title": "劇場版 チェンソーマン レゼ篇",
+        "popularity": 27.0995
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    }
+  ],
+  "tv": [
+    {
+      "id": "tmdb-tv-1396",
+      "title": "Breaking Bad",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1396,
+        "tmdb_rating": 8.9,
+        "vote_count": 17372,
+        "year": "2008",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Głównym bohaterem jest Walter White, nauczyciel chemii mieszkający w Nowym Meksyku wraz z żoną oraz nastoletnim synem cierpiącym na porażenie mózgowe. Kiedy u Waltera zostaje zdiagnozowany rak w trzecim stadium, lekarze rokują, że pozostały mu dwa lata życia. Dzięki tym prognozom Walter wyzbywa się wszelkich lęków i pragnąc zabezpieczyć swoją rodzinę finansowo decyduje się wkroczyć do niebezpiecznego świata narkotyków i zbrodni.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/tsRy63Mu5cu8etL1X7ZLyf7UP1M.jpg",
+        "original_title": "Breaking Bad",
+        "popularity": 138.1897
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-64010",
+      "title": "Reply 1988",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 64010,
+        "tmdb_rating": 8.778,
+        "vote_count": 200,
+        "year": "2015",
+        "genres": [
+          "Komedia"
+        ],
+        "overview": "Wybierz się w nostalgiczną podróż do końca lat 80. XX wieku, poznając życie pięciu rodzin i ich piątki nastoletnich dzieci mieszkających w małej dzielnicy Seulu.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/lZo7G1kEU70PHP1dCe46I0cUKiF.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/sZH7lGs06skRKkrqp1LRi57VVMb.jpg",
+        "original_title": "응답하라 1988",
+        "popularity": 15.1548
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-209867",
+      "title": "Frieren. U kresu drogi",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 209867,
+        "tmdb_rating": 8.8,
+        "vote_count": 736,
+        "year": "2023",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Dramat",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Drużyna bohaterów pokonała potężnego Króla Demonów, tym samym przywracając pokój na ziemi. Po tym postanowili wieść spokojne i samotne życia. Od tego wydarzenia mijają całe pokolenia. Elfia czarodziejka Frieren mierzy się z faktem, iż człowiek jest istotą śmiertelną. Bierze pod swoje skrzydła nowego ucznia, aby spełnić ostatnie życzenia swoich dawnych towarzyszy. Chcąc dowiedzieć się, czy jest w stanie pogodzić się z naturą życia i śmierci, postanawia wyruszyć na wyprawę.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/dhzbCznEzU67RXWYb53fyPe9Keb.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/rBOnrVlck7BIlGeWVlzYiZeg4l2.jpg",
+        "original_title": "葬送のフリーレン",
+        "popularity": 101.4576
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-246",
+      "title": "Avatar. Legenda Aanga",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 246,
+        "tmdb_rating": 8.8,
+        "vote_count": 4731,
+        "year": "2005",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Serial opowiada o świecie podzielonym na cztery nacje: Królestwo Ziemi, Nomadowie Powietrza, Plemiona Wody i Naród Ognia. W każdej krainie żyją ludzie, zwani magami, mogący zapanować nad jednym żywiołem przypisanym swojemu ludowi. Ale raz na pokolenie, na przemian w każdym kraju, rodzi się Awatar, duch świata przybierający ludzką formę. Posiada on umiejętność nauki wszystkich czterech elementów, a jego zadaniem jest pilnowanie pokoju i równowagi na świecie. Gdy nagle znika, Władca Ognia postanawia to wykorzystać, rozpoczynając wojnę przeciwko pozostałym trzem nacjom. Gdy sto lat później jest bliski zwycięstwa, rodzeństwo z wodnego plemienia, Sokka i Katara, ratują dziwnie wyglądającego dwunastoletniego chłopca imieniem Aang. Wkrótce odkrywają, że jest on nie tylko ostatnim z magów powietrza, ale również dawno zaginionym Awatarem. Postanawiają pomagać chłopcu w jego długiej wędrówce, w której ma opanować pozostałe żywioły i ochronić świat przed zniewoleniem.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/nnsGECD9euEWosuqPPDiWRvGvOR.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/kU98MbVVgi72wzceyrEbClZmMFe.jpg",
+        "original_title": "Avatar: The Last Airbender",
+        "popularity": 26.3545
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-94605",
+      "title": "Arcane",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 94605,
+        "tmdb_rating": 8.8,
+        "vote_count": 5764,
+        "year": "2021",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda"
+        ],
+        "overview": "Dwie siostry walczą po przeciwnych stronach w wojnie pomiędzy miastami Piltover i Zaun, gdzie ścierają się magiczne technologie i sprzeczne przekonania.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/q8eejQcg1bAqImEV8jh8RtBD4uH.jpg",
+        "original_title": "Arcane",
+        "popularity": 41.5293
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-280945",
+      "title": "Bon appétit, Wasza Wysokość",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 280945,
+        "tmdb_rating": 8.73,
+        "vote_count": 211,
+        "year": "2025",
+        "genres": [
+          "Dramat",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Zdolna szefowa kuchni przenosi się w czasy dynastii Joseon, gdzie poznaje króla-tyrana. Jej nowoczesne dania urzekają władcę, ale życie pałacowe okazuje się wyzwaniem.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/kqFofZ0hOQ7Y3VUQQ59lpHaCJpM.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/ttbmzTZHTzqDK4JniKonMrsQath.jpg",
+        "original_title": "폭군의 셰프",
+        "popularity": 14.3499
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-234763",
+      "title": "Słowo pacana.  Krew na asfalcie",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 234763,
+        "tmdb_rating": 8.7,
+        "vote_count": 206,
+        "year": "2023",
+        "genres": [
+          "Dramat",
+          "Kryminał"
+        ],
+        "overview": "Pierestrojka przetacza się przez ulice, a era Związku Radzieckiego dobiega końca. Nikt nie wie, jak żyć w nowy sposób - kapryśne lata 80. przynoszą nie tylko wolność, ale i bezprawie.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/2pCRwiRAcrxlJEdAJWCuAnD4UZs.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/AqxPqTbD77ioyBDdk39MEQq6vXL.jpg",
+        "original_title": "Слово пацана. Кровь на асфальте",
+        "popularity": 9.2303
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-37854",
+      "title": "One Piece",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 37854,
+        "tmdb_rating": 8.726,
+        "vote_count": 5176,
+        "year": "1999",
+        "genres": [
+          "Akcja i Przygoda",
+          "Komedia",
+          "Animacja"
+        ],
+        "overview": "Gol D. Roger był znany jako „Król Piratów”, najsilniejsza i najbardziej niesławna istota, która żeglowała po Grand Line. Schwytanie i egzekucja Rogera przez rząd światowy przyniosła zmianę na całym świecie. Jego ostatnie słowa przed śmiercią ujawniły istnienie największego skarbu świata, One Piece. To właśnie to objawienie przyniosło wielki wiek piratów, ludzi, którzy marzyli o znalezieniu One Piece - co obiecuje nieograniczoną ilość bogactw i sławy - i całkiem możliwe, że szczyt chwały i tytuł Króla Piratów.\n\nMonkey D. Luffy'ego, 17-letni chłopiec, w myśl o ekscytującej przygodzie postanawia zostać piratem. Podążając śladami swojego bohatera z dzieciństwa, Luffy i jego załoga podróżują po Grand Line, przeżywając szalone przygody, odkrywając mroczne tajemnice i walcząc z silnymi wrogami, a wszystko po to, aby zdobyć najbardziej pożądany ze wszystkich fortun - One Piece.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/oag7edI9flSMawmNySEiSEJAbrf.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/2rmK7mnchw9Xr3XdiTFSxTTLXqv.jpg",
+        "original_title": "ワンピース",
+        "popularity": 64.5406
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-60059",
+      "title": "Zadzwoń do Saula",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 60059,
+        "tmdb_rating": 8.706,
+        "vote_count": 6291,
+        "year": "2015",
+        "genres": [
+          "Kryminał",
+          "Dramat"
+        ],
+        "overview": "Pechowy prawnik Saul Goodman robi wszystko, by zaistnieć na sądowej scenie w Albuquerque.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/gJGdWuCNGszNJJzGo6tfYxLTW5v.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/t15KHp3iNfHVQBNIaqUGW12xQA4.jpg",
+        "original_title": "Better Call Saul",
+        "popularity": 88.649
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-87108",
+      "title": "Czarnobyl",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 87108,
+        "tmdb_rating": 8.705,
+        "vote_count": 7659,
+        "year": "2019",
+        "genres": [
+          "Dramat"
+        ],
+        "overview": "Porywający mini serial HBO opowiadający przerażającą historię najgorszej w dziejach katastrofy, do której doprowadził człowiek - potężnego wybuchu z 1986 roku w czarnobylskiej elektrowni atomowej na terenie ówczesnego ZSRR. Serial przedstawia to, co się działo od porannej eksplozji, chaos, śmierć w następnych dniach, tygodniach i miesiącach...",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/vwPGpaOy1SV3Iias3GFeaiihzr1.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/3URK0z9PzpVNJrGE7XOuyy6KFzk.jpg",
+        "original_title": "Chernobyl",
+        "popularity": 34.8443
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-31911",
+      "title": "Stalowy Alchemik: Misja braci",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 31911,
+        "tmdb_rating": 8.703,
+        "vote_count": 2384,
+        "year": "2009",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Sci-Fi & Fantasy",
+          "Dramat"
+        ],
+        "overview": "Wydarzenia rozgrywają się w alternatywnym świecie w XX wieku. Głównymi bohaterami są dwaj bracia - starszy Edward Elric i młodszy Alphonse Elric. Obaj pasjonują się alchemią, formą nauki, która wymaga dużej wiedzy i zdolności. Pewnego dnia ich matka Trisha umiera. Bracia nie mogąc pogodzić się z utratą bliskiej im osoby, postanawiają przywrócić ją do życia za pomocą alchemii. Łamią wiec tabu i przeprowadzają transmutację. Wyniki ich działań okazują się tragiczne. Alphonse traci swoje ciało, a Edward lewą nogę. Ostatkiem sił starszemu bratu udaje się poświęcić prawą rękę i wiąże duszę swojego brata ze starą zbroją. Od tego czasu głównym zadaniem Eda i Ala jest odnalezienie kamienia filozoficznego, zwiększającego możliwości alchemii i tym samym przywrócenie utraconych ciał.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/tU6GBUSg3bx18TwMX981NOXf4FM.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/A6tMQAo6t6eRFCPhsrShmxZLqFB.jpg",
+        "original_title": "鋼の錬金術師 FULLMETAL ALCHEMIST",
+        "popularity": 67.6958
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-219246",
+      "title": "Dobra robota",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 219246,
+        "tmdb_rating": 8.699,
+        "vote_count": 486,
+        "year": "2025",
+        "genres": [
+          "Dramat"
+        ],
+        "overview": "Na wyspie Czedżu koleje losu śmiałej dziewczyny i niezłomnego chłopaka układają się w pełną blasków i cieni opowieść dowodzącą, że miłość jest silniejsza niż czas.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/koMkV9qm0PEZHDmX5dRpBpMH1FY.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/mwczMJeoQrsPERcyP1e900jo3Jv.jpg",
+        "original_title": "폭싹 속았수다",
+        "popularity": 26.57
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-250307",
+      "title": "The Pitt",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 250307,
+        "tmdb_rating": 8.7,
+        "vote_count": 571,
+        "year": "2025",
+        "genres": [
+          "Dramat"
+        ],
+        "overview": "Personel Centrum Medycyny Traumatycznej w Pittsburghu pracuje całą dobę, aby ratować ludzkie życie na przepełnionym oddziale ratunkowym.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/kvFSpESyBZMjaeOJDx7RS3P1jey.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/q1z0W19F4T5Xs2qka3xJSmFjv9a.jpg",
+        "original_title": "The Pitt",
+        "popularity": 93.6217
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-85077",
+      "title": "Wybrani",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 85077,
+        "tmdb_rating": 8.679,
+        "vote_count": 786,
+        "year": "2019",
+        "genres": [
+          "Dramat",
+          "Familijny",
+          "Akcja i Przygoda"
+        ],
+        "overview": "Charyzmatyczny rybak walczący z długiem, piękna kobieta zmagająca się z demonami i utalentowany księgowy wykluczony ze społeczeństwa. Oni jako pierwsi spotykają Jezusa, który dokonując cudów, rozpoczyna swoją misję, aby zmienić świat. Jeszcze nie wiedzą, że to początek globalnej rewolucji, która rozpocznie nową erę w historii. ",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/dqVUFuNrMFWt7uGNWlpo91VKYOI.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/3siv3RaQrdr2tQiv9jHq71sLlzo.jpg",
+        "original_title": "The Chosen",
+        "popularity": 172.1941
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-60625",
+      "title": "Rick i Morty",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 60625,
+        "tmdb_rating": 8.678,
+        "vote_count": 10753,
+        "year": "2013",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Sci-Fi & Fantasy",
+          "Akcja i Przygoda"
+        ],
+        "overview": "Głównymi bohaterami są dziadek i wnuczek. Dziadek, Rick, to szalony wynalazca, który podróżuje przez odległe światy z taką swobodą, z jaką inni dziadkowie spacerują po parku. Wnuczek, Morty, to zwykły dzieciak, zakochany w koleżance z klasy i opuszczający coraz więcej lekcji z powodu przygód, które przeżywa z dziadkiem.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/uoWZzv4ZAE3va25VmscOjymXr2o.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/Ao5pBFuWY32cVuh6iYjEjZMEscN.jpg",
+        "original_title": "Rick and Morty",
+        "popularity": 105.0208
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-1429",
+      "title": "Atak Tytanów",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1429,
+        "tmdb_rating": 8.677,
+        "vote_count": 7300,
+        "year": "2013",
+        "genres": [
+          "Animacja",
+          "Sci-Fi & Fantasy",
+          "Akcja i Przygoda"
+        ],
+        "overview": "W otoczonym wysokim murem mieście ostatni ocaleni starają się przetrwać ataki olbrzymów, które od wieków nękają ludzkość. Gdy pewnego razu potwory wdzierają się do miasta, jedną z wielu ofiar jest matka nastoletniego Erena. Chłopak poprzysięga zemstę i wraz z najbliższymi przyjaciółmi, Mikasą i Arminem dołącza do oddziałów obronnych. Kilka lat później młodzi żołnierze kończą szkolenie i właśnie mają dołączyć do jednej z jednostek specjalnych, gdy niespodziewanie olbrzymy ponownie atakują.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/qlbcGr0EYKRICD0MTrIwnIztQna.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/rqbCbjB19amtOtFQbb3K2lgm2zv.jpg",
+        "original_title": "進撃の巨人",
+        "popularity": 36.5028
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-301507",
+      "title": "Gorąca rywalizacja",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 301507,
+        "tmdb_rating": 8.68,
+        "vote_count": 381,
+        "year": "2025",
+        "genres": [
+          "Dramat"
+        ],
+        "overview": "Dwóch czołowych zawodników ligi hokejowej, Shane Hollander i Ilya Rozanov, od lat znajduje się w centrum najbardziej elektryzującej rywalizacji w sporcie. Każdy ich mecz staje się wydarzeniem, a napięcie między nimi napędza uwagę mediów i fanów na całym świecie.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/3YCKbtAkYWCMDLHvkUjGhG7eWoS.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/QbRbCULZVBcrN2uydpmIOQLV5O.jpg",
+        "original_title": "Heated Rivalry",
+        "popularity": 33.9066
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-131378",
+      "title": "Pora na przygodę: Fionna i Cake",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 131378,
+        "tmdb_rating": 8.7,
+        "vote_count": 305,
+        "year": "2023",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Komedia",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Fionna i Cake - z pomocą byłego Króla Lodu, Simona Petrikova - wyruszają w pełną przygód podróż do multiwersum.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/vYHlopchk4qU45YzGEAeVD4vnGW.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/vRAM2el4bAygzUWfwXdt34E71Ee.jpg",
+        "original_title": "Adventure Time: Fionna and Cake",
+        "popularity": 33.4286
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-46298",
+      "title": "Hunter x Hunter",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 46298,
+        "tmdb_rating": 8.7,
+        "vote_count": 2055,
+        "year": "2011",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Remake kultowej przygodówki. W pewnym niebezpiecznym, pełnym strasznych i wielkich kreatur świecie fantasy, młodziutki protagonista Gon marzy o tym, by pójść w ślady ojca i zostać Łowcą. Jest to tytuł dający ogromne możliwości, jak również świadczący o ponadprzeciętnych umiejętnościach i sile, jednak stanie się Łowcą wcale nie jest prostym zadaniem. Śmiałków czekają egzaminy tak trudne, że wielu straciło życie, próbując im sprostać. Wkrótce po wyruszeniu z rodzinnej wioski i rozpoczęciu przygody, dzięki swemu pozytywnemu nastawieniu, Gon zaprzyjaźnia się z mnóstwem różnych ludzi. Kilku postanawia się do niego przyłączyć i podróżować wspólnie, dzieląc smutki i radości oraz razem stawiać czoła najrozmaitszym przeciwnościom. Głównemu bohaterowi nieodłącznie towarzyszą: Leorio - poszukujący fortuny lekarz, a zarazem spec od sztuk walki, Kurapika - tajemniczy i skryty młodzieniec o silnym poczuciu sprawiedliwości oraz Killua - potomek sławnego rodu płatnych zabójców.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/9WxfAQquTun9ATkV6iAeFHMkqxv.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/bFKKyCI89Xq98Gul8cGox8K3sZa.jpg",
+        "original_title": "HUNTER×HUNTER",
+        "popularity": 98.6088
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-92685",
+      "title": "Sowi Dom",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 92685,
+        "tmdb_rating": 8.662,
+        "vote_count": 1761,
+        "year": "2020",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Komedia",
+          "Sci-Fi & Fantasy",
+          "Familijny"
+        ],
+        "overview": "W Królestwie Demonów nastolatek wiedźma i wojownik walczą z siłami zła.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/rhzwpJBhi2WkfihXndS1xUdQlzB.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/bGqKaVROpz7pWUNuBxgU8hbcXYn.jpg",
+        "original_title": "The Owl House",
+        "popularity": 25.9751
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-1398",
+      "title": "Rodzina Soprano",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1398,
+        "tmdb_rating": 8.7,
+        "vote_count": 3353,
+        "year": "1999",
+        "genres": [
+          "Kryminał",
+          "Dramat"
+        ],
+        "overview": "New Jersey, USA. Tony Soprano (James Gandolfini) jest pozornie typowym Amerykaninem włoskiego pochodzenia. Ma żonę Carmelę (Edie Falco), syna Anthonego Jr. (Robert Iler) i córkę Meadow (Jamie-Lynn Sigler). Nie jest to jednak jego jedyna rodzina. Tony jest bowiem wysoko postawionym członkiem włoskiej mafii, do której należy także jego wujek Corrado (Dominic Chianese), bratanek Christopher Moltisanti (Michael Imperioli) oraz przyjaciele: Silvio Dante (Steve Van Zandt), Paulie Gaultieri (Tony Sirico) i Sal Bonpensiero (Vincent Pastore). Pojawiające się w oby aspektach życia problemy sprawiają, że Tony zaczyna tracić przytomność. Podejrzewając, że przypadłość ta podłoże psychiczne, zaczyna chodzić na sesje terapeutyczne do dr Jennifer Melfi (Lorraine Bracco).",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/1IHAl0dqWgLBN5QwbrC69JH8J7B.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/lNpkvX2s8LGB0mjGODMT4o6Up7j.jpg",
+        "original_title": "The Sopranos",
+        "popularity": 110.7682
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-70785",
+      "title": "Ania, nie Anna",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 70785,
+        "tmdb_rating": 8.7,
+        "vote_count": 4895,
+        "year": "2017",
+        "genres": [
+          "Dramat",
+          "Familijny"
+        ],
+        "overview": "Niezamężne rodzeństwo Cuthbertów, Marilla (Geraldine James) i Matthew (R.H. Thomson), zamieszkujące Zielone Wzgórze, pragnie adoptować chłopca z sierocińca, aby pomagał im w prowadzeniu gospodarstwa. Kiedy omyłkowo zostaje przysłana do nich rudowłosa Anne Shirley (Amybeth McNulty), decydują się ją odesłać. Cuthbertowie przejęci historią dziewczynki, postanawiają jednak ją przygarnąć.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/bRqWDRJNyvR2Fxma2wsZtLgEAKD.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/ywQtHG17LZhAFZyZtBflhtFMtJ7.jpg",
+        "original_title": "Anne with an E",
+        "popularity": 24.459
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-42573",
+      "title": "スラムダンク",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 42573,
+        "tmdb_rating": 8.7,
+        "vote_count": 947,
+        "year": "1993",
+        "genres": [
+          "Animacja",
+          "Komedia"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/tl44cjAK0UiQSH6aRLs1ActnGEp.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/dEANXnVRmFkSD8jcJlZ0oy8EnB1.jpg",
+        "original_title": "スラムダンク",
+        "popularity": 40.1409
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-200709",
+      "title": "Słaby bohater",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 200709,
+        "tmdb_rating": 8.6,
+        "vote_count": 370,
+        "year": "2022",
+        "genres": [
+          "Akcja i Przygoda",
+          "Dramat"
+        ],
+        "overview": "Z pomocą nieoczekiwanych przyjaciół uzdolniony, ale zamknięty w sobie uczeń stawia czoła prześladowcom i wrogom, nieświadom, jak niebezpieczne stanie się jego życie.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/jXd83QZhBDAFno4OGqHcMMDs56i.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/oLwotnApTObF5bMRrNHCaqpaZce.jpg",
+        "original_title": "약한영웅",
+        "popularity": 39.7231
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-89456",
+      "title": "Primal",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 89456,
+        "tmdb_rating": 8.6,
+        "vote_count": 1533,
+        "year": "2019",
+        "genres": [
+          "Akcja i Przygoda",
+          "Animacja",
+          "Dramat"
+        ],
+        "overview": "Historia jaskiniowca i dinozaura, dla których nieprawdopodobna przyjaźń staje się jedyną nadzieją na przetrwanie w brutalnym, pierwotnym świecie.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/mf12pRakr3eYdJtv6klQtoznnbU.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/tbHQDtoDZGJsfe7Kx6BEShcrZAa.jpg",
+        "original_title": "Primal",
+        "popularity": 37.8298
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-62741",
+      "title": "Jak zostałam bóstwem!?",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 62741,
+        "tmdb_rating": 8.6,
+        "vote_count": 997,
+        "year": "2012",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Nanami Momozono to na pozór zwyczajna licealistka, gdyby nie fakt, że jej ojciec jest hazardzistą, a ona sama jest odpowiedzialna za wszystkie sprawy w rodzinie. Przez długi hazardowe swojego ojca, bohaterka zostaje eksmitowana ze swojego mieszkania i zostaje z niczym. Jeszcze tego dnia, spotyka tajemniczego mężczyznę, za którego sprawą zostaje... ziemskim bóstwem! Dziewczyna postanawia wprowadzić się do świątyni,\n\ngdzie będzie jej służyć przystojny demon, a jej współlokatorami będą dwa duchy. Czy licealistce uda się wykonać powinności bóstwa, które na pierwszy rzut oka wydają się łatwe?",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/8nfyyLqcAbEocNvPXj26uIflThp.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/cttisz5q4LHwyRYlIj9S7oQa27v.jpg",
+        "original_title": "神様はじめました",
+        "popularity": 17.4565
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-42705",
+      "title": "Hajime no Ippo: The Fighting!",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 42705,
+        "tmdb_rating": 8.6,
+        "vote_count": 1171,
+        "year": "2000",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Dramat",
+          "Akcja i Przygoda"
+        ],
+        "overview": "Makunouchi Ippo nie jest zbyt popularny w szkole. Brak pewności siebie i nieśmiałość są przyczyną braku przyjaciół. Przez większość wolnego czasu pomaga matce w rodzinnym interesie, zawsze pracując bardzo intensywnie. Jego uprzejmość i zaradność jest doceniana przez wielu klientów, ale nie przekłada się to niestety na szkołę. Grupa starszych uczniów nienawidzi jego uległości i życzliwego zachowania. Uważają go za słabeusza, bardzo często po lekcjach znęcają się nad nim psychicznie oraz fizycznie. Zapewne Ippo nadal byłby obiektem prześladowań, gdyby nie interwencja nieznajomego, który uratował go z opresji i dał mu szansę na odmianę swojego życia. Przed głównym bohaterem pojawia się nowa możliwość, podążać ścieżką boksu. Pamiętajmy, że kariera boksera do najprostszej nie należy, każdy sukces (oraz porażka) jest okupiony wielkim wysiłkiem. Jednak czy ciężka praca i silna wola wystarczą by sprostać nowym wyzwaniom? Na ringu każdy pechowo przyjęty cios może być ostatnim...",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/umMYjHm7FjsyllUnC8lWDy9rrZQ.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/bHSgCHRYko757BdmntddESfEEgt.jpg",
+        "original_title": "はじめの一歩",
+        "popularity": 46.7913
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-85937",
+      "title": "Miecz zabójcy demonów – Kimetsu no Yaiba",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 85937,
+        "tmdb_rating": 8.633,
+        "vote_count": 7112,
+        "year": "2019",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Tytuł ten opowiada losy młodzieńca imieniem Tanjiro, który po śmierci ojca mieszka tylko z matką i siostrą, Nezuko. Pewnego dnia gdy wraca do domu Tanjiro odkrywa, że jego rodzicielka została zamordowana, a siostra zamieniona w demona. Okazuje się jednak, że Nezuko nadal przejawia czasami ludzkie cechy. Młodzieniec wyrusza w podróż, której celem jest wyplenienie krwiożerczych demonów, oraz uratowanie siostry.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/6rOwtpcGpipiyWJ2Qq2S0nG1Lup.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/3GQKYh6Trm8pxd2AypovoYQf4Ay.jpg",
+        "original_title": "鬼滅の刃",
+        "popularity": 19.7922
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-3498",
+      "title": "Czarodzieje z Waverly Place",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 3498,
+        "tmdb_rating": 8.6,
+        "vote_count": 1162,
+        "year": "2007",
+        "genres": [
+          "Komedia",
+          "Sci-Fi & Fantasy",
+          "Kids"
+        ],
+        "overview": "Alex, Justin i Max Russo nie są zwykłymi nastolatkami – w tajemnicy szkolą się na czarodziejów!",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/4g6y92Y0Zq2eY1r982Aj152LceE.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/7CVy5uTj3JNF8wqb2VnfQdjL07V.jpg",
+        "original_title": "Wizards of Waverly Place",
+        "popularity": 26.1769
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-72637",
+      "title": "Jedenastka",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 72637,
+        "tmdb_rating": 8.6,
+        "vote_count": 1518,
+        "year": "2017",
+        "genres": [
+          "Komedia",
+          "Familijny",
+          "Soap"
+        ],
+        "overview": "Gabo, nastolatek zafascynowany piłką nożną, otrzymuje stypendium prestiżowego Instituto Académico Deportivo (IAD) w Buenos Aires, co pozwala mu spełnić marzenie o grze w Los Halcones Dorados, znanej amatorskiej drużynie szkolnej, oraz zbliżyć się do celu, jakim jest zostanie profesjonalnym piłkarzem.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/8F7Lpm8lWnhhG7tcq06jkGAdLZX.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/yLyKDdCqSuUXWhAW3TtoXTvmpHo.jpg",
+        "original_title": "O11CE",
+        "popularity": 66.2643
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-68595",
+      "title": "Planeta Ziemia II",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 68595,
+        "tmdb_rating": 8.6,
+        "vote_count": 902,
+        "year": "2016",
+        "genres": [
+          "Dokumentalny",
+          "Familijny"
+        ],
+        "overview": "\"Planeta Ziemia\" pojawiła się na ekranach telewizorów ponad dziesięć lat temu. Był to pierwszy serial przyrodniczy filmowany w technologii HD i tym samym przełom w historii produkcji tego typu. Dzięki niemu ponad pół miliarda widzów na całym świecie zobaczyło bogactwo i różnorodność życia na Ziemi w zachwycającej – i niespotykanej dotąd – jakości obrazu. Dziś, po 10 latach, przyjrzymy się temu wszystkiemu jeszcze raz, ale z zupełnie nowej perspektywy. Tym razem wręcz zanurzymy się w świecie przyrody. W serialu znajdziemy się w środku najbardziej spektakularnych miejsc bytowania i wydarzeń z życia zwierząt, staniemy oko w oko z niewiarygodnymi stworzeniami, które żyją na naszej planecie. Postęp technologiczny, jaki nastąpił w ciągu ostatniej dekady jest niewyobrażalny, pozwala nam pokazać świat natury w całkiem nowy sposób. Dziś możemy dotrzeć do naprawdę odległych i trudno dostępnych miejsc, do minimum zmniejszyć dystans między okiem kamery a zwierzęciem, pozostać niemal niezauważonymi i dzięki temu uchwycić niczym niezniekształcone, naturalne zachowania. Nieosiągalne górskie szczyty, najbardziej odległe wyspy, srogie pustynie i dżungle, przez które przedarcie się graniczy z cudem – \"Planeta Ziemia II\" pozwoli Wam odczuć, jak smakuje życie w prawdziwej dziczy.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/tUKomxy50suT4MyxjYfOJDkZUq3.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/1DYpBOVdb7Mzc9DgMCdIBTN1JEC.jpg",
+        "original_title": "Planet Earth II",
+        "popularity": 6.9187
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-13916",
+      "title": "Notatnik śmierci",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 13916,
+        "tmdb_rating": 8.625,
+        "vote_count": 4796,
+        "year": "2006",
+        "genres": [
+          "Animacja",
+          "Tajemnica",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Młody student Yagami Light znajduje pewnego dnia niezwykły notatnik, który okazuje się własnością boga śmierci. Po wpisaniu do niego czyjegoś nazwiska, następuje prawie natychmiastowa śmierć tej osoby. Główny bohater postanawia ulepszyć przy pomocy notatnika świat, oczyszczając go ze zła.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/6njK4bTeKNPYtMsDyEWotxFndkQ.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/mOlEbXcb6ufRJKogI35KqsSlCfB.jpg",
+        "original_title": "DEATH NOTE",
+        "popularity": 146.1028
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-31132",
+      "title": "Zwyczajny serial",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 31132,
+        "tmdb_rating": 8.6,
+        "vote_count": 2192,
+        "year": "2010",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Akcja i Przygoda",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Mordechaj i Rigbi to dwaj najlepsi kumple, którzy przenoszą problemy i nudy swojej szarej pracy do super miejsc.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/8ASxUq1SqHAvZIblccBHTFr2nop.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/bhF63Jd90gRYyTHd4y5GCGA2vX6.jpg",
+        "original_title": "Regular Show",
+        "popularity": 110.9758
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-1430",
+      "title": "Cosmos: A Personal Voyage",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1430,
+        "tmdb_rating": 8.6,
+        "vote_count": 421,
+        "year": "1980",
+        "genres": [
+          "Dokumentalny"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/nOGArjE0WMkzY2GW1taJm8l9gxD.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/hjJ5XDKP7XY2ADUuMdHM5NsC32s.jpg",
+        "original_title": "Cosmos: A Personal Voyage",
+        "popularity": 5.9598
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-1438",
+      "title": "Prawo ulicy",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1438,
+        "tmdb_rating": 8.6,
+        "vote_count": 2597,
+        "year": "2002",
+        "genres": [
+          "Kryminał",
+          "Dramat"
+        ],
+        "overview": "Jimmy McNulty i jego zawodowa partnerka Shakima Greggs zrobią wszystko, aby przestępcy odpowiedzieli za swoje zbrodnie. Gdy jeden z miejscowych dilerów narkotykowych zostaje oczyszczony z zarzutów o popełnione morderstwo, Jimmy postanawia działać. Wraz Shakimą, która jest jego jedynym sojusznikiem, wytacza prywatną wojnę narkotykowym baronom. Dwójka nieustraszonych partnerów stojących zawsze po stronie prawa, zrobi wszystko, aby przywódcy podziemnego gangu, jak najszybciej znaleźli się za kratkami.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/4lbclFySvugI51fwsyxBTOm4DqK.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/layPSOJGckJv3PXZDIVluMq69mn.jpg",
+        "original_title": "The Wire",
+        "popularity": 151.0199
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-95557",
+      "title": "NIEZWYCIĘŻONY",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 95557,
+        "tmdb_rating": 8.619,
+        "vote_count": 5386,
+        "year": "2021",
+        "genres": [
+          "Animacja",
+          "Dramat"
+        ],
+        "overview": "Kiedy 17-letni Mark Grayson odziedzicza po ojcu supermoce, dołącza do niego w gronie najpotężniejszych superbohaterów na Ziemi. To spełnienie jego największych marzeń – ale wszystko zmienia się po pewnym wstrząsającym wydarzeniu.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/lqUV2HyORKA4zdPCl7sGzgL9jXA.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/dfmPbyeZZSz3bekeESvMJaH91gS.jpg",
+        "original_title": "Invincible",
+        "popularity": 219.1812
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-65930",
+      "title": "Akademia bohaterów",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 65930,
+        "tmdb_rating": 8.618,
+        "vote_count": 5219,
+        "year": "2016",
+        "genres": [
+          "Akcja i Przygoda",
+          "Animacja",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Izuku od zawsze marzył, by zostać bohaterem — to ambitny cel dla każdego, a szczególnie trudny dla dziecka pozbawionego supermocy. Tak, w świecie, gdzie osiemdziesiąt procent populacji posiada jakąś nadludzką „specjalność”, Izuku miał pecha urodzić się całkowicie normalny. Ale to nie powstrzymało go przed zapisaniem się do jednej z najbardziej prestiżowych akademii dla bohaterów na świecie.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/dmUuNVWAJumRkDNuauFaLSvga00.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/6wSSyRNeF9vBJ1h29nuw3vG9hZI.jpg",
+        "original_title": "僕のヒーローアカデミア",
+        "popularity": 20.739
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-74313",
+      "title": "Błękitna planeta II",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 74313,
+        "tmdb_rating": 8.6,
+        "vote_count": 328,
+        "year": "2017",
+        "genres": [
+          "Dokumentalny",
+          "Familijny"
+        ],
+        "overview": "David Attenborough powraca do świata oceanów, filmując rzadkie i niezwykłe stworzenia oraz dokumentując problemy, którym muszą stawić czoła.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/6UbMnO8QFe3XfAciLw5hxL2AHov.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/c7t4tidzOw8E88puHlGsqizViOw.jpg",
+        "original_title": "Blue Planet II",
+        "popularity": 5.2429
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-127532",
+      "title": "Solo Leveling",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 127532,
+        "tmdb_rating": 8.6,
+        "vote_count": 1610,
+        "year": "2024",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Mówi się, że co cię nie zabije, to cię wzmocni, ale nie dotyczy to najsłabszego łowcy na świecie, Sung Jinwoo. Po tym, jak został brutalnie zabity przez potwory w wysoko postawionym lochu, Jinwoo powrócił z Systemem, programem, który tylko on mógł zobaczyć, a który podniósł go pod każdym względem. Teraz jest zainspirowany do odkrycia tajemnic kryjących się za jego mocami i lochu, który je stworzył.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/eCD7WS9h4lCT8N4Xavc9u8R1IGk.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/xMNH87maNLt9n2bMDYeI6db5VFm.jpg",
+        "original_title": "俺だけレベルアップな件",
+        "popularity": 64.1689
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-40075",
+      "title": "Wodogrzmoty Małe",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 40075,
+        "tmdb_rating": 8.6,
+        "vote_count": 3402,
+        "year": "2012",
+        "genres": [
+          "Animacja",
+          "Akcja i Przygoda",
+          "Komedia",
+          "Tajemnica",
+          "Sci-Fi & Fantasy",
+          "Familijny"
+        ],
+        "overview": "Kiedy rodzice Dippera i Mejbel wygrywają bilety na wakacyjny rejs luksusowym statkiem, rodzeństwo trafia do jedynego dyspozycyjnego krewnego – wujka Stana. Nie byłoby w tym nic dziwnego, gdyby nie fakt, że podstarzały wujaszek jest czarną owcą w rodzinie. To zachłanny oszust, prowadzący park turystyczny w zapomnianym przez świat miasteczku o nazwie Wodogrzmoty Małe.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/4J7Wr6zaemzcxEjzmaPwxwP31Jp.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/lhg7eA6CTOCL10QNVdKiyxkgPsL.jpg",
+        "original_title": "Gravity Falls",
+        "popularity": 45.6099
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-1044",
+      "title": "Planeta Ziemia I",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 1044,
+        "tmdb_rating": 8.6,
+        "vote_count": 1213,
+        "year": "2006",
+        "genres": [
+          "Dokumentalny"
+        ],
+        "overview": "Niesamowity serial wykorzystujący wyjątkowe, opracowane specjalnie na jego potrzeby, techniki filmowania. „Planeta Ziemia” zabiera nas w miejsca, jakich nigdy dotąd nie odwiedzaliśmy, w świat widoków i dźwięków, jakich prawdopodobnie nigdy nie mielibyśmy okazji doświadczyć.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/bv9gK367DBr5tj0FGCqTZKZs16o.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/rsQDFOcMvmX93MNot0bwLaRi9hK.jpg",
+        "original_title": "Planet Earth",
+        "popularity": 11.1478
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-100",
+      "title": "I Am Not an Animal",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 100,
+        "tmdb_rating": 8.6,
+        "vote_count": 785,
+        "year": "2004",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/zXhtWhYtlJVyyp5MdT7ggMJn5si.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/cJKGfZHkMFtbVA4m2kwmdGk8uHp.jpg",
+        "original_title": "I Am Not an Animal",
+        "popularity": 3.4469
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-60863",
+      "title": "Haikyu!!",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 60863,
+        "tmdb_rating": 8.6,
+        "vote_count": 1477,
+        "year": "2014",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Dramat"
+        ],
+        "overview": "Pewne nieoczekiwane zdarzenie sprawiło, że w Shouyou Hinacie obudziła się miłość do siatkówki. Klub sportowy do którego się zapisał, nie miał początkowo żadnych innych członków, jednak wytrwałość chłopaka uczyniła cuda, a na końcu gimnazjum spełniło się jego marzenie o zagraniu prawdziwego meczu! Pech chciał, że przeciwnikiem okazał się zespół Tobio Kageyamy, gwiazdy ochrzczonej mianem “Króla Boiska”, który doszczętnie rozniósł przypadkowo pozbieraną drużynę Hinaty. Nasz bohater poprzysiągł zemstę, zaś po kilku miesiącach, rozpoczynając Liceum Karasuno znane z dobrej siatkarskiej ekipy, znów staje twarzą w twarze ze swoim znienawidzonym rywalem… tym razem jednak przyjdzie im zagrać po tej samej stronie siatki!",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/qNKaeunuUdL0smnowVVgShCkWZ4.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/zr1MDQCPVB5uJEHxiO6Tukn4OjH.jpg",
+        "original_title": "ハイキュー!!",
+        "popularity": 48.4317
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-77696",
+      "title": "달려라 방탄!",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 77696,
+        "tmdb_rating": 8.6,
+        "vote_count": 373,
+        "year": "2015",
+        "genres": [
+          "Reality"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/xxv8Ibs8Anni6qrWkAf60rDsPCu.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/c8dm74uPCMA27iKAR1WnHKTsI9h.jpg",
+        "original_title": "달려라 방탄!",
+        "popularity": 16.5649
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-95269",
+      "title": "地縛少年花子くん",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 95269,
+        "tmdb_rating": 8.6,
+        "vote_count": 762,
+        "year": "2020",
+        "genres": [
+          "Animacja",
+          "Tajemnica",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "W Akademii Kamome chodzą plotki o szkolnych Siedmiu Tajemnicach. Jedną z nich jest Hanako. Mówi się, że można ją spotkać w dziewczęcej łazience, znajdującej się na trzecim piętrze, starego szkolnego budynku. Hanako spełnia każde życzenie, osobie, która ją przywoła.\n\nNene Yashiro jest uczennicą kochającą paranormalne rzeczy. Dziewczyna marzy o prawdziwym romansie, niczym z powieści, dlatego udaje się do nawiedzonej łazienki, ale Hanako, nie jest duchem, którego się spodziewała. Hanako... okazał się chłopcem!",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/sPXvmpUW4tFf7DuNeovSomcTWLF.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/hhRhddxhSInMAuIqcx2rP61FmlS.jpg",
+        "original_title": "地縛少年花子くん",
+        "popularity": 17.5567
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-57706",
+      "title": "らんま1/2",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 57706,
+        "tmdb_rating": 8.6,
+        "vote_count": 1492,
+        "year": "1989",
+        "genres": [
+          "Komedia",
+          "Akcja i Przygoda",
+          "Animacja",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/6LmWAQFMD2j8gTUGgmD8vq7xxyA.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/dI2O0d5Dkk8tpuTvCkUKQw3LNMv.jpg",
+        "original_title": "らんま1/2",
+        "popularity": 88.4944
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-35790",
+      "title": "Cardcaptor Sakura",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 35790,
+        "tmdb_rating": 8.6,
+        "vote_count": 780,
+        "year": "1998",
+        "genres": [
+          "Animacja",
+          "Sci-Fi & Fantasy",
+          "Akcja i Przygoda"
+        ],
+        "overview": "Dziesięcioletnia Sakura Kinomoto, przeglądając bibliotekę ojca, przez nieuwagę doprowadziła do tego, że magiczne karty tarota zostały wywiane za okno. Chwilę później pojawił się sam Cerber. Z braku mocy, zamiast piekielnego ogara, przybrał formę słodziutkiej maskotki (nazwanej Kero-chan). Oznajmił on Sakurze, że bura u taty to w tej chwili najmniejsze zmartwienie, bo karty, które właśnie wyleciały przez okno, posiadają w sobie moc, mogącą zniszczyć świat. Wspierana przez przyjaciółkę, Kero-chana oraz tajemniczego przybysza z Hongkongu - Syaorana Li, nasza bohaterka musi pozbierać całą talię.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/eFV0I3w2trXNVIEXMvZpJqYJCd4.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/9H6RuhggxRYzjJEm8nASlCUdhDU.jpg",
+        "original_title": "カードキャプターさくら",
+        "popularity": 30.8991
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-94954",
+      "title": "Hazbin Hotel",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 94954,
+        "tmdb_rating": 8.6,
+        "vote_count": 1534,
+        "year": "2024",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Dramat",
+          "Sci-Fi & Fantasy"
+        ],
+        "overview": "Charlie Gwiazda Zaranna, księżniczka Piekieł, próbuje przekonać anioły i demony, że dusze da się odkupić. Śpiewaj i przeklinaj do wtóru tej animowanej muzycznej komedii dla dorosłych, która opowiada o drugiej szansie.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/aVYHMW8pdzJ9qG1OGRMKyGy9xor.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/muz4zF9dk1h7b9Nu8duOysvX823.jpg",
+        "original_title": "Hazbin Hotel",
+        "popularity": 33.1783
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-80040",
+      "title": "Desafío Champions Sendokai",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 80040,
+        "tmdb_rating": 8.6,
+        "vote_count": 233,
+        "year": "2013",
+        "genres": [
+          "Animacja",
+          "Komedia",
+          "Akcja i Przygoda",
+          "Familijny"
+        ],
+        "overview": "",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/qNqQm1xFJd44PVtW7BanoafhgnM.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/9BeUFOmnq9rI6hXUAG9xEvPvao9.jpg",
+        "original_title": "Desafío Champions Sendokai",
+        "popularity": 1.7522
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    },
+    {
+      "id": "tmdb-tv-67915",
+      "title": "Goblin",
+      "type": "tv",
+      "source": "tmdb_top_rated",
+      "metadata": {
+        "tmdb_id": 67915,
+        "tmdb_rating": 8.598,
+        "vote_count": 3029,
+        "year": "2016",
+        "genres": [
+          "Dramat",
+          "Sci-Fi & Fantasy",
+          "Komedia"
+        ],
+        "overview": "Kim Shin był kiedyś niepokonanym generałem w wojsku Goryeo, który zginął tragiczną śmiercią. Teraz posiada nieśmiertelność, ale jest zmęczony życiem, podczas gdy wszyscy wokół niego umierają. Przez 900 lat Shin szukał swojej narzeczonej, śmiertelniczki, która może wyciągnąć miecz i zakończyć jego życie. Pewnego dnia spotyka Ji Eun-tak, pozytywną, optymistyczną uczennicę liceum, która widzi zmarłych i przeszła przez tragiczne wydarzenia, ale nadal pozostaje silna. Twierdzi, że jest narzeczoną Goblina, która może zakończyć jego nieśmiertelne życie, ale to, co wydaje się łatwym zadaniem, tylko się komplikuje, gdy oboje się zakochują.",
+        "tmdb_poster": "https://image.tmdb.org/t/p/w500/qZMEiTsNlCQV27hHQE27ZtlPWyv.jpg",
+        "tmdb_backdrop": "https://image.tmdb.org/t/p/w1280/smSbK5cd8T9XHcxEUcems23BDEF.jpg",
+        "original_title": "쓸쓸하고 찬란하神-도깨비",
+        "popularity": 19.0018
+      },
+      "reviews": {
+        "styles": {},
+        "personal": null
+      }
+    }
+  ],
+  "fetched_at": "2026-03-25T23:29:06.169Z"
+}

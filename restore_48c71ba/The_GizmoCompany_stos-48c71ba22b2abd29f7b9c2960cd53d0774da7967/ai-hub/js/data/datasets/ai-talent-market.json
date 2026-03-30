@@ -1,0 +1,95 @@
+{
+  "id": "ai-talent-market",
+  "title": "AI Talent Market, Salaries & Skills Gap 2025",
+  "category": "business",
+  "description": "Salary benchmarks, hiring patterns, skill demand, and organizational responses to the AI talent shortage in 2025.",
+  "created": "2026-03-24T06:00:00Z",
+  "updated": "2026-03-24T06:00:00Z",
+  "tags": ["talent", "hiring", "salaries", "skills-gap", "workforce"],
+  "articles": [
+    {
+      "id": "article_1",
+      "title": "AI salary inflation remains strong in senior roles",
+      "url": "https://365datascience.com/career-advice/ai-engineer-job-outlook/",
+      "published": "2025-09-21",
+      "category": "salary-benchmarks",
+      "summary": "Demand for experienced AI engineers, ML engineers, and platform specialists continues to push compensation above many adjacent software roles.",
+      "key_points": [
+        "One 2025 source placed average AI engineer compensation around $206K in the U.S.",
+        "Senior ML, MLOps, and AI research roles often exceed $170K-$300K+ depending on market and level",
+        "Employers pay premiums for people who can move models into production, not just prototype them",
+        "Platform, security, and infra-adjacent AI roles gain pricing power due to scarcity",
+        "Compensation is strongest where AI work touches revenue-critical workflows"
+      ],
+      "use_case": "Headcount planning and compensation benchmarking"
+    },
+    {
+      "id": "article_2",
+      "title": "The entry-level bottleneck is real",
+      "url": "https://365datascience.com/career-advice/ai-engineer-job-outlook/",
+      "published": "2025-09-21",
+      "category": "hiring-patterns",
+      "summary": "Hiring remains heavily skewed toward experienced candidates, which creates a persistent shortage and makes internal upskilling strategically important.",
+      "key_points": [
+        "Only a small share of AI engineer postings target junior profiles in one 2025 analysis",
+        "Companies increasingly expect cloud, deployment, and product judgment in addition to modeling skills",
+        "Hands-on portfolio work matters because employers want proof of execution",
+        "The market favors engineers who can work across data, prompting, evaluation, and shipping",
+        "Internal training pipelines are becoming a competitive necessity"
+      ],
+      "use_case": "Talent pipeline design and L&D planning"
+    },
+    {
+      "id": "article_3",
+      "title": "The in-demand skills stack is becoming more operational",
+      "url": "https://www.techrecruiters.io/ai-ml-talent-report-2025",
+      "published": "2025-10-11",
+      "category": "skills-demand",
+      "summary": "The market increasingly rewards candidates who combine Python and ML fundamentals with operational capabilities such as MLOps, cloud deployment, RAG, evaluation, and AI agents.",
+      "key_points": [
+        "Python remains the baseline technical skill",
+        "Cloud fluency in AWS or Azure is repeatedly requested",
+        "MLOps, deployment, monitoring, and data pipelines are major differentiators",
+        "RAG, vector databases, prompt engineering, and agent orchestration gained importance in 2025",
+        "Teams want builders who can connect models to real business systems"
+      ],
+      "use_case": "Hiring scorecards and capability frameworks"
+    },
+    {
+      "id": "article_4",
+      "title": "Geography still matters, but hybrid talent markets are broadening",
+      "url": "https://cloudurable.com/blog/2025-ai-job-market-report/",
+      "published": "2025-11-02",
+      "category": "global-talent",
+      "summary": "San Francisco remains a premium market, but global hubs such as London, Bengaluru, Toronto, Berlin, and Singapore continue to strengthen as AI centers.",
+      "key_points": [
+        "Major AI hiring hubs include San Francisco, London, Bengaluru, Toronto, Berlin, and Singapore",
+        "Companies use hybrid hiring to access scarcer skills without matching Bay Area salary bands in every case",
+        "Global demand is broadening faster than local talent pipelines can respond",
+        "Retention and growth opportunities matter because top candidates have multiple offers",
+        "Skill scarcity encourages partner ecosystems, bootcamps, labs, and internal academies"
+      ],
+      "use_case": "Global recruiting strategy and workforce planning"
+    }
+  ],
+  "data_points": {
+    "average_ai_engineer_salary_us": "$206K",
+    "data_scientist_reference_salary": "$156K",
+    "top_skill_clusters": "Python, cloud, MLOps, RAG, vector DBs, prompt engineering, AI agents",
+    "key_hubs": "San Francisco, London, Bengaluru, Toronto, Berlin, Singapore",
+    "market_reality": "senior talent is scarce and junior access remains limited"
+  },
+  "organizational_playbook": [
+    "Upskill existing software and data teams instead of relying only on external hiring",
+    "Hire for production capability, not just model experimentation",
+    "Define role families clearly: AI engineer, ML engineer, MLOps, applied scientist, platform engineer",
+    "Use compensation, learning paths, and mission ownership as retention tools"
+  ],
+  "use_cases": [
+    "Compensation planning",
+    "AI hiring strategy",
+    "Internal upskilling programs",
+    "Workforce risk assessment for AI initiatives"
+  ],
+  "credits": 120
+}

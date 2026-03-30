@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════════════
+#  ZENO Queue Consumer Worker
+#  Consumes: agent-tasks, image-processing-queue, voice-processing
+#  Deploy: npx wrangler deploy
+#  Secrets: wrangler secret put DEEPSEEK_API_KEY / OPENROUTER_API_KEY
+# ═══════════════════════════════════════════════════════════════
+
+name = "zeno-queue-consumer"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── Workers AI ─────────────────────────────────────────────
+[ai]
+binding = "AI"
+
+# ─── D1 Database (shared with Pages project) ────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "zeno-browser-db"
+database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
+
+# ─── R2 Bucket (media storage) ──────────────────────────────
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "mybonzo-media"
+
+# ─── Queue Consumers ────────────────────────────────────────
+[[queues.consumers]]
+queue = "agent-tasks"
+max_batch_size = 10
+max_batch_timeout = 30
+max_retries = 3
+dead_letter_queue = ""
+
+[[queues.consumers]]
+queue = "image-processing-queue"
+max_batch_size = 5
+max_batch_timeout = 60
+max_retries = 3
+dead_letter_queue = ""
+
+[[queues.consumers]]
+queue = "voice-processing"
+max_batch_size = 5
+max_batch_timeout = 60
+max_retries = 2
+dead_letter_queue = "voice-processing-dlq"
+
+# ─── DLQ Producer (for voice failures) ─────────────────────
+[[queues.producers]]
+queue = "voice-processing-dlq"
+binding = "VOICE_DLQ"

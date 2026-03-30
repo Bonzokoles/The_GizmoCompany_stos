@@ -1,0 +1,432 @@
+/* PluginHub — Centrum Wtyczek */
+
+.plugin-hub {
+  width: 520px;
+  height: 640px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+
+.ph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ph-header h2 {
+  margin: 0;
+  font-size: 16px;
+  color: #00d4ff;
+}
+
+.ph-btn-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 22px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.ph-btn-close:hover {
+  color: #fff;
+}
+
+/* ── Tabs (nawigacja główna) ────────────────────────── */
+
+.ph-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0 16px;
+}
+
+.ph-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #888;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ph-tab:hover {
+  color: #ccc;
+}
+
+.ph-tab.active {
+  color: #00d4ff;
+  border-bottom-color: #00d4ff;
+}
+
+.ph-badge {
+  display: inline-block;
+  margin-left: 6px;
+  background: #ff4444;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  vertical-align: middle;
+}
+
+/* ── Content area ───────────────────────────────────── */
+
+.ph-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.ph-empty {
+  text-align: center;
+  color: #666;
+  padding: 40px 0;
+  font-style: italic;
+}
+
+/* ── Install banner ─────────────────────────────────── */
+
+.ph-install-banner {
+  padding: 8px 16px;
+  background: rgba(0, 212, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.ph-progress-bar {
+  flex: 1;
+  height: 6px;
+  background: #333;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ph-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff, #00ff88);
+  transition: width 0.2s ease;
+}
+
+.ph-progress-text {
+  font-size: 12px;
+  color: #00d4ff;
+  min-width: 32px;
+  text-align: right;
+}
+
+.ph-success {
+  color: #00ff88;
+  font-weight: 600;
+}
+
+.ph-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ff4444;
+}
+
+/* ── Plugin list (Zainstalowane / Aktualizacje) ─────── */
+
+.ph-plugin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ph-plugin-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.ph-plugin-row:last-child {
+  border-bottom: none;
+}
+
+.ph-icon-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.ph-plugin-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ph-plugin-info strong {
+  font-size: 13px;
+  color: #eee;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ph-meta {
+  font-size: 11px;
+  color: #888;
+}
+
+.ph-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ph-badge-update {
+  font-size: 14px;
+}
+
+.ph-confirm-inline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #ff8800;
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+
+.ph-btn {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.15s;
+}
+
+.ph-btn:hover {
+  opacity: 0.85;
+}
+
+.ph-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.ph-btn-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+.ph-btn-primary {
+  background: #00d4ff;
+  color: #111;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+.ph-btn-ok {
+  background: #00cc66;
+  color: #111;
+}
+
+.ph-btn-warn {
+  background: #ff8800;
+  color: #111;
+}
+
+.ph-btn-danger {
+  background: #ff4444;
+  color: #fff;
+}
+
+/* ── Explore tab — search ───────────────────────────── */
+
+.ph-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.ph-search-bar input[type='search'] {
+  flex: 1;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: #eee;
+  font-size: 13px;
+  outline: none;
+}
+
+.ph-search-bar input[type='search']:focus {
+  border-color: #00d4ff;
+}
+
+.ph-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #444;
+  border-top-color: #00d4ff;
+  border-radius: 50%;
+  animation: phSpin 0.6s linear infinite;
+}
+
+@keyframes phSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Explore sub-tabs ───────────────────────────────── */
+
+.ph-explore-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ph-sub-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #888;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.ph-sub-tab:hover {
+  color: #ccc;
+}
+
+.ph-sub-tab.active {
+  color: #00d4ff;
+  border-bottom-color: #00d4ff;
+}
+
+/* ── Card grid (marketplace) ────────────────────────── */
+
+.ph-card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ph-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ph-card:hover {
+  border-color: rgba(0, 212, 255, 0.3);
+}
+
+.ph-icon-lg {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.ph-card-title {
+  margin: 0;
+  font-size: 14px;
+  color: #eee;
+}
+
+.ph-card-author {
+  margin: 0;
+  font-size: 11px;
+  color: #888;
+}
+
+.ph-card-desc {
+  margin: 0;
+  font-size: 12px;
+  color: #aaa;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ph-card-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: #888;
+}
+
+.ph-card-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ph-tag {
+  background: rgba(0, 212, 255, 0.12);
+  color: #00d4ff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* ── Updates tab header ─────────────────────────────── */
+
+.ph-updates-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #ccc;
+}
+
+/* ── Responsive ─────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .plugin-hub {
+    width: 90vw;
+    height: 70vh;
+  }
+
+  .ph-card-grid {
+    grid-template-columns: 1fr;
+  }
+}

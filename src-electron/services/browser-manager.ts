@@ -71,6 +71,20 @@ export class BrowserManager {
       return false;
     }
 
+    // CR-001: URL validation — whitelist safe protocols
+    const SAFE_PROTOCOLS = ['http:', 'https:', 'about:'];
+    try {
+      const parsedUrl = new URL(url);
+      if (!SAFE_PROTOCOLS.includes(parsedUrl.protocol)) {
+        console.error(`❌ Blocked unsafe protocol: ${parsedUrl.protocol}`);
+        return false;
+      }
+    } catch (e) {
+      // Invalid URL format
+      console.error(`❌ Invalid URL format: ${url}`);
+      return false;
+    }
+
     tab.url = url;
     tab.lastAccessedAt = new Date();
 

@@ -1,0 +1,233 @@
+# Podman Compose - kompatybilna z docker-compose
+version: '3.8'
+
+services:
+  zeno-browser:
+    build:
+      context: .
+      dockerfile: Podfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      EDENAI_API_KEY: ${EDENAI_API_KEY}
+      CF_TUNNEL_TOKEN: ${CF_TUNNEL_TOKEN}
+    restart: unless-stopped
+    container_name: zeno-browser-prod
+
+  zeno-browser-dev:
+    build:
+      context: .
+      dockerfile: Podfile.dev
+    ports:
+      - "5173:5173"
+      - "9222:9222"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      NODE_ENV: development
+    restart: unless-stopped
+    container_name: zeno-browser-dev
+
+  # ─── Umami Analytics ───────────────────────────────────────
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    ports:
+      - "5183:3000"
+    environment:
+      DATABASE_URL: postgresql://umami:umami@umami-db:5432/umami
+      DISABLE_TELEMETRY: 1
+    depends_on:
+      umami-db:
+        condition: service_healthy
+    restart: unless-stopped
+    container_name: zeno-umami
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/heartbeat || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  umami-db:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: umami
+    volumes:
+      - umami-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    container_name: zeno-umami-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umami"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── SearXNG — DISABLED (replaced by websurfx) ──────────────
+  # searxng:
+  #   image: docker.io/searxng/searxng:latest
+  #   ports:
+  #     - "8888:8080"
+  #   environment:
+  #     SEARXNG_BASE_URL: http://localhost:8888/
+  #     SEARXNG_SECRET: zeno-searxng-secret-2026
+  #   volumes:
+  #     - searxng-data:/etc/searxng
+  #   restart: unless-stopped
+  #   container_name: zeno-searxng
+  #   cap_drop:
+  #     - ALL
+  #   cap_add:
+  #     - CHOWN
+  #     - SETGID
+  #     - SETUID
+  #     - DAC_OVERRIDE
+
+  # ─── Redis/Valkey cache (used by websurfx) ─────────────────
+  searxng-redis:
+    image: docker.io/valkey/valkey:8-alpine
+    command: valkey-server --save 30 1 --loglevel warning
+    volumes:
+      - searxng-redis-data:/data
+    networks:
+      - zeno-net
+    restart: unless-stopped
+    container_name: zeno-searxng-redis
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+  # ─── MeiliSearch — history + autocomplete search engine ─────
+  meilisearch:
+    image: docker.io/getmeili/meilisearch:v1.12
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_ENV: development
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_MASTER_KEY: zeno-meili-master-2026
+    volumes:
+      - meilisearch-data:/meili_data
+    restart: unless-stopped
+    container_name: zeno-meilisearch
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+  # ─── Websurfx — Meta Search Engine (SearXNG replacement) ────
+  # NOTE: Image is distroless (no shell). Config must be pre-created.
+  websurfx:
+    image: docker.io/neonmmd/websurfx:latest
+    ports:
+      - "8888:8080"
+    volumes:
+      - ./config/websurfx:/etc/xdg/websurfx:Z
+    networks:
+      - zeno-net
+    restart: unless-stopped
+    container_name: zeno-websurfx
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+
+  # ─── sist2 — Archive/Document Indexer (SQLite mode) ────────
+  # NOTE: Default entrypoint is sist2 binary — must override to python3
+  sist2:
+    image: docker.io/sist2app/sist2:x64-linux
+    entrypoint: python3
+    command: /root/sist2-admin/sist2_admin/app.py
+    ports:
+      - "4090:4090"
+      - "8085:8080"
+    volumes:
+      - sist2-data:/sist2-data
+      - sist2-index:/index
+    environment:
+      SIST2_ADMIN: "1"
+    restart: unless-stopped
+    container_name: zeno-sist2
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+
+  # ─── Plausible CE — Privacy-friendly Analytics ─────────────
+  plausible-db:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: plausible
+      POSTGRES_USER: plausible
+      POSTGRES_PASSWORD: plausible
+    volumes:
+      - plausible-db-data:/var/lib/postgresql/data
+    networks:
+      - plausible-net
+    restart: unless-stopped
+    container_name: plausible-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plausible"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  plausible-events-db:
+    image: docker.io/clickhouse/clickhouse-server:24.3.3.102-alpine
+    volumes:
+      - plausible-events-data:/var/lib/clickhouse
+      - ./plausible-ce/clickhouse/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:Z
+      - ./plausible-ce/clickhouse/clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:Z
+    networks:
+      - plausible-net
+    restart: unless-stopped
+    container_name: plausible-events-db
+
+  plausible:
+    image: ghcr.io/plausible/community-edition:v3.2.0
+    ports:
+      - "8100:8000"
+    environment:
+      BASE_URL: http://localhost:8100
+      SECRET_KEY_BASE: fSDMf2LxaQYA22uiZSA3ZpxV3llPA2cwu7c1ZF9gqmOvElsOHXOFwXuHS9+tTZGa
+      DATABASE_URL: postgres://plausible:plausible@plausible-db:5432/plausible
+      CLICKHOUSE_DATABASE_URL: http://plausible-events-db:8123/plausible_events_db
+      DISABLE_REGISTRATION: "false"
+      HTTP_PORT: "8000"
+    depends_on:
+      plausible-db:
+        condition: service_healthy
+      plausible-events-db:
+        condition: service_started
+    networks:
+      - plausible-net
+    restart: unless-stopped
+    container_name: plausible
+
+networks:
+  zeno-net:
+    driver: bridge
+  plausible-net:
+    driver: bridge
+
+volumes:
+  umami-db-data:
+  searxng-data:
+  searxng-redis-data:
+  meilisearch-data:
+  sist2-data:
+  sist2-index:
+  plausible-db-data:
+  plausible-events-data:

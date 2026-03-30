@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Raport Crawlera</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1020; --card:#121a33; --text:#e9eefb; --muted:#99a7c4; --accent:#35d5ff; --ok:#35d07f; --warn:#ffcc66; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, Segoe UI, Arial, sans-serif; background:linear-gradient(180deg,#090e1b,#0f1730); color:var(--text); }
+    .wrap { max-width:1200px; margin:0 auto; padding:24px; }
+    h1,h2 { margin:0 0 12px; }
+    .muted { color:var(--muted); }
+    .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin:16px 0 24px; }
+    .card { background:rgba(18,26,51,.75); border:1px solid rgba(90,110,160,.25); border-radius:14px; padding:14px; backdrop-filter: blur(4px); }
+    .k { font-size:12px; color:var(--muted); }
+    .v { font-size:24px; font-weight:700; margin-top:6px; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { text-align:left; padding:10px 8px; border-bottom:1px solid rgba(120,140,180,.2); vertical-align:top; }
+    th { color:#b7c7eb; font-size:13px; position:sticky; top:0; background:#121a33; }
+    .tbl { max-height:420px; overflow:auto; border:1px solid rgba(90,110,160,.25); border-radius:12px; }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(53,213,255,.15); color:#a8eefe; font-size:12px; }
+    @media (max-width: 900px) { .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 560px) { .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📊 Raport Crawlera — 2026-03-25</h1>
+    <p class="muted">Wygenerowano: 25.03.2026, 17:16:23 | Plik: <code>ai-hub/crawler-dashboard/raport-crawler.html</code></p>
+
+    <div class="grid">
+      <div class="card"><div class="k">Rundy dziś</div><div class="v">16</div></div>
+      <div class="card"><div class="k">Tavily dziś</div><div class="v">64/80</div></div>
+      <div class="card"><div class="k">Brave dziś</div><div class="v">18/400</div></div>
+      <div class="card"><div class="k">Pending dziś</div><div class="v">854</div></div>
+      <div class="card"><div class="k">Wszystkie rundy</div><div class="v">16</div></div>
+      <div class="card"><div class="k">Wszystkie znalezione</div><div class="v">871</div></div>
+      <div class="card"><div class="k">Auto-approved</div><div class="v">0</div></div>
+      <div class="card"><div class="k">Pending (z plików)</div><div class="v">854</div></div>
+    </div>
+
+    <h2>🧭 Top źródła</h2>
+    <div class="tbl card"><table><thead><tr><th>Źródło</th><th>Liczba</th></tr></thead><tbody>
+      <tr><td>tavily</td><td>509</td></tr><tr><td>devto</td><td>204</td></tr><tr><td>brave</td><td>141</td></tr>
+    </tbody></table></div>
+
+    <h2 style="margin-top:20px;">🌐 Top domeny</h2>
+    <div class="tbl card"><table><thead><tr><th>Domena</th><th>Liczba</th></tr></thead><tbody>
+      <tr><td>dev.to</td><td>210</td></tr><tr><td>youtube.com</td><td>23</td></tr><tr><td>medium.com</td><td>22</td></tr><tr><td>linkedin.com</td><td>21</td></tr><tr><td>reddit.com</td><td>12</td></tr><tr><td>forbes.com</td><td>9</td></tr><tr><td>indiehackers.com</td><td>8</td></tr><tr><td>lovable.dev</td><td>6</td></tr><tr><td>qodo.ai</td><td>5</td></tr><tr><td>ttms.com</td><td>5</td></tr><tr><td>explodingtopics.com</td><td>5</td></tr><tr><td>bigcommerce.com</td><td>5</td></tr>
+    </tbody></table></div>
+
+    <h2 style="margin-top:20px;">🕒 Ostatnie rundy</h2>
+    <div class="tbl card"><table><thead><tr><th>Czas</th><th>Slot</th><th>Znalezione</th><th>Pending</th><th>Plik</th></tr></thead><tbody>
+      <tr>
+        <td>25.03.2026, 17:00:46</td>
+        <td><span class="badge">AI Tools &amp; Workflow 2026</span></td>
+        <td>48</td>
+        <td>48</td>
+        <td>batch-2026-03-25T16-00-32.json</td>
+      </tr><tr>
+        <td>25.03.2026, 16:30:30</td>
+        <td><span class="badge">Market Opportunities &amp; Case Studies</span></td>
+        <td>56</td>
+        <td>54</td>
+        <td>batch-2026-03-25T15-30-16.json</td>
+      </tr><tr>
+        <td>25.03.2026, 16:00:15</td>
+        <td><span class="badge">Emerging Tech &amp; Research</span></td>
+        <td>56</td>
+        <td>56</td>
+        <td>batch-2026-03-25T15-00-01.json</td>
+      </tr><tr>
+        <td>25.03.2026, 15:30:00</td>
+        <td><span class="badge">Polish Market &amp; Business</span></td>
+        <td>48</td>
+        <td>48</td>
+        <td>batch-2026-03-25T14-29-46.json</td>
+      </tr><tr>
+        <td>25.03.2026, 14:59:44</td>
+        <td><span class="badge">Developer Tools &amp; Tech Stack</span></td>
+        <td>55</td>
+        <td>55</td>
+        <td>batch-2026-03-25T13-59-29.json</td>
+      </tr><tr>
+        <td>25.03.2026, 14:29:28</td>
+        <td><span class="badge">Finance &amp; Fintech</span></td>
+        <td>56</td>
+        <td>55</td>
+        <td>batch-2026-03-25T13-29-13.json</td>
+      </tr><tr>
+        <td>25.03.2026, 13:59:11</td>
+        <td><span class="badge">Ecommerce &amp; Digital Marketing</span></td>
+        <td>56</td>
+        <td>52</td>
+        <td>batch-2026-03-25T12-58-57.json</td>
+      </tr><tr>
+        <td>25.03.2026, 13:28:55</td>
+        <td><span class="badge">AI Tools &amp; Workflow 2026</span></td>
+        <td>48</td>
+        <td>48</td>
+        <td>batch-2026-03-25T12-28-42.json</td>
+      </tr><tr>
+        <td>25.03.2026, 12:58:40</td>
+        <td><span class="badge">Market Opportunities &amp; Case Studies</span></td>
+        <td>56</td>
+        <td>55</td>
+        <td>batch-2026-03-25T11-58-27.json</td>
+      </tr><tr>
+        <td>25.03.2026, 12:28:25</td>
+        <td><span class="badge">Emerging Tech &amp; Research</span></td>
+        <td>56</td>
+        <td>56</td>
+        <td>batch-2026-03-25T11-28-12.json</td>
+      </tr><tr>
+        <td>25.03.2026, 11:58:11</td>
+        <td><span class="badge">SEO &amp; Content Strategy</span></td>
+        <td>56</td>
+        <td>53</td>
+        <td>batch-2026-03-25T10-57-57.json</td>
+      </tr><tr>
+        <td>25.03.2026, 11:27:56</td>
+        <td><span class="badge">Polish Market &amp; Business</span></td>
+        <td>48</td>
+        <td>48</td>
+        <td>batch-2026-03-25T10-27-42.json</td>
+      </tr><tr>
+        <td>25.03.2026, 10:57:41</td>
+        <td><span class="badge">Developer Tools &amp; Tech Stack</span></td>
+        <td>56</td>
+        <td>56</td>
+        <td>batch-2026-03-25T09-57-27.json</td>
+      </tr><tr>
+        <td>25.03.2026, 10:27:26</td>
+        <td><span class="badge">Finance &amp; Fintech</span></td>
+        <td>64</td>
+        <td>62</td>
+        <td>batch-2026-03-25T09-27-11.json</td>
+      </tr><tr>
+        <td>25.03.2026, 09:57:10</td>
+        <td><span class="badge">Ecommerce &amp; Digital Marketing</span></td>
+        <td>64</td>
+        <td>60</td>
+        <td>batch-2026-03-25T08-56-56.json</td>
+      </tr><tr>
+        <td>25.03.2026, 09:26:55</td>
+        <td><span class="badge">AI Tools &amp; Workflow 2026</span></td>
+        <td>48</td>
+        <td>48</td>
+        <td>batch-2026-03-25T08-26-41.json</td>
+      </tr>
+    </tbody></table></div>
+
+    <h2 style="margin-top:20px;">📦 Ostatni batch: batch-2026-03-25T16-00-32.json</h2>
+    <div class="tbl card"><table><thead><tr><th>Tytuł</th><th>Źródło</th><th>Score</th><th>URL</th></tr></thead><tbody>
+      <tr>
+        <td>The 5 Best AI Productivity Tools in 2026 (You&#39;ll Actually Use)</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.youtube.com/watch?v=gnDzEb4im6s" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI Tools for Productivity in 2026: Reviews, Pros &amp; Cons, and ...</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://coursiv.io/blog/best-ai-tools-for-productivity-2026" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>6 Best AI Productivity Software (2026): Ranked &amp; Reviewed</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://efficient.app/best/ai-productivity" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI Productivity Tools 2026: 9 Game-Changing Apps | Lovable</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://lovable.dev/guides/best-ai-productivity-tools-2026" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI Tools for Productivity in 2026: 10 We Actually Use Every Day</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.cohorte.co/ai-articles/best-ai-tools-for-productivity-in-2026-10-we-actually-use-every-day" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Top AI Productivity Tools for 2026: Complete Multi-Category Guide</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.reddit.com/r/AIToolMadeEasy/comments/1pcxppp/top_ai_productivity_tools_for_2026_complete/" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>I tried 70+ best AI tools in 2026 | TechRadar</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.techradar.com/best/best-ai-tools" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>The best AI productivity tools in 2026 - Zapier</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://zapier.com/blog/best-ai-productivity-tools/" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>AI Workflow Automation: Steps, Tools, and Tips for 2026 - Influize</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.influize.com/blog/ai-workflow-automation" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Top 10 AI Tools for Enterprise Workflow Automation in 2026 - Medium</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://medium.com/activated-thinker/top-10-ai-tools-for-enterprise-workflow-automation-in-2026-56d767d41e84" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI Process Automation Tools in 2026 [Complete Guide] - Kissflow</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://kissflow.com/workflow/bpm/ai-process-automation-tools/" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>10 Best AI Tools for Business Automation in 2026 That Saves You ...</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://ai.exoticaitsolutions.com/blog/10-best-ai-tools-for-business-automation-in-2026-that-saves-you-hours-every-single-week/" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI business automation tools in 2026: a comparison - Inkeep</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://inkeep.com/blog/ai-business-automation-tools" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>How to Use AI for Business in 2026 (Step-by-Step System) - YouTube</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.youtube.com/watch?v=iC5cKVTqCm4" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Which is the best AI Workflow Platform? (2026) - YouTube</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.youtube.com/watch?v=eZYOoOFpyaY" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Top 10 AI Tools for Business in 2026 - Express Analytics</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.expressanalytics.com/blog/top-10-ai-tools-in-2026" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>10 Best AI Coding Assistants in 2026 - Techslang</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.techslang.com/10-best-ai-coding-assistants-in-2026/" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>AI Coding Tools Comparison 2026: The Complete Guide to Vibe ...</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.vibecodingacademy.ai/blog/ai-coding-tools-comparison-2026" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI Coding Agents for 2026: Real-World Developer Reviews</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.faros.ai/blog/best-ai-coding-agents-2026" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI Coding Assistants 2026: Tools for Developers - Replit</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://replit.com/discover/best-ai-coding-assistant" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>What is the Best AI for Coding in 2026? 10 Tools Tested</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://devspheretechnologies.com/best-ai-for-coding-tools/" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>15 Best AI Coding Assistant Tools In 2026 - Qodo</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.qodo.ai/blog/best-ai-coding-assistant-tools/" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Best AI Coding Assistants 2026 (I Tested 10+) | PlayCode Blog</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://playcode.io/blog/best-ai-coding-assistants-2026" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>AI Coding Tools Ranked from Worst to Best (2026) - YouTube</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.youtube.com/watch?v=zqiYTXiQq-0" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr><tr>
+        <td>Top 7 Agentic AI Frameworks in 2026: LangChain, CrewAI, and ...</td>
+        <td>tavily</td>
+        <td>5</td>
+        <td><a href="https://www.alphamatch.ai/blog/top-agentic-ai-frameworks-2026" target="_blank" rel="noreferrer">otwórz</a></td>
+      </tr>
+    </tbody></table></div>
+
+    <p class="muted" style="margin-top:16px;">Tip: odśwież raport po kolejnych rundach uruchamiając ponownie <code>node scripts/generate-crawler-report.mjs</code>.</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,117 @@
+# ═══════════════════════════════════════════════════════════════
+#  ZENO Browser — Cloudflare Pages + Workers
+#  Deploy: CF Pages (Vite SPA) + Functions (Workers API)
+#  URL: https://zenbrowsers.org
+#  Dev: npx wrangler pages dev dist --port 8788
+# ═══════════════════════════════════════════════════════════════
+
+name = "zeno-browser-web"
+pages_build_output_dir = "dist"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── D1 Database (reuse from old project) ───────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "zeno-browser-db"
+database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
+
+# ─── KV Namespaces ──────────────────────────────────────────
+# Create: wrangler kv namespace create SESSION
+# Create: wrangler kv namespace create AI_CACHE
+# Create: wrangler kv namespace create SITE_REGISTRY
+# [[kv_namespaces]]
+# binding = "SESSION"
+# id = ""
+# [[kv_namespaces]]
+# binding = "AI_CACHE"
+# id = ""
+# [[kv_namespaces]]
+# binding = "SITE_REGISTRY"
+# id = ""
+
+# ─── R2 Bucket (for cached content) ────────────────────────
+# Create: wrangler r2 bucket create zeno-web-cache
+# [[r2_buckets]]
+# binding = "WEB_CACHE"
+# bucket_name = "zeno-web-cache"
+
+# ─── R2 Bucket (static assets — datasets, media) ──────────
+[[r2_buckets]]
+binding = "STATIC_ASSETS"
+bucket_name = "zen-static-assets"
+
+# ─── Workers AI (CF built-in) ──────────────────────────────
+[ai]
+binding = "AI"
+
+# ─── Queues ─────────────────────────────────────────────────
+[[queues.producers]]
+queue = "agent-tasks"
+binding = "AGENT_TASKS_QUEUE"
+
+[[queues.producers]]
+queue = "image-generation-queue"
+binding = "IMAGE_GEN_QUEUE"
+
+[[queues.producers]]
+queue = "image-processing-queue"
+binding = "IMAGE_PROC_QUEUE"
+
+[[queues.producers]]
+queue = "voice-processing"
+binding = "VOICE_QUEUE"
+
+# ─── Environment Variables ──────────────────────────────────
+[vars]
+ENVIRONMENT = "development"
+SITE_NAME = "ZENO Browser"
+SITE_URL = "https://zenbrowsers.org"
+
+# Cross-site registry — all connected sites
+SITES_JIMBO77_ORG = "https://jimbo77.org"
+SITES_MYBONZOAI_BLOG = "https://mybonzoaiblog.com"
+SITES_MYBONZO_COM = "https://mybonzo.com"
+SITES_JIMBO77_COM = "https://jimbo77.com"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+SITE_NAME = "ZENO Browser"
+SITE_URL = "https://zenbrowsers.org"
+SITES_JIMBO77_ORG = "https://jimbo77.org"
+SITES_MYBONZOAI_BLOG = "https://mybonzoaiblog.com"
+SITES_MYBONZO_COM = "https://mybonzo.com"
+SITES_JIMBO77_COM = "https://jimbo77.com"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "zeno-browser-db"
+database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
+
+# ─── Production Queues ──────────────────────────────────────
+[[env.production.queues.producers]]
+queue = "agent-tasks"
+binding = "AGENT_TASKS_QUEUE"
+
+[[env.production.queues.producers]]
+queue = "image-generation-queue"
+binding = "IMAGE_GEN_QUEUE"
+
+[[env.production.queues.producers]]
+queue = "image-processing-queue"
+binding = "IMAGE_PROC_QUEUE"
+
+[[env.production.queues.producers]]
+queue = "voice-processing"
+binding = "VOICE_QUEUE"
+
+# Secrets (set via CLI):
+# wrangler secret put DEEPSEEK_API_KEY
+# wrangler secret put OPENROUTER_API_KEY
+# wrangler secret put OPENAI_API_KEY
+
+[env.production.ai]
+binding = "AI"
+# wrangler secret put ANTHROPIC_API_KEY
+# wrangler secret put WEBGATE_SECRET
+# wrangler secret put UMAMI_SITE_ID

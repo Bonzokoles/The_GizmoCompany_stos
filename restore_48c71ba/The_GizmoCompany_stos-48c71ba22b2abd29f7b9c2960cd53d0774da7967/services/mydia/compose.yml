@@ -1,0 +1,20 @@
+services:
+  mydia:
+    image: ghcr.io/getmydia/mydia:latest
+    container_name: mydia
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Warsaw
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - GUARDIAN_SECRET_KEY=${GUARDIAN_SECRET_KEY}
+      - PHX_HOST=localhost
+      - PORT=4100
+      - MOVIES_PATH=/media/movies
+      - TV_PATH=/media/tv
+    volumes:
+      - ./config:/config
+      - ./media:/media
+    ports:
+      - "4100:4100"
+    restart: unless-stopped

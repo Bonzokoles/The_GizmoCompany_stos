@@ -2,6 +2,7 @@
  * Plugin Loader - Handles loading plugin code
  */
 
+import * as vm from 'vm';
 import { BasePlugin } from './plugin-api';
 
 export interface LoaderOptions {
@@ -68,22 +69,39 @@ export class PluginLoader {
   }
 
   /**
-   * Execute code in sandboxed environment using new Function with limited scope
+   * Execute code in sandboxed environment using vm.runInNewContext
+   * CR-003: Replaced 'new Function()' with 'vm.runInNewContext()' for security
    */
   private executeSandboxed(code: string): any {
     try {
-      // Create a new Function with limited scope
-      const fn = new Function(
-        'BasePlugin',
-        `
+      // Create a sandboxed context with limited access
+      const sandbox: {
+        BasePlugin: typeof BasePlugin;
+        exports: { default?: any };
+        console: any;
+      } = {
+        BasePlugin,
+        exports: {},
+        console: {
+          log: (...args: any[]) => console.log('[Plugin]', ...args),
+          warn: (...args: any[]) => console.warn('[Plugin]', ...args),
+          error: (...args: any[]) => console.error('[Plugin]', ...args),
+        },
+      };
+
+      // Execute code in sandboxed context
+      const wrappedCode = `
         "use strict";
         ${code}
-        return { default: exports.default || null };
-      `
-      );
+        exports.default;
+      `;
 
-      const result = fn(BasePlugin);
-      return result;
+      const result = vm.runInNewContext(wrappedCode, sandbox, {
+        timeout: 5000, // 5s timeout
+        displayErrors: true,
+      });
+
+      return { default: result || sandbox.exports.default };
     } catch (error) {
       throw new Error(`Sandboxed execution failed: ${error}`);
     }

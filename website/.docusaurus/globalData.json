@@ -1,0 +1,43 @@
+{
+  "docusaurus-plugin-content-docs": {
+    "default": {
+      "path": "/pl/docs",
+      "versions": [
+        {
+          "name": "current",
+          "label": "Next",
+          "isLast": true,
+          "path": "/pl/docs",
+          "mainDocId": "faq",
+          "docs": [
+            {
+              "id": "faq",
+              "path": "/pl/docs/faq",
+              "sidebar": "docs"
+            },
+            {
+              "id": "getting-started",
+              "path": "/pl/docs/getting-started",
+              "sidebar": "docs"
+            },
+            {
+              "id": "installation/windows",
+              "path": "/pl/docs/installation/windows",
+              "sidebar": "docs"
+            }
+          ],
+          "draftIds": [],
+          "sidebars": {
+            "docs": {
+              "link": {
+                "path": "/pl/docs/faq",
+                "label": "faq"
+              }
+            }
+          }
+        }
+      ],
+      "breadcrumbs": true
+    }
+  }
+}

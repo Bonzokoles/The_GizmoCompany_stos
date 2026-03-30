@@ -1,0 +1,101 @@
+{
+  "movies": [
+    {
+      "id": "gummo-1997",
+      "title": "Gummo",
+      "year": 1997,
+      "director": "Harmony Korine",
+      "category": "urban-decay",
+      "tags": [
+        "outsider",
+        "experimental",
+        "off"
+      ],
+      "poster": "posters/gummo.jpg"
+    },
+    {
+      "id": "holy-motors-2012",
+      "title": "Holy Motors",
+      "year": 2012,
+      "director": "Leos Carax",
+      "category": "psychodeliczne-bez-horroru",
+      "tags": [
+        "surreal",
+        "role-playing"
+      ],
+      "poster": ""
+    },
+    {
+      "id": "upstream-color-2013",
+      "title": "Upstream Color",
+      "year": 2013,
+      "director": "Shane Carruth",
+      "category": "psychodeliczne-bez-horroru",
+      "tags": [
+        "mindfuck",
+        "organiczne"
+      ],
+      "poster": ""
+    },
+    {
+      "id": "blue-valentine-2010",
+      "title": "Blue Valentine",
+      "year": 2010,
+      "director": "Derek Cianfrance",
+      "category": "czule-o-milosci-bez-kiczu",
+      "tags": [
+        "relationship",
+        "pain"
+      ],
+      "poster": ""
+    },
+    {
+      "id": "the-florida-project-2017",
+      "title": "The Florida Project",
+      "year": 2017,
+      "director": "Sean Baker",
+      "category": "kino-o-zyciu-bez-scemy",
+      "tags": [
+        "dzieci",
+        "margines"
+      ],
+      "poster": ""
+    },
+    {
+      "id": "dead-man-1995",
+      "title": "Dead Man",
+      "year": 1995,
+      "director": "Jim Jarmusch",
+      "category": "brudna-uliczna-poezja",
+      "tags": [
+        "western",
+        "poetyckie"
+      ],
+      "poster": ""
+    },
+    {
+      "id": "a-ghost-story-2017",
+      "title": "A Ghost Story",
+      "year": 2017,
+      "director": "David Lowery",
+      "category": "senne-i-eteryczne",
+      "tags": [
+        "czas",
+        "strata"
+      ],
+      "poster": ""
+    },
+    {
+      "id": "the-station-agent-2003",
+      "title": "The Station Agent",
+      "year": 2003,
+      "director": "Tom McCarthy",
+      "category": "kino-o-outsiderach",
+      "tags": [
+        "friendship",
+        "outsider"
+      ],
+      "poster": ""
+    }
+  ]
+}

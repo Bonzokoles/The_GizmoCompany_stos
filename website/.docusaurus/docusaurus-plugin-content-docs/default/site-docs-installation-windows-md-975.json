@@ -1,0 +1,20 @@
+{
+  "unversionedId": "installation/windows",
+  "id": "installation/windows",
+  "title": "Installing ZENO Browser on Windows",
+  "description": "System Requirements",
+  "source": "@site/docs/installation/windows.md",
+  "sourceDirName": "installation",
+  "slug": "/installation/windows",
+  "permalink": "/pl/docs/installation/windows",
+  "draft": false,
+  "editUrl": "https://github.com/Bonzokoles/zen-bro-wser.org/edit/main/website/docs/installation/windows.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Getting Started with ZENO Browser",
+    "permalink": "/pl/docs/getting-started"
+  }
+}

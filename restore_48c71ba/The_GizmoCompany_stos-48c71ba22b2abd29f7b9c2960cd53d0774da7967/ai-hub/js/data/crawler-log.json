@@ -1,0 +1,405 @@
+{
+  "runs": [
+    {
+      "batch_id": "2026-03-25T16-00-32",
+      "timestamp": "2026-03-25T16:00:46.815Z",
+      "slot_index": 0,
+      "slot_name": "AI Tools & Workflow 2026",
+      "category": "13_AI_NEWS",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 48,
+        "date_filtered": 0,
+        "unique": 48,
+        "auto_approved": 0,
+        "pending": 48,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T16-00-32.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T15-30-16",
+      "timestamp": "2026-03-25T15:30:30.892Z",
+      "slot_index": 7,
+      "slot_name": "Market Opportunities & Case Studies",
+      "category": "11_OPPORTUNITIES",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 0,
+        "unique": 54,
+        "auto_approved": 0,
+        "pending": 54,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T15-30-16.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T15-00-01",
+      "timestamp": "2026-03-25T15:00:15.504Z",
+      "slot_index": 6,
+      "slot_name": "Emerging Tech & Research",
+      "category": "14_EMERGING_TECH",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 0,
+        "unique": 56,
+        "auto_approved": 0,
+        "pending": 56,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T15-00-01.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T14-29-46",
+      "timestamp": "2026-03-25T14:30:00.314Z",
+      "slot_index": 4,
+      "slot_name": "Polish Market & Business",
+      "category": "05_POLISH_MARKET",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 48,
+        "date_filtered": 0,
+        "unique": 48,
+        "auto_approved": 0,
+        "pending": 48,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T14-29-46.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T13-59-29",
+      "timestamp": "2026-03-25T13:59:44.808Z",
+      "slot_index": 3,
+      "slot_name": "Developer Tools & Tech Stack",
+      "category": "12_DEV_TOOLS",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 55,
+        "date_filtered": 0,
+        "unique": 55,
+        "auto_approved": 0,
+        "pending": 55,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T13-59-29.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T13-29-13",
+      "timestamp": "2026-03-25T13:29:28.105Z",
+      "slot_index": 2,
+      "slot_name": "Finance & Fintech",
+      "category": "06_FINANCE",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 1,
+        "unique": 55,
+        "auto_approved": 0,
+        "pending": 55,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T13-29-13.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T12-58-57",
+      "timestamp": "2026-03-25T12:59:11.551Z",
+      "slot_index": 1,
+      "slot_name": "Ecommerce & Digital Marketing",
+      "category": "04_ECOMMERCE_SHOPS",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 0,
+        "unique": 52,
+        "auto_approved": 0,
+        "pending": 52,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T12-58-57.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T12-28-42",
+      "timestamp": "2026-03-25T12:28:55.736Z",
+      "slot_index": 0,
+      "slot_name": "AI Tools & Workflow 2026",
+      "category": "13_AI_NEWS",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 48,
+        "date_filtered": 0,
+        "unique": 48,
+        "auto_approved": 0,
+        "pending": 48,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T12-28-42.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T11-58-27",
+      "timestamp": "2026-03-25T11:58:40.859Z",
+      "slot_index": 7,
+      "slot_name": "Market Opportunities & Case Studies",
+      "category": "11_OPPORTUNITIES",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 0,
+        "unique": 55,
+        "auto_approved": 0,
+        "pending": 55,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T11-58-27.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T11-28-12",
+      "timestamp": "2026-03-25T11:28:25.771Z",
+      "slot_index": 6,
+      "slot_name": "Emerging Tech & Research",
+      "category": "14_EMERGING_TECH",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 0,
+        "unique": 56,
+        "auto_approved": 0,
+        "pending": 56,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T11-28-12.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T10-57-57",
+      "timestamp": "2026-03-25T10:58:11.044Z",
+      "slot_index": 5,
+      "slot_name": "SEO & Content Strategy",
+      "category": "09_SEO_MARKETING",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 0,
+        "unique": 53,
+        "auto_approved": 0,
+        "pending": 53,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T10-57-57.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T10-27-42",
+      "timestamp": "2026-03-25T10:27:56.237Z",
+      "slot_index": 4,
+      "slot_name": "Polish Market & Business",
+      "category": "05_POLISH_MARKET",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 48,
+        "date_filtered": 0,
+        "unique": 48,
+        "auto_approved": 0,
+        "pending": 48,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T10-27-42.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T09-57-27",
+      "timestamp": "2026-03-25T09:57:41.343Z",
+      "slot_index": 3,
+      "slot_name": "Developer Tools & Tech Stack",
+      "category": "12_DEV_TOOLS",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 56,
+        "date_filtered": 0,
+        "unique": 56,
+        "auto_approved": 0,
+        "pending": 56,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T09-57-27.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T09-27-11",
+      "timestamp": "2026-03-25T09:27:26.201Z",
+      "slot_index": 2,
+      "slot_name": "Finance & Fintech",
+      "category": "06_FINANCE",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 2
+      },
+      "results": {
+        "found": 64,
+        "date_filtered": 1,
+        "unique": 62,
+        "auto_approved": 0,
+        "pending": 62,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T09-27-11.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T08-56-56",
+      "timestamp": "2026-03-25T08:57:10.370Z",
+      "slot_index": 1,
+      "slot_name": "Ecommerce & Digital Marketing",
+      "category": "04_ECOMMERCE_SHOPS",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 2
+      },
+      "results": {
+        "found": 64,
+        "date_filtered": 0,
+        "unique": 60,
+        "auto_approved": 0,
+        "pending": 60,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T08-56-56.json"
+      }
+    },
+    {
+      "batch_id": "2026-03-25T08-26-41",
+      "timestamp": "2026-03-25T08:26:55.080Z",
+      "slot_index": 0,
+      "slot_name": "AI Tools & Workflow 2026",
+      "category": "13_AI_NEWS",
+      "dry_run": false,
+      "credits": {
+        "tavily": 4,
+        "brave": 1
+      },
+      "results": {
+        "found": 48,
+        "date_filtered": 0,
+        "unique": 48,
+        "auto_approved": 0,
+        "pending": 48,
+        "rejected": 0
+      },
+      "files": {
+        "dataset": null,
+        "pending": "batch-2026-03-25T08-26-41.json"
+      }
+    }
+  ],
+  "stats": {
+    "total_runs": 16,
+    "total_found": 871,
+    "total_date_filtered": 2,
+    "total_quality_filtered": 0,
+    "total_auto_approved": 0,
+    "total_pending": 854,
+    "daily": {
+      "2026-03-25": {
+        "tavily": 64,
+        "brave": 18,
+        "runs": 16,
+        "auto_approved": 0,
+        "pending": 854
+      }
+    }
+  }
+}

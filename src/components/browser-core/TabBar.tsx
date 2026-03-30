@@ -1,8 +1,8 @@
 /**
- * Tab Bar Component — React 19 + typed props + ARIA
+ * Tab Bar Component — React 19 + typed props + ARIA + useDeferredValue
  */
 
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useDeferredValue } from 'react';
 import type { Tab } from '../../types/electron';
 
 interface TabBarProps {
@@ -18,6 +18,9 @@ export const TabBar = memo(function TabBar({
   onTabClose,
   onNewTab,
 }: TabBarProps) {
+  const deferredTabs = useDeferredValue(tabs);
+  const isStale = tabs !== deferredTabs;
+
   const handleClose = useCallback(
     (e: React.MouseEvent, tabId: string) => {
       e.stopPropagation();
@@ -27,8 +30,8 @@ export const TabBar = memo(function TabBar({
   );
 
   return (
-    <nav className="tab-bar" role="tablist" aria-label="Zakładki przeglądarki">
-      {tabs.map((tab) => (
+    <nav className="tab-bar" role="tablist" aria-label="Zakładki przeglądarki" style={{ opacity: isStale ? 0.7 : 1 }}>
+      {deferredTabs.map((tab) => (
         <div
           key={tab.id}
           className={`tab ${tab.isActive ? 'active' : ''}`}

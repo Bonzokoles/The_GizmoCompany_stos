@@ -3,6 +3,9 @@
    ═══════════════════════════════════════════════════ */
 
 export const SKILLS = [
+  { name:'CF Pages Subpage', icon:'☁️', cat:'devops',     desc:'Deploy podstron na Cloudflare Pages (np. /ai-hub, /BONZO_media_HUB), poprawne kopiowanie artefaktów i walidacja tras.', file:'.agents/skills/cf-pages-subpage-deploy/SKILL.md', url:'.agents/skills/cf-pages-subpage-deploy/SKILL.md' },
+  { name:'CF Routing Domains', icon:'🧭', cat:'devops',   desc:'Konfiguracja tras i domen (workers.dev/pages.dev/custom domain), fallback i walidacja endpointów po deployu.',      file:'.agents/skills/cf-pages-routing-domains/SKILL.md', url:'.agents/skills/cf-pages-routing-domains/SKILL.md' },
+  { name:'Library Ops',      icon:'📚', cat:'data',       desc:'Operacje na bibliotekach wiedzy: normalizacja metadanych, import/export, walidacja i synchronizacja z UI.',         file:'.agents/skills/library-operations-workflow/SKILL.md', url:'.agents/skills/library-operations-workflow/SKILL.md' },
   { name:'HF CLI',           icon:'⌨️', cat:'devops',     desc:'Zarządzanie HuggingFace Hub z CLI — download, upload, zarządzanie repo, jobs, tokeny',                      file:'.agents/skills/hf-cli/SKILL.md' },
   { name:'Community Evals',  icon:'📊', cat:'research',   desc:'Ewaluacja modeli AI z inspect-ai i lighteval — benchmarki, community evals na lokalnym sprzęcie',           file:'.agents/skills/huggingface-community-evals/SKILL.md' },
   { name:'Datasets API',     icon:'📚', cat:'data',       desc:'Dataset Viewer REST API — splits, rows, search, filter, parquet, SQL queries na 200K+ datasetach',           file:'.agents/skills/huggingface-datasets/SKILL.md' },

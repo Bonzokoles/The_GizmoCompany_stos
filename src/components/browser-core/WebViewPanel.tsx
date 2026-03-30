@@ -228,6 +228,19 @@ export const WebViewPanel = forwardRef<WebViewPanelHandle, WebViewPanelProps>(
       iframe.src = url;
     }, [useWebview, url]);
 
+    useEffect(() => {
+      if (useWebview) return;
+      const iframe = iframeRef.current;
+      if (!iframe) return;
+
+      const onLoad = () => onLoadStop?.();
+      iframe.addEventListener('load', onLoad);
+
+      return () => {
+        iframe.removeEventListener('load', onLoad);
+      };
+    }, [useWebview, onLoadStop]);
+
     const handleIframeLoad = useCallback(() => {
       onLoadStop?.();
       // Try to read title from same-origin iframe

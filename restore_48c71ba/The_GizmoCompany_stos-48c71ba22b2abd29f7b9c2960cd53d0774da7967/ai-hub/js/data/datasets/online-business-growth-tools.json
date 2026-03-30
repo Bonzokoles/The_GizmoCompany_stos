@@ -1,0 +1,42 @@
+{
+  "id": "online-business-growth-tools",
+  "category": "10_MARKET_ANALYSIS",
+  "generated": "2026-03-24",
+  "source": "Tavily Search API",
+  "queries_count": 1,
+  "credits_used": 1,
+  "summary": "Skuteczny growth stack online w 2026: ecommerce analytics, automatyzacje marketingu, CRM + orkiestracja danych, oraz AI-assisted obsługa klienta. Największy wpływ daje połączenie analityki z automatycznymi akcjami operacyjnymi.",
+  "raw_searches": [
+    {
+      "query": "online business tools 2026 digital entrepreneurship ecommerce analytics automation",
+      "answer": "In 2026, essential ecommerce tools include AI conversational interfaces, real-time analytics, and integrated marketing automation for growth. Shopify remains a top choice for comprehensive insights and ecosystem access. Advanced analytics tools like Google Analytics and Improvado are crucial for data-driven decisions.",
+      "results": [
+        {
+          "title": "Best Ecommerce Tools for 2026: The Essential Stack For Growth",
+          "url": "https://gokickflip.com/blog/best-ecommerce-tools",
+          "score": 0.9999448
+        },
+        {
+          "title": "Top 5 E-Commerce Tools In 2026 For Faster Online Growth",
+          "url": "https://designmusketeer.com/ecommerce/top-5-e-commerce-tools-2026/",
+          "score": 0.9999448
+        },
+        {
+          "title": "The Ultimate Guide to Ecommerce Analytics Tools for 2026",
+          "url": "https://improvado.io/blog/best-ecommerce-analytics-tools",
+          "score": 0.999944
+        },
+        {
+          "title": "10 Best Ecommerce Analytics Software in 2026",
+          "url": "https://www.sarasanalytics.com/blog/ecommerce-analytics-software",
+          "score": 0.99981767
+        },
+        {
+          "title": "How to Choose the Best eCommerce Analytics Tools in 2026",
+          "url": "https://www.conjura.com/blog/how-to-choose-the-best-ecommerce-analytics-tools-in-2026",
+          "score": 0.9997981
+        }
+      ]
+    }
+  ]
+}

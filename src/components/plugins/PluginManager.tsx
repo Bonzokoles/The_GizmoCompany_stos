@@ -22,6 +22,7 @@ interface PluginManagerProps {
 export const PluginManager: React.FC<PluginManagerProps> = ({ onClose }) => {
   const [plugins, setPlugins] = useState<InstalledPlugin[]>([]);
   const [loading, setLoading] = useState(true);
+  const [confirmModal, setConfirmModal] = useState<{ pluginId: string; pluginName: string } | null>(null);
 
   const electronAPI = window.electronAPI;
 
@@ -59,13 +60,22 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ onClose }) => {
   };
 
   const uninstallPlugin = async (pluginId: string) => {
-    if (confirm('Are you sure you want to uninstall this plugin?')) {
-      try {
-        await electronAPI.plugin?.uninstall?.(pluginId);
-        setPlugins(plugins.filter((p) => p.id !== pluginId));
-      } catch (error) {
-        console.error('Failed to uninstall plugin:', error);
-      }
+    const plugin = plugins.find((p) => p.id === pluginId);
+    if (!plugin) return;
+
+    setConfirmModal({ pluginId, pluginName: plugin.name });
+  };
+
+  const confirmUninstall = async () => {
+    if (!confirmModal) return;
+
+    try {
+      await electronAPI.plugin?.uninstall?.(confirmModal.pluginId);
+      setPlugins(plugins.filter((p) => p.id !== confirmModal.pluginId));
+    } catch (error) {
+      console.error('Failed to uninstall plugin:', error);
+    } finally {
+      setConfirmModal(null);
     }
   };
 
@@ -135,6 +145,26 @@ export const PluginManager: React.FC<PluginManagerProps> = ({ onClose }) => {
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmModal && (
+        <div className="modal-overlay" onClick={() => setConfirmModal(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <h3>Confirm Uninstall</h3>
+            <p>
+              Are you sure you want to uninstall <strong>{confirmModal.pluginName}</strong>?
+            </p>
+            <div className="modal-actions">
+              <button className="btn-small" onClick={() => setConfirmModal(null)}>
+                Cancel
+              </button>
+              <button className="btn-small btn-uninstall" onClick={confirmUninstall}>
+                Uninstall
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

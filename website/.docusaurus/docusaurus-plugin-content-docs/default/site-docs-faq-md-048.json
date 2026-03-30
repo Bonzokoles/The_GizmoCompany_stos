@@ -1,0 +1,20 @@
+{
+  "unversionedId": "faq",
+  "id": "faq",
+  "title": "FAQ - Frequently Asked Questions",
+  "description": "General",
+  "source": "@site/docs/faq.md",
+  "sourceDirName": ".",
+  "slug": "/faq",
+  "permalink": "/pl/docs/faq",
+  "draft": false,
+  "editUrl": "https://github.com/Bonzokoles/zen-bro-wser.org/edit/main/website/docs/faq.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "next": {
+    "title": "Getting Started with ZENO Browser",
+    "permalink": "/pl/docs/getting-started"
+  }
+}

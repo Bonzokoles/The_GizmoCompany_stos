@@ -1,0 +1,50 @@
+# ═══════════════════════════════════════════════════════════════
+#  JIMBO Gateway Worker
+#  REST bridge: CF AI Gateway + D1 + R2 + KV + Workers AI
+#  Deploy: cd workers/jimbo-gateway && npx wrangler deploy
+#  Secrets: wrangler secret put OPENAI_API_KEY
+# ═══════════════════════════════════════════════════════════════
+
+name = "jimbo-gateway"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# ─── Workers AI ─────────────────────────────────────────────
+[ai]
+binding = "AI"
+
+# ─── D1 (shared zeno-browser-db) ────────────────────────────
+[[d1_databases]]
+binding = "DB"
+database_name = "zeno-browser-db"
+database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
+
+# ─── R2 (document / media storage) ─────────────────────────
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "mybonzo-media"
+
+# ─── KV (session cache / chat history) ──────────────────────
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "<valid_kv_namespace_id>"   # opcjonalne: cache może działać bez KV
+
+# ─── Vars ───────────────────────────────────────────────────
+[vars]
+CF_GATEWAY_BASE = "https://gateway.ai.cloudflare.com/v1/7f490d58a478c6baccb0ae01ea1d87c3/buch_chat_box/compat"
+JIMBO_BACKEND   = "http://localhost:5180"
+
+# ─── Secrets (wrangler secret put <NAME>) ────────────────────
+# API Keys — each managed via `wrangler secret put`:
+#   wrangler secret put OPENAI_API_KEY
+#   wrangler secret put ANTHROPIC_API_KEY
+#   wrangler secret put DEEPSEEK_API_KEY
+#   wrangler secret put GEMINI_API_KEY
+#   wrangler secret put OPENROUTER_API_KEY
+#   wrangler secret put TOGETHER_API_KEY
+#   wrangler secret put REPLICATE_API_TOKEN
+#   wrangler secret put STABILITY_API_KEY
+#   wrangler secret put ELEVENLABS_API_KEY
+#   wrangler secret put HUGGINGFACE_API_KEY
+#   wrangler secret put PERPLEXITY_API_KEY

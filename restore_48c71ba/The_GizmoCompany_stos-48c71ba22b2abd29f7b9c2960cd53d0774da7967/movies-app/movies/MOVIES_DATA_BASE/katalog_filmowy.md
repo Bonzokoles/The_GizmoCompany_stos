@@ -1,0 +1,91 @@
+# Katalog Filmowy
+
+## 1. Psychodeliczne, ale bez horroru
+- Upstream Color (2013)
+- Holy Motors (2012)
+- The Congress (2013)
+- Enter the Void (2009)
+- The Fountain (2006)
+- A Field in England (2013)
+- The Holy Mountain (1973)
+- Mandy (2018)
+- Synecdoche, New York (2008)
+- The Green Knight (2021)
+
+## 2. Czułe o miłości, ale bez kiczu
+- Blue Valentine (2010)
+- Her (2013)
+- Before Sunrise (1995)
+- Past Lives (2023)
+- In the Mood for Love (2000)
+- Eternal Sunshine of the Spotless Mind (2004)
+- Once (2007)
+- Punch-Drunk Love (2002)
+- Lost in Translation (2003)
+- Beginners (2010)
+
+## 3. Urban Decay
+- Heaven Knows What (2014)
+- Gummo (1997)
+- Mid90s (2018)
+- Last Days (2005)
+- Pixote (1981)
+- Naked (1993)
+- Taxi Driver (1976)
+- Chungking Express (1994)
+- La Haine (1995)
+- Honey Boy (2019)
+
+## 4. Kino o outsiderach
+- The Station Agent (2003)
+- Wendy and Lucy (2008)
+- Mary and Max (2009)
+- Submarine (2010)
+- Frances Ha (2012)
+- Napoleon Dynamite (2004)
+- The Peanut Butter Falcon (2019)
+- Girl, Interrupted (1999)
+- The Double (2013)
+- Joker (2019)
+
+## 5. Brudna, uliczna poezja
+- Dead Man (1995)
+- A Girl Walks Home Alone at Night (2014)
+- The Rider (2017)
+- Fish Tank (2009)
+- Red Rocket (2021)
+- Frozen River (2008)
+- Blue Ruin (2013)
+- The Place Beyond the Pines (2012)
+- Monster (2003)
+- Buffalo '66 (1998)
+
+## 6. Senne i eteryczne
+- A Ghost Story (2017)
+- Columbus (2017)
+- Loveless (2017)
+- Drive (2011)
+- Solaris (1972)
+- All the Real Girls (2003)
+- The Tree of Life (2011)
+- Arrival (2016)
+- Stalker (1979)
+- Only Lovers Left Alive (2013)
+
+## 7. Kino o życiu, które nie traktuje widza jak debila
+- The Florida Project (2017)
+- The Wrestler (2008)
+- Short Term 12 (2013)
+- Nebraska (2013)
+- Manchester by the Sea (2016)
+- A Separation (2011)
+- The Father (2020)
+- Lean on Pete (2017)
+- The Straight Story (1999)
+- Nomadland (2020)
+
+---
+
+## Miejsce na dopisywanie kolejnych tytułów
+(Tu możesz dopisywać dalej)
+

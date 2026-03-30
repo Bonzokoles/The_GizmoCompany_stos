@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Workspace Dashboard | Definition of Done</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #07090f;
+      --bg-secondary: #0b0f1a;
+      --bg-card: #090d17;
+      --accent-primary: #00d9ff;
+      --accent-secondary: #7c3aed;
+      --accent-gold: #fbbf24;
+      --accent-success: #10b981;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --text-primary: #e7ecff;
+      --text-secondary: #9aa6c7;
+      --text-muted: #6b7696;
+      --border: #1b2542;
+      --border-light: rgba(27, 37, 66, 0.65);
+      --shadow: 0 0 0 1px rgba(231, 236, 255, .06), 0 18px 50px rgba(0, 0, 0, .55);
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: radial-gradient(900px 600px at 20% 0%, rgba(0, 217, 255, .10), transparent 55%),
+                  radial-gradient(900px 600px at 90% 10%, rgba(124, 58, 237, .10), transparent 55%),
+                  linear-gradient(180deg, var(--bg-primary), #05070c 65%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(12px);
+      background: linear-gradient(180deg, rgba(11, 15, 26, .95), rgba(7, 9, 15, .85));
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font: 800 18px/1.2 var(--sans);
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-subtitle {
+      font: 600 11px/1 var(--mono);
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .header-stats {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .stat-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      font: 700 11px/1 var(--mono);
+      letter-spacing: 0.6px;
+    }
+
+    .stat-badge .number {
+      color: var(--accent-primary);
+      font-size: 14px;
+    }
+
+    .stat-badge.success {
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .stat-badge.success .number {
+      color: var(--accent-success);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 4px;
+    }
+
+    .nav-tab {
+      padding: 10px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .nav-tab.active {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      font-weight: 700;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    /* Section Visibility */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* Skills Grid */
+    .skills-controls {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 280px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px 16px 12px 44px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font: 14px/1.5 var(--sans);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+    }
+
+    .search-box .icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .filter-btn.active {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-color: transparent;
+      color: white;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 16px;
+    }
+
+    .skill-card {
+      background: linear-gradient(180deg, rgba(11, 15, 26, .92), rgba(9, 13, 23, .86));
+      border: 1px solid var(--border);
+      padding: 20px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .skill-card:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+
+    .skill-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .skill-card.activated {
+      border-color: var(--accent-success);
+      background: linear-gradient(180deg, rgba(11, 15, 26, .92), rgba(16, 185, 129, 0.08));
+    }
+
+    .skill-card.activated::before {
+      transform: scaleX(1);
+      background: var(--accent-success);
+    }
+
+    .skill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .skill-name {
+      font: 700 15px/1.3 var(--sans);
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .skill-category {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.4);
+      font: 700 10px/1 var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--accent-secondary);
+    }
+
+    .awesome-badge {
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 11px;
+      vertical-align: middle;
+      cursor: help;
+    }
+
+    .skill-description {
+      color: var(--text-secondary);
+      font: 13px/1.6 var(--sans);
+      margin-bottom: 16px;
+    }
+
+    .skill-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-color: transparent;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-success), #059669);
+      border-color: transparent;
+      color: white;
+    }
+
+    /* Tasks Section */
+    .tasks-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .tasks-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .task-panel {
+      background: linear-gradient(180deg, rgba(11, 15, 26, .92), rgba(9, 13, 23, .86));
+      border: 1px solid var(--border);
+      padding: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-title {
+      font: 800 14px/1 var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-primary);
+    }
+
+    /* Add Task Form */
+    .add-task-form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .add-task-form input {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font: 14px/1.5 var(--sans);
+      outline: none;
+    }
+
+    .add-task-form input:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+    }
+
+    .add-task-form select {
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font: 14px/1 var(--sans);
+      min-width: 140px;
+      cursor: pointer;
+    }
+
+    /* Task List */
+    .task-list {
+      list-style: none;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      margin-bottom: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .task-item:hover {
+      border-color: var(--accent-primary);
+      background: rgba(0, 217, 255, 0.03);
+    }
+
+    .task-item.completed {
+      opacity: 0.6;
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent-success);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-content {
+      flex: 1;
+    }
+
+    .task-text {
+      font: 14px/1.4 var(--sans);
+      color: var(--text-primary);
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .task-tag {
+      font: 10px/1 var(--mono);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      color: var(--accent-secondary);
+    }
+
+    .task-tag.priority-high {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--accent-danger);
+    }
+
+    .task-tag.priority-medium {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--accent-warning);
+    }
+
+    .task-tag.priority-low {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--accent-success);
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 6px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .task-item:hover .task-actions {
+      opacity: 1;
+    }
+
+    .task-btn {
+      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font: 11px/1 var(--mono);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .task-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--accent-danger);
+      color: var(--accent-danger);
+    }
+
+    /* DoD Checklist */
+    .dod-list {
+      list-style: none;
+    }
+
+    .dod-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      margin-bottom: 8px;
+    }
+
+    .dod-item.checked {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .dod-item.checked label {
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .dod-item label {
+      font: 13px/1.4 var(--sans);
+      color: var(--text-primary);
+      cursor: pointer;
+      flex: 1;
+    }
+
+    /* Notes Panel */
+    .notes-textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font: 13px/1.7 var(--mono);
+      resize: vertical;
+      outline: none;
+    }
+
+    .notes-textarea:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font: 700 20px/1.2 var(--sans);
+      color: var(--accent-primary);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .command-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 16px;
+      margin: 16px 0;
+      font: 13px/1.6 var(--mono);
+      color: var(--accent-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .command-block:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--accent-success);
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+    }
+
+    .toast-icon {
+      color: var(--accent-success);
+      font-size: 20px;
+    }
+
+    .toast-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toast-title {
+      font: 700 14px/1 var(--sans);
+      color: var(--text-primary);
+    }
+
+    .toast-message {
+      font: 12px/1.4 var(--sans);
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* Sub-tabs within panels */
+    .sub-tabs {
+      display: flex;
+      gap: 2px;
+      margin-bottom: 20px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      padding: 3px;
+    }
+
+    .sub-tab {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .sub-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .sub-tab.active {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      font-weight: 700;
+    }
+
+    .sub-panel {
+      display: none;
+    }
+
+    .sub-panel.active {
+      display: block;
+    }
+
+    /* Connect workspace button */
+    .connect-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(0, 217, 255, 0.05);
+      border: 1px dashed rgba(0, 217, 255, 0.3);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .connect-bar.connected {
+      border-style: solid;
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .connect-status {
+      font: 12px/1 var(--mono);
+      color: var(--text-muted);
+    }
+
+    .connect-status.active {
+      color: var(--accent-success);
+    }
+
+    .btn-connect {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border: none;
+      color: white;
+      font: 600 12px/1 var(--sans);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-connect:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn-connect.synced {
+      background: linear-gradient(135deg, var(--accent-success), #059669);
+    }
+
+    /* History items */
+    .history-item {
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      margin-bottom: 10px;
+      border-left: 3px solid var(--accent-success);
+    }
+
+    .history-item:hover {
+      border-color: var(--accent-primary);
+      border-left-color: var(--accent-primary);
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .history-task-text {
+      font: 600 14px/1.4 var(--sans);
+      color: var(--text-primary);
+    }
+
+    .history-dates {
+      font: 11px/1.6 var(--mono);
+      color: var(--text-muted);
+      text-align: right;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+
+    .history-resolution {
+      font: 13px/1.6 var(--sans);
+      color: var(--text-secondary);
+      padding: 10px 14px;
+      background: rgba(16, 185, 129, 0.05);
+      border-left: 2px solid rgba(16, 185, 129, 0.3);
+      margin-top: 8px;
+      white-space: pre-wrap;
+    }
+
+    .history-meta {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    /* Completion Modal */
+    .completion-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 2500;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .completion-modal.show {
+      display: flex;
+    }
+
+    .completion-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--accent-success);
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
+    }
+
+    .completion-content h2 {
+      font: 700 20px/1.2 var(--sans);
+      color: var(--accent-success);
+      margin-bottom: 8px;
+    }
+
+    .completion-content .task-preview {
+      font: 14px/1.5 var(--sans);
+      color: var(--text-secondary);
+      padding: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      margin: 16px 0;
+    }
+
+    .completion-content textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      font: 13px/1.7 var(--mono);
+      resize: vertical;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .completion-content textarea:focus {
+      border-color: var(--accent-success);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .completion-content textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    .completion-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .skills-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .skills-controls {
+        flex-direction: column;
+      }
+
+      .filter-buttons {
+        width: 100%;
+      }
+
+      .filter-btn {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-title">
+        <div>
+          <h1>Workspace Dashboard</h1>
+          <div class="header-subtitle">Dashboard v4.0 — ToDo / History / Skills / Notes</div>
+        </div>
+      </div>
+      
+      <div class="header-stats">
+        <div class="stat-badge">
+          <span>Skills:</span>
+          <span class="number" id="totalSkills">0</span>
+        </div>
+        <div class="stat-badge success">
+          <span>Active:</span>
+          <span class="number" id="activeSkills">0</span>
+        </div>
+        <div class="stat-badge">
+          <span>Tasks:</span>
+          <span class="number" id="totalTasks">0</span>
+        </div>
+        <div class="stat-badge success">
+          <span>Done:</span>
+          <span class="number" id="completedTasks">0</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs">
+        <button class="nav-tab active" data-section="skills">Skills</button>
+        <button class="nav-tab" data-section="tasks">Tasks & DoD</button>
+        <button class="nav-tab" data-section="notes">Notes</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- SKILLS SECTION -->
+    <section id="skills-section" class="section active">
+      <div class="skills-controls">
+        <div class="search-box">
+          <span class="icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Search skills by name or description...">
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-category="all">All</button>
+          <button class="filter-btn" data-category="architecture">Architecture</button>
+          <button class="filter-btn" data-category="business">Business</button>
+          <button class="filter-btn" data-category="data">Data & AI</button>
+          <button class="filter-btn" data-category="development">Development</button>
+          <button class="filter-btn" data-category="infrastructure">Infrastructure</button>
+          <button class="filter-btn" data-category="ui">UI/UX</button>
+          <span style="display:inline-block;width:1px;height:20px;background:var(--border);margin:0 6px;vertical-align:middle;"></span>
+          <button class="filter-btn" data-category="web-dev" style="border-color:#06b6d4;">🌐 Web Dev</button>
+          <button class="filter-btn" data-category="testing" style="border-color:#f97316;">🧪 Testing</button>
+          <button class="filter-btn" data-category="git-workflow" style="border-color:#a855f7;">🔀 Git</button>
+          <button class="filter-btn" data-category="documentation" style="border-color:#3b82f6;">📄 Docs</button>
+          <button class="filter-btn" data-category="planning" style="border-color:#eab308;">📐 Planning</button>
+          <button class="filter-btn" data-category="refactoring" style="border-color:#ec4899;">🔧 Refactor</button>
+          <button class="filter-btn" data-category="database" style="border-color:#14b8a6;">🗄️ Database</button>
+          <button class="filter-btn" data-category="ai-tools" style="border-color:#8b5cf6;">🤖 AI Tools</button>
+          <button class="filter-btn" data-category="github" style="border-color:#6366f1;">🐙 GitHub</button>
+          <button class="filter-btn" data-category="meta" style="border-color:#64748b;">⚙️ Meta</button>
+        </div>
+      </div>
+
+      <div class="skills-grid" id="skillsGrid"></div>
+    </section>
+
+    <!-- TASKS SECTION -->
+    <section id="tasks-section" class="section">
+      <!-- Filesystem Connect Bar -->
+      <div class="connect-bar" id="connectBar">
+        <button class="btn-connect" id="connectBtn" onclick="connectWorkspace()">📂 Połącz z .workspace_meta</button>
+        <span class="connect-status" id="connectStatus">⚪ Niepołączono — taski w localStorage</span>
+        <button class="btn" onclick="syncFromFiles()" id="syncBtn" style="display:none;">🔄 Sync</button>
+      </div>
+
+      <div class="tasks-layout">
+        <!-- ToDo Panel (left) -->
+        <div class="task-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">📋 ToDo</h2>
+            <span style="font: 11px/1 var(--mono); color: var(--text-muted);" id="todoCount">0 tasks</span>
+          </div>
+
+          <div class="add-task-form">
+            <input type="text" id="newTaskInput" placeholder="Nowy task... (Enter aby dodać)">
+            <select id="newTaskPriority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+            <button class="btn btn-primary" onclick="addNewTask()">+ Dodaj</button>
+          </div>
+
+          <ul class="task-list" id="taskList">
+            <!-- Tasks rendered here -->
+          </ul>
+        </div>
+
+        <!-- Right Panel with sub-tabs -->
+        <div class="task-panel">
+          <div class="sub-tabs">
+            <button class="sub-tab active" data-subtab="history" onclick="showSubTab('history')">📜 Historia (<span id="historyCount">0</span>)</button>
+            <button class="sub-tab" data-subtab="dod" onclick="showSubTab('dod')">✅ DoD</button>
+          </div>
+
+          <!-- History Sub-panel -->
+          <div class="sub-panel active" id="history-panel">
+            <div id="historyList">
+              <div class="empty-state">
+                <div class="empty-state-icon">📜</div>
+                <p>Brak ukończonych tasków</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- DoD Sub-panel -->
+          <div class="sub-panel" id="dod-panel">
+            <ul class="dod-list" id="dodList">
+              <!-- DoD items rendered here -->
+            </ul>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border);">
+              <h3 style="font: 800 11px/1 var(--mono); text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">
+                ⚠️ Agent Red Lines
+              </h3>
+              <ul style="font: 12px/1.8 var(--sans); color: var(--text-secondary); list-style: none;">
+                <li>❌ Nie ignoruj błędów</li>
+                <li>❌ Nie commituj secrets</li>
+                <li>❌ Nie pomiń type-check</li>
+                <li>❌ Nie zostawiaj dead code bez TODO</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTES SECTION -->
+    <section id="notes-section" class="section">
+      <div class="task-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">📝 Project Notes</h2>
+          <div>
+            <span style="font: 11px/1 var(--mono); color: var(--text-muted);">Session: <span id="sessionTime">0 min</span></span>
+          </div>
+        </div>
+
+        <p style="font: 12px/1.5 var(--sans); color: var(--text-muted); margin-bottom: 16px;">
+          Notatki są widoczne dla agentów jako kontekst projektu. Używaj technicznego języka.
+          <br>
+          <span style="color: var(--accent-primary);">💡 Tip:</span> Kliknij poniższe komendy aby skopiować
+        </p>
+
+        <div class="command-block" onclick="copyToClipboard('Use the {skill-name} skill for this task')">
+          <strong>Activate Skill:</strong> Use the {skill-name} skill for this task
+        </div>
+
+        <div class="command-block" onclick="copyToClipboard('/{skill-name}')">
+          <strong>Workflow Command:</strong> /{skill-name}
+        </div>
+
+        <textarea class="notes-textarea" id="notesEditor" placeholder="Wpisz notatki projektu...
+
+Przykład:
+# Nazwa projektu
+## Architektura
+- Frontend: ...
+- Backend: ...
+## Stack
+- ...
+## Backlog
+- ..."></textarea>
+
+        <div class="panel-actions">
+          <button class="btn btn-primary" onclick="saveNotes()">💾 Save (localStorage)</button>
+          <button class="btn btn-primary" onclick="saveNotesToFile()" style="background: linear-gradient(135deg, #10b981, #059669);">📁 Save to File</button>
+          <button class="btn" onclick="loadNotesFromFile()">📂 Load File</button>
+          <button class="btn" onclick="exportNotes()">📋 Export to Clipboard</button>
+          <button class="btn" onclick="clearNotes()">🗑️ Clear</button>
+        </div>
+        <p style="font: 11px/1.4 var(--mono); color: var(--text-muted); margin-top: 8px;">💡 "Save to File" zapisuje do .workspace_meta/notes/project-notes.md (File System Access API lub download)</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Completion Modal -->
+  <div class="completion-modal" id="completionModal">
+    <div class="completion-content">
+      <h2>✅ Ukończ task</h2>
+      <div class="task-preview" id="completionTaskPreview">Task name</div>
+      <label style="font: 600 12px/1 var(--sans); color: var(--text-secondary); display: block; margin-bottom: 8px;">
+        Opisz jak task został rozwiązany i wdrożony:
+      </label>
+      <textarea id="completionNotes" placeholder="Co zrobiono? Jakie pliki zmieniono? Jak przetestowano?&#10;&#10;Np.: Dodano walidację formularza w src/components/Form.tsx.&#10;Testy: npm test → all pass. Deploy: npm run deploy ✅"></textarea>
+      <div class="completion-actions">
+        <button class="btn" onclick="cancelCompletion()">Anuluj</button>
+        <button class="btn btn-success" onclick="confirmCompletion()">✅ Ukończ i archiwizuj</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skill Modal -->
+  <div class="modal" id="skillModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Skill Details</h2>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">✅</span>
+    <div class="toast-content">
+      <strong class="toast-title" id="toastTitle">Success!</strong>
+      <span class="toast-message" id="toastMessage">Action completed</span>
+    </div>
+  </div>
+
+  <script>
+    // ==================== DATA ====================
+    const skills = [
+      // Architecture & Design
+      { name: "api-design-principles", category: "architecture", description: "Master REST and GraphQL API design principles to build intuitive, scalable, and maintainable APIs that delight developers." },
+      { name: "architecture-decision-records", category: "architecture", description: "Write and maintain Architecture Decision Records (ADRs) following best practices for technical decision documentation." },
+      { name: "architecture-patterns", category: "architecture", description: "Implement proven backend architecture patterns including Clean Architecture, Hexagonal Architecture, and Domain-Driven Design." },
+      { name: "c4-architecture", category: "architecture", description: "Generate comprehensive C4 architecture documentation for an existing repository/codebase using a bottom-up analysis approach." },
+      { name: "code-refactoring-tech-debt", category: "architecture", description: "Identify, quantify, and prioritize technical debt in software projects. Analyze the codebase to uncover debt, assess its impact, and create actionable plans." },
+      { name: "documentation-generation", category: "architecture", description: "Create comprehensive, maintainable documentation from code. Generate API docs, architecture diagrams, user guides, and technical references." },
+      { name: "legacy-modernizer", category: "architecture", description: "Refactor legacy codebases, migrate outdated frameworks, and implement gradual modernization. Handles technical debt, dependency updates, and backward compatibility." },
+      { name: "monorepo-management", category: "architecture", description: "Master monorepo management with Turborepo, Nx, and pnpm workspaces to build efficient, scalable multi-package repositories." },
+      { name: "_template_skill", category: "architecture", description: "A template for creating new skills. Use this as a reference when creating a new capability for the agent." },
+
+      // Business & Strategy
+      { name: "business-analyst", category: "business", description: "Master modern business analysis with AI-powered analytics, real-time dashboards, and data-driven insights. Build comprehensive KPI frameworks and strategic recommendations." },
+      { name: "competitive-landscape", category: "business", description: "Analyze competitors, assess competitive landscape, identify differentiation, evaluate market positioning, and apply Porter's Five Forces for competitive strategy analysis." },
+      { name: "kpi-dashboard-design", category: "business", description: "Design effective KPI dashboards with metrics selection, visualization best practices, and real-time monitoring patterns." },
+      { name: "market-sizing-analysis", category: "business", description: "Calculate TAM, determine SAM, estimate SOM, size the market, and calculate market opportunity for startups and business opportunities." },
+      { name: "risk-manager", category: "business", description: "Monitor portfolio risk, R-multiples, and position limits. Creates hedging strategies, calculates expectancy, and implements stop-losses." },
+      { name: "sales-automator", category: "business", description: "Draft cold emails, follow-ups, and proposal templates. Creates pricing pages, case studies, and sales scripts for sales outreach and lead nurturing." },
+      { name: "seo-content-planner", category: "business", description: "Creates comprehensive content outlines and topic clusters for SEO. Plans content calendars and identifies topic gaps for content strategy and planning." },
+      { name: "seo-keyword-strategist", category: "business", description: "Analyzes keyword usage in provided content, calculates density, suggests semantic variations and LSI keywords based on the topic. Prevents over-optimization." },
+      { name: "startup-financial-modeling", category: "business", description: "Create financial projections, build financial models, forecast revenue, calculate burn rate, estimate runway, and model cash flow for 3-5 year financial planning." },
+      { name: "startup-metrics-framework", category: "business", description: "Track key startup metrics, SaaS metrics, CAC and LTV, unit economics, burn multiple, rule of 40, and marketplace metrics for business performance optimization." },
+      { name: "team-composition-analysis", category: "business", description: "Plan team structure, determine hiring needs, design org chart, calculate compensation, and plan equity allocation for organizational design and headcount planning." },
+
+      // Data & AI
+      { name: "data-engineering-pipeline", category: "data", description: "Data pipeline architecture expert specializing in scalable, reliable, and cost-effective data pipelines for batch and streaming data processing." },
+      { name: "data-scientist", category: "data", description: "Expert data scientist for advanced analytics, machine learning, and statistical modeling. Handles complex data analysis, predictive modeling, and business intelligence." },
+      { name: "data-storytelling", category: "data", description: "Transform data into compelling narratives using visualization, context, and persuasive structure for presenting analytics to stakeholders." },
+      { name: "mlops-engineer", category: "data", description: "Build comprehensive ML pipelines, experiment tracking, and model registries with MLflow, Kubeflow, and modern MLOps tools. Implements automated training, deployment, and monitoring." },
+      { name: "prompt-engineer", category: "data", description: "Expert prompt engineer specializing in advanced prompting techniques, LLM optimization, and AI system design. Masters chain-of-thought, constitutional AI, and production prompt strategies." },
+      { name: "python-performance-optimization", category: "data", description: "Profile and optimize Python code using cProfile, memory profilers, and performance best practices for debugging slow code and improving application performance." },
+      { name: "rag-implementation", category: "data", description: "Build Retrieval-Augmented Generation (RAG) systems for LLM applications with vector databases and semantic search for knowledge-grounded AI and document Q&A systems." },
+      { name: "sql-pro", category: "data", description: "Master modern SQL with cloud-native databases, OLTP/OLAP optimization, and advanced query techniques. Expert in performance tuning, data modeling, and hybrid analytical systems." },
+      { name: "vector-database-engineer", category: "data", description: "Expert in vector databases, embedding strategies, and semantic search implementation. Masters Pinecone, Weaviate, Qdrant, Milvus, and pgvector for RAG applications." },
+
+      // Development
+      { name: "api-testing-observability", category: "development", description: "API mocking expert specializing in realistic mock services for development, testing, and demos. Design mocks that simulate real API behavior and enable parallel development." },
+      { name: "code-review-excellence", category: "development", description: "Master effective code review practices to provide constructive feedback, catch bugs early, and foster knowledge sharing while maintaining team morale." },
+      { name: "fastapi-pro", category: "development", description: "Build high-performance async APIs with FastAPI, SQLAlchemy 2.0, and Pydantic V2. Master microservices, WebSockets, and modern Python async patterns." },
+      { name: "frontend-security-coder", category: "development", description: "Expert in secure frontend coding practices specializing in XSS prevention, output sanitization, and client-side security patterns for frontend security implementations." },
+      { name: "git-advanced-workflows", category: "development", description: "Master advanced Git workflows including rebasing, cherry-picking, bisect, worktrees, and reflog to maintain clean history and recover from any situation." },
+      { name: "python-packaging", category: "development", description: "Create distributable Python packages with proper project structure, setup.py/pyproject.toml, and publishing to PyPI for packaging libraries and CLI tools." },
+      { name: "react-modernization", category: "development", description: "Upgrade React applications to latest versions, migrate from class components to hooks, and adopt concurrent features for modernizing React codebases." },
+      { name: "react-state-management", category: "development", description: "Master modern React state management with Redux Toolkit, Zustand, Jotai, and React Query for setting up global state and managing server state." },
+      { name: "tailwind-design-system", category: "development", description: "Build scalable design systems with Tailwind CSS, design tokens, component libraries, and responsive patterns for creating component libraries and standardizing UI patterns." },
+      { name: "typescript-pro", category: "development", description: "Master TypeScript with advanced types, generics, and strict type safety. Handles complex type systems, decorators, and enterprise-grade patterns." },
+
+      // Infrastructure & Operations
+      { name: "bash-defensive-patterns", category: "infrastructure", description: "Master defensive Bash programming techniques for production-grade scripts. Use when writing robust shell scripts, CI/CD pipelines, or system utilities requiring fault tolerance." },
+      { name: "cicd-automation", category: "infrastructure", description: "Workflow automation expert specializing in creating efficient CI/CD pipelines, GitHub Actions workflows, and automated development processes." },
+      { name: "cost-optimization", category: "infrastructure", description: "Optimize cloud costs through resource rightsizing, tagging strategies, reserved instances, and spending analysis for reducing cloud expenses and implementing cost governance." },
+      { name: "database-admin", category: "infrastructure", description: "Expert database administrator specializing in modern cloud databases, automation, and reliability engineering. Masters AWS/Azure/GCP database services and Infrastructure as Code." },
+      { name: "devops-troubleshooter", category: "infrastructure", description: "Expert DevOps troubleshooter specializing in rapid incident response, advanced debugging, and modern observability. Masters log analysis, distributed tracing, and Kubernetes debugging." },
+      { name: "incident-response", category: "infrastructure", description: "Incident response expert for handling production outages, system failures, and security incidents with structured response protocols and post-mortem analysis." },
+      { name: "observability-engineer", category: "infrastructure", description: "Build production-ready monitoring, logging, and tracing systems. Implements comprehensive observability strategies, SLI/SLO management, and incident response workflows." },
+      { name: "security-auditor", category: "infrastructure", description: "Expert security auditor specializing in DevSecOps, comprehensive cybersecurity, and compliance frameworks. Masters vulnerability assessment, threat modeling, and OWASP standards." },
+      { name: "terraform-specialist", category: "infrastructure", description: "Expert Terraform/OpenTofu specialist mastering advanced IaC automation, state management, and enterprise infrastructure patterns. Handles complex module design and multi-cloud deployments." },
+
+      // UI/UX
+      { name: "ui-ux-pro-max", category: "ui", description: "AI-powered design intelligence with 67+ styles, 96+ color palettes, and automated design system generation for professional UI/UX across multiple platforms and frameworks." },
+
+      // ==================== AWESOME-COPILOT SKILLS ====================
+      // Source: github/awesome-copilot — MIT License
+
+      // Web Dev
+      { name: "web-coder", category: "web-dev", description: "Expert 10x web engineer — HTML, CSS, JS, web APIs, HTTP, security, performance, accessibility, and modern web standards.", source: "awesome-copilot" },
+      { name: "web-design-reviewer", category: "web-dev", description: "Visual inspection of websites to identify and fix design issues in responsive layout, accessibility, and visual consistency.", source: "awesome-copilot" },
+
+      // Testing
+      { name: "javascript-typescript-jest", category: "testing", description: "Best practices for writing JS/TS tests using Jest — mocking strategies, test structure, and common patterns.", source: "awesome-copilot" },
+      { name: "playwright-generate-test", category: "testing", description: "Generates Playwright tests from a scenario using Playwright MCP, iterating until the test passes.", source: "awesome-copilot" },
+      { name: "playwright-explore-website", category: "testing", description: "Explores a website via Playwright MCP to identify key functionalities and propose test cases.", source: "awesome-copilot" },
+      { name: "breakdown-test", category: "testing", description: "Generates comprehensive test strategies, task breakdowns, and quality assurance plans using ISTQB/ISO 25010.", source: "awesome-copilot" },
+
+      // Git Workflow
+      { name: "git-commit", category: "git-workflow", description: "Executes git commits with conventional commit message analysis, intelligent staging, and auto-generated messages from diffs.", source: "awesome-copilot" },
+      { name: "git-flow-branch-creator", category: "git-workflow", description: "Analyzes git status/diff and creates appropriate branches following the nvie Git Flow branching model.", source: "awesome-copilot" },
+      { name: "conventional-commit", category: "git-workflow", description: "Workflow for generating standardized conventional commit messages using structured format and validation.", source: "awesome-copilot" },
+
+      // Documentation
+      { name: "create-readme", category: "documentation", description: "Creates a comprehensive, well-structured README.md for the project following open-source best practices.", source: "awesome-copilot" },
+      { name: "create-specification", category: "documentation", description: "Creates a new specification file optimized for Generative AI consumption with clear requirements and constraints.", source: "awesome-copilot" },
+      { name: "update-specification", category: "documentation", description: "Updates an existing specification file based on new requirements or code changes, AI-optimized.", source: "awesome-copilot" },
+      { name: "documentation-writer", category: "documentation", description: "Diátaxis Documentation Expert — creates high-quality docs across tutorials, how-tos, reference, and explanation.", source: "awesome-copilot" },
+
+      // Planning
+      { name: "create-implementation-plan", category: "planning", description: "Creates a detailed implementation plan for new features, refactoring, upgrades, or architecture changes.", source: "awesome-copilot" },
+      { name: "prd", category: "planning", description: "Generates production-grade Product Requirements Documents with executive summaries, user stories, and risk analysis.", source: "awesome-copilot" },
+      { name: "architecture-blueprint-generator", category: "planning", description: "Analyzes codebases to generate comprehensive architectural documentation with diagrams and decision records.", source: "awesome-copilot" },
+      { name: "breakdown-feature-implementation", category: "planning", description: "Creates detailed technical implementation plans for features based on a Feature PRD.", source: "awesome-copilot" },
+      { name: "breakdown-feature-prd", category: "planning", description: "Creates Product Requirements Documents for new features based on an Epic, acting as expert Product Manager.", source: "awesome-copilot" },
+      { name: "breakdown-plan", category: "planning", description: "Generates GitHub project plans with Epic > Feature > Story > Test hierarchy, dependencies, and automated tracking.", source: "awesome-copilot" },
+
+      // Refactoring
+      { name: "refactor", category: "refactoring", description: "Surgical code refactoring to improve maintainability — extract functions, rename, reduce complexity, apply patterns.", source: "awesome-copilot" },
+      { name: "refactor-plan", category: "refactoring", description: "Plans a multi-file refactor with proper sequencing, dependency analysis, and rollback steps.", source: "awesome-copilot" },
+      { name: "review-and-refactor", category: "refactoring", description: "Reviews all project code against coding guidelines and performs refactorings to ensure clean, maintainable code.", source: "awesome-copilot" },
+
+      // Database
+      { name: "sql-optimization", category: "database", description: "Universal SQL performance optimization — query tuning, indexing, execution plan analysis across all SQL databases.", source: "awesome-copilot" },
+      { name: "sql-code-review", category: "database", description: "Universal SQL code review for security, injection prevention, access control, anti-patterns across all SQL databases.", source: "awesome-copilot" },
+      { name: "postgresql-optimization", category: "database", description: "PostgreSQL-specific assistant — JSONB, array types, full-text search, window functions, and extensions ecosystem.", source: "awesome-copilot" },
+      { name: "postgresql-code-review", category: "database", description: "PostgreSQL-specific code review — JSONB best practices, RLS, schema design, custom types, and anti-patterns.", source: "awesome-copilot" },
+
+      // AI Tools
+      { name: "typescript-mcp-server-generator", category: "ai-tools", description: "Generates a complete MCP server project in TypeScript with tools, resources, and proper configuration.", source: "awesome-copilot" },
+      { name: "boost-prompt", category: "ai-tools", description: "Interactive prompt refinement workflow — interrogates scope, deliverables, constraints; outputs polished markdown prompt.", source: "awesome-copilot" },
+      { name: "prompt-builder", category: "ai-tools", description: "Guides users through creating high-quality GitHub Copilot .prompt.md files with proper structure and best practices.", source: "awesome-copilot" },
+      { name: "model-recommendation", category: "ai-tools", description: "Analyzes .agent.md/.prompt.md files and recommends optimal AI models based on task complexity and cost-efficiency.", source: "awesome-copilot" },
+      { name: "mcp-configure", category: "ai-tools", description: "Configures a Dataverse MCP server for GitHub Copilot with environment URL (global or project scope).", source: "awesome-copilot" },
+      { name: "ai-prompt-engineering-safety-review", category: "ai-tools", description: "Comprehensive safety review of AI prompts — analyzes for bias, security vulnerabilities, and provides improvement recs.", source: "awesome-copilot" },
+
+      // GitHub
+      { name: "gh-cli", category: "github", description: "Comprehensive GitHub CLI (gh) reference for repos, issues, PRs, Actions, releases, and all GitHub operations.", source: "awesome-copilot" },
+      { name: "github-issues", category: "github", description: "Create, update, and manage GitHub issues via MCP tools — bugs, features, labels, milestones, dependencies.", source: "awesome-copilot" },
+      { name: "copilot-spaces", category: "github", description: "Uses Copilot Spaces to load project-specific context from shared knowledge bases into conversations.", source: "awesome-copilot" },
+      { name: "create-github-action-workflow-specification", category: "github", description: "Creates a formal, AI-optimized specification for an existing GitHub Actions CI/CD workflow.", source: "awesome-copilot" },
+
+      // Meta
+      { name: "context-map", category: "meta", description: "Generates a map of all files relevant to a task before making changes — dependencies, tests, and patterns.", source: "awesome-copilot" },
+      { name: "first-ask", category: "meta", description: "Interactive task refinement — interrogates scope, deliverables, constraints before carrying out the task.", source: "awesome-copilot" },
+      { name: "what-context-needed", category: "meta", description: "Asks Copilot what files it needs to see before answering a question — lists files and explains relevance.", source: "awesome-copilot" },
+      { name: "remember", category: "meta", description: "Transforms lessons learned into domain-organized memory instructions stored globally or per-workspace.", source: "awesome-copilot" },
+      { name: "noob-mode", category: "meta", description: "Plain-English translation layer for non-technical users — translates every prompt, error, and output with risk indicators.", source: "awesome-copilot" },
+      { name: "suggest-awesome-github-copilot-skills", category: "meta", description: "Suggests relevant skills from awesome-copilot repo based on project context, avoiding duplicates and flagging outdated ones.", source: "awesome-copilot" }
+    ];
+
+    const defaultDoDItems = [
+      "npm run build && npm test bez błędów",
+      "Testy – coverage ≥ 80%",
+      "Wpis w notes/ opisujący zmianę",
+      "workspace.spec.json zaktualizowany (jeśli arch)",
+      "Git diff – bez secrets, clean commits",
+      "Brak dead code bez TODO + GitHub issue"
+    ];
+
+    // ==================== STATE ====================
+    let activatedSkills = new Set(JSON.parse(localStorage.getItem('activatedSkills') || '[]'));
+    let currentFilter = 'all';
+    let tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    let history = JSON.parse(localStorage.getItem('history') || '[]');
+    let dodItems = JSON.parse(localStorage.getItem('dodItems') || JSON.stringify(defaultDoDItems.map(text => ({ text, checked: false }))));
+    let totalMinutes = parseInt(localStorage.getItem('sessionTime') || '0');
+
+    // Filesystem handles
+    let rootDirHandle = null;
+    let todoDirHandle = null;
+    let historyDirHandle = null;
+    let fsConnected = false;
+
+    // Completion flow state
+    let completingTaskIndex = null;
+
+    // ==================== FILESYSTEM API ====================
+    async function connectWorkspace() {
+      if (!('showDirectoryPicker' in window)) {
+        showToast('Błąd', 'Twoja przeglądarka nie wspiera File System Access API. Użyj Chrome/Edge.');
+        return;
+      }
+
+      try {
+        rootDirHandle = await window.showDirectoryPicker({
+          id: 'workspace-meta',
+          mode: 'readwrite',
+          startIn: 'documents'
+        });
+
+        // Get or create ToDo and History directories
+        todoDirHandle = await rootDirHandle.getDirectoryHandle('ToDo', { create: true });
+        historyDirHandle = await rootDirHandle.getDirectoryHandle('History', { create: true });
+
+        fsConnected = true;
+        updateConnectUI();
+
+        // Sync: load from files
+        await syncFromFiles();
+
+        showToast('Połączono!', `Folder: ${rootDirHandle.name} — taski synchronizowane z plikami`);
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+        console.error('Connect error:', e);
+        showToast('Błąd', 'Nie udało się połączyć z folderem');
+      }
+    }
+
+    function updateConnectUI() {
+      const bar = document.getElementById('connectBar');
+      const btn = document.getElementById('connectBtn');
+      const status = document.getElementById('connectStatus');
+      const syncBtn = document.getElementById('syncBtn');
+
+      if (fsConnected) {
+        bar.classList.add('connected');
+        btn.textContent = '✅ Połączono';
+        btn.classList.add('synced');
+        status.textContent = `🟢 ${rootDirHandle.name}/ToDo/ + History/`;
+        status.classList.add('active');
+        syncBtn.style.display = '';
+      } else {
+        bar.classList.remove('connected');
+        btn.textContent = '📂 Połącz z .workspace_meta';
+        btn.classList.remove('synced');
+        status.textContent = '⚪ Niepołączono — taski w localStorage';
+        status.classList.remove('active');
+        syncBtn.style.display = 'none';
+      }
+    }
+
+    function sanitizeFilename(text) {
+      return text
+        .replace(/[<>:"/\\|?*]/g, '')
+        .replace(/\s+/g, '_')
+        .substring(0, 60)
+        .replace(/_+$/, '');
+    }
+
+    function generateTaskId() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+
+    // Parse a task .md file content into a task object
+    function parseTaskFile(content, filename) {
+      const lines = content.split('\n');
+      const task = {
+        id: filename.replace('.md', ''),
+        text: '',
+        priority: 'medium',
+        created: new Date().toISOString(),
+        filename: filename
+      };
+
+      for (const line of lines) {
+        if (line.startsWith('# ')) task.text = line.substring(2).trim();
+        if (line.startsWith('- **Priorytet:**')) task.priority = line.split('**')[2]?.trim() || 'medium';
+        if (line.startsWith('- **Utworzono:**')) task.created = line.split('**')[2]?.trim() || task.created;
+      }
+
+      return task;
+    }
+
+    // Parse a history .md file content into a history object
+    function parseHistoryFile(content, filename) {
+      const lines = content.split('\n');
+      const item = {
+        id: filename.replace('.md', ''),
+        text: '',
+        priority: 'medium',
+        created: '',
+        completed: '',
+        resolution: '',
+        filename: filename
+      };
+
+      let inResolution = false;
+      const resolutionLines = [];
+
+      for (const line of lines) {
+        if (line.startsWith('# ✅ ')) { item.text = line.substring(5).trim(); continue; }
+        if (line.startsWith('- **Priorytet:**')) { item.priority = line.split('**')[2]?.trim() || 'medium'; continue; }
+        if (line.startsWith('- **Utworzono:**')) { item.created = line.split('**')[2]?.trim() || ''; continue; }
+        if (line.startsWith('- **Ukończono:**')) { item.completed = line.split('**')[2]?.trim() || ''; continue; }
+        if (line.startsWith('## Rozwiązanie')) { inResolution = true; continue; }
+        if (inResolution && line.trim() !== '') resolutionLines.push(line);
+      }
+
+      item.resolution = resolutionLines.join('\n').trim();
+      return item;
+    }
+
+    // Generate .md content for a task
+    function taskToMarkdown(task) {
+      return `# ${task.text}\n\n- **Priorytet:** ${task.priority}\n- **Utworzono:** ${task.created}\n- **Status:** todo\n`;
+    }
+
+    // Generate .md content for a completed task
+    function historyToMarkdown(item) {
+      return `# ✅ ${item.text}\n\n- **Priorytet:** ${item.priority}\n- **Utworzono:** ${item.created}\n- **Ukończono:** ${item.completed}\n- **Status:** done\n\n## Rozwiązanie\n\n${item.resolution}\n`;
+    }
+
+    // Save a task to ToDo/ folder
+    async function saveTaskToFile(task) {
+      if (!fsConnected || !todoDirHandle) return;
+      try {
+        const filename = task.id + '.md';
+        const fileHandle = await todoDirHandle.getFileHandle(filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(taskToMarkdown(task));
+        await writable.close();
+      } catch (e) {
+        console.error('Save task file error:', e);
+      }
+    }
+
+    // Delete a task file from ToDo/
+    async function deleteTaskFile(task) {
+      if (!fsConnected || !todoDirHandle) return;
+      try {
+        await todoDirHandle.removeEntry(task.id + '.md');
+      } catch (e) {
+        console.error('Delete task file error:', e);
+      }
+    }
+
+    // Save a history item to History/ folder
+    async function saveHistoryToFile(item) {
+      if (!fsConnected || !historyDirHandle) return;
+      try {
+        const filename = item.id + '.md';
+        const fileHandle = await historyDirHandle.getFileHandle(filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(historyToMarkdown(item));
+        await writable.close();
+      } catch (e) {
+        console.error('Save history file error:', e);
+      }
+    }
+
+    // Delete a history file
+    async function deleteHistoryFile(item) {
+      if (!fsConnected || !historyDirHandle) return;
+      try {
+        await historyDirHandle.removeEntry(item.id + '.md');
+      } catch (e) {
+        console.error('Delete history file error:', e);
+      }
+    }
+
+    // Sync: read all files from ToDo/ and History/
+    async function syncFromFiles() {
+      if (!fsConnected) return;
+
+      try {
+        // Read ToDo files
+        const newTasks = [];
+        for await (const [name, handle] of todoDirHandle.entries()) {
+          if (handle.kind === 'file' && name.endsWith('.md') && name !== 'README.md') {
+            const file = await handle.getFile();
+            const content = await file.text();
+            newTasks.push(parseTaskFile(content, name));
+          }
+        }
+        tasks = newTasks;
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+
+        // Read History files
+        const newHistory = [];
+        for await (const [name, handle] of historyDirHandle.entries()) {
+          if (handle.kind === 'file' && name.endsWith('.md') && name !== 'README.md') {
+            const file = await handle.getFile();
+            const content = await file.text();
+            newHistory.push(parseHistoryFile(content, name));
+          }
+        }
+        // Sort history by completion date (newest first)
+        newHistory.sort((a, b) => (b.completed || '').localeCompare(a.completed || ''));
+        history = newHistory;
+        localStorage.setItem('history', JSON.stringify(history));
+
+        renderTasks();
+        renderHistory();
+        updateStats();
+        showToast('Zsynchronizowano', `${tasks.length} tasków, ${history.length} w historii`);
+      } catch (e) {
+        console.error('Sync error:', e);
+        showToast('Błąd sync', e.message);
+      }
+    }
+
+    // ==================== SUB-TABS ====================
+    function showSubTab(tabName) {
+      document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sub-panel').forEach(p => p.classList.remove('active'));
+
+      document.querySelector(`[data-subtab="${tabName}"]`).classList.add('active');
+      document.getElementById(tabName + '-panel').classList.add('active');
+    }
+
+    // ==================== SKILLS FUNCTIONS ====================
+    function renderSkills(filter = 'all', searchTerm = '') {
+      const grid = document.getElementById('skillsGrid');
+      grid.innerHTML = '';
+
+      const filteredSkills = skills.filter(skill => {
+        const matchesCategory = filter === 'all' || skill.category === filter;
+        const matchesSearch = searchTerm === '' || 
+          skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          skill.description.toLowerCase().includes(searchTerm.toLowerCase());
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filteredSkills.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1/-1;">
+            <div class="empty-state-icon">🔍</div>
+            <p>No skills found matching your criteria</p>
+          </div>
+        `;
+        return;
+      }
+
+      filteredSkills.forEach(skill => {
+        const isActivated = activatedSkills.has(skill.name);
+        const isAwesome = skill.source === 'awesome-copilot';
+        const card = document.createElement('div');
+        card.className = `skill-card ${isActivated ? 'activated' : ''}`;
+        card.innerHTML = `
+          <div class="skill-header">
+            <div>
+              <div class="skill-name">${skill.name}${isAwesome ? '<span class="awesome-badge" title="awesome-copilot">⭐</span>' : ''}</div>
+              <span class="skill-category">${skill.category}</span>
+            </div>
+          </div>
+          <p class="skill-description">${skill.description}</p>
+          <div class="skill-actions">
+            <button class="btn ${isActivated ? 'btn-success' : 'btn-primary'}" onclick="activateSkill('${skill.name}')">
+              ${isActivated ? '✓ Activated' : '⚡ Activate'}
+            </button>
+            <button class="btn" onclick="showSkillInfo('${skill.name}')">
+              ℹ️ Info
+            </button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      updateStats();
+    }
+
+    function activateSkill(skillName) {
+      activatedSkills.add(skillName);
+      localStorage.setItem('activatedSkills', JSON.stringify([...activatedSkills]));
+      
+      const command = `Use the ${skillName} skill for this task`;
+      navigator.clipboard.writeText(command).then(() => {
+        showToast('Skill Activated!', `"${skillName}" command copied to clipboard`);
+        renderSkills(currentFilter, document.getElementById('searchInput').value);
+      });
+    }
+
+    function showSkillInfo(skillName) {
+      const skill = skills.find(s => s.name === skillName);
+      if (!skill) return;
+
+      const isActivated = activatedSkills.has(skill.name);
+      
+      document.getElementById('modalTitle').textContent = skill.name;
+      const sourceInfo = skill.source === 'awesome-copilot' 
+        ? `<p style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Source:</span> <span style="margin-left: 8px; color: var(--accent-gold);">⭐ awesome-copilot</span></p>` 
+        : '';
+      document.getElementById('modalBody').innerHTML = `
+        <p style="margin-bottom: 8px;"><span style="color: var(--text-muted);">Category:</span> <span class="skill-category" style="margin-left: 8px;">${skill.category}</span></p>
+        ${sourceInfo}
+        <p style="margin-bottom: 20px; line-height: 1.7;">${skill.description}</p>
+        
+        <h3 style="font: 800 12px/1 var(--mono); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; color: var(--accent-primary);">Activation Commands</h3>
+        
+        <div class="command-block" onclick="copyToClipboard('Use the ${skillName} skill for this task')">
+          <strong>Direct:</strong> Use the ${skillName} skill for this task
+        </div>
+        
+        <div class="command-block" onclick="copyToClipboard('/${skillName}')">
+          <strong>Workflow:</strong> /${skillName}
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <button class="btn ${isActivated ? 'btn-success' : 'btn-primary'}" onclick="activateSkill('${skill.name}'); closeModal();" style="width: 100%;">
+            ${isActivated ? '✓ Already Activated' : '⚡ Activate Skill'}
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('skillModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('skillModal').classList.remove('show');
+    }
+
+    // ==================== TASKS FUNCTIONS ====================
+    function renderTasks() {
+      const list = document.getElementById('taskList');
+      list.innerHTML = '';
+
+      document.getElementById('todoCount').textContent = tasks.length + ' tasks';
+
+      if (tasks.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📝</div>
+            <p>Brak tasków. Dodaj nowy powyżej!</p>
+          </div>
+        `;
+        updateStats();
+        return;
+      }
+
+      tasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        li.innerHTML = `
+          <input type="checkbox" class="task-checkbox" onchange="startCompletion(${index})">
+          <div class="task-content">
+            <div class="task-text">${escapeHtml(task.text)}</div>
+            <div class="task-meta">
+              <span class="task-tag priority-${task.priority}">${task.priority}</span>
+              <span style="font: 10px/1 var(--mono); color: var(--text-muted);">${new Date(task.created).toLocaleDateString('pl-PL')}</span>
+            </div>
+          </div>
+          <div class="task-actions">
+            <button class="task-btn" onclick="deleteTask(${index})">🗑️</button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+
+      updateStats();
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function addNewTask() {
+      const input = document.getElementById('newTaskInput');
+      const priority = document.getElementById('newTaskPriority');
+      const text = input.value.trim();
+      
+      if (!text) {
+        showToast('Błąd', 'Wpisz opis taska');
+        return;
+      }
+
+      const task = {
+        id: generateTaskId(),
+        text: text,
+        priority: priority.value,
+        created: new Date().toISOString()
+      };
+
+      tasks.unshift(task);
+      saveTasks();
+      renderTasks();
+      input.value = '';
+
+      // Save to file if connected
+      await saveTaskToFile(task);
+
+      showToast('Task dodany', `"${text}" dodany do ToDo`);
+    }
+
+    // Start completion flow — show modal
+    function startCompletion(index) {
+      completingTaskIndex = index;
+      const task = tasks[index];
+
+      document.getElementById('completionTaskPreview').textContent = task.text;
+      document.getElementById('completionNotes').value = '';
+      document.getElementById('completionModal').classList.add('show');
+
+      // Focus the textarea after animation
+      setTimeout(() => document.getElementById('completionNotes').focus(), 100);
+    }
+
+    function cancelCompletion() {
+      completingTaskIndex = null;
+      document.getElementById('completionModal').classList.remove('show');
+
+      // Uncheck checkbox
+      const checkboxes = document.querySelectorAll('.task-checkbox');
+      checkboxes.forEach(cb => cb.checked = false);
+    }
+
+    async function confirmCompletion() {
+      if (completingTaskIndex === null) return;
+
+      const task = tasks[completingTaskIndex];
+      const resolution = document.getElementById('completionNotes').value.trim();
+
+      if (!resolution) {
+        showToast('Wymagane', 'Opisz jak task został rozwiązany');
+        document.getElementById('completionNotes').focus();
+        return;
+      }
+
+      // Create history item
+      const historyItem = {
+        id: task.id,
+        text: task.text,
+        priority: task.priority,
+        created: task.created,
+        completed: new Date().toISOString(),
+        resolution: resolution
+      };
+
+      // Add to history (newest first)
+      history.unshift(historyItem);
+      localStorage.setItem('history', JSON.stringify(history));
+
+      // Remove from tasks
+      tasks.splice(completingTaskIndex, 1);
+      saveTasks();
+
+      // Filesystem operations
+      await deleteTaskFile(task);
+      await saveHistoryToFile(historyItem);
+
+      // Close modal and refresh
+      completingTaskIndex = null;
+      document.getElementById('completionModal').classList.remove('show');
+
+      renderTasks();
+      renderHistory();
+      updateStats();
+
+      showToast('✅ Ukończono!', `"${task.text}" → archiwum`);
+    }
+
+    async function deleteTask(index) {
+      const task = tasks[index];
+      if (!confirm(`Usunąć "${task.text}"?`)) return;
+
+      tasks.splice(index, 1);
+      saveTasks();
+      renderTasks();
+
+      await deleteTaskFile(task);
+
+      showToast('Usunięty', `"${task.text}" usunięty z ToDo`);
+    }
+
+    function saveTasks() {
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // ==================== HISTORY FUNCTIONS ====================
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      document.getElementById('historyCount').textContent = history.length;
+
+      if (history.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📜</div>
+            <p>Brak ukończonych tasków</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      history.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `
+          <div class="history-header">
+            <div class="history-task-text">✅ ${escapeHtml(item.text)}</div>
+            <div class="history-dates">
+              <div>📅 ${item.created ? new Date(item.created).toLocaleDateString('pl-PL') : '?'}</div>
+              <div>✅ ${item.completed ? new Date(item.completed).toLocaleDateString('pl-PL') : '?'}</div>
+            </div>
+          </div>
+          <div class="history-meta">
+            <span class="task-tag priority-${item.priority}">${item.priority}</span>
+          </div>
+          <div class="history-resolution">${escapeHtml(item.resolution || '(brak opisu)')}</div>
+          <div class="history-actions">
+            <button class="task-btn" onclick="deleteHistoryItem(${index})" title="Usuń z historii">🗑️</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function deleteHistoryItem(index) {
+      const item = history[index];
+      if (!confirm(`Usunąć "${item.text}" z historii?`)) return;
+
+      history.splice(index, 1);
+      localStorage.setItem('history', JSON.stringify(history));
+      renderHistory();
+      updateStats();
+
+      await deleteHistoryFile(item);
+
+      showToast('Usunięty', 'Wpis usunięty z historii');
+    }
+
+    // ==================== DoD FUNCTIONS ====================
+    function renderDoD() {
+      const list = document.getElementById('dodList');
+      list.innerHTML = '';
+
+      dodItems.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = `dod-item ${item.checked ? 'checked' : ''}`;
+        li.innerHTML = `
+          <input type="checkbox" class="task-checkbox" ${item.checked ? 'checked' : ''} onchange="toggleDoD(${index})">
+          <label>${item.text}</label>
+        `;
+        list.appendChild(li);
+      });
+    }
+
+    function toggleDoD(index) {
+      dodItems[index].checked = !dodItems[index].checked;
+      saveDoD();
+      renderDoD();
+      
+      if (dodItems[index].checked) {
+        showToast('DoD Check', dodItems[index].text);
+      }
+    }
+
+    function resetDoD() {
+      dodItems = defaultDoDItems.map(text => ({ text, checked: false }));
+      saveDoD();
+      renderDoD();
+      showToast('Reset', 'Definition of Done checklist reset');
+    }
+
+    function saveDoD() {
+      localStorage.setItem('dodItems', JSON.stringify(dodItems));
+    }
+
+    // ==================== NOTES FUNCTIONS ====================
+    let notesDirHandle = null;
+    let notesFileHandle = null;
+
+    function saveNotes() {
+      const notes = document.getElementById('notesEditor').value;
+      localStorage.setItem('projectNotes', notes);
+      showToast('Notes Saved', 'Zapisano w localStorage');
+    }
+
+    async function saveNotesToFile() {
+      const notes = document.getElementById('notesEditor').value;
+      const date = new Date().toISOString().slice(0, 19).replace(/[T:]/g, '-');
+      const header = `<!-- Auto-saved: ${new Date().toLocaleString('pl-PL')} -->\n`;
+      const content = header + notes;
+
+      localStorage.setItem('projectNotes', notes);
+
+      if ('showSaveFilePicker' in window) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: 'project-notes.md',
+            startIn: 'documents',
+            types: [{
+              description: 'Markdown',
+              accept: { 'text/markdown': ['.md'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(content);
+          await writable.close();
+          notesFileHandle = handle;
+          showToast('Saved to File', `Zapisano: ${handle.name}`);
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+
+      const blob = new Blob([content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `project-notes-${date.slice(0,10)}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Downloaded', 'Notatki pobrane jako .md');
+    }
+
+    async function quickSaveToFile() {
+      if (notesFileHandle) {
+        try {
+          const notes = document.getElementById('notesEditor').value;
+          const header = `<!-- Auto-saved: ${new Date().toLocaleString('pl-PL')} -->\n`;
+          const writable = await notesFileHandle.createWritable();
+          await writable.write(header + notes);
+          await writable.close();
+          localStorage.setItem('projectNotes', notes);
+          showToast('Quick Save', `Nadpisano: ${notesFileHandle.name}`);
+          return true;
+        } catch (e) { /* handle lost, fall through */ }
+      }
+      return false;
+    }
+
+    async function loadNotesFromFile() {
+      if ('showOpenFilePicker' in window) {
+        try {
+          const [handle] = await window.showOpenFilePicker({
+            types: [{
+              description: 'Markdown',
+              accept: { 'text/markdown': ['.md'], 'text/plain': ['.txt'] }
+            }]
+          });
+          const file = await handle.getFile();
+          let text = await file.text();
+          text = text.replace(/^<!-- Auto-saved:.*-->\n/, '');
+          document.getElementById('notesEditor').value = text;
+          localStorage.setItem('projectNotes', text);
+          notesFileHandle = handle;
+          showToast('Loaded', `Załadowano: ${file.name}`);
+          return;
+        } catch (e) {
+          if (e.name === 'AbortError') return;
+        }
+      }
+
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.md,.txt';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        let text = await file.text();
+        text = text.replace(/^<!-- Auto-saved:.*-->\n/, '');
+        document.getElementById('notesEditor').value = text;
+        localStorage.setItem('projectNotes', text);
+        showToast('Loaded', `Załadowano: ${file.name}`);
+      };
+      input.click();
+    }
+
+    function exportNotes() {
+      const notes = document.getElementById('notesEditor').value;
+      const date = new Date().toISOString().slice(0, 10);
+      const exportText = `# Project Notes\n\nDate: ${date}\n\n${notes || '- (no content)'}`;
+      
+      navigator.clipboard.writeText(exportText).then(() => {
+        showToast('Exported!', 'Notes copied to clipboard as Markdown');
+      });
+    }
+
+    function clearNotes() {
+      if (confirm('Czy na pewno wyczyścić notatki?')) {
+        document.getElementById('notesEditor').value = '';
+        localStorage.removeItem('projectNotes');
+        notesFileHandle = null;
+        showToast('Cleared', 'Notatki wyczyszczone');
+      }
+    }
+
+    function loadNotes() {
+      const notes = localStorage.getItem('projectNotes');
+      if (notes !== null) {
+        document.getElementById('notesEditor').value = notes;
+      }
+    }
+
+    // Ctrl+S shortcut
+    document.addEventListener('keydown', async (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        const notesSection = document.getElementById('notes-section');
+        if (notesSection && notesSection.style.display !== 'none') {
+          e.preventDefault();
+          const saved = await quickSaveToFile();
+          if (!saved) saveNotes();
+        }
+      }
+    });
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Copied!', text.length > 50 ? text.substring(0, 50) + '...' : text);
+      });
+    }
+
+    function showToast(title, message) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastTitle').textContent = title;
+      document.getElementById('toastMessage').textContent = message;
+      
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function updateStats() {
+      document.getElementById('totalSkills').textContent = skills.length;
+      document.getElementById('activeSkills').textContent = activatedSkills.size;
+      document.getElementById('totalTasks').textContent = tasks.length;
+      document.getElementById('completedTasks').textContent = history.length;
+    }
+
+    function updateSessionTime() {
+      totalMinutes++;
+      localStorage.setItem('sessionTime', totalMinutes);
+      document.getElementById('sessionTime').textContent = totalMinutes + ' min';
+    }
+
+    // ==================== NAVIGATION ====================
+    function showSection(sectionName) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      
+      document.getElementById(sectionName + '-section').classList.add('active');
+      document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      renderSkills();
+      renderTasks();
+      renderHistory();
+      renderDoD();
+      loadNotes();
+      updateStats();
+
+      setInterval(updateSessionTime, 60000);
+      document.getElementById('sessionTime').textContent = totalMinutes + ' min';
+
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => showSection(tab.dataset.section));
+      });
+
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        renderSkills(currentFilter, e.target.value);
+      });
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.category;
+          renderSkills(currentFilter, document.getElementById('searchInput').value);
+        });
+      });
+
+      document.getElementById('newTaskInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addNewTask();
+      });
+
+      document.getElementById('skillModal').addEventListener('click', (e) => {
+        if (e.target.id === 'skillModal') closeModal();
+      });
+
+      document.getElementById('completionModal').addEventListener('click', (e) => {
+        if (e.target.id === 'completionModal') cancelCompletion();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal();
+          cancelCompletion();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

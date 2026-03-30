@@ -14,6 +14,9 @@ import {
   nativeTheme,
   shell,
 } from 'electron';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import isDev from 'electron-is-dev';
 import { BrowserManager } from './services/browser-manager';
@@ -29,14 +32,16 @@ import { CrawlerService, type CrawlConfig } from './services/crawler-service';
 import { UmamiService } from './services/umami-service';
 import { SearXNGService, type SearchFilters } from './services/searxng-service';
 import { CatalogService } from './services/catalog-service';
-import { SearchService } from './services/search-service';
-import { MeilisearchService } from './services/meilisearch-service';
+import { SearchService, type SearchConfig } from './services/search-service';
+import { MeilisearchService, type HistoryDocument } from './services/meilisearch-service';
 import { WebsurfxService } from './services/websurfx-service';
 import { Sist2Service } from './services/sist2-service';
 import { SyncService } from './services/sync-service';
-import { KnowledgeHubService } from './services/knowledge-hub-service';
-import { AgentsCreatorService } from './services/agents-creator-service';
+import { KnowledgeHubService, type AgentDefinition } from './services/knowledge-hub-service';
+import { AgentsCreatorService, type AgentWorkspace, type PromptSnippet } from './services/agents-creator-service';
 import { CopilotSdkService } from './services/copilot-sdk-service';
+import { CopilotRuntimeServer } from './services/copilot-runtime-server';
+import { isSafeUrl, isValidString } from './utils/validate-url';
 import { createMCPServer, MCPServer } from './mcp-server';
 
 let mainWindow: BrowserWindow | null = null;
@@ -60,6 +65,7 @@ let syncService: SyncService;
 let knowledgeHubService: KnowledgeHubService;
 let agentsCreatorService: AgentsCreatorService;
 let copilotSdkService: CopilotSdkService;
+let copilotRuntimeServer: CopilotRuntimeServer;
 
 /**
  * Create main window
@@ -228,7 +234,7 @@ async function initializeServices() {
 
     // Auto-Updater
     if (!isDev) {
-      new AutoUpdaterService();
+      new AutoUpdaterService(mainWindow); // CR-011: Pass mainWindow for renderer IPC
       console.log('✅ Auto-Updater initialized');
     }
 
@@ -275,6 +281,15 @@ async function initializeServices() {
     copilotSdkService = new CopilotSdkService();
     console.log('✅ Copilot SDK Service initialized');
 
+    // CopilotKit local runtime — AI sidebar dla aplikacji desktopowej
+    const openrouterKey = process.env.OPENROUTER_API_KEY ?? '';
+    if (openrouterKey) {
+      copilotRuntimeServer = new CopilotRuntimeServer();
+      copilotRuntimeServer.start(openrouterKey);
+    } else {
+      console.warn('⚠️ CopilotKit runtime nie uruchomiony — brak OPENROUTER_API_KEY');
+    }
+
     // Search — unified orchestrator (SearXNG + AI + Catalog)
     searchService = new SearchService(searxngService, catalogService, aiGatewayService);
     console.log('✅ Search Service initialized');
@@ -315,17 +330,6 @@ async function initializeServices() {
  * Setup IPC handlers for communication between renderer and main
  */
 function setupIPCHandlers() {
-  const BLOCKED_PROTOCOLS = ['javascript:', 'data:', 'vbscript:', 'file:'];
-
-  function isValidString(val: unknown): val is string {
-    return typeof val === 'string' && val.length > 0 && val.length < 8192;
-  }
-
-  function isSafeUrl(url: string): boolean {
-    const lower = url.trim().toLowerCase();
-    return !BLOCKED_PROTOCOLS.some((p) => lower.startsWith(p));
-  }
-
   // Browser operations
   ipcMain.handle('browser:new-tab', async () => {
     return browserManager.createTab();
@@ -546,7 +550,6 @@ function setupIPCHandlers() {
     }
     const workDir = (cwd && typeof cwd === 'string') ? cwd : terminalCwd;
     try {
-      const { execSync } = require('child_process');
       const stdout = execSync(command, {
         encoding: 'utf8',
         timeout: 30000,
@@ -571,8 +574,6 @@ function setupIPCHandlers() {
 
   ipcMain.handle('terminal:set-cwd', async (_, dir: string) => {
     if (!isValidString(dir)) return { success: false, error: 'Nieprawidłowa ścieżka' };
-    const path = require('path');
-    const fs = require('fs');
     try {
       const resolved = path.resolve(terminalCwd, dir);
       if (fs.existsSync(resolved) && fs.statSync(resolved).isDirectory()) {
@@ -586,7 +587,6 @@ function setupIPCHandlers() {
   });
 
   ipcMain.handle('terminal:system-info', async () => {
-    const os = require('os');
     return {
       platform: os.platform(),
       arch: os.arch(),
@@ -685,8 +685,8 @@ function setupIPCHandlers() {
     try {
       const results = await searchService.webSearch(query, filters);
       return { success: true, data: results };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -695,8 +695,8 @@ function setupIPCHandlers() {
     try {
       const report = await searchService.deepSearch(query, filters);
       return { success: true, data: report };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -705,8 +705,8 @@ function setupIPCHandlers() {
     try {
       const results = searchService.localSearch(query, libraryId);
       return { success: true, data: results };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -715,8 +715,8 @@ function setupIPCHandlers() {
     try {
       const result = await searchService.compare(query, libraryId);
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -728,7 +728,7 @@ function setupIPCHandlers() {
     return searchService.getConfig();
   });
 
-  ipcMain.handle('search:set-config', async (_, config: any) => {
+  ipcMain.handle('search:set-config', async (_, config: SearchConfig) => {
     if (!config || typeof config !== 'object') return;
     searchService.setConfig(config);
   });
@@ -737,13 +737,13 @@ function setupIPCHandlers() {
   // MeiliSearch — History & Autocomplete
   // ═══════════════════════════════════════════════════════════
 
-  ipcMain.handle('meili:add-history', async (_, entry: any) => {
+  ipcMain.handle('meili:add-history', async (_, entry: HistoryDocument) => {
     if (!entry || !entry.url) return { success: false, error: 'Brak URL' };
     try {
       await meilisearchService.addHistoryEntry(entry);
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -752,8 +752,8 @@ function setupIPCHandlers() {
     try {
       const result = await meilisearchService.searchHistory(query, limit);
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -762,8 +762,8 @@ function setupIPCHandlers() {
     try {
       const results = await meilisearchService.autocomplete(query, limit);
       return { success: true, data: results };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -771,8 +771,8 @@ function setupIPCHandlers() {
     try {
       const results = await meilisearchService.getRecentHistory(limit);
       return { success: true, data: results };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -780,8 +780,8 @@ function setupIPCHandlers() {
     try {
       await meilisearchService.clearHistory();
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -798,8 +798,8 @@ function setupIPCHandlers() {
     try {
       const result = await websurfxService.search(query, filters as any);
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -816,8 +816,8 @@ function setupIPCHandlers() {
     try {
       const result = await sist2Service.search(query, size, from);
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -825,8 +825,8 @@ function setupIPCHandlers() {
     try {
       const indices = await sist2Service.getIndices();
       return { success: true, data: indices };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -835,8 +835,8 @@ function setupIPCHandlers() {
     try {
       const job = await sist2Service.scanDirectory(dirPath);
       return { success: true, data: job };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -844,8 +844,8 @@ function setupIPCHandlers() {
     try {
       const jobs = await sist2Service.getJobs();
       return { success: true, data: jobs };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -862,8 +862,8 @@ function setupIPCHandlers() {
     try {
       const lib = catalogService.addLibrary(name, rootPath, extensions);
       return { success: true, data: lib };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -881,8 +881,8 @@ function setupIPCHandlers() {
     try {
       const result = catalogService.indexLibrary(libraryId);
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -890,8 +890,8 @@ function setupIPCHandlers() {
     try {
       const result = catalogService.indexAll();
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -906,8 +906,8 @@ function setupIPCHandlers() {
       const file = catalogService.readFile(filePath);
       if (!file) return { success: false, error: 'Plik niedostępny lub poza biblioteką' };
       return { success: true, data: file };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -923,8 +923,8 @@ function setupIPCHandlers() {
     try {
       const result = await knowledgeHubService.autoRegisterHubLibraries();
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -945,15 +945,15 @@ function setupIPCHandlers() {
     return knowledgeHubService.getAgentDefinitions();
   });
 
-  ipcMain.handle('hub:create-agent', async (_, agent: any) => {
+  ipcMain.handle('hub:create-agent', async (_, agent: AgentDefinition) => {
     if (!agent || !isValidString(agent.id) || !isValidString(agent.name)) {
       return { success: false, error: 'Nieprawidłowe dane agenta' };
     }
     try {
       const created = knowledgeHubService.createAgent(agent);
       return { success: true, data: created };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -966,8 +966,8 @@ function setupIPCHandlers() {
     try {
       const results = knowledgeHubService.searchKnowledge(query, topicId);
       return { success: true, data: results };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -977,13 +977,13 @@ function setupIPCHandlers() {
     return agentsCreatorService.listWorkspaces();
   });
 
-  ipcMain.handle('ac:create-workspace', async (_, config: any) => {
+  ipcMain.handle('ac:create-workspace', async (_, config: { name: string; domain: string; model: string; description: string; systemPrompt?: string }) => {
     if (!config || !isValidString(config.name)) return { success: false, error: 'Nieprawidłowa nazwa' };
     try {
       const ws = agentsCreatorService.createWorkspace(config);
       return { success: true, data: ws };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -992,8 +992,8 @@ function setupIPCHandlers() {
     try {
       agentsCreatorService.deleteWorkspace(agentId);
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1002,13 +1002,13 @@ function setupIPCHandlers() {
     return agentsCreatorService.getWorkspace(agentId);
   });
 
-  ipcMain.handle('ac:update-workspace', async (_, agentId: string, updates: any) => {
+  ipcMain.handle('ac:update-workspace', async (_, agentId: string, updates: Partial<AgentWorkspace>) => {
     if (!isValidString(agentId)) return { success: false, error: 'Nieprawidłowe ID' };
     try {
       const ws = agentsCreatorService.updateWorkspace(agentId, updates);
       return { success: true, data: ws };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1022,8 +1022,8 @@ function setupIPCHandlers() {
     try {
       const file = agentsCreatorService.addKnowledgeFile(agentId, sourcePath);
       return { success: true, data: file };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1032,8 +1032,8 @@ function setupIPCHandlers() {
     try {
       const result = agentsCreatorService.importFromTopic(agentId, topicId);
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1042,8 +1042,8 @@ function setupIPCHandlers() {
     try {
       const file = await agentsCreatorService.importFromUrl(agentId, url);
       return { success: true, data: file };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1052,8 +1052,8 @@ function setupIPCHandlers() {
     try {
       agentsCreatorService.removeKnowledgeFile(agentId, fileName);
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1067,13 +1067,13 @@ function setupIPCHandlers() {
     return agentsCreatorService.getPromptSnippets(agentId);
   });
 
-  ipcMain.handle('ac:add-prompt-snippet', async (_, agentId: string, snippet: any) => {
+  ipcMain.handle('ac:add-prompt-snippet', async (_, agentId: string, snippet: PromptSnippet) => {
     if (!isValidString(agentId) || !snippet?.name) return { success: false, error: 'Brak danych' };
     try {
       agentsCreatorService.addPromptSnippet(agentId, snippet);
       return { success: true };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1082,8 +1082,8 @@ function setupIPCHandlers() {
     try {
       const result = await agentsCreatorService.indexForRag(agentId);
       return { success: true, data: result };
-    } catch (error: any) {
-      return { success: false, error: error.message };
+    } catch (error: unknown) {
+      return { success: false, error: getErrorMessage(error) };
     }
   });
 
@@ -1184,7 +1184,7 @@ function setupIPCHandlers() {
       }
     }
     try { walk(dirPath); return { success: true, files: results }; }
-    catch (e: any) { return { success: false, files: [], error: e.message }; }
+    catch (e: unknown) { return { success: false, files: [], error: getErrorMessage(e) }; }
   });
 }
 
@@ -1226,6 +1226,10 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
+});
+
+app.on('will-quit', () => {
+  copilotRuntimeServer?.stop();
 });
 
 /**

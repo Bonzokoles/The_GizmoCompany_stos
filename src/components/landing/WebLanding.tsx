@@ -4,11 +4,13 @@
  * Deployed on zenbrowsers.org (CF Pages)
  */
 import { useState, useEffect, useCallback } from 'react';
+import { BuchChatWidget } from '../assistant/BuchChatWidget';
+import { AssistantPage } from '../assistant/AssistantPage';
 
 
 /* ─── Types ──────────────────────────────────────── */
 
-type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub' | 'biztools' | 'workflows' | 'mediahub';
+type TabId = 'overview' | 'workers' | 'content' | 'analytics' | 'pipelines' | 'crawlers' | 'storage' | 'databases' | 'images' | 'moa' | 'render' | 'queues' | 'aihub' | 'assistant' | 'biztools' | 'workflows' | 'mediahub';
 type Status = 'online' | 'offline' | 'checking' | 'unknown';
 type AnalyticsSource = 'local' | 'mybonzo';
 
@@ -34,6 +36,7 @@ const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'render',     label: 'Render',    icon: '◕' },
   { id: 'queues',     label: 'Queues',    icon: '▷' },
   { id: 'aihub',      label: 'AI Chat',   icon: '◈' },
+  { id: 'assistant',  label: 'Asystent',  icon: '◉' },
   { id: 'mediahub',   label: 'Media Hub', icon: '♫' },
   { id: 'biztools',   label: 'BizTools',  icon: '▨' },
   { id: 'workflows',  label: 'Workflows', icon: '⚡' },
@@ -149,16 +152,7 @@ async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T | n
 export function WebLanding() {
   const [tab, setTab] = useState<TabId>('overview');
 
-  const openCopilotKit = useCallback(() => {
-    const trigger = document.querySelector<HTMLButtonElement>('.copilotKitButton');
-    if (trigger) {
-      trigger.click();
-      return;
-    }
-    const url = new URL(window.location.href);
-    url.searchParams.set('copilot', 'open');
-    window.location.href = url.toString();
-  }, []);
+
   const [apis, setApis] = useState(API_SERVICES);
   const [sites, setSites] = useState<SiteStatus[]>([]);
 
@@ -2533,6 +2527,9 @@ export function WebLanding() {
         </div>
       )}
 
+      {/* ─── ASSISTANT TAB ─── */}
+      {tab === 'assistant' && <AssistantPage />}
+
       {/* ─── MEDIA HUB TAB ─── */}
       {tab === 'mediahub' && (
         <div className="tab-content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 'calc(100vh - 120px)', gap: 32 }}>
@@ -2543,7 +2540,7 @@ export function WebLanding() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <a
-              href="https://bonzokoles.github.io/BONZO_media_HUB/"
+              href="https://bonzo-media-hub.pages.dev/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', background: '#60a5fa', textDecoration: 'none', padding: '12px 32px', borderRadius: 8, letterSpacing: 0.5 }}
@@ -2566,15 +2563,8 @@ export function WebLanding() {
         <p>ZENO Ops &copy; {new Date().getFullYear()} — Powered by Cloudflare Workers &amp; AI</p>
       </footer>
 
-      {/* ─── CopilotKit trigger ─── */}
-      <button
-        className="chat-toggle"
-        onClick={openCopilotKit}
-        title="Otwórz CopilotKit"
-      >
-        <span className="ct-dot" />
-        CopilotKit
-      </button>
+      {/* ─── BUCH_CHAT floating widget ─── */}
+      <BuchChatWidget onOpenFull={() => setTab('assistant')} />
     </div>
   );
 }

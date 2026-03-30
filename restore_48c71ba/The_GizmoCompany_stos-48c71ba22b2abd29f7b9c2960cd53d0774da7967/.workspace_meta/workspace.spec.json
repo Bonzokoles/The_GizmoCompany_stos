@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Workspace Specification",
+  "version": "2.0.0",
+  "lastUpdated": "2026-03-20",
+  "metadata": {
+    "name": "ZENO Browser",
+    "type": "single-repo",
+    "root": "U:\\WWW_Zen_BRo_wser_org3",
+    "owner": "Bonzokoles",
+    "description": "ZENO Browser — przeglądarka internetowa oparta na Electron z panelem AI, systemem pluginów, SecurityMonitor i Cloudflare Tunnel",
+    "architecture": "desktop-app",
+    "primaryTechStack": [
+      "TypeScript",
+      "React 19",
+      "Electron 27",
+      "Vite 5",
+      "Zustand",
+      "Cloudflare Agents SDK",
+      "Cloudflare Workers AI",
+      "Jest",
+      "Playwright",
+      "Docker/Podman"
+    ]
+  },
+  "repositories": {
+    "root": {
+      "path": ".",
+      "type": "application",
+      "remote": "",
+      "branch": "main"
+    },
+    "submodules": []
+  },
+  "services": {
+    "zeno-browser": {
+      "type": "electron-app",
+      "description": "Główna aplikacja desktopowa — przeglądarka z AI",
+      "entrypoint": "src-electron/main.ts",
+      "devCommand": "npm run dev"
+    },
+    "vite-dev-server": {
+      "type": "dev-server",
+      "description": "Vite dev server dla React UI",
+      "port": 5173
+    },
+    "ai-gateway": {
+      "type": "backend-service",
+      "description": "AI Gateway — routing do Gemini, OpenRouter, Claude",
+      "configFile": "config/ai-gateway.yml"
+    }
+  },
+  "portAllocations": {
+    "range": "3000-5173",
+    "specific": {
+      "3000": "zeno-browser (production)",
+      "5173": "vite-dev-server",
+      "9222": "Chrome DevTools Protocol (debug)",
+      "11434": "Gemma 2B (kontener)",
+      "11435": "Phi Nano 0.5B (kontener)"
+    },
+    "configFile": "docker-compose.yml"
+  },
+  "mcpServers": {
+    "local": [],
+    "npx": ["@modelcontextprotocol/server-github"],
+    "url": [],
+    "configFile": ".workspace_meta/mcp/config.json"
+  },
+  "environmentVariables": {
+    "WORKSPACE_ROOT": "U:\\WWW_Zen_BRo_wser_org3",
+    "DEEPSEEK_API_KEY": "${env:DEEPSEEK_API_KEY}",
+    "OPENROUTER_API_KEY": "${env:OPENROUTER_API_KEY}",
+    "EDENAI_API_KEY": "${env:EDENAI_API_KEY}",
+    "CF_TUNNEL_TOKEN": "${env:CF_TUNNEL_TOKEN}"
+  },
+  "conventions": {
+    "packageManager": "npm",
+    "commitFormat": "[type] description",
+    "typesOfCommits": ["feat", "fix", "docs", "refactor", "chore", "test", "build"],
+    "codeStyle": {
+      "linter": "eslint",
+      "formatter": "prettier",
+      "testRunner": "jest + playwright"
+    }
+  },
+  "documentation": {
+    "root": ".workspace_meta",
+    "primary": [
+      "README.md",
+      "QUICK_START.md",
+      "CHANGELOG.md",
+      "docs/"
+    ],
+    "notes": ".workspace_meta/notes",
+    "architecture": ".workspace_meta/notes/decisions.md",
+    "website": "website/"
+  },
+  "projectStructure": {
+    "src/": "React components i UI (AddressBar, AIPanel, BrowserUI, TabBar, PluginManager, SecurityMonitor)",
+    "src-electron/": "Electron main process (main.ts, preload.ts, services/)",
+    "src/services/": "Frontend services (ai-gateway, security)",
+    "src/plugin-system/": "System pluginów (core, marketplace)",
+    "config/": "Pliki konfiguracyjne (ai-gateway.yml)",
+    "scripts/": "Build scripts, podman scripts, installer tools",
+    "website/": "Docusaurus documentation website",
+    "docs/": "Dokumentacja projektu i integration guides"
+  },
+  "criticalRules": [
+    "ZAWSZE aktualizuj workspace.spec.json po zmianie architektury",
+    "NIGDY nie commituj secrets do repo",
+    "ZAWSZE dokumentuj decyzje architektoniczne w notes/decisions.md",
+    "Modele AI: Gemini, OpenRouter, Claude (API) + Gemma, Phi (kontenery)",
+    "Ollama i Bielik USUNIĘTE z projektu — nie dodawać z powrotem",
+    "Lokalne modele: TYLKO terminal support (max 4B), API modele: główna praca AI"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "unversionedId": "getting-started",
+  "id": "getting-started",
+  "title": "Getting Started with ZENO Browser",
+  "description": "Welcome to ZENO Browser - the AI-powered web browser with DeepSeek integration!",
+  "source": "@site/docs/getting-started.md",
+  "sourceDirName": ".",
+  "slug": "/getting-started",
+  "permalink": "/pl/docs/getting-started",
+  "draft": false,
+  "editUrl": "https://github.com/Bonzokoles/zen-bro-wser.org/edit/main/website/docs/getting-started.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "FAQ - Frequently Asked Questions",
+    "permalink": "/pl/docs/faq"
+  },
+  "next": {
+    "title": "Installing ZENO Browser on Windows",
+    "permalink": "/pl/docs/installation/windows"
+  }
+}

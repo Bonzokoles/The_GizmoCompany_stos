@@ -1,53 +1,653 @@
 
+# ZENO Browser — 5-Phase Upgrade Plan
 
-```markdown
-# ZENO Browser — Implementation Plan: Upgrade & Refactor
-
-> **Wygenerowano:** 2026-03-19
-> **Format:** TASK-{NNN} | Atomowe zmiany z weryfikacją
-> **Bazuje na:** context-map + refactor-plan z sesji 2026-03-19
-
----
-
-## LEGENDA
-
-- **Blocked-by:** TASK-{NNN} musi być ukończone PRZED tym taskiem
-- **Verify:** Komenda do sprawdzenia po wykonaniu
-- **Files:** Pełne ścieżki plików do modyfikacji
-- **Status:** `[ ]` TODO | `[-]` IN PROGRESS | `[x]` DONE
+> **Generated:** 2026-03-30  
+> **Based on:** context-map-20260330.md  
+> **Agent:** principal-software-engineer  
+> **Strategy:** Incremental, tested phases with rollback capability
 
 ---
 
-## EPIC-0: PRE-UPGRADE BUGFIXY
+## Target Versions
 
-> **Completion Criteria:** `npx tsc --noEmit` = 0 nowych błędów, `npm run build` = OK
-> **Blocked-by:** nic — start tutaj
+| Package | Current | Target | Breaking? | Priority |
+|---------|---------|--------|-----------|----------|
+| **TypeScript** | ^5.3.3 | 5.9.x | ❌ NO | Phase 1 |
+| **Vite** | ^5.0.7 | 8.x | ⚠️ YES (Rollup 3→4) | Phase 2 |
+| **React** | ^18.2.0 | 19.2.x | ⚠️ YES | Phase 3 |
+| **Electron** | ^27.0.0 | 41.x | ⚠️ YES (Node 20) | Phase 4 |
+| **ESLint** | ^8.55.0 | 10.x | ⚠️ YES | Phase 5 |
+| **Zustand** | ^4.4.1 | 5.x | ⚠️ YES | Phase 3 |
 
-### TASK-001: Przenieś browser-sandbox.ts do src-electron/
-- **Status:** `[ ]`
-- **Files:**
-  - MOVE: `src/services/security/browser-sandbox.ts` → `src-electron/services/security-sandbox.ts`
-- **Opis:** Plik importuje `ipcMain`, `contextBridge` z Electron — to kod main procesu, NIE renderer
-- **Blocked-by:** —
-- **Verify:**
-  ```bash
-  test -f src-electron/services/security-sandbox.ts && echo "OK" || echo "FAIL"
-  test ! -f src/services/security/browser-sandbox.ts && echo "OK" || echo "FAIL"
-  npx tsc --noEmit
-  ```
+---
 
-### TASK-002: Zamień require() → dynamic import() w gateway.ts
-- **Status:** `[ ]`
-- **Files:**
-  - EDIT: `src/services/ai-gateway/gateway.ts` L55-62
-- **Opis:** Zamień synchroniczny `require('./providers/deepseek')` na `await import('./providers/deepseek')` — umożliwi tree-shaking i ESM compatibility
-- **Zmiana:**
-  ```typescript
-  // PRZED (L55-62):
-  const providerMap: Record<AIProviderType, any> = {
-    deepseek: require('./providers/deepseek').DeepSeekProvider,
-    openrouter: require('./providers/openrouter').OpenRouterProvider,
-    edenai: require('./providers/edenai').EdenAIProvider,
+## PHASE 1: TypeScript 5.3 → 5.9 (Non-Breaking)
+
+**Effort:** S (Small — 1-2 days)  
+**Risk:** Low (no breaking changes)  
+**Blocked-by:** None
+
+### Files to Modify
+
+#### 1.1 Update package.json
+```json
+{
+  "devDependencies": {
+    "typescript": "^5.9.6"
+  }
+}
+```
+
+#### 1.2 Update tsconfig.json — enable new features
+**File:** `tsconfig.json`
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "bundler",  // New in 5.4
+    "noEmit": true,
+    "isolatedModules": true
+  }
+}
+```
+
+#### 1.3 Update tsconfig.electron.json
+**File:** `tsconfig.electron.json`
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "node16"  // Electron still uses Node.js
+  }
+}
+```
+
+### Affected Files (Type Errors Expected — 0)
+- ✅ All `src/**/*.ts`, `src/**/*.tsx` (syntax compatible)
+- ✅ All `src-electron/**/*.ts` (syntax compatible)
+
+### Verification
+```bash
+npm install
+npx tsc --noEmit
+npm run type-check:electron
+npm run build
+```
+
+### Rollback Plan
+```bash
+git checkout package.json package-lock.json
+npm install
+```
+
+---
+
+## PHASE 2: Vite 5 → 8 (Breaking — Rollup 3 → 4)
+
+**Effort:** M (Medium — 2-3 days)  
+**Risk:** Medium (build output changes, plugin API updates)  
+**Blocked-by:** PHASE 1
+
+### Files to Modify
+
+#### 2.1 Update package.json
+```json
+{
+  "devDependencies": {
+    "vite": "^8.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "vite-plugin-electron": "^0.31.0",
+    "vite-plugin-electron-renderer": "^0.14.8"
+  }
+}
+```
+
+#### 2.2 Update vite.config.mts
+**File:** `vite.config.mts` (lines 1-87)
+
+**Changes:**
+1. **Rollup 4 config updates** (lines 20-40)
+   - `output.manualChunks` → requires function signature change
+   - `onwarn` handler → updated API
+2. **Plugin API** (lines 50-80)
+   - `vite-plugin-electron` → updated `entry` syntax
+   - `vite-plugin-electron-renderer` → updated `preload` config
+
+**Before:**
+```typescript
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+        }
+      }
+    }
+  }
+})
+```
+
+**After:**
+```typescript
+export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react')) return 'react-vendor';
+          return undefined;
+        }
+      }
+    }
+  }
+})
+```
+
+#### 2.3 Update index.html (if needed)
+**File:** `index.html`, `ai-hub/index.html`
+- Verify HMR script injection still works
+- Check `<script type="module" src="/src/main.tsx">` path
+
+### Affected Files (58 files — NO code changes needed)
+- ✅ All components (Vite handles bundling)
+- ⚠️ `vite.config.mts` (manual update required)
+- ⚠️ Build scripts: `scripts/build-*.js` (if they reference Rollup APIs)
+
+### Verification
+```bash
+npm install
+npm run dev  # Check HMR works
+npm run build
+npm run preview  # Verify production build
+npm run build:electron  # Verify Electron build
+```
+
+### Rollback Plan
+```bash
+git checkout package.json package-lock.json vite.config.mts
+npm install
+```
+
+---
+
+## PHASE 3: React 18.2 → 19.2 + Zustand 4 → 5 (Breaking)
+
+**Effort:** L (Large — 5-7 days)  
+**Risk:** High (component API changes, Zustand state access patterns)  
+**Blocked-by:** PHASE 2
+
+### Files to Modify
+
+#### 3.1 Update package.json
+```json
+{
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  }
+}
+```
+
+#### 3.2 Zustand Migration (5 files)
+
+**React 19 Changes:**
+- `use` hook (new for promises)
+- `useActionState` replaces `useFormState`
+- `useOptimistic` for optimistic UI
+- `ref` as callback cleanup instead of `useEffect`
+
+**Zustand 5 Changes:**
+- `create` signature change: `create<State>()((set, get) => ({...}))` → `create<State>((set, get) => ({...}))`
+
+**Files:**
+1. **`src/store/chatBotStore.ts`** (lines 1-85)
+   - Update `create()` syntax
+   - Replace `(set, get)` → new signature
+2. **`src/store/browserStore.ts`** (lines 1-60)
+   - Same Zustand 5 migration
+3. **`src/store/pluginStore.ts`** (lines 1-40)
+   - Same Zustand 5 migration
+4. **`src/hooks/useJimboKitStore.ts`** (lines 1-25)
+   - Update `create()` syntax
+5. **`src/store/settingsStore.ts`** (if exists)
+   - Same Zustand 5 migration
+
+**Example Migration:**
+
+**Before (Zustand 4):**
+```typescript
+import create from 'zustand';
+const useStore = create<State>()((set, get) => ({
+  count: 0,
+  increment: () => set({ count: get().count + 1 })
+}));
+```
+
+**After (Zustand 5):**
+```typescript
+import { create } from 'zustand';
+const useStore = create<State>((set, get) => ({
+  count: 0,
+  increment: () => set({ count: get().count + 1 })
+}));
+```
+
+#### 3.3 React Component Updates (30 files)
+
+**3.3.1 BrowserUI.tsx (CRITICAL — 18 dependencies)**
+**File:** `src/components/browser-core/BrowserUI.tsx` (lines 1-447)
+
+**Changes:**
+1. **Lazy imports** (lines 10-25): Verify React 19 compatibility
+   ```typescript
+   const AIPanel = lazy(() => import('../ai/AIPanel'));
+   // No changes needed, but test loading behavior
+   ```
+2. **IPC event listeners** (lines 100-120): Replace cleanup with ref callback
+   ```typescript
+   // BEFORE (React 18):
+   useEffect(() => {
+     const unsubscribe = window.electronAPI.on('browser:navigate-back', handler);
+     return () => unsubscribe();
+   }, []);
+
+   // AFTER (React 19):
+   const unsubscribeRef = useRef<() => void>();
+   useEffect(() => {
+     unsubscribeRef.current = window.electronAPI.on('browser:navigate-back', handler);
+   }, []);
+   useEffect(() => () => unsubscribeRef.current?.(), []);
+   ```
+3. **Panel state** (lines 200-300): No changes (controlled by local state)
+
+**3.3.2 AIPanel.tsx** (lines 1-137)
+- **useTransition** already used → verify React 19 compatibility (should work)
+- Update IPC calls if needed
+
+**3.3.3 AddressBar.tsx** (lines 1-60)
+- ✅ No breaking changes (uses `useState`, `useCallback`)
+
+**3.3.4 TabBar.tsx** (lines 1-56)
+- Verify `memo()` still works (React 19 compatible)
+
+**3.3.5 14 Lazy-Loaded Panels**
+| File | Lines | Changes Needed |
+|------|-------|----------------|
+| SecurityMonitor.tsx | 64 | ✅ None |
+| CloudflareTunnelPanel.tsx | 118 | Replace `useEffect` cleanup |
+| PluginHub.tsx | 80 | ✅ None (composition only) |
+| PluginExplorer.tsx | 125 | Replace `useEffect` cleanup (marketplace polling) |
+| PluginInstaller.tsx | 85 | ✅ None |
+| PluginManager.tsx | 92 | ✅ None |
+| UpdateNotification.tsx | 97 | Replace IPC listener cleanup |
+| AIGatewayPanel.tsx | 120 | Replace `useEffect` cleanup (metrics polling) |
+| TerminalPanel.tsx | 150+ | Replace `useEffect` cleanup (output stream) |
+| CatalogBrowser.tsx | 100+ | ✅ None |
+| KnowledgeHubPanel.tsx | 170+ | ✅ None |
+| AgentsCreatorPanel.tsx | 280+ | Replace `useEffect` cleanup (RAG indexing) |
+| CopilotDevPanel.tsx | 100+ | Replace `useEffect` cleanup (SDK status) |
+| JimboKitPanel.tsx | 90+ | Replace WebSocket cleanup |
+
+### Verification
+```bash
+npm install
+npx tsc --noEmit  # Check type errors
+npm run dev  # Test in dev mode
+npm run build
+npm run test  # Run component tests (if exist)
+```
+
+### Rollback Plan
+```bash
+git stash  # Save all component changes
+git checkout package.json package-lock.json
+npm install
+git stash pop  # If reverting specific files only
+```
+
+---
+
+## PHASE 4: Electron 27 → 41 (Breaking — Node 20, IPC Security)
+
+**Effort:** XL (Extra Large — 7-10 days)  
+**Risk:** Critical (IPC security model changed, context isolation strict)  
+**Blocked-by:** PHASE 3
+
+### Files to Modify
+
+#### 4.1 Update package.json
+```json
+{
+  "devDependencies": {
+    "electron": "^41.0.0",
+    "electron-builder": "^25.0.0",
+    "vite-plugin-electron": "^0.31.0",
+    "vite-plugin-electron-renderer": "^0.14.8"
+  }
+}
+```
+
+#### 4.2 main.ts — Security Hardening (CRITICAL)
+**File:** `src-electron/main.ts` (lines 1-1178)
+
+**Changes:**
+
+**4.2.1 BrowserWindow Creation** (lines 80-120)
+```typescript
+// BEFORE (Electron 27):
+const mainWindow = new BrowserWindow({
+  webPreferences: {
+    contextIsolation: true,  // Already enabled (CR-005)
+    nodeIntegration: false,
+    preload: path.join(__dirname, 'preload.js')
+  }
+});
+
+// AFTER (Electron 41 — stricter defaults):
+const mainWindow = new BrowserWindow({
+  webPreferences: {
+    contextIsolation: true,  // Required (throws error if false)
+    nodeIntegration: false,  // Required
+    sandbox: true,  // NEW — stricter than CR-005
+    webSecurity: true,  // Enforce CSP
+    allowRunningInsecureContent: false,
+    preload: path.join(__dirname, 'preload.js')
+  }
+});
+```
+
+**4.2.2 IPC Handler Validation** (lines 300-1000)
+
+**Problem:** Electron 41 requires explicit IPC channel whitelisting via `ipcMain.handle` **and** sender origin validation.
+
+**Example Fix (apply to all 120+ handlers):**
+
+**Before:**
+```typescript
+ipcMain.handle('browser:navigate', async (event, url: string) => {
+  await browserManager.navigate(url);
+});
+```
+
+**After:**
+```typescript
+ipcMain.handle('browser:navigate', async (event, url: string) => {
+  // Validate sender origin (防 malicious renderer injection)
+  if (!event.senderFrame.url.startsWith('file://')) {
+    throw new Error('Unauthorized IPC call');
+  }
+  await browserManager.navigate(url);
+});
+```
+
+**Affected Handlers:** 120+ (see context-map IPC Channel Map)
+- ✅ Already validated: `browser:*` (CR-001 applied)
+- ⚠️ Need validation: `ai:*`, `network:*`, `terminal:*`, `plugin:*`, `catalog:*`, `hub:*`, `ac:*`, `cms:*`, `sync:*`, `umami:*`, `copilot:*`, `mcp:*`, `search:*`, `meili:*`, `websurfx:*`, `sist2:*`, `workflow:*`, `crawler:*`, `tunnel:*`, `updater:*`, `dialog:*`, `file:*`, `theme:*`, `window:*`, `tabs:*`, `security:*`
+
+**Automated Fix Strategy:**
+```typescript
+// util function in main.ts
+function validateIPC(event: Electron.IpcMainInvokeEvent): void {
+  const allowedProtocols = ['file://', 'app://'];
+  const senderURL = event.senderFrame.url;
+  if (!allowedProtocols.some(proto => senderURL.startsWith(proto))) {
+    throw new Error(`IPC call from unauthorized origin: ${senderURL}`);
+  }
+}
+
+// Apply to all handlers:
+ipcMain.handle('browser:navigate', async (event, url: string) => {
+  validateIPC(event);  // ← Add this line
+  await browserManager.navigate(url);
+});
+```
+
+#### 4.3 preload.ts — Context Bridge Hardening
+**File:** `src-electron/preload.ts` (lines 1-360)
+
+**Electron 41 Changes:**
+1. **`contextBridge.exposeInMainWorld` now throws** if object contains functions with Node.js primitives (Buffer, Stream, etc.)
+2. **Must serialize all return values** explicitly
+
+**Before:**
+```typescript
+contextBridge.exposeInMainWorld('electronAPI', {
+  terminal: {
+    execute: (command: string) => ipcRenderer.invoke('terminal:execute', command)
+    // Returns Promise<{ stdout: Buffer }> ← BREAKS in Electron 41
+  }
+});
+```
+
+**After:**
+```typescript
+contextBridge.exposeInMainWorld('electronAPI', {
+  terminal: {
+    execute: async (command: string) => {
+      const result = await ipcRenderer.invoke('terminal:execute', command);
+      return {
+        ...result,
+        stdout: result.stdout.toString('utf-8')  // Serialize Buffer → string
+      };
+    }
+  }
+});
+```
+
+**Affected Namespaces:** 24 (see context-map preload.ts analysis)
+- ⚠️ `terminal.*` (returns Buffers)
+- ⚠️ `file.*` (returns file descriptors)
+- ⚠️ `catalog.readFile()` (returns Buffer)
+- ⚠️ `sync.*` (returns SQLite primitives)
+
+#### 4.4 Service Updates (24 files)
+
+All services in `src-electron/services/` must:
+1. **Validate IPC sender** (use `validateIPC()` helper)
+2. **Remove Node.js primitives** from return types
+3. **Update electron-log** (new API in Electron 41)
+
+**Files:**
+- ✅ `auto-updater.ts` (CR-022 already applied)
+- ⚠️ `browser-manager.ts` (validate sender)
+- ⚠️ `ai-gateway-service.ts` (validate sender)
+- ⚠️ `network-monitor.ts` (validate sender)
+- ⚠️ `security-sandbox.ts` (validate sender)
+- ⚠️ `plugin-ipc-bridge.ts` (validate sender + serialize plugin metadata)
+- ⚠️ `network-manager.ts` (validate sender)
+- ⚠️ `tab-communication.ts` (validate sender)
+- ⚠️ `workflow-engine.ts` (validate sender)
+- ⚠️ `crawler-service.ts` (validate sender)
+- ⚠️ `umami-service.ts` (validate sender + axios response serialization)
+- ⚠️ `searxng-service.ts` (validate sender)
+- ⚠️ `catalog-service.ts` (validate sender + Buffer → string in readFile)
+- ⚠️ `search-service.ts` (validate sender)
+- ⚠️ `meilisearch-service.ts` (validate sender)
+- ⚠️ `websurfx-service.ts` (validate sender)
+- ⚠️ `sist2-service.ts` (validate sender)
+- ⚠️ `sync-service.ts` (validate sender + SQLite serialization)
+- ⚠️ `knowledge-hub-service.ts` (validate sender)
+- ⚠️ `agents-creator-service.ts` (validate sender)
+- ⚠️ `copilot-sdk-service.ts` (validate sender)
+- ⚠️ `copilot-runtime-server.ts` (HTTP server, no IPC)
+- ⚠️ `tunnel-ui-bridge.ts` (validate sender)
+- ⚠️ `mcp-server.ts` (HTTP/SSE server, no IPC)
+
+### Verification
+```bash
+npm install
+npm run build:electron
+npm run start:electron  # Test all IPC flows manually
+npm run test:e2e  # Playwright tests (if exist)
+
+# Security audit:
+npx electronegativity .
+```
+
+### Rollback Plan
+```bash
+git stash  # Save all Electron changes
+git checkout package.json package-lock.json src-electron/
+npm install
+git stash pop  # If reverting specific files
+```
+
+---
+
+## PHASE 5: ESLint 8 → 10 (Breaking — Flat Config)
+
+**Effort:** M (Medium — 2-3 days)  
+**Risk:** Low (linting only, no runtime impact)  
+**Blocked-by:** PHASE 4
+
+### Files to Modify
+
+#### 5.1 Update package.json
+```json
+{
+  "devDependencies": {
+    "eslint": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint-plugin-react": "^7.36.0",
+    "eslint-plugin-react-hooks": "^5.0.0"
+  }
+}
+```
+
+#### 5.2 Migrate .eslintrc.cjs → eslint.config.mjs
+**Delete:** `.eslintrc.cjs`  
+**Create:** `eslint.config.mjs`
+
+**Before (.eslintrc.cjs):**
+```javascript
+module.exports = {
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended'
+  ],
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    project: './tsconfig.json'
+  }
+};
+```
+
+**After (eslint.config.mjs):**
+```javascript
+import js from '@eslint/js';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
+import reactPlugin from 'eslint-plugin-react';
+
+export default [
+  js.configs.recommended,
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: './tsconfig.json'
+      }
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+      'react': reactPlugin
+    },
+    rules: {
+      ...tsPlugin.configs.recommended.rules,
+      ...reactPlugin.configs.recommended.rules
+    }
+  }
+];
+```
+
+#### 5.3 Update package.json scripts
+```json
+{
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  }
+}
+```
+
+### Verification
+```bash
+npm install
+npm run lint
+npm run lint:fix  # Auto-fix issues
+```
+
+### Rollback Plan
+```bash
+git checkout package.json package-lock.json eslint.config.mjs .eslintrc.cjs
+npm install
+```
+
+---
+
+## Global Rollback Strategy
+
+If **any phase fails catastrophically**:
+
+```bash
+# 1. Restore entire workspace
+git reset --hard HEAD~1
+
+# 2. Restore dependencies
+npm install
+
+# 3. Verify old versions work
+npm run dev
+npm run build
+
+# 4. Review logs
+git log --oneline -5
+git diff HEAD~1
+```
+
+---
+
+## Testing Checklist (After Each Phase)
+
+- [ ] `npm run type-check` — 0 TypeScript errors
+- [ ] `npm run lint` — 0 ESLint errors
+- [ ] `npm run build` — success
+- [ ] `npm run dev` — HMR works, no console errors
+- [ ] `npm run build:electron` — success
+- [ ] `npm run start:electron` — app launches, no crashes
+- [ ] Manual IPC test: Open all 15 panels, trigger IPC calls (browser nav, AI chat, plugin install, terminal execute, catalog add, etc.)
+- [ ] Security audit: `npx electronegativity .` — 0 critical findings
+
+---
+
+## Effort Summary
+
+| Phase | Effort | Days | Risk |
+|-------|--------|------|------|
+| 1 — TypeScript 5.9 | S | 1-2 | Low |
+| 2 — Vite 8 | M | 2-3 | Medium |
+| 3 — React 19 + Zustand 5 | L | 5-7 | High |
+| 4 — Electron 41 | XL | 7-10 | Critical |
+| 5 — ESLint 10 | M | 2-3 | Low |
+| **TOTAL** | — | **17-25 days** | — |
+
+---
+
+## Next Steps
+
+1. ✅ **TASK-MAP complete** → Context map created
+2. ⏭️ **TASK-REACT** → Use this plan to start React 19 refactor (Phase 3)
+3. ⏭️ **TASK-TDD** → Add tests after each phase
+
+**Generated by:** principal-software-engineer (via context-architect agent)  
+**Timestamp:** 2026-03-30T15:30:00Z
     openai: require('./providers/openai').OpenAIProvider,
     anthropic: require('./providers/anthropic').AnthropicProvider,
     local: require('./providers/local').LocalProvider,

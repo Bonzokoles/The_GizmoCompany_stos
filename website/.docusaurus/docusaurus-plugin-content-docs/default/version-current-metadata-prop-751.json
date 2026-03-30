@@ -1,0 +1,60 @@
+{
+  "pluginId": "default",
+  "version": "current",
+  "label": "Next",
+  "banner": null,
+  "badge": false,
+  "noIndex": false,
+  "className": "docs-version-current",
+  "isLast": true,
+  "docsSidebars": {
+    "docs": [
+      {
+        "type": "link",
+        "label": "FAQ - Frequently Asked Questions",
+        "href": "/pl/docs/faq",
+        "docId": "faq"
+      },
+      {
+        "type": "link",
+        "label": "Getting Started with ZENO Browser",
+        "href": "/pl/docs/getting-started",
+        "docId": "getting-started"
+      },
+      {
+        "type": "category",
+        "label": "installation",
+        "collapsible": true,
+        "collapsed": true,
+        "items": [
+          {
+            "type": "link",
+            "label": "Installing ZENO Browser on Windows",
+            "href": "/pl/docs/installation/windows",
+            "docId": "installation/windows"
+          }
+        ]
+      }
+    ]
+  },
+  "docs": {
+    "faq": {
+      "id": "faq",
+      "title": "FAQ - Frequently Asked Questions",
+      "description": "General",
+      "sidebar": "docs"
+    },
+    "getting-started": {
+      "id": "getting-started",
+      "title": "Getting Started with ZENO Browser",
+      "description": "Welcome to ZENO Browser - the AI-powered web browser with DeepSeek integration!",
+      "sidebar": "docs"
+    },
+    "installation/windows": {
+      "id": "installation/windows",
+      "title": "Installing ZENO Browser on Windows",
+      "description": "System Requirements",
+      "sidebar": "docs"
+    }
+  }
+}

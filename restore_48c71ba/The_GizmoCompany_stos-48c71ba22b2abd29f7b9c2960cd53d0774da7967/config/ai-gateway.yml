@@ -1,0 +1,109 @@
+# ZENO Browser - AI Gateway Configuration
+
+providers:
+  # DeepSeek - Primary for deep research/reasoning
+  deepseek:
+    enabled: true
+    priority: 1
+    apiKey: ${DEEPSEEK_API_KEY}
+    endpoint: https://api.deepseek.com/v1
+    models:
+      - deepseek-chat       # General purpose
+      - deepseek-coder      # Code generation
+      - deepseek-reasoning  # Complex reasoning
+    rateLimit:
+      rpm: 60
+      tokensPerMinute: 1000000
+    timeout: 60000
+    capabilities:
+      - text-generation
+      - reasoning
+      - code-generation
+      - web-search
+
+  # OpenRouter - Secondary, diverse models
+  openrouter:
+    enabled: true
+    priority: 2
+    apiKey: ${OPENROUTER_API_KEY}
+    endpoint: https://openrouter.io/api/v1
+    models:
+      - anthropic/claude-3-opus
+      - openai/gpt-4-turbo
+      - mistralai/mistral-large
+      - meta-llama/llama-2-70b
+    rateLimit:
+      rpm: 100
+    timeout: 30000
+    capabilities:
+      - text-generation
+      - code-generation
+      - vision
+      - streaming
+
+  # EdenAI - Tertiary aggregator
+  edenai:
+    enabled: true
+    priority: 3
+    apiKey: ${EDENAI_API_KEY}
+    endpoint: https://api.edenai.run/v1
+    models:
+      - openai.gpt-4
+      - huggingfaceh4.zephyr-7b-beta
+      - cohere.command-plus
+    rateLimit:
+      rpm: 50
+    timeout: 30000
+    capabilities:
+      - text-generation
+      - vision
+      - audio
+
+  # Classic providers - for specific use cases only
+  openai:
+    enabled: false  # Enable only if needed
+    priority: 99
+    apiKey: ${OPENAI_API_KEY}
+    models:
+      - gpt-4o
+      - gpt-4-turbo
+    rateLimit:
+      rpm: 3500
+
+  anthropic:
+    enabled: false
+    priority: 100
+    apiKey: ${ANTHROPIC_API_KEY}
+    models:
+      - claude-3-opus
+    rateLimit:
+      rpm: 50
+
+# Caching Configuration
+caching:
+  enabled: true
+  maxSize: 5000
+  ttl: 3600              # 1 hour
+  compressionEnabled: true
+
+# Monitoring & Metrics
+monitoring:
+  enabled: true
+  metricsInterval: 60000 # Collect every minute
+  alertThresholds:
+    errorRate: 0.1       # Alert if 10% errors
+    avgLatency: 5000     # Alert if avg > 5s
+    rateLimitHits: 10
+
+# Failover & Retry
+failover:
+  enabled: true
+  maxRetries: 3
+  backoffMultiplier: 2
+  initialBackoff: 1000   # milliseconds
+
+# Request Batching (for efficiency)
+batching:
+  enabled: true
+  batchSize: 10
+  maxWaitTime: 5000

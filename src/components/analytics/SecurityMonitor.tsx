@@ -1,31 +1,68 @@
 /**
- * Security Monitor Panel — React 19 + typed API
+ * Security Monitor Panel — React 19 + typed API + useSyncExternalStore
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useSyncExternalStore, useCallback } from 'react';
 import type { AuditLog } from '../../types/electron';
 
 interface SecurityMonitorProps {
   onClose: () => void;
 }
 
+// External store for audit logs (subscribes to real-time IPC events)
+let cachedLogs: AuditLog[] = [];
+const listeners = new Set<() => void>();
+let isInitialized = false;
+
+async function initializeLogs() {
+  if (isInitialized) return;
+  isInitialized = true;
+
+  try {
+    const auditLogs = await window.electronAPI.security.getAuditLogs();
+    cachedLogs = auditLogs;
+    listeners.forEach((listener) => listener());
+  } catch (error) {
+    console.error('Failed to initialize audit logs:', error);
+  }
+}
+
+function subscribe(callback: () => void) {
+  listeners.add(callback);
+
+  // Initialize logs on first subscription
+  void initializeLogs();
+
+  // Subscribe to real-time audit log events from Electron
+  const handleNewLog = (log: AuditLog) => {
+    cachedLogs = [...cachedLogs, log];
+    listeners.forEach((listener) => listener());
+  };
+
+  window.electronAPI.security?.onAuditLog?.(handleNewLog);
+
+  return () => {
+    listeners.delete(callback);
+    window.electronAPI.security?.offAuditLog?.(handleNewLog);
+  };
+}
+
+function getSnapshot() {
+  return cachedLogs;
+}
+
 export function SecurityMonitor({ onClose }: SecurityMonitorProps) {
-  const [logs, setLogs] = useState<AuditLog[]>([]);
+  const logs = useSyncExternalStore(subscribe, getSnapshot);
 
-  const { electronAPI } = window;
-
-  const loadLogs = useCallback(async () => {
+  const refreshLogs = useCallback(async () => {
     try {
-      const auditLogs = await electronAPI.security.getAuditLogs();
-      setLogs(auditLogs);
+      const auditLogs = await window.electronAPI.security.getAuditLogs();
+      cachedLogs = auditLogs;
+      listeners.forEach((listener) => listener());
     } catch (error) {
-      console.error('Failed to load logs:', error);
+      console.error('Failed to refresh logs:', error);
     }
-  }, [electronAPI]);
-
-  useEffect(() => {
-    loadLogs();
-  }, [loadLogs]);
+  }, []);
 
   return (
     <div className="security-panel floating-panel" role="complementary" aria-label="Monitor bezpieczeństwa">
@@ -55,7 +92,7 @@ export function SecurityMonitor({ onClose }: SecurityMonitorProps) {
           )}
         </div>
 
-        <button onClick={loadLogs} className="btn-small">
+        <button onClick={refreshLogs} className="btn-small">
           Odśwież logi
         </button>
       </div>

@@ -3,8 +3,9 @@
  * Handles checking for and installing updates
  */
 
-import { app, dialog, ipcMain } from 'electron';
+import { app, dialog, ipcMain, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import log from 'electron-log'; // CR-022: Static import instead of require
 import path from 'path';
 
 export interface UpdateInfo {
@@ -17,14 +18,16 @@ export interface UpdateInfo {
 export class AutoUpdaterService {
   private isCheckingForUpdate = false;
   private updateCheckInterval: ReturnType<typeof setInterval> | null = null;
+  private mainWindow?: BrowserWindow; // CR-011: Store mainWindow reference
 
-  constructor() {
+  constructor(mainWindow?: BrowserWindow) {
+    this.mainWindow = mainWindow;
     this.configureAutoUpdater();
     this.setupIPC();
   }
 
   private configureAutoUpdater() {
-    autoUpdater.logger = require('electron-log');
+    autoUpdater.logger = log; // CR-022: Use imported log instead of require
     autoUpdater.checkForUpdatesAndNotify();
 
     autoUpdater.on('checking-for-update', () => {
@@ -46,7 +49,8 @@ export class AutoUpdaterService {
 
     autoUpdater.on('download-progress', (progress) => {
       console.log(`📥 Download progress: ${progress.percent}%`);
-      ipcMain.emit('update-progress', progress);
+      // CR-011: Send to renderer process via webContents, not ipcMain.emit
+      this.mainWindow?.webContents.send('update-progress', progress);
     });
 
     autoUpdater.on('update-downloaded', () => {

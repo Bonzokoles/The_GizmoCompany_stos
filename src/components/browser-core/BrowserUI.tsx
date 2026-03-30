@@ -28,6 +28,7 @@ const CatalogBrowser = lazy(() => import('../tools/CatalogBrowser').then(m => ({
 const KnowledgeHubPanel = lazy(() => import('../knowledge-hub/KnowledgeHubPanel').then(m => ({ default: m.KnowledgeHubPanel })));
 const AgentsCreatorPanel = lazy(() => import('../agents-creator/AgentsCreatorPanel').then(m => ({ default: m.AgentsCreatorPanel })));
 const CopilotDevPanel = lazy(() => import('../ai/CopilotDevPanel').then(m => ({ default: m.CopilotDevPanel })));
+const JimboKitPanel = lazy(() => import('../assistant/JimboKitPanel').then(m => ({ default: m.JimboKitPanel })));
 
 function PanelFallback() {
   return <div className="panel-loading">Ładowanie panelu...</div>;
@@ -71,6 +72,7 @@ export function BrowserUI() {
   const [showKnowledgeHub, setShowKnowledgeHub] = useState(false);
   const [showAgentsCreator, setShowAgentsCreator] = useState(false);
   const [showCopilotDev, setShowCopilotDev] = useState(false);
+  const [showJimboKit, setShowJimboKit] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [showUpdateNotification, setShowUpdateNotification] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -391,6 +393,15 @@ export function BrowserUI() {
             >
               🪁
             </button>
+            <button
+              className="btn-icon"
+              onClick={() => setShowJimboKit(v => !v)}
+              title="Jimbo_kit — Agent AI z terminalem"
+              aria-pressed={showJimboKit}
+              style={navBtnStyle}
+            >
+              🦾
+            </button>
             <button className="btn-icon" onClick={handleNewTab} title="Nowa karta" style={navBtnStyle}>
               +
             </button>
@@ -413,6 +424,7 @@ export function BrowserUI() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 14px', background: '#16213e', borderBottom: '1px solid #0f3460', overflowX: 'auto' }}>
               {navBtn('https://zenbrowsers.org/',                        '🌐 ZenBrowsers.org',    'ZENO Browser – strona oficjalna')}
               {navBtn('https://zenbrowsers.org/ai-hub/',                 '🤖 AI Org Hub',         'AI Hub — centrum narzędzi AI')}
+              {navBtn('https://bonzo-media-hub.pages.dev/',              '♫ BONZO Media Hub',    'BONZO Media Hub — osobna aplikacja Cloudflare')}
               {navBtn('https://jimbo77.com',                             '👤 jimbo77.com',        'Jimbo77 — strona główna')}
               {navBtn('https://jimbo77.org',                             '🔗 jimbo77.org',        'Jimbo77 — org')}
               {navBtn('https://mybonzoaiblog.com',                       '📝 MyBonzoAI Blog',     'MyBonzo AI Blog')}
@@ -522,6 +534,20 @@ export function BrowserUI() {
             {showCopilotDev && (
               <ErrorBoundary>
                 <CopilotDevPanel onClose={() => setShowCopilotDev(false)} />
+              </ErrorBoundary>
+            )}
+            {showJimboKit && (
+              <ErrorBoundary>
+                <JimboKitPanel
+                  onClose={() => setShowJimboKit(false)}
+                  onNavigate={handleNavigate}
+                  onNewTab={handleNewTab}
+                  onBack={handleGoBack}
+                  onForward={handleGoForward}
+                  onReload={handleReload}
+                  currentUrl={currentUrl}
+                  floating
+                />
               </ErrorBoundary>
             )}
           </Suspense>

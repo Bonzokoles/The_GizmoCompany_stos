@@ -20,9 +20,14 @@ export function renderSkills() {
     return true;
   });
 
+  const resolveSkillUrl = (s) => {
+    if (s.url) return s.url;
+    return `https://github.com/huggingface/skills/tree/main/skills/${encodeURIComponent(s.file.split('/')[2])}`;
+  };
+
   grid.innerHTML = filtered.map(s => `
     <div class="glass tool-card" style="cursor:pointer"
-      onclick="window.open('https://github.com/huggingface/skills/tree/main/skills/${encodeURIComponent(s.file.split('/')[2])}','_blank')">
+      onclick="window.open('${resolveSkillUrl(s)}','_blank')">
       <div class="tool-icon" style="font-size:1.8rem">${s.icon}</div>
       <div class="tool-name">${s.name}</div>
       <div class="tool-desc">${s.desc}</div>

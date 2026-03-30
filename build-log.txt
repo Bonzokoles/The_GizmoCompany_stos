@@ -1,0 +1,43 @@
+
+> zeno-browser@0.1.0 build
+> npm run build:vite && npm run build:electron
+
+
+> zeno-browser@0.1.0 build:vite
+> cross-env VITE_BUILD_TARGET=web vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32mÔťô[39m 118 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                                 [39m[1m[2m  7.57 kB[22m[1m[22m[2m Ôöé gzip:  2.03 kB[22m
+[2mdist/[22m[35massets/ElectronApp-tn0RQdqM.css            [39m[1m[2m  0.00 kB[22m[1m[22m[2m Ôöé gzip:  0.02 kB[22m
+[2mdist/[22m[35massets/UpdateNotification-BKYZ-ocR.css     [39m[1m[2m  1.35 kB[22m[1m[22m[2m Ôöé gzip:  0.61 kB[22m
+[2mdist/[22m[35massets/CloudflareTunnelPanel-CcI9gv_X.css  [39m[1m[2m  1.70 kB[22m[1m[22m[2m Ôöé gzip:  0.59 kB[22m
+[2mdist/[22m[35massets/PluginHub-C6P8CmzE.css              [39m[1m[2m  4.67 kB[22m[1m[22m[2m Ôöé gzip:  1.45 kB[22m
+[2mdist/[22m[35massets/index-C0utQX4j.css                  [39m[1m[2m 30.94 kB[22m[1m[22m[2m Ôöé gzip:  6.29 kB[22m
+[2mdist/[22m[36massets/SecurityMonitor-B7Lbfwew.js         [39m[1m[2m  1.31 kB[22m[1m[22m[2m Ôöé gzip:  0.69 kB[22m
+[2mdist/[22m[36massets/UpdateNotification-B4HWg3_g.js      [39m[1m[2m  1.78 kB[22m[1m[22m[2m Ôöé gzip:  0.86 kB[22m
+[2mdist/[22m[36massets/CloudflareTunnelPanel-CPXCLTvc.js   [39m[1m[2m  3.04 kB[22m[1m[22m[2m Ôöé gzip:  1.22 kB[22m
+[2mdist/[22m[36massets/vendor-scheduler-BmyE5rk0.js        [39m[1m[2m  3.78 kB[22m[1m[22m[2m Ôöé gzip:  1.69 kB[22m
+[2mdist/[22m[36massets/CopilotDevPanel-Bu3E32KQ.js         [39m[1m[2m  4.62 kB[22m[1m[22m[2m Ôöé gzip:  1.78 kB[22m
+[2mdist/[22m[36massets/AIPanel-fa7dzqVR.js                 [39m[1m[2m  5.49 kB[22m[1m[22m[2m Ôöé gzip:  2.55 kB[22m
+[2mdist/[22m[36massets/CatalogBrowser-BEEOYesa.js          [39m[1m[2m  5.85 kB[22m[1m[22m[2m Ôöé gzip:  2.10 kB[22m
+[2mdist/[22m[36massets/SearchPanel-P466CUbp.js             [39m[1m[2m  7.41 kB[22m[1m[22m[2m Ôöé gzip:  2.48 kB[22m
+[2mdist/[22m[36massets/PluginHub-BtEx2GSa.js               [39m[1m[2m 10.34 kB[22m[1m[22m[2m Ôöé gzip:  3.17 kB[22m
+[2mdist/[22m[36massets/AIGatewayPanel-mO8S7y3-.js          [39m[1m[2m 10.74 kB[22m[1m[22m[2m Ôöé gzip:  3.75 kB[22m
+[2mdist/[22m[36massets/AnalyticsPanel-BFtDGJPu.js          [39m[1m[2m 11.10 kB[22m[1m[22m[2m Ôöé gzip:  3.84 kB[22m
+[2mdist/[22m[36massets/ToolsPanel-DVeXP0gN.js              [39m[1m[2m 11.42 kB[22m[1m[22m[2m Ôöé gzip:  3.38 kB[22m
+[2mdist/[22m[36massets/KnowledgeHubPanel-BLZdm_a6.js       [39m[1m[2m 13.41 kB[22m[1m[22m[2m Ôöé gzip:  3.67 kB[22m
+[2mdist/[22m[36massets/AgentsCreatorPanel-BvpWYO4l.js      [39m[1m[2m 17.36 kB[22m[1m[22m[2m Ôöé gzip:  4.89 kB[22m
+[2mdist/[22m[36massets/TerminalPanel-CeVc9I6M.js           [39m[1m[2m 21.38 kB[22m[1m[22m[2m Ôöé gzip:  7.86 kB[22m
+[2mdist/[22m[36massets/vendor-axios-42ANG6Sg.js            [39m[1m[2m 37.09 kB[22m[1m[22m[2m Ôöé gzip: 14.85 kB[22m
+[2mdist/[22m[36massets/ElectronApp-CrgsSfPg.js             [39m[1m[2m 46.39 kB[22m[1m[22m[2m Ôöé gzip: 13.38 kB[22m
+[2mdist/[22m[36massets/index-CYzq105c.js                   [39m[1m[2m 86.44 kB[22m[1m[22m[2m Ôöé gzip: 21.68 kB[22m
+[2mdist/[22m[36massets/vendor-react-BXxeFX84.js            [39m[1m[2m188.69 kB[22m[1m[22m[2m Ôöé gzip: 58.75 kB[22m
+[32mÔťô built in 1.40s[39m
+
+> zeno-browser@0.1.0 build:electron
+> tsc -p tsconfig.electron.json
+

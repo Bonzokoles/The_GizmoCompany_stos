@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "skills": {
+    "agents-sdk": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "a57f4149f1127dc38201532adcdb2ddc5113bf360ba96cc7972bc6e6a173becc"
+    },
+    "building-ai-agent-on-cloudflare": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "2e1135493cefdf93eb44f811b08606ace16808bcd0b312172507eb9c2f611961"
+    },
+    "building-mcp-server-on-cloudflare": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "00063f0a4eed517051ded927d008225946b6c2a2f8b64eb2c414945e20eb1396"
+    },
+    "cloudflare": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "5a5e2d959b24a1ea765d3697011e1facfbee4710855fba7fa7cea957b7b88e14"
+    },
+    "durable-objects": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "afa5e9dfcbbe3b70107d9f263a1c183ef89afbb5eb97f42be01cad7bd942958f"
+    },
+    "hf-cli": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "277897055ffeb33268641e02d8e3fc68e2c87eef07ca7ab94786b9cacaef111e"
+    },
+    "huggingface-community-evals": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "139f2f0736aeb5127dc20e2e43866c9f3da78ccd2ba49cced090022a5cb2627c"
+    },
+    "huggingface-datasets": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "5af74f3e042313efadf02e85c316a2576bdc0b0ff92c43c3ba5dcb6e2da1eded"
+    },
+    "huggingface-gradio": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "9443a05fbceae2ee27feba9dc296302ae43c862565a0924d8fc076bd4578fd54"
+    },
+    "huggingface-jobs": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "7799227abe9e05e0d643f7af6b24c78148ae3cf1a29b256fdfea4a3f6eb988eb"
+    },
+    "huggingface-llm-trainer": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "a22a3d539f8b2f1e0f8232d0bb4897c1d0791b59618aacae2cab8c3485ec3320"
+    },
+    "huggingface-paper-publisher": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "7449d07f6c280f05925bda33cb2e41284e7f89b7262265cc2a1875426f0ac69d"
+    },
+    "huggingface-papers": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "1cb8a2e3b8c88f0208e07bdbd68f9b512f990987e0ba2ce5a962cd6a02d1da0a"
+    },
+    "huggingface-trackio": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "d268ff919e667ec9ece1e24ff1340909ff0d33f69de31805d6304e5c445104cf"
+    },
+    "huggingface-vision-trainer": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "1652cc2a2d4f3fcf5626b71a7fc5da7d127d4c6d91d57aef4e6adadfb6b696c3"
+    },
+    "sandbox-sdk": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "8e3a3fa92d0abb81358c5ab0be9ecdcde07945913de055c0a0eed19ade12b611"
+    },
+    "tavily-best-practices": {
+      "source": "tavily-ai/skills",
+      "sourceType": "github",
+      "computedHash": "b1912363d3ad92011952118994dbf9e01bcd6544aab166f9bf1ce243cd44f7a0"
+    },
+    "tavily-cli": {
+      "source": "tavily-ai/skills",
+      "sourceType": "github",
+      "computedHash": "524054fc3d04cf2acc47b00f263ccffc82b086fc9eb031c80a54f8f840c46f54"
+    },
+    "tavily-crawl": {
+      "source": "tavily-ai/skills",
+      "sourceType": "github",
+      "computedHash": "0fb681b713040b33cea5a7accf46e44f8f718e36da1c1d8b2cd7f54f574da8e7"
+    },
+    "tavily-extract": {
+      "source": "tavily-ai/skills",
+      "sourceType": "github",
+      "computedHash": "c3f85118a29d8adf7f90acb87d28eb2d3526a7c92d4b276df7ec800675114664"
+    },
+    "tavily-map": {
+      "source": "tavily-ai/skills",
+      "sourceType": "github",
+      "computedHash": "8b059fd854895eecfb6999b4ca7eb268dc324a04d4515d9f81d867a4bfd538ba"
+    },
+    "tavily-research": {
+      "source": "tavily-ai/skills",
+      "sourceType": "github",
+      "computedHash": "8f0d7dc0a3d838fc647c5666f7dd398626d35b8f95bd7f0ae2512df8927d8f29"
+    },
+    "tavily-search": {
+      "source": "tavily-ai/skills",
+      "sourceType": "github",
+      "computedHash": "8cc6213302c9e74916e135d8abf462b8b0fc1ddea328b6f6a6a3f1d7d4b5c2ac"
+    },
+    "transformers-js": {
+      "source": "huggingface/skills",
+      "sourceType": "github",
+      "computedHash": "e04e86139565278def1e029df65754934c2a1c58d3df93830564cfb435b1b8f2"
+    },
+    "web-perf": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "b66d51ed7af8716b0bbf224483437c4fd6f0213c2c24bbf94609699d8181c30d"
+    },
+    "workers-best-practices": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "c919a93c9db826a0ee2818f6f7977c40c1a43bb87abc848b22181fdbabe2ef80"
+    },
+    "wrangler": {
+      "source": "cloudflare/skills",
+      "sourceType": "github",
+      "computedHash": "ec6ba585a1ec45004569ac780a215df8fef6b0ea871899331dcf2ac88f384a1b"
+    }
+  }
+}

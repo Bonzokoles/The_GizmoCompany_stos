@@ -1,9 +1,10 @@
 /**
  * Plugin Explorer - Discover and browse plugins
+ * React 19 refactor: Uses IPC instead of direct service imports
  */
 
 import React, { useState, useEffect } from 'react';
-import { marketplaceService, MarketplacePlugin } from '../../plugin-system/marketplace/marketplace-service';
+import type { MarketplacePlugin } from '../../plugin-system/marketplace/marketplace-service';
 import './PluginExplorer.css';
 
 interface PluginExplorerProps {
@@ -19,6 +20,8 @@ export const PluginExplorer: React.FC<PluginExplorerProps> = ({ onClose, onInsta
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'featured' | 'trending' | 'search'>('featured');
 
+  const electronAPI = window.electronAPI;
+
   useEffect(() => {
     loadPlugins();
   }, []);
@@ -27,8 +30,8 @@ export const PluginExplorer: React.FC<PluginExplorerProps> = ({ onClose, onInsta
     setLoading(true);
     try {
       const [featuredData, trendingData] = await Promise.all([
-        marketplaceService.getFeatured(),
-        marketplaceService.getTrending(),
+        electronAPI.plugin?.getFeatured?.() ?? [],
+        electronAPI.plugin?.getTrending?.() ?? [],
       ]);
 
       setFeatured(featuredData);
@@ -46,7 +49,7 @@ export const PluginExplorer: React.FC<PluginExplorerProps> = ({ onClose, onInsta
 
     setLoading(true);
     try {
-      const results = await marketplaceService.search(searchQuery);
+      const results = await electronAPI.plugin?.searchMarketplace?.(searchQuery) ?? [];
       setPlugins(results);
       setActiveTab('search');
     } catch (error) {

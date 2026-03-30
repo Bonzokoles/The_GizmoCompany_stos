@@ -55,6 +55,7 @@ interface Props {
 export function AgentsCreatorPanel({ onClose }: Props) {
   const [activeTab, setActiveTab] = useState<ActiveTab>('workspaces');
   const [status, setStatus] = useState<string | null>(null);
+  const [deleteWorkspaceId, setDeleteWorkspaceId] = useState<string | null>(null);
 
   // Workspaces
   const [workspaces, setWorkspaces] = useState<AgentWorkspace[]>([]);
@@ -143,7 +144,6 @@ export function AgentsCreatorPanel({ onClose }: Props) {
   };
 
   const handleDeleteWorkspace = async (agentId: string) => {
-    if (!confirm('Usunac workspace "' + agentId + '" i wszystkie jego dane?')) return;
     try {
       await window.electronAPI.agentsCreator.deleteWorkspace(agentId);
       setStatus('\ud83d\uddd1 Workspace usuniety');
@@ -441,7 +441,7 @@ export function AgentsCreatorPanel({ onClose }: Props) {
                   <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                     <span style={{ fontSize: '10px', color: '#4a5568' }}>{ws.model}</span>
                     <button
-                      onClick={e => { e.stopPropagation(); handleDeleteWorkspace(ws.id); }}
+                      onClick={e => { e.stopPropagation(); setDeleteWorkspaceId(ws.id); }}
                       style={{ ...smallActionBtn, color: '#ff6b6b', fontSize: '11px' }}
                       title="Usun"
                     >
@@ -709,6 +709,37 @@ export function AgentsCreatorPanel({ onClose }: Props) {
           </div>
         )}
       </div>
+
+      {deleteWorkspaceId && (
+        <div style={confirmOverlayStyle}>
+          <div style={confirmDialogStyle}>
+            <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#ccd6f6', marginBottom: '8px' }}>
+              Potwierdź usunięcie workspace
+            </div>
+            <div style={{ fontSize: '12px', color: '#8892b0', marginBottom: '10px' }}>
+              Czy na pewno usunąć workspace "{deleteWorkspaceId}" i wszystkie jego dane?
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+              <button
+                onClick={() => setDeleteWorkspaceId(null)}
+                style={{ ...actionBtn, background: '#1a365d', borderColor: '#2a4a74' }}
+              >
+                Anuluj
+              </button>
+              <button
+                onClick={async () => {
+                  const id = deleteWorkspaceId;
+                  setDeleteWorkspaceId(null);
+                  if (id) await handleDeleteWorkspace(id);
+                }}
+                style={{ ...actionBtn, background: '#4a1f2d', borderColor: '#6f2a40', color: '#ffb3c1' }}
+              >
+                Usuń
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -799,4 +830,23 @@ const snippetCard: React.CSSProperties = {
 const searchResultStyle: React.CSSProperties = {
   padding: '6px 8px', borderRadius: '3px', marginTop: '4px',
   background: '#112240', border: '1px solid #233554',
+};
+
+const confirmOverlayStyle: React.CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  background: 'rgba(10, 25, 47, 0.75)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  zIndex: 250,
+};
+
+const confirmDialogStyle: React.CSSProperties = {
+  width: '360px',
+  maxWidth: '90%',
+  background: '#112240',
+  border: '1px solid #233554',
+  borderRadius: '8px',
+  padding: '12px',
 };

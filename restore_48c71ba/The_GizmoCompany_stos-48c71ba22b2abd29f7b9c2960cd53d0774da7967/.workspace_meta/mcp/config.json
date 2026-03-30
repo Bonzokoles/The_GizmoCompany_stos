@@ -1,0 +1,63 @@
+{
+  "mcpServers": {
+    "_instructions": "Serwery MCP dla ZENO Browser. Klucze API ładowane z .env (gitignored). Używaj ${env:VARIABLE_NAME} dla secrets.",
+
+    "zeno-browser-mcp": {
+      "command": "node",
+      "args": ["dist-electron/src-electron/mcp-server/mcp-server.js"],
+      "env": {
+        "ANTHROPIC_API_KEY": "${env:ANTHROPIC_API_KEY}",
+        "NODE_ENV": "development"
+      }
+    },
+
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
+    },
+
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "./src", "./src-electron", "./config", "./docs"]
+    },
+
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    },
+
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {
+        "MEMORY_FILE": ".workspace_meta/mcp/memory.json"
+      }
+    },
+
+    "cloudflare-api": {
+      "url": "https://mcp.cloudflare.com/mcp",
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "${env:CLOUDFLARE_API_TOKEN}"
+      }
+    },
+
+    "cloudflare-docs": {
+      "url": "https://docs.mcp.cloudflare.com/mcp"
+    },
+
+    "cloudflare-bindings": {
+      "url": "https://bindings.mcp.cloudflare.com/mcp"
+    },
+
+    "cloudflare-builds": {
+      "url": "https://builds.mcp.cloudflare.com/mcp"
+    },
+
+    "cloudflare-observability": {
+      "url": "https://observability.mcp.cloudflare.com/mcp"
+    }
+  }
+}

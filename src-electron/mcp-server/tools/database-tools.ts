@@ -6,6 +6,7 @@
 import type { MCPTool } from '../mcp-server';
 import path from 'path';
 import { app } from 'electron';
+import BetterSqlite3 from 'better-sqlite3';
 
 let Database: any;
 let db: any;
@@ -13,7 +14,7 @@ let db: any;
 function getDB() {
   if (db) return db;
   try {
-    Database = require('better-sqlite3');
+    Database = BetterSqlite3;
     const dbPath = path.join(app.getPath('userData'), 'zeno-data.db');
     db = new Database(dbPath);
     db.pragma('journal_mode = WAL');

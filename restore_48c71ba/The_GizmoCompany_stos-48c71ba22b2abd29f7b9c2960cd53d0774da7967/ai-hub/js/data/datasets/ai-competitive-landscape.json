@@ -1,0 +1,95 @@
+{
+  "id": "ai-competitive-landscape",
+  "title": "AI Competitive Landscape, Moats & Market Structure 2025",
+  "category": "business",
+  "description": "A strategic map of the AI market across model providers, cloud ecosystems, infrastructure players, and application-layer competitors.",
+  "created": "2026-03-24T06:00:00Z",
+  "updated": "2026-03-24T06:00:00Z",
+  "tags": ["competition", "market-structure", "moats", "foundation-models", "strategy"],
+  "articles": [
+    {
+      "id": "article_1",
+      "title": "AI competition is increasingly stacked by layer",
+      "url": "https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai",
+      "published": "2025-08-12",
+      "category": "market-structure",
+      "summary": "The market has separated into infrastructure, model, tooling, and application layers, each with different economics and different defensibility patterns.",
+      "key_points": [
+        "Cloud and chip vendors monetize demand across many winners",
+        "Model providers compete on capability, price, latency, context, and ecosystem depth",
+        "Application-layer vendors win when they solve workflow pain instead of merely wrapping models",
+        "Open-source models compress margins in undifferentiated use cases",
+        "Distribution and trust increasingly matter as much as raw benchmark performance"
+      ],
+      "use_case": "Market mapping and competitor segmentation"
+    },
+    {
+      "id": "article_2",
+      "title": "The strongest moats are data loops, workflow embedding, and procurement trust",
+      "url": "https://www.sequoiacap.com/article/ai-market-map/",
+      "published": "2025-11-06",
+      "category": "competitive-advantage",
+      "summary": "In mature AI categories, defensibility comes from being embedded in real work: domain data, integrations, compliance posture, and switching costs built into operational processes.",
+      "key_points": [
+        "Generic chatbot features are easy to copy",
+        "Domain-specific data and feedback loops improve product quality over time",
+        "Enterprise integrations create adoption stickiness",
+        "Security, compliance, and governance posture influence vendor selection",
+        "Trusted procurement paths can outcompete slightly better raw model performance"
+      ],
+      "use_case": "Positioning and moat analysis"
+    },
+    {
+      "id": "article_3",
+      "title": "Price competition intensifies where model access becomes commoditized",
+      "url": "https://www.bvp.com/atlas/the-state-of-generative-ai-pricing",
+      "published": "2025-10-14",
+      "category": "pricing-pressure",
+      "summary": "Where access to similar models is widely available, competition shifts toward routing, orchestration, UX, and enterprise controls rather than pure generation quality alone.",
+      "key_points": [
+        "API and model routing vendors compete aggressively on cost-performance ratios",
+        "Enterprises increasingly want optionality instead of single-model lock-in",
+        "Application vendors must prove domain outcomes rather than generic AI capability",
+        "Bundling inside large platforms can compress standalone pricing power",
+        "Cost visibility and predictable spend are now strategic product features"
+      ],
+      "use_case": "Pricing and go-to-market strategy"
+    },
+    {
+      "id": "article_4",
+      "title": "Winning in AI means choosing the right battlefield",
+      "url": "https://www.gartner.com/en/articles/competitive-advantage-in-generative-ai",
+      "published": "2025-09-03",
+      "category": "strategic-positioning",
+      "summary": "Not every company should build models. Many will create more durable value by owning orchestration, governance, domain expertise, or the last mile of operational adoption.",
+      "key_points": [
+        "Infrastructure and platform companies capture horizontal demand",
+        "Specialized vertical solutions often outperform broad assistants on ROI",
+        "Governance and compliance tooling rises as regulation matures",
+        "Customer success and change management remain underappreciated differentiators",
+        "The best competitive position is the one with the clearest repeatable sales motion"
+      ],
+      "use_case": "Strategic planning and product roadmaps"
+    }
+  ],
+  "data_points": {
+    "primary_layers": "chips/cloud, foundation models, tooling/orchestration, applications",
+    "common_moats": "distribution, workflow embedding, proprietary data, compliance trust",
+    "major_pressure": "commoditization of undifferentiated model access",
+    "enterprise_buying_pattern": "preference for integrated, governable, and secure solutions",
+    "strategic_truth": "benchmark wins do not guarantee market wins"
+  },
+  "framework": {
+    "layer_1_infrastructure": ["GPU supply", "cloud credits", "networking", "storage"],
+    "layer_2_models": ["capability", "latency", "cost", "safety controls", "ecosystem"],
+    "layer_3_tooling": ["observability", "routing", "evaluation", "RAG", "security"],
+    "layer_4_apps": ["workflow ownership", "UX", "vertical expertise", "change management"]
+  },
+  "use_cases": [
+    "Competitive benchmarking",
+    "Moat analysis for AI products",
+    "Strategic narrative for investors",
+    "Landscape mapping for product teams"
+  ],
+  "credits": 125
+}

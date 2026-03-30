@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../FROMS/BUCH_DEvz_CHAT"
+		}
+	],
+	"settings": {
+		"chat.editor.wordWrap": "on",
+		"github-actions.workflows.pinned.workflows": [
+			"dynamic/copilot-swe-agent/copilot"
+		],
+		"git.ignoreLimitWarning": true,
+		"powershell.cwd": "WWW_Zen_BRo_wser_org3"
+	}
+}

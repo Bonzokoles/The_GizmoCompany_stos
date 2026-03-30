@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      CSP is set via Electron session headers in production (main.ts).
+      In dev mode, Vite injects inline scripts for HMR/React Refresh.
+      Deploy retrigger marker: 2026-03-23
+    -->
+    <title>ZENO Browser — Przeglądarka z AI, MCP i Cloudflare</title>
+    <meta name="description" content="ZENO Browser to nowoczesna przeglądarka z wbudowanym asystentem AI, obsługą MCP (Model Context Protocol), tunelami Cloudflare i zaawansowanymi narzędziami dla deweloperów." />
+    <meta name="keywords" content="ZENO Browser, przeglądarka AI, MCP browser, Cloudflare browser, AI assistant browser, electron browser, open source browser" />
+    <meta name="author" content="GizmoCompany" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://zenbrowsers.org/" />
+
+    <!-- Open Graph (Facebook, LinkedIn, Slack) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://zenbrowsers.org/" />
+    <meta property="og:title" content="ZENO Browser — Przeglądarka z AI i MCP" />
+    <meta property="og:description" content="Przeglądarka nowej generacji z wbudowanym AI, obsługą Model Context Protocol, Cloudflare Tunnels i narzędziami dla deweloperów." />
+    <meta property="og:image" content="https://zenbrowsers.org/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="ZENO Browser — przeglądarka z AI i MCP" />
+    <meta property="og:locale" content="pl_PL" />
+    <meta property="og:site_name" content="ZENO Browser" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@ZenoBrowser" />
+    <meta name="twitter:title" content="ZENO Browser — Przeglądarka z AI i MCP" />
+    <meta name="twitter:description" content="Przeglądarka nowej generacji z wbudowanym AI, obsługą Model Context Protocol, Cloudflare Tunnels i narzędziami dla deweloperów." />
+    <meta name="twitter:image" content="https://zenbrowsers.org/og-image.png" />
+    <meta name="twitter:image:alt" content="ZENO Browser — przeglądarka z AI i MCP" />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "ZENO Browser",
+      "url": "https://zenbrowsers.org/",
+      "description": "Nowoczesna przeglądarka internetowa z wbudowanym asystentem AI, obsługą MCP (Model Context Protocol), tunelami Cloudflare i zaawansowanymi narzędziami dla deweloperów.",
+      "applicationCategory": "BrowserApplication",
+      "operatingSystem": "Windows, macOS, Linux",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "PLN"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "GizmoCompany",
+        "url": "https://jimbo77.com"
+      },
+      "featureList": [
+        "Wbudowany asystent AI",
+        "Model Context Protocol (MCP)",
+        "Cloudflare Tunnels",
+        "Zarządzanie wtyczkami",
+        "Terminal wbudowany",
+        "Monitoring bezpieczeństwa"
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD: WebSite + SearchAction (pomaga Google/Bing odkryć treść) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "ZENO Browser",
+      "url": "https://zenbrowsers.org/",
+      "inLanguage": "pl",
+      "sameAs": [
+        "https://jimbo77.com",
+        "https://jimbo77.org",
+        "https://mybonzoaiblog.com",
+        "https://mybonzo.com"
+      ],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://zenbrowsers.org/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD: Organization — łączy wszystkie domeny w jedną tożsamość SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "GizmoCompany",
+      "url": "https://jimbo77.com",
+      "logo": "https://zenbrowsers.org/og-image.png",
+      "sameAs": [
+        "https://zenbrowsers.org/",
+        "https://jimbo77.com",
+        "https://jimbo77.org",
+        "https://mybonzoaiblog.com",
+        "https://mybonzo.com"
+      ],
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "technical support",
+        "url": "https://jimbo77.com"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD: BreadcrumbList — crawlery rozumieją hierarchię stron -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "GizmoCompany",
+          "item": "https://jimbo77.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "ZENO Browser",
+          "item": "https://zenbrowsers.org/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "AI Org Hub",
+          "item": "https://zeno-browser-web.pages.dev/ai-hub/"
+        }
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD: ItemList — lista wszystkich powiązanych stron (crawl discovery) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "GizmoCompany — wszystkie strony",
+      "description": "Sieć stron GizmoCompany: narzędzia AI, blog, browser i projekty webowe",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "url": "https://zenbrowsers.org/",
+          "name": "ZENO Browser — przeglądarka z AI i MCP"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "url": "https://jimbo77.com",
+          "name": "jimbo77.com — główna strona"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "url": "https://jimbo77.org",
+          "name": "jimbo77.org"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "url": "https://mybonzoaiblog.com",
+          "name": "MyBonzo AI Blog — blog o sztucznej inteligencji"
+        },
+        {
+          "@type": "ListItem",
+          "position": 5,
+          "url": "https://mybonzo.com",
+          "name": "MyBonzo — narzędzia i projekty"
+        }
+      ]
+    }
+    </script>
+
+    <script defer src="https://analytics.mybonzo.com/script.js" data-website-id="8fbc639b-7427-4323-9931-faa797bb7fd3"></script>
+    <script defer data-domain="zenbrowsers.org" src="https://plausible.mybonzo.com/js/script.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

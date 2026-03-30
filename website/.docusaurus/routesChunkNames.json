@@ -1,0 +1,21 @@
+{
+  "/pl/docs-71b": {
+    "__comp": "1be78505",
+    "__context": {
+      "plugin": "f211fe35"
+    },
+    "versionMetadata": "935f2afb"
+  },
+  "/pl/docs/faq-7a5": {
+    "__comp": "17896441",
+    "content": "0480b142"
+  },
+  "/pl/docs/getting-started-a0c": {
+    "__comp": "17896441",
+    "content": "d589d3a7"
+  },
+  "/pl/docs/installation/windows-721": {
+    "__comp": "17896441",
+    "content": "975c1e12"
+  }
+}

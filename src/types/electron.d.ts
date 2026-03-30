@@ -191,6 +191,8 @@ export interface CrawlerAPI {
 export interface SecurityAPI {
   createContext(tabId: string): Promise<SecurityContext>;
   getAuditLogs(tabId?: string): Promise<AuditLog[]>;
+  onAuditLog(callback: (log: AuditLog) => void): void;
+  offAuditLog(callback: (log: AuditLog) => void): void;
 }
 
 export interface WindowAPI {
@@ -245,6 +247,22 @@ export interface UpdaterAPI {
   installUpdate(): Promise<void>;
 }
 
+export interface MarketplacePlugin {
+  id: string;
+  name: string;
+  version: string;
+  author: string;
+  description: string;
+  icon?: string;
+  repository?: string;
+  downloads: number;
+  rating: number;
+  reviews: number;
+  tags: string[];
+  latest: string;
+  releaseDate: Date;
+}
+
 export interface PluginAPI {
   install(pluginId: string): Promise<void>;
   getInstalled(): Promise<InstalledPlugin[]>;
@@ -252,6 +270,11 @@ export interface PluginAPI {
   disable(pluginId: string): Promise<void>;
   uninstall(pluginId: string): Promise<void>;
   update(pluginId: string): Promise<void>;
+  searchMarketplace(query: string): Promise<MarketplacePlugin[]>;
+  getFeatured(): Promise<MarketplacePlugin[]>;
+  getTrending(): Promise<MarketplacePlugin[]>;
+  onInstallProgress(callback: (data: { pluginId: string; progress: number }) => void): void;
+  offInstallProgress(callback: (data: { pluginId: string; progress: number }) => void): void;
 }
 
 // ── Search & Catalog Types ─────────────────────────────────────
