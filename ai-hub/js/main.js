@@ -24,6 +24,7 @@ import {
 } from './modules/kb.js';
 import { jimboReloadAll, jimboCreateDataset, jimboCreateAgent, jimboExportAgent } from './modules/jimbo.js';
 import { initVchat } from './modules/vchat.js';
+import { initStorage } from './modules/storage.js';
 
 /* ── Expose globals for inline onclick= handlers ── */
 Object.assign(window, {
@@ -67,4 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Voice chat widget
   initVchat();
+
+  // R2 Storage browser (lazy — loads buckets on tab click)
+  initStorage();
 });

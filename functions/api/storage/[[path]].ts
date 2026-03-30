@@ -107,6 +107,46 @@ async function handleBrowse(env: Env, request: Request, bucketName: string): Pro
   }
 }
 
+async function handleFile(env: Env, bucketName: string, objectKey: string): Promise<Response> {
+  if (!R2_BUCKETS[bucketName]) {
+    return errorResponse(`Unknown bucket: ${bucketName}`, 404);
+  }
+
+  const cfAccountId = env.CF_ACCOUNT_ID;
+  const cfToken = env.CF_API_TOKEN;
+
+  if (!cfAccountId || !cfToken) {
+    return errorResponse('CF credentials required for file access', 503);
+  }
+
+  try {
+    const apiUrl = `https://api.cloudflare.com/client/v4/accounts/${cfAccountId}/r2/buckets/${bucketName}/objects/${encodeURIComponent(objectKey)}`;
+    const resp = await fetch(apiUrl, {
+      headers: { Authorization: `Bearer ${cfToken}` },
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!resp.ok) {
+      return errorResponse(`R2 API returned ${resp.status}`, resp.status);
+    }
+
+    // Proxy the response with content-disposition for download
+    const contentType = resp.headers.get('content-type') ?? 'application/octet-stream';
+    const fileName = objectKey.split('/').pop() ?? objectKey;
+    return new Response(resp.body, {
+      status: 200,
+      headers: {
+        'Content-Type': contentType,
+        'Content-Disposition': `inline; filename="${fileName}"`,
+        'Cache-Control': 'public, max-age=3600',
+        ...Object.fromEntries(corsHeaders().headers),
+      },
+    });
+  } catch (e: unknown) {
+    return errorResponse(`File fetch error: ${e instanceof Error ? e.message : String(e)}`, 500);
+  }
+}
+
 async function handleStats(env: Env): Promise<Response> {
   const cfAccountId = env.CF_ACCOUNT_ID;
   const cfToken = env.CF_API_TOKEN;
@@ -160,6 +200,16 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   if (path.startsWith('browse/')) {
     const bucketName = path.replace('browse/', '').split('/')[0];
     return handleBrowse(context.env, context.request, bucketName);
+  }
+
+  // /api/storage/file/:bucketName/:objectKey
+  if (path.startsWith('file/')) {
+    const rest = path.slice('file/'.length);
+    const slashIdx = rest.indexOf('/');
+    if (slashIdx === -1) return errorResponse('Missing object key', 400);
+    const bucketName = rest.slice(0, slashIdx);
+    const objectKey = decodeURIComponent(rest.slice(slashIdx + 1));
+    return handleFile(context.env, bucketName, objectKey);
   }
 
   return errorResponse(`Unknown endpoint: /api/storage/${path}`, 404);

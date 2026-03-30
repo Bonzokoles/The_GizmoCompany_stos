@@ -23,6 +23,7 @@
     <button class="nav-btn active" data-tab="agents"><span class="icon">🤖</span> Agenci <span class="nav-badge" id="agents-badge" style="display:none">0</span></button>
     <button class="nav-btn" data-tab="filmvault"><span class="icon">🎬</span> Film Vault</button>
     <button class="nav-btn" data-tab="dane"><span class="icon">📚</span> Dane</button>
+    <button class="nav-btn" data-tab="storage"><span class="icon">🗄</span> Storage</button>
   </nav>
   <div class="topbar-right">
     <a href="https://bonzo-media-hub.stolarnia-ams.workers.dev/" target="_blank" rel="noopener noreferrer"
@@ -729,6 +730,63 @@
   <div class="chat-modal-box">
     <button class="chat-modal-close" onclick="closeChatModal()" title="Zamknij">✕</button>
     <iframe id="chat-frame" src="" allow="clipboard-read;clipboard-write" loading="lazy"></iframe>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════ -->
+<!-- R2 STORAGE BROWSER -->
+<!-- ════════════════════════════════════════════════════ -->
+<div class="page" id="page-storage">
+  <div class="section-head">
+    <h2>🗄 <span class="hl">Storage Browser</span></h2>
+    <p>Przeglądarka R2 bucketów — 16 bucketów, read-only</p>
+  </div>
+
+  <!-- Spinner + Error -->
+  <div id="st-spinner" style="display:none;text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.9rem">⏳ Ładowanie...</div>
+  <div id="st-error" style="display:none;padding:.8rem 1rem;border-radius:8px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171;font-size:.83rem;margin-bottom:1rem"></div>
+
+  <!-- Bucket list -->
+  <div id="st-bucket-list">
+    <div id="st-buckets-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.9rem">
+      <div style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.85rem;grid-column:1/-1">
+        Przejdź do zakładki Storage, aby załadować buckety…
+      </div>
+    </div>
+  </div>
+
+  <!-- Object view (hidden until bucket selected) -->
+  <div id="st-bucket-view" style="display:none">
+    <!-- Breadcrumb + search -->
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap">
+      <div id="st-breadcrumb" style="font-size:.85rem;display:flex;align-items:center;gap:.3rem;flex:1;min-width:200px"></div>
+      <div style="display:flex;gap:.5rem;align-items:center">
+        <input type="text" placeholder="🔍 szukaj w buckecie…" oninput="stSearch(this.value)"
+               style="padding:.45rem .8rem;border-radius:8px;border:1px solid var(--glass-border);
+                      background:rgba(255,255,255,0.04);color:var(--text);font-family:inherit;font-size:.82rem;width:200px">
+        <button onclick="stBack()" style="padding:.45rem 1rem;border-radius:8px;border:1px solid var(--glass-border);
+                background:rgba(255,255,255,0.04);color:var(--text-muted);cursor:pointer;font-size:.82rem">← Powrót</button>
+      </div>
+    </div>
+
+    <!-- Objects list -->
+    <div class="glass" style="border-radius:12px;overflow:hidden">
+      <!-- Header row -->
+      <div style="display:grid;grid-template-columns:2rem 1fr auto auto;gap:.6rem;padding:.5rem .8rem;
+                  border-bottom:1px solid var(--glass-border);font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">
+        <span></span><span>Nazwa</span><span>Rozmiar</span><span>Data</span>
+      </div>
+      <div id="st-objects-list"></div>
+    </div>
+
+    <!-- Load more -->
+    <div style="text-align:center;margin-top:.8rem">
+      <button onclick="stLoadMore()" id="st-load-more"
+              style="padding:.5rem 1.4rem;border-radius:8px;border:1px solid var(--glass-border);
+                     background:rgba(255,255,255,0.04);color:var(--text-muted);cursor:pointer;font-size:.82rem">
+        Załaduj więcej…
+      </button>
+    </div>
   </div>
 </div>
 
