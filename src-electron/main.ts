@@ -796,7 +796,7 @@ function setupIPCHandlers() {
   ipcMain.handle('websurfx:search', async (_, query: string, filters?: Record<string, unknown>) => {
     if (!isValidString(query)) return { success: false, error: 'Brak zapytania' };
     try {
-      const result = await websurfxService.search(query, filters as any);
+      const result = await websurfxService.search(query, filters as Record<string, unknown>);
       return { success: true, data: result };
     } catch (error: unknown) {
       return { success: false, error: getErrorMessage(error) };

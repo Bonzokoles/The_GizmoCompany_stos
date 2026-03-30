@@ -2,7 +2,7 @@
  * MCP Browser Tools — navigate, tabs, back/forward, screenshot
  */
 
-import type { MCPTool, MCPContext } from '../mcp-server';
+import type { MCPTool } from '../mcp-server';
 
 function str(v: unknown): string {
   return typeof v === 'string' ? v : '';
@@ -28,7 +28,7 @@ export function createBrowserTools(): MCPTool[] {
         const bm = ctx.browserManager;
         if (!bm) return { error: 'BrowserManager not available' };
 
-        const tabId = str(input.tabId) || (bm.getActiveTab() as any)?.id;
+        const tabId = str(input.tabId) || (bm.getActiveTab() as { id?: string })?.id;
         if (!tabId) return { error: 'No active tab' };
 
         const ok = bm.navigate(tabId, url);
@@ -97,7 +97,7 @@ export function createBrowserTools(): MCPTool[] {
       handler: async (input, ctx) => {
         const bm = ctx.browserManager;
         if (!bm) return { error: 'BrowserManager not available' };
-        const tabId = str(input.tabId) || (bm.getActiveTab() as any)?.id;
+        const tabId = str(input.tabId) || (bm.getActiveTab() as { id?: string })?.id;
         if (!tabId) return { error: 'No active tab' };
         return { success: bm.goBack(tabId) };
       },
@@ -115,7 +115,7 @@ export function createBrowserTools(): MCPTool[] {
       handler: async (input, ctx) => {
         const bm = ctx.browserManager;
         if (!bm) return { error: 'BrowserManager not available' };
-        const tabId = str(input.tabId) || (bm.getActiveTab() as any)?.id;
+        const tabId = str(input.tabId) || (bm.getActiveTab() as { id?: string })?.id;
         if (!tabId) return { error: 'No active tab' };
         return { success: bm.goForward(tabId) };
       },

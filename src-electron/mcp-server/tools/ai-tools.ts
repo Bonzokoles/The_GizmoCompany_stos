@@ -154,7 +154,7 @@ export function createAITools(): MCPTool[] {
         const bm = ctx.browserManager;
         if (!bm) return { error: 'browserManager unavailable' };
 
-        const tab = bm.getActiveTab() as any;
+        const tab = bm.getActiveTab() as { url?: string; webContents?: Electron.WebContents };
         if (!tab?.webContents) return { error: 'No active tab with webContents' };
 
         // Extract page content

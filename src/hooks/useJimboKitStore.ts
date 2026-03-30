@@ -187,8 +187,7 @@ export function useJimboKitStore(): JimboKitStore {
       ws.onclose = () => setIsConnected(false);
     }
     return () => { ws?.close(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // eslint-disable-line -- WS connection intentionally runs once
 
   function chatId(data?: { chat_id?: string }): string {
     return data?.chat_id ?? chatIdFromKey(sessionRef.current);
@@ -345,8 +344,7 @@ export function useJimboKitStore(): JimboKitStore {
   useEffect(() => {
     void loadHistory(currentSessionId);
     void loadSessions();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // eslint-disable-line -- initial load only
 
   const sendMessage = useCallback(async (text: string) => {
     const userMsg: JimboMessage = {
@@ -397,8 +395,7 @@ export function useJimboKitStore(): JimboKitStore {
         console.error('[JimboKit] sendMessage failed:', err2);
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // eslint-disable-line -- sendMessage intentionally stable
 
   const newSession = useCallback(() => {
     const key = generateSessionKey();

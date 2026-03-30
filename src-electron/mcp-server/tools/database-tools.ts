@@ -8,8 +8,8 @@ import path from 'path';
 import { app } from 'electron';
 import BetterSqlite3 from 'better-sqlite3';
 
-let Database: any;
-let db: any;
+let Database: typeof BetterSqlite3;
+let db: BetterSqlite3.Database;
 
 function getDB() {
   if (db) return db;
@@ -328,8 +328,8 @@ export function createDatabaseTools(): MCPTool[] {
         try {
           const rows = database.prepare(sql).all();
           return { count: rows.length, rows: rows.slice(0, 200) };
-        } catch (err: any) {
-          return { error: err.message };
+        } catch (err: unknown) {
+          return { error: err instanceof Error ? err.message : String(err) };
         }
       },
     },
