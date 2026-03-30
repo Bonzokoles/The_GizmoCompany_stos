@@ -58,6 +58,12 @@
 
 ## Odkrycia
 
+### 2026-03-30: Dark mode dla natywnych dropdownów w WebLanding
+
+- **Problem:** natywne `select` w `src/components/landing/WebLanding.tsx` miały ciemne pole, ale po rozwinięciu lista opcji na Windows/Chromium renderowała się na jasnym tle.
+- **Fix:** dodano wspólne reguły w `src/styles/web-landing.css` dla `.ops-dashboard select`, `option`, `optgroup` oraz `color-scheme: dark`, plus objęto stylem także `select` w `.tab-actions`.
+- **Wniosek:** przy dark UI nie wystarczy stylować samego `select` — trzeba jawnie stylować także rozwijane opcje, inaczej systemowy popup może wrócić do jasnego motywu.
+
 ### 2026-03-20: Migracja React 19
 
 - **Nowe pliki:** `src/types/electron.d.ts`, `src/components/ErrorBoundary.tsx`, `src/components/PluginHub.tsx`, `src/components/PluginHub.css`

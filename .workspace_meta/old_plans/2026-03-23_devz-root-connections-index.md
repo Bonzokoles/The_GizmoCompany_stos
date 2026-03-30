@@ -2,6 +2,7 @@
 
 **Data:** 2026-03-23
 **Cel:** dokończyć organizację roota `U:\The_DEVz_HUB_of_work`, rozpisać połączenia między repo/serwisami/domenami i utworzyć centralny master index.
+**PRZENIESIONY DO old_plans:** 2026-03-30
 
 ## Zakres
 - klasyfikacja luźnych plików z roota

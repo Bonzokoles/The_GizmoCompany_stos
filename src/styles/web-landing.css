@@ -207,6 +207,7 @@
 .ops-dashboard .form-group input,
 .ops-dashboard .form-group textarea,
 .ops-dashboard .form-group select,
+.ops-dashboard .tab-actions select,
 .ops-dashboard .input-row input,
 .ops-dashboard .input-row textarea {
   background: rgba(255,255,255,0.04);
@@ -219,11 +220,31 @@
 .ops-dashboard .form-group input:focus,
 .ops-dashboard .form-group textarea:focus,
 .ops-dashboard .form-group select:focus,
+.ops-dashboard .tab-actions select:focus,
 .ops-dashboard .input-row input:focus,
 .ops-dashboard .input-row textarea:focus {
   border-color: rgba(0,255,204,0.4);
   box-shadow: 0 0 0 3px rgba(0,255,204,0.08);
   outline: none;
+}
+
+.ops-dashboard select {
+  color-scheme: dark;
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+.ops-dashboard select option,
+.ops-dashboard select optgroup {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+.ops-dashboard select option:checked,
+.ops-dashboard select option:hover,
+.ops-dashboard select option:focus {
+  background-color: #1e293b;
+  color: #f8fafc;
 }
 /* ── Tags / badges ── */
 .ops-dashboard .tag {

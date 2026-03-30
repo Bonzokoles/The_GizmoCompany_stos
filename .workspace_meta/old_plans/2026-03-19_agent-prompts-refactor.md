@@ -3,6 +3,7 @@
 > **Data:** 2026-03-19
 > **Projekt:** ZENO Browser (Electron + React + Vite)
 > **Cel:** Refaktoryzacja, upgrade zależności, plan rozwoju
+> **PRZENIESIONY DO old_plans:** 2026-03-30 — zastąpiony przez 2026-03-30_zeno-master-orchestration.md
 
 ---
 
@@ -125,28 +126,6 @@ Format: TASK-001, TASK-002... z pełnymi ścieżkami plików i komendami.
 **Agent:** `@principal-software-engineer`
 **Skill:** `breakdown-plan`
 
-```
-@breakdown-plan
-
-Na podstawie implementation-plan z Kroku 3, rozbij plan na hierarchię:
-
-Epic > Feature > Story > Task
-
-DLA KAŻDEGO EPICA:
-- Tytuł, opis, acceptance criteria
-- Labels: `upgrade`, `refactor`, `breaking-change`, `phase-N`
-- Priority: P0 (TypeScript) → P1 (Vite) → P2 (React) → P3 (Electron) → P4 (Tooling)
-- Estimated effort (S/M/L/XL)
-
-DLA KAŻDEGO STORY:
-- INVEST criteria (Independent, Negotiable, Valuable, Estimable, Small, Testable)
-- Definition of Done
-- Blocking/blocked-by relationships
-
-Output: Lista issues gotowa do utworzenia w GitHub.
-Każdy issue = osobna sekcja Markdown z title, body, labels, assignees.
-```
-
 ---
 
 ## KROK 5 — Code Review obecnego kodu
@@ -154,80 +133,9 @@ Każdy issue = osobna sekcja Markdown z title, body, labels, assignees.
 **Agent:** `@se-security-reviewer` + `@expert-react-frontend-engineer`
 **Skill:** `review-and-refactor`
 
-```
-@review-and-refactor
-
-Przeprowadź code review całego projektu ZENO Browser PRZED rozpoczęciem upgrade.
-
-ZAKRES:
-1. src/components/ — czy komponenty React są zgodne z best practices?
-2. src/services/ai-gateway/ — czy providerzy API są bezpieczni? (secrets, validation)
-3. src-electron/services/ — czy sandbox i security są poprawne?
-4. src/plugin-system/ — czy plugin API jest bezpieczne?
-
-SPRAWDŹ:
-- [ ] Hardcoded secrets/tokens
-- [ ] XSS vulnerabilities w BrowserUI
-- [ ] Injection w AddressBar (user input → URL)
-- [ ] Sandbox escape w plugin-system
-- [ ] IPC security (exposed channels w preload.ts)
-- [ ] Error handling (uncaught, unhandled rejections)
-- [ ] Performance (re-renders, memory leaks, event listeners)
-- [ ] Accessibility (ARIA, keyboard navigation)
-
-Output: Lista issues z severity (Critical/High/Medium/Low) i rekomendacjami.
-```
-
 ---
 
 ## KROK 6 — Web UI Refactor
 
 **Agent:** `@expert-react-frontend-engineer`
 **Skill:** `web-coder`
-
-```
-@web-coder
-
-Po upgrade React 18→19, zrefaktoryzuj komponenty UI w ZENO Browser.
-
-KOMPONENTY DO REFAKTORU:
-1. BrowserUI.tsx — główny layout, rozdziel na mniejsze komponenty
-2. AIPanel.tsx — dodaj streaming responses, useActionState
-3. AddressBar.tsx — autocomplete z useOptimistic, debounce
-4. TabBar.tsx — performance (memo, useDeferredValue dla wielu tabów)
-5. PluginManager.tsx + PluginExplorer.tsx + PluginInstaller.tsx — unifikacja
-6. SecurityMonitor.tsx — real-time updates z useSyncExternalStore
-
-ZASADY:
-- React 19 patterns (use hook, Actions, Server Components jeśli zasadne)
-- TypeScript strict mode
-- Zustand 5 API (createStore, useStore)
-- Brak class components
-- Lazy loading dla heavy panels (AIPanel, PluginManager)
-
-Output: Kod gotowy do wklejenia, plik po pliku.
-```
-
----
-
-## SZYBKIE KOMENDY (kopiuj-wklej)
-
-### Uruchomienie konkretnego skill:
-```
-@context-map Zmapuj zależności ZENO Browser (src/, src-electron/)
-```
-```
-@refactor-plan Zaplanuj upgrade: Vite 5→8, React 18→19, Electron 27→41
-```
-```
-@create-implementation-plan Wygeneruj plan upgrade zależności ZENO Browser
-```
-```
-@breakdown-plan Rozbij plan refaktoryzacji na GitHub Issues (Epic > Story > Task)
-```
-```
-@review-and-refactor Code review ZENO Browser — security + performance + best practices
-```
-```
-@web-coder Zrefaktoryzuj komponenty React w ZENO Browser na React 19 patterns
-```
