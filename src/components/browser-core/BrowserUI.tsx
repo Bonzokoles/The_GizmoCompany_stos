@@ -387,11 +387,11 @@ export function BrowserUI() {
             <button
               className="btn-icon"
               onClick={() => setShowCopilotDev(v => !v)}
-              title="Copilot Dev — @github/copilot-sdk panel"
+              title="ZENO DevTools — narzędzia developerskie"
               aria-pressed={showCopilotDev}
               style={navBtnStyle}
             >
-              🪁
+              ⚡
             </button>
             <button
               className="btn-icon"
