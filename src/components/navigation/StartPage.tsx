@@ -383,7 +383,7 @@ const TOOL_HIGHLIGHTS = [
 const QUICK_LINKS = [
   { label: 'GitHub', url: 'https://github.com' },
   { label: 'AI Hub', url: 'https://zenbrowsers.org/ai-hub/' },
-  { label: 'BONZO Media Hub', url: 'https://bonzo-media-hub.pages.dev/' },
+  { label: 'BONZO Media Hub', url: 'https://bonzo-media-hub.stolarnia-ams.workers.dev/' },
   { label: 'ChatGPT', url: 'https://chat.openai.com' },
   { label: 'Claude', url: 'https://claude.ai' },
   { label: 'Stack Overflow', url: 'https://stackoverflow.com' },

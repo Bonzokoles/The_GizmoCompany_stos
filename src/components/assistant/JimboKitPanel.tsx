@@ -184,6 +184,14 @@ export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [store.messages.length, store.live?.content.length]);
 
+  // Handle /clear command — when terminal adds marker, reset log
+  useEffect(() => {
+    const lastEntry = store.terminalLog[store.terminalLog.length - 1];
+    if (lastEntry?.command === '/clear') {
+      store.clearTerminalLog();
+    }
+  }, [store.terminalLog, store.clearTerminalLog]);
+
   const handleSend = useCallback(async () => {
     const text = inputText.trim();
     if (!text) return;

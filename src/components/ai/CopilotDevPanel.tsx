@@ -79,6 +79,17 @@ const statusDot = (connected: boolean): React.CSSProperties => ({
   marginRight: '6px',
 });
 
+const alertBoxStyle: React.CSSProperties = {
+  background: 'rgba(255,107,107,0.1)',
+  border: '1px solid rgba(255,107,107,0.3)',
+  borderRadius: '6px',
+  padding: '10px 12px',
+  marginTop: '8px',
+  color: '#fca5a5',
+  fontSize: '12px',
+  lineHeight: '1.5',
+};
+
 const outputStyle: React.CSSProperties = {
   background: '#050d18',
   border: '1px solid #1e3a5f',
@@ -193,6 +204,21 @@ export function CopilotDevPanel({ onClose }: CopilotDevPanelProps) {
           <div style={{ color: '#8892b0', fontSize: '11px', marginBottom: '8px', lineHeight: 1.6 }}>
             <div>CLI: <span style={{ color: '#ffe57f' }}>{status.cliPath}</span></div>
             <div>Configured: <span style={{ color: status.configured ? '#64ffda' : '#ff6b6b' }}>{String(status.configured)}</span></div>
+          </div>
+        )}
+
+        {status && !status.configured && status.state.includes('error') && (
+          <div style={alertBoxStyle}>
+            <div style={{ fontWeight: 700, marginBottom: '6px' }}>❌ Copilot CLI nie znaleziony</div>
+            <div style={{ marginBottom: '6px' }}>
+              Aby użyć GitHub Copilot SDK, zainstaluj CLI globalnie:
+            </div>
+            <div style={{ background: 'rgba(0,0,0,0.3)', padding: '6px 8px', borderRadius: '4px', fontFamily: 'monospace', marginBottom: '6px' }}>
+              npm install -g @github/copilot
+            </div>
+            <div style={{ fontSize: '11px', opacity: 0.8 }}>
+              Lub ustaw zmienną środowiskową COPILOT_CLI_PATH wskazującą na istniejący plik binarny.
+            </div>
           </div>
         )}
 

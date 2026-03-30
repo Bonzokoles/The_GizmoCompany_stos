@@ -11,7 +11,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { EventEmitter } from 'events';
-import http from 'http';
+import * as http from 'http';
 import { URL } from 'url';
 
 export interface MCPTool {
@@ -225,6 +225,22 @@ export class MCPServer extends EventEmitter {
       if (req.method === 'GET' && url.pathname === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'ok', tools: this.getToolNames() }));
+        return;
+      }
+
+      // Root info (friendly hint for browser/manual checks)
+      if (req.method === 'GET' && url.pathname === '/') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          status: 'ok',
+          service: 'zeno-browser-mcp',
+          endpoints: {
+            sse: '/sse',
+            messages: '/messages?sessionId=...',
+            health: '/health',
+          },
+          toolsCount: this.getToolNames().length,
+        }));
         return;
       }
 

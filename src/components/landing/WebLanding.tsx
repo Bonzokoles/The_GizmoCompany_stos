@@ -2528,7 +2528,9 @@ export function WebLanding() {
       )}
 
       {/* ─── ASSISTANT TAB ─── */}
-      {tab === 'assistant' && <AssistantPage />}
+      {tab === 'assistant' && (
+        <AssistantPage />
+      )}
 
       {/* ─── MEDIA HUB TAB ─── */}
       {tab === 'mediahub' && (
@@ -2540,7 +2542,7 @@ export function WebLanding() {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
             <a
-              href="https://bonzo-media-hub.pages.dev/"
+              href="https://bonzo-media-hub.stolarnia-ams.workers.dev/"
               target="_blank"
               rel="noopener noreferrer"
               style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', background: '#60a5fa', textDecoration: 'none', padding: '12px 32px', borderRadius: 8, letterSpacing: 0.5 }}

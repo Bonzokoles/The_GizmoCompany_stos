@@ -75,7 +75,7 @@ const SETTINGS_KEY  = 'buch-assistant-settings';
 const DEFAULT_SETTINGS: AssistantSettings = {
   provider:      'deepseek',
   model:         'deepseek-r1',
-  systemPrompt:  'Jesteś pomocnym asystentem AI. Odpowiadaj po polsku, chyba że użytkownik pisze w innym języku.',
+  systemPrompt:  'Jesteś BUCH_CHAT — asystentem AI projektu ZENO Browser / zenonbrowsers.org.\nProjekt: Electron + React + Vite + Cloudflare Workers/Pages.\nCI/CD: GitHub Actions → deploy-web.yml → Cloudflare Pages.\nWorkers: bonzo-media-hub.stolarnia-ams.workers.dev, moa.mybonzo.com.\nUżywasz /api/ai/chat (Cloudflare Worker) z providerami: DeepSeek R1, OpenRouter, Claude (Anthropic), Workers AI.\nOdpowiadaj po polsku, chyba że użytkownik pisze inaczej.',
   maxTokens:     2048,
   deepseekKey:   '',
   openrouterKey: '',

@@ -424,7 +424,7 @@ export function BrowserUI() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '5px 14px', background: '#16213e', borderBottom: '1px solid #0f3460', overflowX: 'auto' }}>
               {navBtn('https://zenbrowsers.org/',                        '🌐 ZenBrowsers.org',    'ZENO Browser – strona oficjalna')}
               {navBtn('https://zenbrowsers.org/ai-hub/',                 '🤖 AI Org Hub',         'AI Hub — centrum narzędzi AI')}
-              {navBtn('https://bonzo-media-hub.pages.dev/',              '♫ BONZO Media Hub',    'BONZO Media Hub — osobna aplikacja Cloudflare')}
+              {navBtn('https://bonzo-media-hub.stolarnia-ams.workers.dev/', '♫ BONZO Media Hub',    'BONZO Media Hub — osobna aplikacja Cloudflare')}
               {navBtn('https://jimbo77.com',                             '👤 jimbo77.com',        'Jimbo77 — strona główna')}
               {navBtn('https://jimbo77.org',                             '🔗 jimbo77.org',        'Jimbo77 — org')}
               {navBtn('https://mybonzoaiblog.com',                       '📝 MyBonzoAI Blog',     'MyBonzo AI Blog')}

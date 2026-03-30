@@ -153,6 +153,7 @@ export interface JimboKitStore {
   deleteSession: (key: string) => Promise<void>;
   addTerminalEntry: (entry: TerminalEntry) => void;
   updateTerminalEntry: (id: string, patch: Partial<TerminalEntry>) => void;
+  clearTerminalLog: () => void;
 }
 
 export function useJimboKitStore(): JimboKitStore {
@@ -379,11 +380,20 @@ export function useJimboKitStore(): JimboKitStore {
         ]);
       } catch (err2) {
         clearLive(cid);
-        setMessages((prev) => {
-          const idx = prev.indexOf(userMsg);
-          if (idx === -1) return prev;
-          return [...prev.slice(0, idx), ...prev.slice(idx + 1)];
-        });
+        // DON'T remove user message - add error message instead
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: [
+              {
+                type: 'text',
+                text: '⚠ Brak połączenia z backendem. Sprawdź czy Jimbo_kit server działa na porcie 4111.',
+              },
+            ],
+            timestamp: Date.now(),
+          },
+        ]);
         console.error('[JimboKit] sendMessage failed:', err2);
       }
     }
@@ -431,6 +441,10 @@ export function useJimboKitStore(): JimboKitStore {
     );
   }, []);
 
+  const clearTerminalLog = useCallback(() => {
+    setTerminalLog([]);
+  }, []);
+
   return {
     messages,
     live,
@@ -444,5 +458,6 @@ export function useJimboKitStore(): JimboKitStore {
     deleteSession,
     addTerminalEntry,
     updateTerminalEntry,
+    clearTerminalLog,
   };
 }

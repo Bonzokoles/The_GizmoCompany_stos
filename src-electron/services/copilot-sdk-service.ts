@@ -52,24 +52,43 @@ export class CopilotSdkService {
   }
 
   async getStatus(): Promise<CopilotSdkStatus> {
-    const client = this.ensureClient();
+    try {
+      const client = this.ensureClient();
+      const state = client.getState();
 
-    return {
-      configured: true,
-      connected: client.getState() === 'connected',
-      cliPath: this.cliPath,
-      state: client.getState(),
-    };
+      return {
+        configured: true,
+        connected: state === 'connected',
+        cliPath: this.cliPath,
+        state,
+      };
+    } catch (error) {
+      return {
+        configured: false,
+        connected: false,
+        cliPath: this.cliPath,
+        state: `error: ${error instanceof Error ? error.message : 'CLI not found'}`,
+      };
+    }
   }
 
   async start(): Promise<CopilotSdkStatus> {
-    const client = this.ensureClient();
+    try {
+      const client = this.ensureClient();
 
-    if (client.getState() !== 'connected') {
-      await client.start();
+      if (client.getState() !== 'connected') {
+        await client.start();
+      }
+
+      return this.getStatus();
+    } catch (error) {
+      return {
+        configured: false,
+        connected: false,
+        cliPath: this.cliPath,
+        state: `start_failed: ${error instanceof Error ? error.message : String(error)}`,
+      };
     }
-
-    return this.getStatus();
   }
 
   async stop(): Promise<void> {
