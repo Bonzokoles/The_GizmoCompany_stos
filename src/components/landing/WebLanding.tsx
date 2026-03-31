@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BuchChatWidget } from '../assistant/BuchChatWidget';
 import { AssistantPage } from '../assistant/AssistantPage';
+import { JimboKitPanel } from '../assistant/JimboKitPanel';
 
 
 /* ─── Types ──────────────────────────────────────── */
@@ -151,6 +152,7 @@ async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T | n
 
 export function WebLanding() {
   const [tab, setTab] = useState<TabId>('overview');
+  const [showJimboKit, setShowJimboKit] = useState(false);
 
 
   const [apis, setApis] = useState(API_SERVICES);
@@ -2567,6 +2569,35 @@ export function WebLanding() {
 
       {/* ─── BUCH_CHAT floating widget ─── */}
       <BuchChatWidget onOpenFull={() => setTab('assistant')} />
+
+      {/* ─── JimboKit toggle button ─── */}
+      <button
+        onClick={() => setShowJimboKit(v => !v)}
+        style={{
+          position: 'fixed', bottom: '80px', right: '24px', zIndex: 9998,
+          background: showJimboKit ? 'rgba(139,92,246,0.9)' : 'rgba(30,41,59,0.9)',
+          border: '1px solid rgba(139,92,246,0.5)',
+          borderRadius: '12px', padding: '10px 14px',
+          color: '#e2e8f0', cursor: 'pointer', fontSize: '0.82rem',
+          backdropFilter: 'blur(8px)', boxShadow: '0 4px 16px rgba(0,0,0,0.4)',
+          transition: 'all 0.2s',
+        }}
+        title="JimboKit Agent Terminal"
+      >
+        ⌨ Jimbo
+      </button>
+
+      {/* ─── JimboKit floating panel ─── */}
+      {showJimboKit && (
+        <JimboKitPanel
+          floating
+          onClose={() => setShowJimboKit(false)}
+          onNavigate={(url) => window.open(url, '_blank')}
+          onNewTab={() => window.open('about:blank', '_blank')}
+          onReload={() => window.location.reload()}
+          currentUrl={window.location.href}
+        />
+      )}
     </div>
   );
 }

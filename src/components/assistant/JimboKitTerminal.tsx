@@ -53,6 +53,11 @@ async function fetchViaBridge(url: string): Promise<string> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url }),
   });
+  if (res.status === 404) {
+    // Electron backend not available — open in new tab as fallback
+    window.open(url, '_blank');
+    return `↗ Otwarto w nowej karcie: ${url}`;
+  }
   if (!res.ok) throw new Error(`Błąd HTTP ${res.status}`);
   const data = await res.json() as { content?: string; text?: string; html?: string };
   const raw = data.content ?? data.text ?? data.html ?? '';
