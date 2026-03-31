@@ -256,9 +256,30 @@ async function handleChat(req: http.IncomingMessage, res: http.ServerResponse) {
     try {
       type Msg = OpenAI.Chat.ChatCompletionMessageParam;
 
-      const contextMessages: Msg[] = session.messages
-        .slice(-20)
-        .map(m => ({ role: m.role, content: m.content }));
+      const systemMessage: Msg = {
+        role: 'system',
+        content: `Jesteś JimboKit — backend AI dla ZENO Browser.
+Masz dostęp do 3 narzędzi: web_search (SearXNG), fetch_url, kb_search (jimbo_kb D1).
+
+INSTRUKCJE: Przeczytaj pełną dokumentację narzędzi i funkcji w pliku:
+.workspace_meta/scripts/ai-tools-index.md
+
+Ten plik zawiera:
+- Szczegóły wszystkich dostępnych tools
+- Kiedy używać poszczególnych narzędzi
+- Przykłady wywołań
+- Strategie error handling
+- Informacje o providerach i modelach
+
+Odpowiadaj po polsku, chyba że użytkownik pisze inaczej.`
+      };
+
+      const contextMessages: Msg[] = [
+        systemMessage,
+        ...session.messages
+          .slice(-20)
+          .map(m => ({ role: m.role, content: m.content }))
+      ];
 
       // ── Phase 1: tool-use (non-streaming) ─────────────────────────────────
       const toolResp = await openrouter.chat.completions.create({
