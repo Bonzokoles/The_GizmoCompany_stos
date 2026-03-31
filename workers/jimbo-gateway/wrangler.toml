@@ -20,10 +20,70 @@ binding = "DB"
 database_name = "zeno-browser-db"
 database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
 
-# ─── R2 (document / media storage) ─────────────────────────
+# ─── R2 buckets (16 bucketów — Storage Browser) ─────────────
 [[r2_buckets]]
 binding = "STORAGE"
 bucket_name = "mybonzo-media"
+
+[[r2_buckets]]
+binding = "R2_BONZO_MEDIA_HUB"
+bucket_name = "bonzo-media-hub"
+
+[[r2_buckets]]
+binding = "R2_JIMBO77_COMMUNITY_IMAGES"
+bucket_name = "jimbo77-community-images"
+
+[[r2_buckets]]
+binding = "R2_JIMBO77COM_ASSETS"
+bucket_name = "jimbo77com-assets"
+
+[[r2_buckets]]
+binding = "R2_MY_PROJECT_OPENNEXT_CACHE"
+bucket_name = "my-project-opennext-cache"
+
+[[r2_buckets]]
+binding = "R2_MYBONZO_AI_MODELS"
+bucket_name = "mybonzo-ai-models"
+
+[[r2_buckets]]
+binding = "R2_MYBONZO_ANALYTICS"
+bucket_name = "mybonzo-analytics"
+
+[[r2_buckets]]
+binding = "R2_MYBONZO_BACKUPS"
+bucket_name = "mybonzo-backups"
+
+[[r2_buckets]]
+binding = "R2_MYBONZO_BLOG_CONTENT"
+bucket_name = "mybonzo-blog-content"
+
+[[r2_buckets]]
+binding = "R2_MYBONZO_FINANSE"
+bucket_name = "mybonzo-finanse"
+
+[[r2_buckets]]
+binding = "R2_MYBONZO_STORAGE"
+bucket_name = "mybonzo-storage"
+
+[[r2_buckets]]
+binding = "R2_MYBONZO_VIDEOS"
+bucket_name = "mybonzo-videos"
+
+[[r2_buckets]]
+binding = "R2_PUMO_RAW_DATA"
+bucket_name = "pumo-raw-data"
+
+[[r2_buckets]]
+binding = "R2_VIBESDK_TEMPLATES"
+bucket_name = "vibesdk-templates"
+
+[[r2_buckets]]
+binding = "R2_ZEN_BLOG_IMAGES"
+bucket_name = "zen-blog-images"
+
+[[r2_buckets]]
+binding = "R2_ZEN_STATIC_ASSETS"
+bucket_name = "zen-static-assets"
 
 # ─── KV (session cache / chat history) ──────────────────────
 # [[kv_namespaces]]

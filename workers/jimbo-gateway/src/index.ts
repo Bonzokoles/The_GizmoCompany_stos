@@ -40,6 +40,22 @@ export interface Env {
   DB: D1Database;
   STORAGE: R2Bucket;
   CACHE?: KVNamespace;
+  // R2 Storage Browser bindings
+  R2_BONZO_MEDIA_HUB: R2Bucket;
+  R2_JIMBO77_COMMUNITY_IMAGES: R2Bucket;
+  R2_JIMBO77COM_ASSETS: R2Bucket;
+  R2_MY_PROJECT_OPENNEXT_CACHE: R2Bucket;
+  R2_MYBONZO_AI_MODELS: R2Bucket;
+  R2_MYBONZO_ANALYTICS: R2Bucket;
+  R2_MYBONZO_BACKUPS: R2Bucket;
+  R2_MYBONZO_BLOG_CONTENT: R2Bucket;
+  R2_MYBONZO_FINANSE: R2Bucket;
+  R2_MYBONZO_STORAGE: R2Bucket;
+  R2_MYBONZO_VIDEOS: R2Bucket;
+  R2_PUMO_RAW_DATA: R2Bucket;
+  R2_VIBESDK_TEMPLATES: R2Bucket;
+  R2_ZEN_BLOG_IMAGES: R2Bucket;
+  R2_ZEN_STATIC_ASSETS: R2Bucket;
   CF_GATEWAY_BASE: string;
   // Provider API Keys (secrets)
   OPENAI_API_KEY: string;
@@ -1217,6 +1233,104 @@ export default {
           "Content-Type": "application/json",
           "Content-Disposition": `attachment; filename="${filename}"`,
         },
+      });
+    }
+
+    // ── /api/storage/buckets ──────────────────────────────────────────────
+    if (path === "/api/storage/buckets" && req.method === "GET") {
+      const BUCKETS = [
+        { name: "bonzo-media-hub",              category: "media",     description: "Media Hub — filmy i obrazy" },
+        { name: "zen-static-assets",            category: "assets",    description: "ZENO — assety statyczne" },
+        { name: "zen-blog-images",              category: "assets",    description: "ZENO — obrazy blogowe" },
+        { name: "mybonzo-media",                category: "media",     description: "MyBonzo — media" },
+        { name: "mybonzo-videos",               category: "media",     description: "MyBonzo — wideo" },
+        { name: "mybonzo-ai-models",            category: "ai",        description: "MyBonzo — modele AI" },
+        { name: "mybonzo-blog-content",         category: "content",   description: "MyBonzo — treści bloga" },
+        { name: "mybonzo-analytics",            category: "data",      description: "MyBonzo — dane analityczne" },
+        { name: "mybonzo-backups",              category: "backups",   description: "MyBonzo — kopie zapasowe" },
+        { name: "mybonzo-finanse",              category: "data",      description: "MyBonzo — dane finansowe" },
+        { name: "mybonzo-storage",              category: "general",   description: "MyBonzo — storage ogólny" },
+        { name: "jimbo77-community-images",     category: "media",     description: "Jimbo77 — obrazy społeczności" },
+        { name: "jimbo77com-assets",            category: "assets",    description: "Jimbo77.com — assety" },
+        { name: "my-project-opennext-cache",    category: "general",   description: "OpenNext — cache projektu" },
+        { name: "pumo-raw-data",                category: "data",      description: "PUMO — surowe dane" },
+        { name: "vibesdk-templates",            category: "templates", description: "VibeSdk — szablony" },
+      ];
+      return json({ buckets: BUCKETS });
+    }
+
+    // ── /api/storage/browse/:bucket ───────────────────────────────────────
+    if (path.startsWith("/api/storage/browse/") && req.method === "GET") {
+      const BUCKET_BINDING: Record<string, keyof Env> = {
+        "bonzo-media-hub":              "R2_BONZO_MEDIA_HUB",
+        "jimbo77-community-images":     "R2_JIMBO77_COMMUNITY_IMAGES",
+        "jimbo77com-assets":            "R2_JIMBO77COM_ASSETS",
+        "my-project-opennext-cache":    "R2_MY_PROJECT_OPENNEXT_CACHE",
+        "mybonzo-ai-models":            "R2_MYBONZO_AI_MODELS",
+        "mybonzo-analytics":            "R2_MYBONZO_ANALYTICS",
+        "mybonzo-backups":              "R2_MYBONZO_BACKUPS",
+        "mybonzo-blog-content":         "R2_MYBONZO_BLOG_CONTENT",
+        "mybonzo-finanse":              "R2_MYBONZO_FINANSE",
+        "mybonzo-media":                "STORAGE",
+        "mybonzo-storage":              "R2_MYBONZO_STORAGE",
+        "mybonzo-videos":               "R2_MYBONZO_VIDEOS",
+        "pumo-raw-data":                "R2_PUMO_RAW_DATA",
+        "vibesdk-templates":            "R2_VIBESDK_TEMPLATES",
+        "zen-blog-images":              "R2_ZEN_BLOG_IMAGES",
+        "zen-static-assets":            "R2_ZEN_STATIC_ASSETS",
+      };
+      const bucketName = decodeURIComponent(path.slice("/api/storage/browse/".length));
+      const bindingKey = BUCKET_BINDING[bucketName];
+      if (!bindingKey) return err("Unknown bucket", 404);
+      const bucket = env[bindingKey] as R2Bucket;
+      if (!bucket) return err("Bucket not bound", 503);
+      const prefix = url.searchParams.get("prefix") ?? "";
+      const cursor = url.searchParams.get("cursor") ?? undefined;
+      const limit  = Math.min(Number(url.searchParams.get("limit") ?? 100), 500);
+      const listed = await bucket.list({ prefix, cursor, limit, delimiter: "/" });
+      const objects = [
+        ...listed.delimitedPrefixes.map(p => ({ key: p, size: 0, uploaded: null })),
+        ...listed.objects.map(o => ({ key: o.key, size: o.size, uploaded: o.uploaded })),
+      ];
+      const nextCursor = listed.truncated && "cursor" in listed ? (listed as { cursor: string }).cursor : null;
+      return json({ objects, cursor: nextCursor });
+    }
+
+    // ── /api/storage/file/:bucket/:key ────────────────────────────────────
+    if (path.startsWith("/api/storage/file/") && req.method === "GET") {
+      const BUCKET_BINDING: Record<string, keyof Env> = {
+        "bonzo-media-hub":              "R2_BONZO_MEDIA_HUB",
+        "jimbo77-community-images":     "R2_JIMBO77_COMMUNITY_IMAGES",
+        "jimbo77com-assets":            "R2_JIMBO77COM_ASSETS",
+        "my-project-opennext-cache":    "R2_MY_PROJECT_OPENNEXT_CACHE",
+        "mybonzo-ai-models":            "R2_MYBONZO_AI_MODELS",
+        "mybonzo-analytics":            "R2_MYBONZO_ANALYTICS",
+        "mybonzo-backups":              "R2_MYBONZO_BACKUPS",
+        "mybonzo-blog-content":         "R2_MYBONZO_BLOG_CONTENT",
+        "mybonzo-finanse":              "R2_MYBONZO_FINANSE",
+        "mybonzo-media":                "STORAGE",
+        "mybonzo-storage":              "R2_MYBONZO_STORAGE",
+        "mybonzo-videos":               "R2_MYBONZO_VIDEOS",
+        "pumo-raw-data":                "R2_PUMO_RAW_DATA",
+        "vibesdk-templates":            "R2_VIBESDK_TEMPLATES",
+        "zen-blog-images":              "R2_ZEN_BLOG_IMAGES",
+        "zen-static-assets":            "R2_ZEN_STATIC_ASSETS",
+      };
+      const rest       = path.slice("/api/storage/file/".length);
+      const slashIdx   = rest.indexOf("/");
+      if (slashIdx === -1) return err("Missing key", 400);
+      const bucketName = decodeURIComponent(rest.slice(0, slashIdx));
+      const key        = decodeURIComponent(rest.slice(slashIdx + 1));
+      const bindingKey = BUCKET_BINDING[bucketName];
+      if (!bindingKey) return err("Unknown bucket", 404);
+      const bucket = env[bindingKey] as R2Bucket;
+      if (!bucket) return err("Bucket not bound", 503);
+      const obj = await bucket.get(key);
+      if (!obj) return err("Object not found", 404);
+      const ct = obj.httpMetadata?.contentType ?? "application/octet-stream";
+      const disposition = `attachment; filename="${key.split("/").pop()}"`;
+      return new Response(obj.body, {
+        headers: { ...CORS, "Content-Type": ct, "Content-Disposition": disposition },
       });
     }
 
