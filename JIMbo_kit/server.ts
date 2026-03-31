@@ -49,9 +49,12 @@ const __dir = dirname(fileURLToPath(import.meta.url));
 loadEnv(resolve(__dir, '.env'));
 loadEnv(resolve(__dir, '../.env'));
 
-const PORT   = Number(process.env.JIMBO_PORT   ?? 4111);
-const MODEL  = process.env.JIMBO_MODEL  ?? 'deepseek/deepseek-r1-0528:free';
-const ORKEY  = process.env.OPENROUTER_API_KEY ?? '';
+const PORT         = Number(process.env.JIMBO_PORT   ?? 4111);
+const MODEL        = process.env.JIMBO_MODEL  ?? 'deepseek/deepseek-r1-0528:free';
+const TOOL_MODEL   = process.env.JIMBO_TOOL_MODEL ?? 'deepseek/deepseek-chat';
+const ORKEY        = process.env.OPENROUTER_API_KEY ?? '';
+const SEARXNG_URL  = process.env.SEARXNG_URL ?? 'http://localhost:8888';
+const JIMBO_GW     = process.env.JIMBO_GATEWAY_URL ?? 'https://jimbo-gateway.stolarnia-ams.workers.dev';
 
 // ── OpenRouter client ──────────────────────────────────────────────────────────
 
@@ -128,6 +131,99 @@ function json(res: http.ServerResponse, status: number, data: unknown) {
 
 // ── Chat handler — streaming via WebSocket ────────────────────────────────────
 
+// ── Tool definitions ──────────────────────────────────────────────────────────
+
+const TOOLS: OpenAI.Chat.ChatCompletionTool[] = [
+  {
+    type: 'function',
+    function: {
+      name: 'web_search',
+      description: 'Search the web using SearXNG. Use for current events, recent data, or unknown facts.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Search query' },
+        },
+        required: ['query'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'fetch_url',
+      description: 'Fetch and read the text content of a URL.',
+      parameters: {
+        type: 'object',
+        properties: {
+          url: { type: 'string', description: 'Full URL to fetch' },
+        },
+        required: ['url'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'kb_search',
+      description: 'Search the internal ZENO knowledge base (jimbo_kb in D1) for relevant stored information.',
+      parameters: {
+        type: 'object',
+        properties: {
+          query:   { type: 'string', description: 'Search query' },
+          library: { type: 'string', description: 'Library name to search in (optional, e.g. local_03_connections)' },
+        },
+        required: ['query'],
+      },
+    },
+  },
+];
+
+async function executeTool(name: string, args: Record<string, string>): Promise<string> {
+  try {
+    if (name === 'web_search') {
+      const r = await fetch(`${SEARXNG_URL}/search?q=${encodeURIComponent(args.query ?? '')}&format=json`, {
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (!r.ok) return `SearXNG error ${r.status}`;
+      const data = await r.json() as { results?: Array<{ title: string; url: string; content?: string }> };
+      const hits = (data.results ?? []).slice(0, 5);
+      if (!hits.length) return 'No search results found.';
+      return hits.map((x, i) => `[${i + 1}] ${x.title}\n${x.url}\n${x.content ?? ''}`).join('\n\n');
+    }
+
+    if (name === 'fetch_url') {
+      const r = await fetch(args.url, {
+        headers: { 'User-Agent': 'ZENO-JimboKit/1.0' },
+        signal:  AbortSignal.timeout(10_000),
+      });
+      const text  = await r.text();
+      const clean = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 3_000);
+      return clean + (text.length > 3_000 ? '\n…(truncated)' : '');
+    }
+
+    if (name === 'kb_search') {
+      const r = await fetch(`${JIMBO_GW}/kb/search`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ query: args.query, library: args.library ?? null, limit: 5 }),
+        signal:  AbortSignal.timeout(8_000),
+      });
+      if (!r.ok) return `KB error ${r.status}`;
+      const data = await r.json() as { results?: Array<{ title: string; content: string }> };
+      const hits = data.results ?? [];
+      if (!hits.length) return 'No KB results found.';
+      return hits.map((x, i) => `[${i + 1}] ${x.title}\n${x.content}`).join('\n\n');
+    }
+
+    return `Unknown tool: ${name}`;
+  } catch (e) {
+    return `Tool error (${name}): ${e instanceof Error ? e.message : String(e)}`;
+  }
+}
+
+// ── Chat handler — tool-use + streaming ──────────────────────────────────────
+
 async function handleChat(req: http.IncomingMessage, res: http.ServerResponse) {
   const raw = await readBody(req);
   const body = JSON.parse(raw) as { message?: string; prompt?: string; session_id?: string };
@@ -158,10 +254,52 @@ async function handleChat(req: http.IncomingMessage, res: http.ServerResponse) {
     }
 
     try {
-      const contextMessages = session.messages
-        .slice(-20)
-        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }));
+      type Msg = OpenAI.Chat.ChatCompletionMessageParam;
 
+      const contextMessages: Msg[] = session.messages
+        .slice(-20)
+        .map(m => ({ role: m.role, content: m.content }));
+
+      // ── Phase 1: tool-use (non-streaming) ─────────────────────────────────
+      const toolResp = await openrouter.chat.completions.create({
+        model:      TOOL_MODEL,
+        messages:   contextMessages,
+        tools:      TOOLS,
+        tool_choice: 'auto',
+        max_tokens: 1024,
+        stream:     false,
+      });
+
+      const toolMsg = toolResp.choices[0]?.message;
+      const toolCalls = toolMsg?.tool_calls ?? [];
+
+      if (toolCalls.length > 0) {
+        // Execute each tool and collect results
+        const toolMessages: Msg[] = [toolMsg as Msg];
+
+        for (const call of toolCalls) {
+          const fnName = call.function.name;
+          let fnArgs: Record<string, string> = {};
+          try { fnArgs = JSON.parse(call.function.arguments); } catch { /* empty */ }
+
+          broadcast('chat:tool_use', {
+            chat_id: chatId, task_id,
+            tool: fnName, args: fnArgs,
+          });
+
+          const result = await executeTool(fnName, fnArgs);
+
+          toolMessages.push({
+            role:         'tool',
+            tool_call_id: call.id,
+            content:      result,
+          });
+        }
+
+        contextMessages.push(...toolMessages);
+      }
+
+      // ── Phase 2: streaming final answer ───────────────────────────────────
       const stream = await openrouter.chat.completions.create({
         model:      MODEL,
         messages:   contextMessages,
