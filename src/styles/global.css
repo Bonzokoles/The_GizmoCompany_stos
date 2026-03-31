@@ -491,9 +491,10 @@ body {
   box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
 }
 
+/* CopilotKit floating button — ukryty (zastąpiony przez ⚡ ZENO DevTools w toolbarze) */
 .copilotKitButton,
 .zeno-copilot-theme .copilotKitButton {
-  display: inline-flex !important;
+  display: none !important;
   align-items: center;
   gap: 8px;
   right: 24px !important;

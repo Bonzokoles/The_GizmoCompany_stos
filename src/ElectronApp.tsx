@@ -1,5 +1,4 @@
 import { CopilotKit } from '@copilotkit/react-core';
-import '@copilotkit/react-ui/styles.css';
 import { BrowserUI } from './components/browser-core/BrowserUI';
 
 export function ElectronApp() {
