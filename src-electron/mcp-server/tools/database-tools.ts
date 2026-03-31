@@ -348,13 +348,13 @@ export function createDatabaseTools(): MCPTool[] {
         ).all();
 
         const stats: Record<string, number> = {};
-        for (const t of tables) {
-          const row = database.prepare(`SELECT COUNT(*) as count FROM "${t.name}"`).get();
+        for (const t of tables as { name: string }[]) {
+          const row = database.prepare(`SELECT COUNT(*) as count FROM "${t.name}"`).get() as { count: number } | undefined;
           stats[t.name] = row?.count ?? 0;
         }
 
         return {
-          tables: tables.map((t: any) => t.name),
+          tables: (tables as { name: string }[]).map(t => t.name),
           rowCounts: stats,
           dbPath: path.join(app.getPath('userData'), 'zeno-data.db'),
         };

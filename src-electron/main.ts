@@ -234,7 +234,7 @@ async function initializeServices() {
 
     // Auto-Updater
     if (!isDev) {
-      new AutoUpdaterService(mainWindow); // CR-011: Pass mainWindow for renderer IPC
+      new AutoUpdaterService(mainWindow ?? undefined); // CR-011: Pass mainWindow for renderer IPC
       console.log('✅ Auto-Updater initialized');
     }
 
