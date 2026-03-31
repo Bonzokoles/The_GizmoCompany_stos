@@ -170,6 +170,7 @@ export interface UmamiAPI {
 
 export interface McpAPI {
   listTools(): Promise<string[]>;
+  callTool(name: string, args: Record<string, unknown>): Promise<unknown>;
 }
 
 export interface WorkflowAPI {
