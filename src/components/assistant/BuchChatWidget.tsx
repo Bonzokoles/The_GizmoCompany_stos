@@ -6,12 +6,20 @@
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+interface ToolCall {
+  tool:   string;
+  input:  Record<string, unknown>;
+  result: string;
+}
+
 interface Message {
-  role: 'user' | 'assistant';
-  text: string;
-  provider: string;
-  tokens?: number;
-  ts: number;
+  role:       'user' | 'assistant';
+  text:       string;
+  provider:   string;
+  tokens?:    number;
+  ts:         number;
+  streaming?: boolean;
+  toolTrace?: ToolCall[];
 }
 
 interface BuchChatWidgetProps {
@@ -19,30 +27,47 @@ interface BuchChatWidgetProps {
   onOpenFull?: () => void;
 }
 
-const HISTORY_KEY  = 'buch-widget-history';
-const PROVIDER_KEY = 'buch-widget-provider';
+const HISTORY_KEY   = 'buch-widget-history';
+const PROVIDER_KEY  = 'buch-widget-provider';
+const TOOLS_KEY     = 'buch-widget-tools';
+const STREAMING_KEY = 'buch-widget-streaming';
+
+function parseSSEToken(line: string): string {
+  if (!line.startsWith('data: ')) return '';
+  const raw = line.slice(6).trim();
+  if (raw === '[DONE]') return '';
+  try {
+    const parsed = JSON.parse(raw);
+    const oaiToken = parsed?.choices?.[0]?.delta?.content;
+    if (typeof oaiToken === 'string') return oaiToken;
+    if (parsed?.type === 'content_block_delta' && parsed?.delta?.type === 'text_delta') {
+      return parsed.delta.text ?? '';
+    }
+  } catch { /* ignore */ }
+  return '';
+}
 
 export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
-  const [open, setOpen]     = useState(false);
+  const [open, setOpen]         = useState(false);
   const [provider, setProvider] = useState<string>(
     () => localStorage.getItem(PROVIDER_KEY) ?? 'deepseek',
   );
-  const [history, setHistory] = useState<Message[]>(() => {
+  const [history, setHistory]   = useState<Message[]>(() => {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]'); } catch { return []; }
   });
-  const [prompt,  setPrompt]  = useState('');
-  const [loading, setLoading] = useState(false);
+  const [prompt,       setPrompt]       = useState('');
+  const [loading,      setLoading]      = useState(false);
+  const [useTools,     setUseTools]     = useState(() => localStorage.getItem(TOOLS_KEY) === 'true');
+  const [useStreaming, setUseStreaming]  = useState(() => localStorage.getItem(STREAMING_KEY) !== 'false');
 
   const bottomRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   /* persist */
-  useEffect(() => {
-    localStorage.setItem(HISTORY_KEY,  JSON.stringify(history.slice(-80)));
-  }, [history]);
-  useEffect(() => {
-    localStorage.setItem(PROVIDER_KEY, provider);
-  }, [provider]);
+  useEffect(() => { localStorage.setItem(HISTORY_KEY,   JSON.stringify(history.slice(-80))); }, [history]);
+  useEffect(() => { localStorage.setItem(PROVIDER_KEY,  provider); }, [provider]);
+  useEffect(() => { localStorage.setItem(TOOLS_KEY,     String(useTools)); }, [useTools]);
+  useEffect(() => { localStorage.setItem(STREAMING_KEY, String(useStreaming)); }, [useStreaming]);
 
   /* scroll to bottom */
   useEffect(() => {
@@ -60,28 +85,83 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     setPrompt('');
     setHistory(h => [...h, { role: 'user', text, provider, ts: Date.now() }]);
     setLoading(true);
+
+    const basePayload = { prompt: text, provider, maxTokens: 1024 };
+
     try {
+      /* PATH 1: Tool use */
+      if (useTools) {
+        const res = await fetch('/api/ai/chat/tools', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(basePayload),
+        });
+        const data = await res.json() as {
+          content?: string; provider?: string;
+          tokens?: { total?: number }; toolTrace?: ToolCall[];
+        };
+        setHistory(h => [...h, {
+          role:      'assistant',
+          text:      data?.content ?? '[Brak odpowiedzi]',
+          provider:  data?.provider ?? provider,
+          tokens:    data?.tokens?.total,
+          toolTrace: data?.toolTrace,
+          ts:        Date.now(),
+        }]);
+        return;
+      }
+
+      /* PATH 2: Streaming SSE */
+      if (useStreaming) {
+        const msgId = `stream-${Date.now()}`;
+        setHistory(h => [...h, { role: 'assistant', text: '', provider, ts: Date.now(), streaming: true }]);
+
+        const res = await fetch('/api/ai/chat/stream', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(basePayload),
+        });
+        if (!res.ok || !res.body) throw new Error(`Stream error ${res.status}`);
+
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer    = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          for (const line of lines) {
+            const chunk = parseSSEToken(line);
+            if (!chunk) continue;
+            setHistory(h => h.map((m, i) =>
+              i === h.length - 1 && m.streaming ? { ...m, text: m.text + chunk } : m,
+            ));
+          }
+        }
+        setHistory(h => h.map((m, i) =>
+          i === h.length - 1 && m.streaming ? { ...m, streaming: false } : m,
+        ));
+        void msgId;
+        return;
+      }
+
+      /* PATH 3: Plain fetch */
       const res  = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: text, provider, maxTokens: 1024 }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(basePayload),
       });
       const data = await res.json() as { content?: string; provider?: string; usage?: { total_tokens?: number } };
       setHistory(h => [...h, {
-        role:     'assistant',
-        text:     data?.content ?? '[Brak odpowiedzi]',
-        provider: data?.provider ?? provider,
-        tokens:   data?.usage?.total_tokens,
-        ts:       Date.now(),
+        role: 'assistant', text: data?.content ?? '[Brak odpowiedzi]',
+        provider: data?.provider ?? provider, tokens: data?.usage?.total_tokens, ts: Date.now(),
       }]);
     } catch {
-      setHistory(h => [...h, {
-        role: 'assistant', text: '⚠ Błąd połączenia z API', provider, ts: Date.now(),
-      }]);
+      setHistory(h => [...h, { role: 'assistant', text: '⚠ Błąd połączenia z API', provider, ts: Date.now() }]);
     } finally {
       setLoading(false);
     }
-  }, [prompt, provider, loading]);
+  }, [prompt, provider, loading, useTools, useStreaming]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -109,6 +189,18 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                 <option value="anthropic">Claude</option>
                 <option value="workers-ai">Workers AI</option>
               </select>
+              <button
+                className={`buch-widget-btn${useStreaming && !useTools ? ' buch-btn-active' : ''}`}
+                onClick={() => { if (!useTools) setUseStreaming(v => !v); }}
+                title="Streaming SSE"
+                aria-label="Streaming"
+              >~</button>
+              <button
+                className={`buch-widget-btn${useTools ? ' buch-btn-active' : ''}`}
+                onClick={() => setUseTools(v => !v)}
+                title="Narzędzia webowe (Claude)"
+                aria-label="Narzędzia"
+              >⚒</button>
               {onOpenFull && (
                 <button
                   className="buch-widget-btn"
@@ -143,13 +235,21 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                   <span className="buch-msg-role">{m.role === 'user' ? 'TY' : 'AI'}</span>
                   <span className="buch-msg-prov">{m.provider}</span>
                   {m.tokens != null && <span className="buch-msg-tok">{m.tokens}t</span>}
+                  {m.toolTrace && m.toolTrace.length > 0 && (
+                    <span className="buch-msg-tools" title={m.toolTrace.map(t => t.tool).join(', ')}>⚒{m.toolTrace.length}</span>
+                  )}
                 </div>
-                <p className="buch-msg-text">{m.text}</p>
+                <p className="buch-msg-text">
+                  {m.text}{m.streaming ? <span className="buch-typing">▋</span> : null}
+                </p>
               </div>
             ))}
-            {loading && (
+            {loading && !history.some(m => m.streaming) && (
               <div className="buch-widget-msg buch-msg-assistant">
-                <div className="buch-msg-meta"><span className="buch-msg-role">AI</span></div>
+                <div className="buch-msg-meta">
+                  <span className="buch-msg-role">AI</span>
+                  {useTools && <span className="buch-msg-tools">⚒</span>}
+                </div>
                 <p className="buch-msg-text buch-typing">▋</p>
               </div>
             )}

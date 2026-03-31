@@ -17,13 +17,21 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 
 type AssistantMode = 'chat' | 'prompts' | 'kb' | 'settings';
 
+interface ToolCall {
+  tool:   string;
+  input:  Record<string, unknown>;
+  result: string;
+}
+
 interface ChatMessage {
-  id:        string;
-  role:      'user' | 'assistant' | 'system';
-  text:      string;
-  provider:  string;
-  timestamp: number;
-  tokens?:   number;
+  id:         string;
+  role:       'user' | 'assistant' | 'system';
+  text:       string;
+  provider:   string;
+  timestamp:  number;
+  tokens?:    number;
+  toolTrace?: ToolCall[];
+  streaming?: boolean;
 }
 
 interface Session {
@@ -132,8 +140,10 @@ export function AssistantPage() {
   const [notes, setNotes] = useState<KBNote[]>(() => loadJSON<KBNote[]>(KB_KEY, []));
 
   /* Chat state */
-  const [prompt,  setPrompt]  = useState('');
-  const [loading, setLoading] = useState(false);
+  const [prompt,      setPrompt]      = useState('');
+  const [loading,     setLoading]     = useState(false);
+  const [useTools,    setUseTools]    = useState(false);
+  const [useStreaming, setUseStreaming] = useState(true);
   const [systemMsg, setSystemMsg] = useState(settings.systemPrompt);
 
   const bottomRef   = useRef<HTMLDivElement>(null);
@@ -178,6 +188,24 @@ export function AssistantPage() {
     setCurSessionId(prev => prev === id ? null : prev);
   }, []);
 
+  /* ── SSE chunk parser (OpenAI-compatible + Anthropic) ── */
+  function parseSSEToken(line: string): string {
+    if (!line.startsWith('data: ')) return '';
+    const raw = line.slice(6).trim();
+    if (raw === '[DONE]') return '';
+    try {
+      const parsed = JSON.parse(raw);
+      // OpenAI-compatible (DeepSeek, OpenRouter)
+      const oaiToken = parsed?.choices?.[0]?.delta?.content;
+      if (typeof oaiToken === 'string') return oaiToken;
+      // Anthropic streaming
+      if (parsed?.type === 'content_block_delta' && parsed?.delta?.type === 'text_delta') {
+        return parsed.delta.text ?? '';
+      }
+    } catch { /* ignore */ }
+    return '';
+  }
+
   /* ── Send message ── */
   const sendMessage = useCallback(async () => {
     const text = prompt.trim();
@@ -217,16 +245,101 @@ export function AssistantPage() {
       { role: 'user' as const, content: text },
     ];
 
+    const basePayload = {
+      prompt:    text,
+      messages:  contextMessages,
+      provider:  settings.provider,
+      maxTokens: settings.maxTokens,
+      systemPrompt: systemMsg || undefined,
+    };
+
     try {
+      /* ── PATH 1: Tool use (Anthropic agent loop) ── */
+      if (useTools) {
+        const res = await fetch('/api/ai/chat/tools', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(basePayload),
+        });
+        const data = await res.json() as {
+          content?: string; provider?: string;
+          tokens?: { total?: number };
+          toolTrace?: ToolCall[];
+        };
+        const aiMsg: ChatMessage = {
+          id:        uid(),
+          role:      'assistant',
+          text:      data?.content ?? '[Brak odpowiedzi]',
+          provider:  data?.provider ?? settings.provider,
+          tokens:    data?.tokens?.total,
+          toolTrace: data?.toolTrace,
+          timestamp: Date.now(),
+        };
+        setSessions(prev => prev.map(s => s.id === sessionId
+          ? { ...s, messages: [...s.messages, aiMsg], updatedAt: Date.now() }
+          : s,
+        ));
+        return;
+      }
+
+      /* ── PATH 2: Streaming SSE ── */
+      if (useStreaming) {
+        const assistantMsgId = uid();
+        const placeholder: ChatMessage = {
+          id: assistantMsgId, role: 'assistant', text: '', provider: settings.provider,
+          timestamp: Date.now(), streaming: true,
+        };
+        setSessions(prev => prev.map(s => s.id === sessionId
+          ? { ...s, messages: [...s.messages, placeholder], updatedAt: Date.now() }
+          : s,
+        ));
+
+        const res = await fetch('/api/ai/chat/stream', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(basePayload),
+        });
+
+        if (!res.ok || !res.body) throw new Error(`Stream error ${res.status}`);
+
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer    = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          for (const line of lines) {
+            const chunk = parseSSEToken(line);
+            if (!chunk) continue;
+            setSessions(prev => prev.map(s => s.id === sessionId
+              ? {
+                  ...s,
+                  messages: s.messages.map(m =>
+                    m.id === assistantMsgId ? { ...m, text: m.text + chunk } : m,
+                  ),
+                  updatedAt: Date.now(),
+                }
+              : s,
+            ));
+          }
+        }
+        // Mark streaming done
+        setSessions(prev => prev.map(s => s.id === sessionId
+          ? { ...s, messages: s.messages.map(m => m.id === assistantMsgId ? { ...m, streaming: false } : m) }
+          : s,
+        ));
+        return;
+      }
+
+      /* ── PATH 3: Plain fetch (fallback) ── */
       const res  = await fetch('/api/ai/chat', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt:   text,
-          messages: contextMessages,
-          provider: settings.provider,
-          maxTokens: settings.maxTokens,
-        }),
+        body:    JSON.stringify(basePayload),
       });
       const data = await res.json() as { content?: string; provider?: string; usage?: { total_tokens?: number } };
       const aiMsg: ChatMessage = {
@@ -252,7 +365,7 @@ export function AssistantPage() {
     } finally {
       setLoading(false);
     }
-  }, [prompt, loading, curSessionId, sessions, settings, systemMsg]);
+  }, [prompt, loading, curSessionId, sessions, settings, systemMsg, useTools, useStreaming]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -385,16 +498,35 @@ export function AssistantPage() {
                     <span className="ba-msg-role">{m.role === 'user' ? 'TY' : m.role === 'system' ? 'SYS' : 'AI'}</span>
                     <span className="ba-msg-prov">{m.provider}</span>
                     {m.tokens != null && <span className="ba-msg-tok">{m.tokens}t</span>}
+                    {m.toolTrace && m.toolTrace.length > 0 && (
+                      <span className="ba-msg-tools" title={m.toolTrace.map(t => t.tool).join(', ')}>
+                        ⚒ {m.toolTrace.length}
+                      </span>
+                    )}
                     <span className="ba-msg-time">{new Date(m.timestamp).toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                  <div className="ba-msg-text">{m.text}</div>
+                  <div className="ba-msg-text">
+                    {m.text}{m.streaming ? <span className="ba-typing">▋</span> : null}
+                  </div>
+                  {m.toolTrace && m.toolTrace.length > 0 && (
+                    <details className="ba-tool-trace">
+                      <summary>⚒ Użyte narzędzia ({m.toolTrace.length})</summary>
+                      {m.toolTrace.map((t, i) => (
+                        <div key={i} className="ba-tool-item">
+                          <span className="ba-tool-name">{t.tool}</span>
+                          <span className="ba-tool-input">{JSON.stringify(t.input).slice(0, 120)}</span>
+                        </div>
+                      ))}
+                    </details>
+                  )}
                 </div>
               ))}
-              {loading && (
+              {loading && !messages.some(m => m.streaming) && (
                 <div className="ba-msg ba-msg-assistant ba-msg-loading">
                   <div className="ba-msg-meta">
                     <span className="ba-msg-role">AI</span>
                     <span className="ba-msg-prov">{settings.provider}</span>
+                    {useTools && <span className="ba-msg-tools">⚒ narzędzia</span>}
                   </div>
                   <div className="ba-msg-text ba-typing">▋</div>
                 </div>
@@ -413,6 +545,26 @@ export function AssistantPage() {
                     onChange={e => setSystemMsg(e.target.value)}
                     placeholder="Opcjonalny system prompt…"
                   />
+                </div>
+                <div className="ba-tools-row">
+                  <button
+                    className={`ba-tool-toggle${useStreaming ? ' ba-tool-toggle-on' : ''}`}
+                    onClick={() => setUseStreaming(v => !v)}
+                    title="Streaming SSE — odpowiedź pojawia się token po tokenie"
+                    disabled={useTools}
+                  >
+                    {useStreaming ? '◉ STREAM' : '○ STREAM'}
+                  </button>
+                  <button
+                    className={`ba-tool-toggle${useTools ? ' ba-tool-toggle-on' : ''}`}
+                    onClick={() => setUseTools(v => !v)}
+                    title="Narzędzia webowe: web_search, fetch_url, searxng_search, r2_read, d1_query (wymaga Claude)"
+                  >
+                    {useTools ? '⚒ TOOLS ON' : '⚒ TOOLS OFF'}
+                  </button>
+                  {useTools && (
+                    <span className="ba-tools-note">Claude · web_search · fetch_url · searxng · r2 · d1</span>
+                  )}
                 </div>
                 <div className="ba-input-row">
                   <textarea
