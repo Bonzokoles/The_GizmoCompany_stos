@@ -40,6 +40,9 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
   },
+  optimizeDeps: {
+    include: ['use-sync-external-store/shim/index.js'],
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
@@ -51,7 +54,17 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
 
-          if (id.includes('/react/') || id.includes('/react-dom/')) {
+          // use-sync-external-store MUSI być w tym samym chunku co React —
+          // jej CJS shim wykonuje React.useState bezpośrednio i crasha gdy
+          // React chunk nie jest jeszcze załadowany.
+          // Zustand jest tutaj, bo importuje bezpośrednio react + use-sync-external-store,
+          // co tworzy cykl vendor-zustand <-> vendor-react — wspólny chunk eliminuje cykl.
+          if (
+            id.includes('/react/') ||
+            id.includes('/react-dom/') ||
+            id.includes('/use-sync-external-store/') ||
+            id.includes('/zustand/')
+          ) {
             return 'vendor-react';
           }
 
