@@ -40,7 +40,6 @@ import { SyncService } from './services/sync-service';
 import { KnowledgeHubService, type AgentDefinition } from './services/knowledge-hub-service';
 import { AgentsCreatorService, type AgentWorkspace, type PromptSnippet } from './services/agents-creator-service';
 import { CopilotSdkService } from './services/copilot-sdk-service';
-import { CopilotRuntimeServer } from './services/copilot-runtime-server';
 import { isSafeUrl, isValidString } from './utils/validate-url';
 import { createMCPServer, MCPServer } from './mcp-server';
 
@@ -65,7 +64,6 @@ let syncService: SyncService;
 let knowledgeHubService: KnowledgeHubService;
 let agentsCreatorService: AgentsCreatorService;
 let copilotSdkService: CopilotSdkService;
-let copilotRuntimeServer: CopilotRuntimeServer;
 let jimboHubProcess: ChildProcess | null = null;
 
 /**
@@ -281,15 +279,6 @@ async function initializeServices() {
     // Copilot SDK — project-scoped adapter for Copilot CLI
     copilotSdkService = new CopilotSdkService();
     console.log('✅ Copilot SDK Service initialized');
-
-    // CopilotKit local runtime — AI sidebar dla aplikacji desktopowej
-    const openrouterKey = process.env.OPENROUTER_API_KEY ?? '';
-    if (openrouterKey) {
-      copilotRuntimeServer = new CopilotRuntimeServer();
-      copilotRuntimeServer.start(openrouterKey);
-    } else {
-      console.warn('⚠️ CopilotKit runtime nie uruchomiony — brak OPENROUTER_API_KEY');
-    }
 
     // Search — unified orchestrator (SearXNG + AI + Catalog)
     searchService = new SearchService(searxngService, catalogService, aiGatewayService);
@@ -1293,10 +1282,6 @@ app.on('activate', () => {
   if (mainWindow === null) {
     createWindow();
   }
-});
-
-app.on('will-quit', () => {
-  copilotRuntimeServer?.stop();
 });
 
 /**
