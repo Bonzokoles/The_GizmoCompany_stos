@@ -232,8 +232,7 @@ export async function stBrowse(prefix) {
 }
 
 export function stOpenFile(bucket, key) {
-  // Open via the pages function download endpoint or CF public URL
-  const url = `/api/storage/file/${encodeURIComponent(bucket)}/${encodeURIComponent(key)}`;
+  const url = `${API}/file/${encodeURIComponent(bucket)}/${encodeURIComponent(key)}`;
   window.open(url, '_blank');
 }
 

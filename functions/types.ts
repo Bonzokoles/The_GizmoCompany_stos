@@ -37,6 +37,7 @@ export interface Env {
   PERPLEXITY_API_KEY?: string;
   WEBGATE_SECRET?: string;
   UMAMI_SITE_ID?: string;
+  JIMBO_GATEWAY_URL?: string;
 
   // TMDB
   TMDB_API_KEY?: string;

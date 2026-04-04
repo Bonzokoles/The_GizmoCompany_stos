@@ -28,10 +28,14 @@ if not exist "logs" mkdir logs
 echo [PHASE 1/8] Podman Machine...
 podman machine inspect podman-machine-default >nul 2>&1
 if errorlevel 1 (
-    echo   [BLAD] Maszyna Podman nie istnieje!
-    echo   Uruchom: podman machine init
-    pause
-    exit /b 1
+    echo   Maszyna Podman nie istnieje - inicjalizacja ^(moze potrwac kilka minut^)...
+    podman machine init
+    if errorlevel 1 (
+        echo   [BLAD] Nie mozna zainicjowac maszyny Podman!
+        pause
+        exit /b 1
+    )
+    echo   [OK] Maszyna Podman zainicjalizowana
 )
 
 for /f "tokens=*" %%a in ('podman machine inspect podman-machine-default --format "{{.State}}" 2^>nul') do set MACHINE_STATE=%%a
@@ -241,7 +245,7 @@ set "HUB_PORT=4224"
 
 :: Kill-before-start: zabij istniejący proces na porcie HUB_PORT
 for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%HUB_PORT% " ^| findstr "LISTENING"') do (
-    echo   [HUB] Zatrzymuje stary proces na porcie %HUB_PORT% (PID: %%P^)...
+    echo   [HUB] Zatrzymuje stary proces na porcie %HUB_PORT% ^(PID: %%P^)...
     taskkill /PID %%P /F >nul 2>&1
 )
 timeout /t 1 /nobreak >nul
@@ -259,7 +263,7 @@ echo   [OK] JIMBO Agent HUB uruchomiony -^> http://localhost:%HUB_PORT%  (log: l
 if exist "E:\Programs\goose\goose.exe" (
     echo [BG] Uruchamianie Goose Terminal...
     start "◈ JIMBO HUB — Goose AI Terminal" cmd /k "%HUB_DIR%\start_goose_terminal.bat"
-    echo   [OK] Goose Terminal otwarty (widoczne okno ^- mozna wpisywac komendy^)
+    echo   [OK] Goose Terminal otwarty ^(widoczne okno ^- mozna wpisywac komendy^)
 ) else (
     echo   [WARN] Goose nie znaleziony: E:\Programs\goose\goose.exe
 )
@@ -365,7 +369,7 @@ echo.
 echo [PHASE 7/8] Watchdog...
 if exist "%ZENO_DIR%watchdog.ps1" (
     start "ZENO-Watchdog" /MIN powershell -ExecutionPolicy Bypass -NoProfile -File "%ZENO_DIR%watchdog.ps1"
-    echo   [OK] Watchdog aktywny (co 30s, log: logs\watchdog.log)
+    echo   [OK] Watchdog aktywny ^(co 30s, log: logs\watchdog.log^)
 ) else (
     echo   [WARN] watchdog.ps1 nie znaleziony!
 )

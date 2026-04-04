@@ -58,6 +58,12 @@
 
 ## Odkrycia
 
+### 2026-04-04: Web agents routing przez Pages Functions (bez hardcoded workers.dev)
+
+- **Problem:** webowy panel agentów był zależny od bezpośredniego URL `workers.dev`, co omijało warstwę API projektu i utrudniało spójny routing między środowiskami.
+- **Fix:** dodano proxy `functions/api/ai/agents/[[path]].ts` i przepięto frontend na endpointy same-origin `/api/ai/agents/*`.
+- **Wniosek:** dla runtime web utrzymujemy zasadę: frontend komunikuje się z własnym API (`/api/...`), a Pages Functions odpowiadają za forwarding do workerów/docelowych usług.
+
 ### 2026-03-30: Dark mode dla natywnych dropdownów w WebLanding
 
 - **Problem:** natywne `select` w `src/components/landing/WebLanding.tsx` miały ciemne pole, ale po rozwinięciu lista opcji na Windows/Chromium renderowała się na jasnym tle.

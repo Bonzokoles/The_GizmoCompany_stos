@@ -150,6 +150,8 @@ async function apiFetch<T = any>(url: string, opts?: RequestInit): Promise<T | n
 
 /* ─── Main Component ─────────────────────────────── */
 
+const isElectron = typeof window !== 'undefined' && !!window.electronAPI;
+
 export function WebLanding() {
   const [tab, setTab] = useState<TabId>('overview');
   const [showJimboKit, setShowJimboKit] = useState(false);
@@ -2570,19 +2572,21 @@ export function WebLanding() {
       {/* ─── BUCH_CHAT floating widget ─── */}
       <BuchChatWidget onOpenFull={() => setTab('assistant')} />
 
-      {/* ─── JimboKit toggle button ─── */}
-      <button
-        onClick={() => setShowJimboKit(v => !v)}
-        className={`chat-toggle${showJimboKit ? ' buch-toggle-active' : ''}`}
-        style={{ bottom: '28px', right: '182px' }}
-        title="JimboKit Agent Terminal"
-      >
-        <span className="ct-dot" />
-        ⌨ Jimbo
-      </button>
+      {/* ─── JimboKit toggle button — Electron only ─── */}
+      {isElectron && (
+        <button
+          onClick={() => setShowJimboKit(v => !v)}
+          className={`chat-toggle${showJimboKit ? ' buch-toggle-active' : ''}`}
+          style={{ bottom: '28px', right: '182px' }}
+          title="JimboKit Agent Terminal"
+        >
+          <span className="ct-dot" />
+          ⌨ Jimbo
+        </button>
+      )}
 
-      {/* ─── JimboKit floating panel ─── */}
-      {showJimboKit && (
+      {/* ─── JimboKit floating panel — Electron only ─── */}
+      {isElectron && showJimboKit && (
         <JimboKitPanel
           floating
           onClose={() => setShowJimboKit(false)}

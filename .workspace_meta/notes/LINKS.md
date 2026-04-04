@@ -1,128 +1,151 @@
-search engines:
-https://github.com/topics/search-engine
-https://github.com/elastic/elasticsearch.git
-https://github.com/qdrant/qdrant.git
- https://github.com/jina-ai/serve.git 
- https://github.com/meilisearch/meilisearch.git 
- https://docs.searxng.org/
- https://github.com/sist2app/sist2.git
- https://github.com/neon-mmd/websurfx.git
- https://solr.apache.org/
- https://fess.codelibs.org/
- https://github.com/typesense/typesense.git
- https://github.com/valeriansaliou/sonic.git
- https://github.com/dailydotdev/daily.git
- https://github.com/weaviate/weaviate.git
- https://github.com/neuml/txtai.git
- 
- 
- manymachines:
- https://github.com/edoardottt/awesome-hacker-search-engines.git
- 
- 
- devtools:
- https://github.com/sindresorhus/awesome-nodejs.git
- https://github.com/tiimgreen/github-cheat-sheet.git
- https://github.com/ggreer/the_silver_searcher.git
- https://github.com/sindresorhus/quick-look-plugins.git
- https://github.com/Slackadays/Clipboard.git
- https://github.com/wavetermdev/waveterm.git
- 
- do zapamiętania:
- https://github.com/collections/productivity-tools
- https://github.com/awesome-selfhosted/awesome-selfhosted#document-management---institutional-repository-and-digital-library-software
- https://github.com/awesome-selfhosted/awesome-selfhosted.git
- 
- simplymachines:
- https://github.com/SimpleMachines/SMF.git
- https://github.com/SimpleMachines/BuildTools.git
- 
- app:
- https://socialhome.network/p/7538bd1b-d3a8-49a5-bf00-db63fcc9114f
- 
- Content Management Systems:
- 
- socialmedia:
- https://mixpost.app/
- 
- 
- 
- analitycs:
- https://github.com/orangecoloured/analog.git
- https://aptabase.com/
- https://www.awstats.org/                  =Free real-time logfile analyzer to get advanced statistics (GNU GPL)
- https://github.com/apache/druid.git
- https://goaccess.io/       =super wygląda!
- https://litlyx.com/           mcno do sprawdzenia!!!
- https://www.metabase.com/                  wygląda dobrze darmowe konto (podstawy)warto
- https://github.com/lutzroeder/netron.git     ??? sprawdzić 
- https://www.offen.dev/     kod w stronie do zapisywania wejść
- https://plausible.io/     9$ za miesiąc
- 
-https://posthog.com/  dobrze wygląda
-https://inveniordm.docs.cern.ch/                                  =Turn-key research data management repository
+# ZENO Browser — Linki i Repo Referencyjne
+> Zaktualizowano: 2026-04-04
 
+---
 
+## ⭐ TOP PRIORYTETY — zaadaptować do JIMBO Hub
 
+### Hermes Agent (NousResearch)
+**Repo:** https://github.com/NousResearch/hermes-agent
+**Stars:** 24.8k | **Aktywny:** v0.7.0 — 2026-04-03
+**Dlaczego:** Identyczna architektura co ZENO — SQLite + FTS5, local embeddings (fastembed + sqlite-vec), SKILL.md runtime creation, closed loop (task → extract → save skill → reuse).
+**Co zabrać:**
+- Schemat `hermes_state.py` — wzorzec SQLite + FTS5 + skills
+- Skills wstrzykiwane jako **user messages** zamiast system prompt (prompt caching)
+- MEMORY.md + USER.md jako strukturalna pamięć obok DB
 
-images:
-https://samvera.org/
+### Hermes Agent Self-Evolution (GEPA)
+**Repo:** https://github.com/NousResearch/hermes-agent-self-evolution
+**Stars:** 617 | **Aktywny:** 2026-03-09 | **Paper:** ICLR 2026 oral
+**Dlaczego:** GEPA (Genetic-Pareto Prompt Evolution) — silnik ewolucji promptów bez GPU (~$2-10/cykl). Poprawa 24% → 93% resolve rate. Czyta execution traces, diagnozuje failures, generuje targeted mutations.
+**Co zabrać:**
+- Architektura GEPA jako alternatywa/uzupełnienie OpenEvolve (P4)
+- Wzorzec: execution traces → diagnosis → mutation cycle
 
+### OpenSpace (HKUDS)
+**Repo:** https://github.com/HKUDS/OpenSpace
+**Stars:** 4k | **Aktywny:** 2026-04-04 (aktywny!)
+**Dlaczego:** Najbliższy odpowiednik planowanego systemu ewolucji skilli w ZENO. 3 tryby: FIX (naprawa), DERIVED (nowe ze starych), CAPTURED (wzorce z wykonania). SQLite z pełną historią lineage + quality metrics. 165 skills z 13-pokoleniową ewolucją w benchmarkach.
+**Co zabrać:**
+- Schema SQLite z `showcase/.openspace/openspace.db` — wzorzec dla JIMBO skills DB z lineage
+- Wzorzec 3-trybowej ewolucji do implementacji przy P4
 
-webbuild?
-https://microweber.com/
+---
 
+## ✅ WARTO — dobre wzorce do studium
 
+### Agent Zero (frdel)
+**Repo:** https://github.com/frdel/agent-zero
+**Stars:** 16.7k | **Aktywny:** tak
+**Co zabrać:**
+- Modułowy system promptów z dziedziczeniem (`prompts/<profil>/` nadpisują default)
+- Dynamiczne ładowanie skills przez semantic recall (nie ładuj wszystkiego do kontekstu)
+- Hierarchia delegacyjna: każdy agent ma "superior", może delegować do sub-agentów
 
-https://github.com/gp247net/s-cart.git   e-comerce
+### OpenHands (All-Hands-AI)
+**Repo:** https://github.com/All-Hands-AI/OpenHands
+**Stars:** 35k+ | **Aktywny:** codzienne commity
+**Co zabrać:**
+- Wzorzec system prompta w sekcjach: ROLE / EFFICIENCY / FILE_SYSTEM / CODE_QUALITY / VERSION_CONTROL / PROBLEM_SOLVING / SECURITY
+- **AGENTS.md pattern** — plik w katalogu projektu ładowany automatycznie (lokalna wiedza bez DB)
+- Hierarchia micro-agents: repo-level / org-level / user-level → mapowanie na JIMBO: session/project/global skills
 
+### Letta (dawniej MemGPT)
+**Repo:** https://github.com/letta-ai/letta
+**Stars:** 21.9k | **Aktywny:** tak
+**Docs:** https://docs.letta.com/concepts/memgpt/
+**Co zabrać:**
+- Trójpoziomowy model pamięci: **core** (zawsze w kontekście) / **archival** (vector store) / **recall** (FTS historia)
+- Mapowanie na JIMBO SQLite:
+  - core_memory  → tabela agent_state (always loaded)
+  - archival     → tabela skills z embedding (cosine search)
+  - recall       → tabela sessions z FTS5
+- Agent jako aktywny manager pamięci (wywołuje memory_append/archival_search)
 
+### mini-swe-agent (princeton-nlp)
+**Repo:** https://github.com/SWE-agent/mini-swe-agent
+**Dlaczego:** 100-liniowy agent osiągający >74% na SWE-bench. Benchmark prostoty — punkt odniesienia "ile kodu wystarczy dla skutecznego agenta".
 
+---
 
+## 📚 STANDARDY — obowiązkowe
 
+### SKILL.md Open Standard
+**Spec:** https://agentskills.io/specification
+**Repo:** https://github.com/agentskills/agentskills
+**Dlaczego:** ZENO używa Goose (współtwórcy standardu). Kompatybilny z Claude Code, Cursor, VS Code, Copilot, Codex. JIMBO skills DB powinna eksportować w tym formacie.
 
+### Awesome Agent Skills
+**Repo:** https://github.com/skillmatic-ai/awesome-agent-skills
+**Akcja:** Zasilić JIMBO DB gotowymi skills w formacie SKILL.md.
 
+### Goose CLI (block)
+**Repo:** https://github.com/block/goose
+**Stars:** 35.5k | **Aktywny:** v1.29.1 — 2026-04-03
+**Docs:** https://block.github.io/goose/docs/guides/context-engineering/using-skills/
+**Akcja:** Śledzić zmiany standardu, nowe extensions, SKILL.md spec updates.
 
-scraping:
-https://github.com/topics/scraping
-https://github.com/edoardottt/awesome-hacker-search-engines
+---
 
+## 🔬 EWOLUCJA PROMPTÓW I SKILLI
 
+### OpenEvolve
+**Repo:** https://github.com/algorithmicsuperintelligence/openevolve
+**Status:** PyPI 0.0.20 — sprawdzić stabilność 2026-04-23 przed P4
+**Dlaczego:** Ewoluuje kod i prompty. Bez GPU. +23% accuracy na HotpotQA przez ewolucję promptów.
 
-dashboards:
-https://github.com/glanceapp/glance.git
-https://github.com/osquery/osquery.git
-https://github.com/vectordotdev/vector.git
+### GEPA
+**Repo:** https://github.com/gepa-ai/gepa
+**Paper:** ICLR 2026 oral | Działa przez DSPy
+**Dlaczego:** Ewolucja promptów przez analizę execution traces (nie gradienty). Uzupełnienie OpenEvolve.
 
+---
 
-networking / DNS / internet tools (z awesome-sindresorhus 2026-03-14):
+## 🔍 SQLITE + EMBEDDINGS — referencje implementacji
 
-  SDN / packet analysis:
-  https://github.com/sdnds-tw/awesome-sdn         Software-Defined Networking
-  https://github.com/caesar0301/awesome-pcaptools  PCAP - przechwytywanie i analiza pakietów
-  https://github.com/secdev/awesome-scapy          Python: manipulacja pakietami sieciowymi
+| Repo | Co daje |
+|------|---------|
+| https://github.com/sqliteai/sqlite-memory | Hybrid cosine + FTS5 w jednym SQLite extension |
+| https://github.com/sqliteai/sqlite-vector | Cross-platform SQLite vector extension |
+| https://github.com/JordanMcCann/agentmemory | #1 LongMemEval (96.2%), SQLite domyślnie |
+| https://github.com/bolnet/agent-memory | Sub-5ms retrieval, gotowa schema SQLite |
 
-  DNS / CDN / ochrona łącza:
-  https://github.com/irazasyed/awesome-cloudflare  CDN, DNS, DDoS protection ★★★
-  https://github.com/satta/awesome-suricata        IDS/IPS - wykrywanie intruzów w sieci
-  https://github.com/fabacab/awesome-cybersecurity-blueteam  Obrona sieci i monitoring
+---
 
-  Real-time / monitoring protokołów:
-  https://github.com/rtckit/awesome-rtc            Real-Time Communications (WebRTC, SIP)
-  https://github.com/eozer/awesome-snmp            SNMP - monitoring urządzeń sieciowych
-  https://github.com/seifrajhi/awesome-cilium      Networking+security dla kontenerów
+## 📂 KOLEKCJE SYSTEM PROMPTÓW — referencja
 
-  Anonimowość / omijanie blokad DNS:
-  https://github.com/polycarbohydrate/awesome-tor  Tor - anonimowa komunikacja
-  https://github.com/moul/awesome-ssh              SSH - tunelowanie, zarządzanie połączeniami
+| Repo | Zawartość |
+|------|-----------|
+| https://github.com/EliFuzz/awesome-system-prompts | Claude Code, Cursor, Devin, Windsurf, Augment |
+| https://github.com/x1xhlol/system-prompts-and-models-of-ai-tools | 20+ narzędzi — Claude Code, Manus, Lovable, Replit |
+| https://github.com/danielrosehill/System-Prompt-Library | 1290+ promptów z auto-export |
 
-  Dane o infrastrukturze:
-  https://github.com/stevesong/awesome-connectivity-info  Dostęp do internetu, telekomunikacja
-  https://github.com/briatte/awesome-network-analysis     Analiza sieci
+---
 
+## ❌ NIE WARTO (teraz)
 
+| Projekt | Dlaczego |
+|---------|----------|
+| Leon AI (leon-ai/leon) | W środku przepisywania na v2.0, docs nie gotowe. Focus na voice assistant, nie agentic AI. |
+| AutoGPT | Enterprise SaaS. Za duże, za cloudowe. |
+| SWE-agent (pełny) | Overkill. Użyj mini-swe-agent jako benchmark. |
+| MemOS | Graph-based memory — ciekawy ale mało dojrzały. Wróć przy P4. |
 
+---
 
+## 🛠️ INFRASTRUKTURA PODMAN (kontenery)
 
+| Serwis | Repo / URL | Namespace |
+|--------|-----------|-----------|
+| SearXNG | https://docs.searxng.org/ | search |
+| sist2 (desktop search) | https://github.com/sist2app/sist2 | search |
+| websurfx | https://github.com/neon-mmd/websurfx | search |
+| Meilisearch | https://github.com/meilisearch/meilisearch | search |
+| Umami | open source analytics | analytics |
+| Plausible | https://plausible.io/ | analytics |
+| Glance (dashboard) | https://github.com/glanceapp/glance | global |
+| GoAccess (log analytics) | https://goaccess.io/ | analytics |
 
- 
+---
+
+*ZENO Browser — Bonzokoles 2026*
