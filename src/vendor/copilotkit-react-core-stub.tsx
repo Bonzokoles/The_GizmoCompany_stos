@@ -7,3 +7,7 @@ export function CopilotKit({ children }: { children: ReactNode; runtimeUrl?: str
 export function useCopilotAction(_config: unknown): void {
   // no-op stub for web/CF Pages builds
 }
+
+export function useCopilotReadable(_config: unknown): void {
+  // no-op stub for web/CF Pages builds
+}
