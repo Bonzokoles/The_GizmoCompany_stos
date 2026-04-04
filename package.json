@@ -32,9 +32,6 @@
   },
   "dependencies": {
     "@cloudflare/tanstack-ai": "^0.1.4",
-    "@copilotkit/react-core": "^1.54.1",
-    "@copilotkit/react-ui": "^1.54.1",
-    "@copilotkit/runtime": "^1.54.1",
     "@github/copilot-sdk": "^0.2.0",
     "@modelcontextprotocol/sdk": "^1.27.1",
     "@xyflow/react": "^12.10.2",
