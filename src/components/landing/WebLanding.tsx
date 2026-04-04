@@ -791,7 +791,7 @@ export function WebLanding() {
 
   /* ─── Render ─── */
   return (
-    <div className="web-landing ops-dashboard">
+    <div className={`web-landing ops-dashboard${tab === 'assistant' ? ' assistant-active' : ''}`}>
       {/* Header */}
       <header className="hero compact">
         <div className="hero-glow" />
@@ -2574,7 +2574,7 @@ export function WebLanding() {
       <button
         onClick={() => setShowJimboKit(v => !v)}
         className={`chat-toggle${showJimboKit ? ' buch-toggle-active' : ''}`}
-        style={{ bottom: '80px' }}
+        style={{ bottom: '28px', right: '182px' }}
         title="JimboKit Agent Terminal"
       >
         <span className="ct-dot" />

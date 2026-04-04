@@ -14,7 +14,7 @@ import {
   nativeTheme,
   shell,
 } from 'electron';
-import { execSync } from 'child_process';
+import { execSync, spawn, type ChildProcess } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -66,6 +66,7 @@ let knowledgeHubService: KnowledgeHubService;
 let agentsCreatorService: AgentsCreatorService;
 let copilotSdkService: CopilotSdkService;
 let copilotRuntimeServer: CopilotRuntimeServer;
+let jimboHubProcess: ChildProcess | null = null;
 
 /**
  * Create main window
@@ -320,10 +321,67 @@ async function initializeServices() {
     console.log('✅ MCP Server initialized');
 
     setupIPCHandlers();
+
+    // JIMBO Agent HUB — autostart
+    startJimboHub();
   } catch (error) {
     console.error('Failed to initialize services:', error);
     throw error;
   }
+}
+
+/**
+ * Start JIMBO_agent_HUB server (port 4224) as a child process.
+ * Restarts automatically if it crashes. Killed when Electron quits.
+ */
+function startJimboHub() {
+  const hubDir = path.join(app.getAppPath(), 'JIMBO_agent_HUB');
+  const envPath = path.join(hubDir, '.env');
+  if (!fs.existsSync(envPath)) {
+    console.warn('⚠️ JIMBO Hub: .env not found at', envPath, '— skipping autostart');
+    return;
+  }
+
+  const spawnHub = () => {
+    // Sprawdź czy port 4224 jest już zajęty (hub uruchomiony z .bat)
+    const testServer = require('net').createServer();
+    testServer.once('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        console.log('✅ JIMBO Hub already running on :4224 (started externally) — skipping spawn');
+        return;
+      }
+      // Inny błąd — spróbuj mimo to
+      doSpawn();
+    });
+    testServer.once('listening', () => {
+      testServer.close(() => doSpawn());
+    });
+    testServer.listen(4224, '127.0.0.1');
+  };
+
+  const doSpawn = () => {
+    jimboHubProcess = spawn('npx', ['tsx', 'hub-server.ts'], {
+      cwd: hubDir,
+      stdio: 'pipe',
+      shell: true,
+      env: { ...process.env },
+      detached: false,
+    });
+
+    jimboHubProcess.stdout?.on('data', (d: Buffer) =>
+      console.log('[JIMBO HUB]', d.toString().trimEnd()));
+    jimboHubProcess.stderr?.on('data', (d: Buffer) =>
+      console.warn('[JIMBO HUB ERR]', d.toString().trimEnd()));
+    jimboHubProcess.on('exit', (code, signal) => {
+      console.warn(`⚠️ JIMBO Hub exited (code=${code}, signal=${signal}) — restarting in 5s`);
+      jimboHubProcess = null;
+      setTimeout(spawnHub, 5000);
+    });
+
+    console.log('✅ JIMBO Agent HUB started (pid:', jimboHubProcess.pid, ')');
+  };
+
+  spawnHub();
 }
 
 /**
@@ -1219,6 +1277,15 @@ app.on('ready', async () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+app.on('before-quit', () => {
+  if (jimboHubProcess) {
+    jimboHubProcess.removeAllListeners('exit'); // prevent restart loop
+    jimboHubProcess.kill();
+    jimboHubProcess = null;
+    console.log('✅ JIMBO Hub stopped');
   }
 });
 

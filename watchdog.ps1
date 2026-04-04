@@ -19,6 +19,10 @@ if (-not (Test-Path $LogDir)) {
     New-Item -ItemType Directory -Path $LogDir -Force | Out-Null
 }
 
+# --- ZENO Browser (Electron) ---
+$ZenoDir     = "U:\WWW_Zen_BRo_wser_org3"
+$ElectronExe = "electron"
+
 # --- Konfiguracja kontenerow ---
 $Containers = @(
     "zeno-umami-db",
@@ -137,6 +141,45 @@ function Start-CloudflaredTunnel {
     return $true
 }
 
+function Test-ElectronRunning {
+    $procs = Get-Process -Name $ElectronExe -ErrorAction SilentlyContinue
+    return (($procs | Measure-Object).Count -gt 0)
+}
+
+function Set-ElectronHighPriority {
+    $procs = Get-Process -Name $ElectronExe -ErrorAction SilentlyContinue
+    $set = 0
+    foreach ($p in $procs) {
+        try {
+            if ($p.PriorityClass -ne [System.Diagnostics.ProcessPriorityClass]::High) {
+                $p.PriorityClass = [System.Diagnostics.ProcessPriorityClass]::High
+                $set++
+            }
+        } catch {}
+    }
+    if ($set -gt 0) {
+        Write-WatchdogLog "ZENO Browser: High priority ustawiony dla $set procesow electron" "OK"
+    }
+}
+
+function Restart-ZenoBrowser {
+    param([bool]$ViteUp = $false)
+    $key = "electron"
+    if (-not $RestartCount.ContainsKey($key)) { $RestartCount[$key] = 0 }
+    if ($RestartCount[$key] -ge $MaxRestarts) {
+        Write-WatchdogLog "ZENO Browser: limit restartow ($MaxRestarts/h) przekroczony" "FAIL"
+        return
+    }
+    $RestartCount[$key]++
+    if ($ViteUp) {
+        Write-WatchdogLog "ZENO Browser: Electron padl, Vite dziala — restart samego Electron (#$($RestartCount[$key]))" "FIX"
+        Start-Process "cmd.exe" -ArgumentList "/c", "cd /d `"$ZenoDir`" && npx electron ." -WindowStyle Normal
+    } else {
+        Write-WatchdogLog "ZENO Browser: pelny restart (Vite + Electron) (#$($RestartCount[$key]))" "FIX"
+        Start-Process "cmd.exe" -ArgumentList "/c", "cd /d `"$ZenoDir`" && npm run dev" -WindowStyle Normal
+    }
+}
+
 function Show-TunnelUrls {
     foreach ($t in $Tunnels) {
         $logPath = Join-Path $LogDir $t.Log
@@ -235,6 +278,16 @@ while ($true) {
                 Write-WatchdogLog "Named tunnel $($nt.Name) - uruchomiony" "OK"
             }
         }
+    }
+
+    # === ZENO BROWSER ELECTRON (kazdy cykl) ===
+    if (Test-ElectronRunning) {
+        Set-ElectronHighPriority
+    } else {
+        $problems++
+        $viteUp = Test-HttpAlive "http://localhost:5173" 3
+        Write-WatchdogLog "ZENO Browser: electron.exe nie dziala (Vite: $(if($viteUp){'UP'}else{'DOWN'}))" "WARN"
+        Restart-ZenoBrowser -ViteUp $viteUp
     }
 
     # === STATUS (co 10 cykli = co ~5 min) ===

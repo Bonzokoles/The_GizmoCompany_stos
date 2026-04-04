@@ -3,6 +3,10 @@
  * Auto-typed interface for contextBridge.exposeInMainWorld('electronAPI', api)
  */
 
+// ── CSS Module declarations ─────────────────────────────────────
+declare module '*.css';
+
+
 // ── Domain Models ──────────────────────────────────────────────
 
 export interface Tab {

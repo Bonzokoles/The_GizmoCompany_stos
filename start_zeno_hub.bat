@@ -233,6 +233,43 @@ echo   [OK] ZENO Build gotowy
 echo.
 
 :: =============================================
+:: JIMBO AGENT HUB (background, port 4224)
+:: =============================================
+echo [BG] JIMBO Agent HUB (port 4224)...
+set "HUB_DIR=U:\WWW_Zen_BRo_wser_org3\JIMBO_agent_HUB"
+set "HUB_PORT=4224"
+
+:: Kill-before-start: zabij istniejący proces na porcie HUB_PORT
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%HUB_PORT% " ^| findstr "LISTENING"') do (
+    echo   [HUB] Zatrzymuje stary proces na porcie %HUB_PORT% (PID: %%P^)...
+    taskkill /PID %%P /F >nul 2>&1
+)
+timeout /t 1 /nobreak >nul
+
+:: Upewnij sie ze node_modules istnieje
+if not exist "%HUB_DIR%\node_modules" (
+    echo   [HUB] Instalowanie zaleznosci...
+    cmd /c "cd /d %HUB_DIR% && npm install > %ZENO_DIR%logs\hub_install.log 2>&1"
+)
+
+start "JIMBO-agent-HUB" /MIN cmd /c "cd /d %HUB_DIR% && npm start > %ZENO_DIR%logs\jimbo_hub.log 2>&1"
+echo   [OK] JIMBO Agent HUB uruchomiony -^> http://localhost:%HUB_PORT%  (log: logs\jimbo_hub.log)
+
+:: Goose interactive terminal — widoczne okno, mozna wpisywac komendy
+if exist "E:\Programs\goose\goose.exe" (
+    echo [BG] Uruchamianie Goose Terminal...
+    start "◈ JIMBO HUB — Goose AI Terminal" cmd /k "%HUB_DIR%\start_goose_terminal.bat"
+    echo   [OK] Goose Terminal otwarty (widoczne okno ^- mozna wpisywac komendy^)
+) else (
+    echo   [WARN] Goose nie znaleziony: E:\Programs\goose\goose.exe
+)
+
+:: Goose Desktop App (opcjonalne — odkomentuj zeby uruchamiac automatycznie)
+:: start "" "U:\Goose-1.29.1\dist-windows\Goose.exe"
+:: echo   [OK] Goose Desktop uruchomiony
+echo.
+
+:: =============================================
 :: LIBRARY CURATION (background, silent)
 :: =============================================
 echo [BG] Library curation...
@@ -343,6 +380,7 @@ echo  ======================================================
 echo.
 echo   Lokalne serwisy:
 echo     ZENO Browser   http://localhost:5173
+echo     JIMBO Agent HUB http://localhost:4224
 echo     JIMBO Chat     http://localhost:5180
 echo     Libraries API  http://localhost:7070
 echo     MyBonzo        http://localhost:4321
@@ -366,10 +404,20 @@ echo  ======================================================
 echo.
 
 :: =============================================
+:: WRANGLER PAGES DEV (Cloudflare bindings local)
+:: Czeka az Vite wystartuje, potem startuje na :8788
+:: Daje dostep do D1, R2, KV przez http://localhost:8788
+:: =============================================
+echo [BG] Wrangler CF Pages Dev (port 8788, proxy -^> :5173)...
+start "Wrangler-CF-Dev" /MIN cmd /c "cd /d %ZENO_DIR% && npx wait-on http://localhost:5173 --timeout 60000 && npx wrangler pages dev --proxy 5173 --port 8788 > %ZENO_DIR%logs\wrangler_dev.log 2>&1"
+echo   [OK] Wrangler uruchomi sie po starcie Vite -^> http://localhost:8788
+
+:: =============================================
 :: PHASE 8: ZENO BROWSER (foreground)
 :: =============================================
 echo [PHASE 8/8] Uruchamianie ZENO Browser...
 echo       Vite:        http://localhost:5173
+echo       Wrangler CF: http://localhost:8788
 echo       Electron:    auto-launch
 echo.
 call npm run dev

@@ -17,6 +17,7 @@ coverage/
 .env.local
 .env.*.local
 .dev.vars
+.dev.vars
 .dev.vars.*
 .workspace_meta/secrets/
 .workspace_meta/awesome-copilot/
@@ -68,3 +69,16 @@ test-results/
 
 # Mascot assets (local only)
 public/mascot/
+
+# JIMBO_agent_HUB — binary/DB files
+JIMBO_agent_HUB/skills/db/*.db
+JIMBO_agent_HUB/skills/db/*.db-shm
+JIMBO_agent_HUB/skills/db/*.db-wal
+JIMBO_agent_HUB/skills/*.db
+JIMBO_agent_HUB/skills/library/global/--*
+JIMBO_agent_HUB/skills/library/search/cze-*
+
+# Workspace metadata (history / session notes — local only)
+.workspace_meta/
+
+services/mydia/

@@ -12,10 +12,15 @@
  * Storage: localStorage (CF Pages compatible, no Prisma)
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { AgentHubPanel } from './AgentHubPanel';
+
+const API_BASE = (typeof window !== 'undefined' && (
+  window.location.protocol === 'file:' || window.location.port === '5173'
+)) ? 'http://localhost:8788' : '';
 
 /* ─── Types ─────────────────────────────────────── */
 
-type AssistantMode = 'chat' | 'prompts' | 'kb' | 'settings';
+type AssistantMode = 'chat' | 'prompts' | 'kb' | 'settings' | 'agent';
 
 interface ToolCall {
   tool:   string;
@@ -256,7 +261,7 @@ export function AssistantPage() {
     try {
       /* ── PATH 1: Tool use (Anthropic agent loop) ── */
       if (useTools) {
-        const res = await fetch('/api/ai/chat/tools', {
+        const res = await fetch(`${API_BASE}/api/ai/chat/tools`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify(basePayload),
@@ -294,7 +299,7 @@ export function AssistantPage() {
           : s,
         ));
 
-        const res = await fetch('/api/ai/chat/stream', {
+        const res = await fetch(`${API_BASE}/api/ai/chat/stream`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify(basePayload),
@@ -337,7 +342,7 @@ export function AssistantPage() {
       }
 
       /* ── PATH 3: Plain fetch (fallback) ── */
-      const res  = await fetch('/api/ai/chat', {
+      const res  = await fetch(`${API_BASE}/api/ai/chat`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(basePayload),
@@ -403,7 +408,7 @@ export function AssistantPage() {
         </div>
 
         <nav className="ba-nav" role="navigation">
-          {(['chat', 'prompts', 'kb', 'settings'] as AssistantMode[]).map(m => (
+          {(['chat', 'prompts', 'kb', 'settings', 'agent'] as AssistantMode[]).map(m => (
             <button
               key={m}
               className={`ba-nav-btn${mode === m ? ' ba-nav-btn-active' : ''}`}
@@ -413,6 +418,7 @@ export function AssistantPage() {
               {m === 'prompts'  && '◧ PROMPTS'}
               {m === 'kb'       && '◇ BAZA WIEDZY'}
               {m === 'settings' && '⚙ USTAWIENIA'}
+              {m === 'agent'    && '◈ AGENT HUB'}
             </button>
           ))}
         </nav>
@@ -807,6 +813,9 @@ export function AssistantPage() {
           </div>
         </div>
       )}
+
+      {/* ══ AGENT HUB MODE ═════════════════════════ */}
+      {mode === 'agent' && <AgentHubPanel />}
     </div>
   );
 }

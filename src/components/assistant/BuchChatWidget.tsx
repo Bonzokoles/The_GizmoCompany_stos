@@ -6,6 +6,12 @@
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+// Auto-detect: Vite dev (:5173) or Electron (file:) → proxy through wrangler at :8788
+// Production Cloudflare → relative paths work directly
+const API_BASE = (typeof window !== 'undefined' && (
+  window.location.protocol === 'file:' || window.location.port === '5173'
+)) ? 'http://localhost:8788' : '';
+
 interface ToolCall {
   tool:   string;
   input:  Record<string, unknown>;
@@ -43,6 +49,8 @@ function parseSSEToken(line: string): string {
     if (parsed?.type === 'content_block_delta' && parsed?.delta?.type === 'text_delta') {
       return parsed.delta.text ?? '';
     }
+    // JIMBO Agent HUB format: { text: "..." }
+    if (typeof parsed?.text === 'string') return parsed.text;
   } catch { /* ignore */ }
   return '';
 }
@@ -50,7 +58,7 @@ function parseSSEToken(line: string): string {
 export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   const [open, setOpen]         = useState(false);
   const [provider, setProvider] = useState<string>(
-    () => localStorage.getItem(PROVIDER_KEY) ?? 'deepseek',
+    () => localStorage.getItem(PROVIDER_KEY) ?? 'agent-hub',
   );
   const [history, setHistory]   = useState<Message[]>(() => {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]'); } catch { return []; }
@@ -89,9 +97,57 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     const basePayload = { prompt: text, provider, maxTokens: 1024 };
 
     try {
+      /* PATH 0: JIMBO Agent HUB (localhost:4224) */
+      if (provider === 'agent-hub') {
+        const hubMessages = [
+          ...history.slice(-20).map(m => ({ role: m.role, content: m.text })),
+          { role: 'user' as const, content: text },
+        ];
+
+        if (useStreaming) {
+          setHistory(h => [...h, { role: 'assistant', text: '', provider: 'agent-hub', ts: Date.now(), streaming: true }]);
+          const res = await fetch('http://localhost:4224/chat', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: hubMessages, stream: true }),
+          });
+          if (!res.ok || !res.body) throw new Error(`Agent HUB error ${res.status}`);
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+            for (const line of lines) {
+              const chunk = parseSSEToken(line);
+              if (!chunk) continue;
+              setHistory(h => h.map((m, i) =>
+                i === h.length - 1 && m.streaming ? { ...m, text: m.text + chunk } : m,
+              ));
+            }
+          }
+          setHistory(h => h.map((m, i) =>
+            i === h.length - 1 && m.streaming ? { ...m, streaming: false } : m,
+          ));
+        } else {
+          const res = await fetch('http://localhost:4224/chat', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: hubMessages, stream: false }),
+          });
+          const data = await res.json() as { content?: string; model?: string; usage?: { total_tokens?: number } };
+          setHistory(h => [...h, {
+            role: 'assistant', text: data?.content ?? '[Brak odpowiedzi]',
+            provider: data?.model ?? 'agent-hub', tokens: data?.usage?.total_tokens, ts: Date.now(),
+          }]);
+        }
+        return;
+      }
+
       /* PATH 1: Tool use */
       if (useTools) {
-        const res = await fetch('/api/ai/chat/tools', {
+        const res = await fetch(`${API_BASE}/api/ai/chat/tools`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(basePayload),
         });
@@ -115,7 +171,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
         const msgId = `stream-${Date.now()}`;
         setHistory(h => [...h, { role: 'assistant', text: '', provider, ts: Date.now(), streaming: true }]);
 
-        const res = await fetch('/api/ai/chat/stream', {
+        const res = await fetch(`${API_BASE}/api/ai/chat/stream`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(basePayload),
         });
@@ -148,7 +204,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
       }
 
       /* PATH 3: Plain fetch */
-      const res  = await fetch('/api/ai/chat', {
+      const res  = await fetch(`${API_BASE}/api/ai/chat`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(basePayload),
       });
@@ -189,6 +245,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                 <option value="openrouter">OpenRouter</option>
                 <option value="anthropic">Claude</option>
                 <option value="workers-ai">Workers AI</option>
+                <option value="agent-hub">◈ Agent HUB</option>
               </select>
               <button
                 className={`buch-widget-btn${useStreaming && !useTools ? ' buch-btn-active' : ''}`}

@@ -1,5 +1,9 @@
 {
   "mcpServers": {
+    "zeno-electron": {
+      "type": "sse",
+      "url": "http://127.0.0.1:3847/sse"
+    },
     "zeno-browser": {
       "type": "http",
       "url": "https://zeno-mcp.stolarnia-ams.workers.dev/mcp"
@@ -29,7 +33,8 @@
       "url": "https://observability.mcp.cloudflare.com/mcp"
     },
     "huggingface-skills": {
-      "url": "https://huggingface.co/mcp?login"
+      "type": "http",
+      "url": "https://huggingface.co/mcp"
     },
     "tavily": {
       "type": "stdio",
