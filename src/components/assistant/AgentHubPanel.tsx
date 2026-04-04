@@ -15,6 +15,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { SkillGraphPanel } from './SkillGraphPanel';
+import { useJimboCopilotActions } from '../../hooks/useJimboCopilotActions';
 
 const HUB = 'http://localhost:4224';
 const HUB_WS = 'ws://localhost:4224/ws';
@@ -494,6 +495,17 @@ export function AgentHubPanel() {
   /* ── URL detection in task output ── */
   const extractUrls = (text: string) =>
     [...text.matchAll(/https?:\/\/[^\s"'>)]+/g)].map(m => m[0]).slice(0, 3);
+
+  /* ── CopilotKit actions ── */
+  useJimboCopilotActions({
+    hubOnline,
+    hubModel,
+    sessionName,
+    activeAgentName,
+    sendToChat,
+    sendToTask,
+    setRightTab,
+  });
 
   /* ════ RENDER ════════════════════════════════════════════════ */
   return (
