@@ -44,27 +44,35 @@ export class SkillAgent {
 
   /**
    * Szuka skills pasujących do zapytania użytkownika.
-   * Zwraca suffix gotowy do doklejenia do system prompt.
+   * Zwraca prefix gotowy do wstrzyknięcia jako pierwsza część wiadomości użytkownika.
+   * Wzorzec Hermes: skills jako user message → system prompt pozostaje statyczny
+   * → Anthropic cache_control działa → ~80% oszczędności na tokenach systemu.
    * Zwraca '' jeśli nic nie znaleziono.
    */
-  async buildSuffix(query: string, activeNamespaces: Iterable<string>): Promise<string> {
+  async buildUserPrefix(query: string, activeNamespaces: Iterable<string>): Promise<string> {
     if (!query.trim()) return '';
     try {
       const ns = [...activeNamespaces];
       const matched = await this.skills.search(query, 3, 0.65, ns);
       if (matched.length === 0) return '';
-      return (
-        '\n\n--- SKILLS Z BAZY (sprawdzone rozwiązania) ---\n' +
-        matched
-          .map(
-            s =>
-              `[${s.name}]\nOpis: ${s.description}\n\`\`\`\n${(s.code ?? '').slice(0, 400)}\n\`\`\``,
-          )
-          .join('\n\n')
-      );
+      const skillsBlock = matched
+        .map(
+          s =>
+            `## ${s.name}\n${s.description}\n\`\`\`\n${(s.code ?? '').slice(0, 400)}\n\`\`\``,
+        )
+        .join('\n\n');
+      return `[Relevant skills from knowledge base:\n${skillsBlock}\n]\n\n`;
     } catch {
       return ''; // nie blokuj chatu gdy skills DB fail
     }
+  }
+
+  /**
+   * @deprecated Użyj buildUserPrefix() — wstrzykuje skills jako user message zamiast system prompt.
+   * Zostaje dla kompatybilności wstecznej.
+   */
+  async buildSuffix(query: string, activeNamespaces: Iterable<string>): Promise<string> {
+    return this.buildUserPrefix(query, activeNamespaces);
   }
 
   /**

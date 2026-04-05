@@ -37,6 +37,10 @@ $Containers = @(
     "plausible"
 )
 
+# --- JIMBO Agent HUB ---
+$HubDir  = "U:\WWW_Zen_BRo_wser_org3\JIMBO_agent_HUB"
+$HubPort = 4224
+
 # --- Konfiguracja endpointow HTTP ---
 $HttpEndpoints = @(
     @{ Name = "ZENO Vite"; Url = "http://localhost:5173"; Timeout = 5 },
@@ -139,6 +143,43 @@ function Start-CloudflaredTunnel {
     }
     Write-WatchdogLog "Tunel $Name : uruchomiony (URL w $LogName)" "INFO"
     return $true
+}
+
+function Test-JimboHubRunning {
+    try {
+        $r = Invoke-WebRequest -Uri "http://localhost:$HubPort/status" -TimeoutSec 3 -UseBasicParsing -ErrorAction Stop
+        return ($r.StatusCode -eq 200)
+    } catch {
+        return $false
+    }
+}
+
+function Restart-JimboHub {
+    $key = "jimbo-hub"
+    if (-not $RestartCount.ContainsKey($key)) { $RestartCount[$key] = 0 }
+    if ($RestartCount[$key] -ge $MaxRestarts) {
+        Write-WatchdogLog "JIMBO HUB: limit restartow ($MaxRestarts/h) przekroczony" "FAIL"
+        return
+    }
+    $RestartCount[$key]++
+    Write-WatchdogLog "JIMBO HUB: restart #$($RestartCount[$key]) na porcie $HubPort..." "FIX"
+    # Zabij stary proces na porcie
+    $pids = netstat -ano 2>$null | Select-String ":$HubPort " | Select-String "LISTENING"
+    foreach ($line in $pids) {
+        if ($line -match '\s+(\d+)$') {
+            $procId = [int]$Matches[1]
+            Stop-Process -Id $procId -Force -ErrorAction SilentlyContinue
+        }
+    }
+    Start-Sleep -Seconds 2
+    $logPath = Join-Path $LogDir "jimbo_hub.log"
+    Start-Process "cmd.exe" -ArgumentList "/c", "cd /d `"$HubDir`" && npm start >> `"$logPath`" 2>&1" -WindowStyle Minimized
+    Start-Sleep -Seconds 4
+    if (Test-JimboHubRunning) {
+        Write-WatchdogLog "JIMBO HUB: OK po restarcie -> http://localhost:$HubPort" "OK"
+    } else {
+        Write-WatchdogLog "JIMBO HUB: nie odpowiada po restarcie (sprawdz $logPath)" "FAIL"
+    }
 }
 
 function Test-ElectronRunning {
@@ -277,6 +318,15 @@ while ($true) {
                 Start-Sleep -Seconds 5
                 Write-WatchdogLog "Named tunnel $($nt.Name) - uruchomiony" "OK"
             }
+        }
+    }
+
+    # === JIMBO AGENT HUB (co 2 cykle = co ~60s) ===
+    if ($cycle % 2 -eq 0) {
+        if (-not (Test-JimboHubRunning)) {
+            $problems++
+            Write-WatchdogLog "JIMBO HUB: brak odpowiedzi na :$HubPort" "WARN"
+            Restart-JimboHub
         }
     }
 

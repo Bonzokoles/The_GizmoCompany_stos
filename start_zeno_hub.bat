@@ -243,12 +243,15 @@ echo [BG] JIMBO Agent HUB (port 4224)...
 set "HUB_DIR=U:\WWW_Zen_BRo_wser_org3\JIMBO_agent_HUB"
 set "HUB_PORT=4224"
 
-:: Kill-before-start: zabij istniejący proces na porcie HUB_PORT
+:: Kill-before-start: zabij wszystkie procesy na porcie HUB_PORT
+echo   [HUB] Czyszczenie portu %HUB_PORT%...
 for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%HUB_PORT% " ^| findstr "LISTENING"') do (
-    echo   [HUB] Zatrzymuje stary proces na porcie %HUB_PORT% ^(PID: %%P^)...
+    echo   [HUB] Zatrzymuje PID %%P na porcie %HUB_PORT%...
     taskkill /PID %%P /F >nul 2>&1
 )
-timeout /t 1 /nobreak >nul
+:: Zabij tez procesy tsx/node ktore moga trzymac port (np. po crashu)
+taskkill /FI "WINDOWTITLE eq JIMBO-agent-HUB" /F >nul 2>&1
+timeout /t 3 /nobreak >nul
 
 :: Upewnij sie ze node_modules istnieje
 if not exist "%HUB_DIR%\node_modules" (

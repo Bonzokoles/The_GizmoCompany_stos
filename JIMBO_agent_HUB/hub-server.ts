@@ -269,13 +269,24 @@ app.post('/chat', async (req, res) => {
     ? `\n\n--- ACTIVE AGENT MODE: ${activeAgentName} ---\n${activeAgentPrompt}`
     : '';
 
-  // Skill injection — sprawdź bazę skills przed wywołaniem LLM
+  // Skill injection (Hermes pattern) — skills jako user message, nie system prompt
+  // System prompt pozostaje statyczny → Anthropic prompt caching → ~80% oszczędności
   const lastUserContent = messages[messages.length - 1]?.content;
   const lastUserText = typeof lastUserContent === 'string' ? lastUserContent : '';
-  const skillsSuffix = await skillAgent.buildSuffix(lastUserText, activeNamespaces);
+  const skillsPrefix = await skillAgent.buildUserPrefix(lastUserText, activeNamespaces);
 
-  const systemContent = SYSTEM_PROMPT.content + agentSuffix + skillsSuffix;
-  const fullMessages: Message[] = [{ role: 'system', content: systemContent }, ...messages];
+  const systemContent = SYSTEM_PROMPT.content + agentSuffix;
+  // Jeśli znaleziono skills — wstrzyknij je jako prefix ostatniej wiadomości użytkownika
+  const injectedMessages: Message[] = skillsPrefix
+    ? [
+        ...messages.slice(0, -1),
+        {
+          role: 'user' as const,
+          content: skillsPrefix + lastUserText,
+        },
+      ]
+    : messages;
+  const fullMessages: Message[] = [{ role: 'system', content: systemContent }, ...injectedMessages];
 
   try {
     if (stream) {
@@ -553,6 +564,33 @@ app.post('/skills/import-goose-session', async (req, res) => {
     return res.status(404).json(result);
   }
   res.json(result);
+});
+
+// GET /skills/export-skill-md — eksport skills do formatu SKILL.md (Goose-native)
+// Query params:
+//   namespace=global    — filtr namespace (opcjonalny)
+//   limit=100           — max liczba skills (default 100)
+//   save=true           — zapisz plik SKILL.md obok AGENTS.md (Goose auto-load)
+app.get('/skills/export-skill-md', (req, res) => {
+  const namespace = typeof req.query['namespace'] === 'string' ? req.query['namespace'] : undefined;
+  const limit = Number(req.query['limit'] ?? 100);
+  const save = req.query['save'] === 'true';
+
+  const md = skills.exportAsSkillMd(namespace, limit);
+
+  if (save) {
+    const skillMdPath = path.join(__dirname, '..', 'SKILL.md');
+    try {
+      fs.writeFileSync(skillMdPath, md, 'utf-8');
+      console.log(`[HUB] SKILL.md zapisany: ${skillMdPath} (${md.length} znaków)`);
+    } catch (err) {
+      console.warn('[HUB] Nie można zapisać SKILL.md:', err instanceof Error ? err.message : err);
+    }
+  }
+
+  res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="SKILL.md"`);
+  res.send(md);
 });
 
 // ⚠️  UWAGA — KOLEJNOŚĆ ROUTES MA ZNACZENIE ⚠️
