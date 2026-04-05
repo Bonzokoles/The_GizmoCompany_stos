@@ -15,6 +15,7 @@ import {
   shell,
 } from 'electron';
 import { execSync, spawn, type ChildProcess } from 'child_process';
+import net from 'net';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -65,6 +66,7 @@ let knowledgeHubService: KnowledgeHubService;
 let agentsCreatorService: AgentsCreatorService;
 let copilotSdkService: CopilotSdkService;
 let jimboHubProcess: ChildProcess | null = null;
+let jimboHubShuttingDown = false;
 
 /**
  * Create main window
@@ -332,14 +334,14 @@ function startJimboHub() {
   }
 
   const spawnHub = () => {
+    if (jimboHubShuttingDown) return;
     // Sprawdź czy port 4224 jest już zajęty (hub uruchomiony z .bat)
-    const testServer = require('net').createServer();
+    const testServer = net.createServer();
     testServer.once('error', (err: NodeJS.ErrnoException) => {
       if (err.code === 'EADDRINUSE') {
         console.log('✅ JIMBO Hub already running on :4224 (started externally) — skipping spawn');
         return;
       }
-      // Inny błąd — spróbuj mimo to
       doSpawn();
     });
     testServer.once('listening', () => {
@@ -349,11 +351,16 @@ function startJimboHub() {
   };
 
   const doSpawn = () => {
+    if (jimboHubShuttingDown) return;
+    // Dodaj nvm do PATH na Windows żeby npx/tsx były dostępne
+    const nvmPath = 'C:\\nvm4w\\nodejs;C:\\ProgramData\\nvm';
+    const env = { ...process.env, PATH: `${nvmPath};${process.env.PATH ?? ''}` };
+
     jimboHubProcess = spawn('npx', ['tsx', 'hub-server.ts'], {
       cwd: hubDir,
       stdio: 'pipe',
       shell: true,
-      env: { ...process.env },
+      env,
       detached: false,
     });
 
@@ -362,6 +369,7 @@ function startJimboHub() {
     jimboHubProcess.stderr?.on('data', (d: Buffer) =>
       console.warn('[JIMBO HUB ERR]', d.toString().trimEnd()));
     jimboHubProcess.on('exit', (code, signal) => {
+      if (jimboHubShuttingDown) return; // nie restartuj przy zamykaniu
       console.warn(`⚠️ JIMBO Hub exited (code=${code}, signal=${signal}) — restarting in 5s`);
       jimboHubProcess = null;
       setTimeout(spawnHub, 5000);
@@ -1270,8 +1278,9 @@ app.on('window-all-closed', () => {
 });
 
 app.on('before-quit', () => {
+  jimboHubShuttingDown = true; // blokuje restart loop zanim kill
   if (jimboHubProcess) {
-    jimboHubProcess.removeAllListeners('exit'); // prevent restart loop
+    jimboHubProcess.removeAllListeners('exit');
     jimboHubProcess.kill();
     jimboHubProcess = null;
     console.log('✅ JIMBO Hub stopped');

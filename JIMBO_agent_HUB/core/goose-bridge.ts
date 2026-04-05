@@ -11,8 +11,30 @@
  */
 
 import { spawn, type ChildProcess } from 'child_process';
-import { existsSync } from 'fs';
+import { existsSync, readdirSync } from 'fs';
+import { join } from 'path';
+import os from 'os';
 import { EventEmitter } from 'events';
+
+// Katalog sesji Goose: %APPDATA%\Block\goose\sessions\ (Windows)
+const GOOSE_SESSIONS_DIR = join(
+  process.env.APPDATA ?? join(os.homedir(), 'AppData', 'Roaming'),
+  'Block', 'goose', 'sessions',
+);
+
+/**
+ * Sprawdza czy sesja Goose istnieje na dysku.
+ * Goose zapisuje sesje jako <name>.jsonl w GOOSE_SESSIONS_DIR.
+ */
+function sessionExists(name: string): boolean {
+  if (!existsSync(GOOSE_SESSIONS_DIR)) return false;
+  try {
+    const files = readdirSync(GOOSE_SESSIONS_DIR);
+    return files.some(f => f === `${name}.jsonl` || f.startsWith(`${name}_`));
+  } catch {
+    return false;
+  }
+}
 
 export interface GooseTask {
   id:           string;
@@ -56,10 +78,24 @@ export class GooseBridge extends EventEmitter {
    * Jeśli sessionName to null — nowa sesja zostanie utworzona przy pierwszym tasku.
    */
   initSession(sessionName: string | null, taskCount = 0) {
-    this.persistentSession = sessionName;
-    this.sessionTaskCount  = taskCount;
-    if (sessionName) {
-      console.log(`[GooseBridge] Resuming session: ${sessionName} (${taskCount} poprzednich tasków)`);
+    if (sessionName && taskCount > 0) {
+      // Waliduj czy plik sesji Goose faktycznie istnieje na dysku
+      if (sessionExists(sessionName)) {
+        this.persistentSession = sessionName;
+        this.sessionTaskCount  = taskCount;
+        console.log(`[GooseBridge] Resuming session: ${sessionName} (${taskCount} poprzednich tasków)`);
+      } else {
+        // Sesja w hub-state.json ale brak pliku — zacznij od nowa
+        console.warn(`[GooseBridge] Sesja "${sessionName}" nie istnieje na dysku — nowa sesja przy następnym tasku`);
+        this.persistentSession = null;
+        this.sessionTaskCount  = 0;
+      }
+    } else {
+      this.persistentSession = sessionName;
+      this.sessionTaskCount  = taskCount;
+      if (sessionName) {
+        console.log(`[GooseBridge] Resuming session: ${sessionName} (${taskCount} poprzednich tasków)`);
+      }
     }
   }
 
