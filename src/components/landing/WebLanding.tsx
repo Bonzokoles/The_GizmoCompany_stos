@@ -1193,19 +1193,51 @@ export function WebLanding() {
                 </div>
               </div>
 
-              {/* Per-site */}
-              <div className="dashboard-grid">
-                {analyticsData.sites?.map((s: any) => (
-                  <section key={s.site} className="card">
-                    <h3>{s.site}</h3>
-                    <div className="mini-stats">
-                      <span>👁 {s.stats?.pageviews?.value || 0} pageviews</span>
-                      <span>👤 {s.stats?.visitors?.value || 0} visitors</span>
-                      <span>🔄 {s.stats?.visits?.value || 0} visits</span>
+              {/* Per-site bar chart */}
+              {(() => {
+                const sites = analyticsData.sites ?? [];
+                const maxPV = Math.max(1, ...sites.map((s: any) => s.stats?.pageviews?.value ?? 0));
+                return (
+                  <section className="card" style={{ marginBottom: 16 }}>
+                    <h3 style={{ marginBottom: 12 }}>📊 Pageviews per site</h3>
+                    <div style={{ display: 'grid', gap: 10 }}>
+                      {sites.map((s: any) => {
+                        const pv = s.stats?.pageviews?.value ?? 0;
+                        const vi = s.stats?.visitors?.value ?? 0;
+                        const vs = s.stats?.visits?.value ?? 0;
+                        const pct = Math.round((pv / maxPV) * 100);
+                        return (
+                          <div key={s.site}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: 3 }}>
+                              <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{s.site}</span>
+                              <span style={{ color: 'var(--text-dim)', fontSize: '0.72rem' }}>
+                                👁 {pv} · 👤 {vi} · 🔄 {vs}
+                              </span>
+                            </div>
+                            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 4, height: 10, overflow: 'hidden' }}>
+                              <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg,#00ffcc,#60a5fa)', borderRadius: 4, transition: 'width 0.6s ease' }} />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </section>
-                ))}
-              </div>
+                );
+              })()}
+
+              {/* Umami full dashboard iframe */}
+              <section className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 600 }}>📈 Umami Dashboard</span>
+                  <a href="https://analytics.mybonzo.com" target="_blank" rel="noopener noreferrer" className="btn-sm" style={{ fontSize: '0.72rem' }}>↗ Otwórz pełny</a>
+                </div>
+                <iframe
+                  src="https://analytics.mybonzo.com"
+                  style={{ width: '100%', height: 520, border: 'none', display: 'block', background: '#0f172a' }}
+                  title="Umami Analytics Dashboard"
+                  sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                />
+              </section>
             </>
           )}
 
@@ -1387,12 +1419,29 @@ export function WebLanding() {
                 <p className="muted">No objects found or credentials needed.</p>
               ) : (
                 <div className="object-list">
-                  {bucketObjects.map((obj: any, i: number) => (
-                    <div key={i} className="object-row">
-                      <span>{obj.key}</span>
-                      <span className="muted">{obj.size ? `${(obj.size / 1024).toFixed(1)} KB` : ''}</span>
-                    </div>
-                  ))}
+                  {bucketObjects.map((obj: any, i: number) => {
+                    const fileUrl = `/api/storage/file/${selectedBucket}/${encodeURIComponent(obj.key)}`;
+                    const ext = obj.key.split('.').pop()?.toLowerCase() ?? '';
+                    const isImage = ['jpg','jpeg','png','gif','webp','svg','avif'].includes(ext);
+                    const isPdf   = ext === 'pdf';
+                    const isText  = ['txt','md','json','csv','yaml','yml','xml','html','ts','js'].includes(ext);
+                    return (
+                      <div key={i} className="object-row" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ flex: 1, wordBreak: 'break-all' }}>{obj.key}</span>
+                        <span className="muted" style={{ whiteSpace: 'nowrap' }}>{obj.size ? `${(obj.size / 1024).toFixed(1)} KB` : ''}</span>
+                        {(isImage || isPdf || isText) && (
+                          <a href={fileUrl} target="_blank" rel="noopener noreferrer"
+                            className="btn-sm" style={{ whiteSpace: 'nowrap', fontSize: '0.72rem' }}>
+                            {isImage ? '🖼 Podgląd' : isPdf ? '📄 Otwórz' : '📝 Czytaj'}
+                          </a>
+                        )}
+                        <a href={fileUrl} download={obj.key.split('/').pop()}
+                          className="btn-sm" style={{ whiteSpace: 'nowrap', fontSize: '0.72rem' }}>
+                          ⬇ Pobierz
+                        </a>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
