@@ -611,10 +611,9 @@ export function WebLanding() {
     setRenderLoading(false);
   }, [renderUrl, renderAction, renderSelectors, renderPrompt]);
 
-  const CONSUMER_URL = 'https://zeno-queue-consumer.stolarnia-ams.workers.dev';
-
   const loadConsumerHealth = useCallback(async () => {
-    const data = await apiFetch(CONSUMER_URL + '/');
+    // Używamy własnego CF Function zamiast zewnętrznego consumer worker
+    const data = await apiFetch('/api/queues/status');
     setConsumerHealth(data);
   }, []);
 
@@ -623,9 +622,9 @@ export function WebLanding() {
     setQueueLoading(true); setQueueResult(null);
     const actionMap: Record<string, any> = {
       'agent-tasks': { action: queueAction, prompt: queuePrompt },
-      'image-gen': { action: 'generate', prompt: queuePrompt },
-      'image-proc': { action: 'analyze', url: queuePrompt },
-      'voice': { action: 'transcribe', url: queuePrompt },
+      'image-gen':   { action: 'generate',   prompt: queuePrompt },
+      'image-proc':  { action: 'analyze',    url: queuePrompt },
+      'voice':       { action: 'transcribe', url: queuePrompt },
     };
     const data = await apiFetch('/api/queues/test', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -637,15 +636,12 @@ export function WebLanding() {
 
   const handleQueueLookup = useCallback(async () => {
     if (!queueTaskId.trim()) return;
-    setQueueLookupResult(null);
-    const data = await apiFetch(CONSUMER_URL + '/results?taskId=' + encodeURIComponent(queueTaskId));
-    setQueueLookupResult(data);
+    setQueueLookupResult({ info: 'Task lookup wymaga consumer worker (external). TaskId: ' + queueTaskId });
   }, [queueTaskId]);
 
   const loadRecentResults = useCallback(async () => {
-    const data = await apiFetch(CONSUMER_URL + '/results?recent=5');
-    if (data?.results) setRecentResults(data.results);
-    else if (Array.isArray(data)) setRecentResults(data);
+    // Recent results zależą od consumer worker — pokazujemy info zamiast błędu
+    setRecentResults([]);
   }, []);
 
   const handleAiHubChat = useCallback(async () => {
@@ -1962,18 +1958,57 @@ export function WebLanding() {
             </div>
           </div>
 
-          {/* Consumer Health */}
+          {/* Queue Bindings Status */}
           <section className="card">
-            <h3>🏥 Queue Consumer Status</h3>
+            <h3>🏥 Queue Bindings Status</h3>
             {consumerHealth ? (
-              <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
-                <div className="stat-card"><span className="stat-label">Status</span><span className="stat-value" style={{ color: '#4ade80' }}>✅ Online</span></div>
-                <div className="stat-card"><span className="stat-label">Service</span><span className="stat-value">{consumerHealth.service || 'queue-consumer'}</span></div>
-                <div className="stat-card"><span className="stat-label">Queues</span><span className="stat-value">{consumerHealth.queues?.join(', ') || 'agent-tasks, image, voice'}</span></div>
-                <div className="stat-card"><span className="stat-label">AI Fallback</span><span className="stat-value">{consumerHealth.ai_fallback || 'Gemma 7b-it'}</span></div>
-              </div>
+              <>
+                <div className="dashboard-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', marginBottom: 16 }}>
+                  <div className="stat-card">
+                    <span className="stat-label">Status</span>
+                    <span className="stat-value" style={{ color: consumerHealth.ok ? '#4ade80' : '#f87171' }}>
+                      {consumerHealth.ok ? '✅ Bindings OK' : '⚠️ Niedostępne'}
+                    </span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-label">Dostępne kolejki</span>
+                    <span className="stat-value">{consumerHealth.queues?.length ?? 0} / {consumerHealth.total ?? 4}</span>
+                  </div>
+                  <div className="stat-card">
+                    <span className="stat-label">CF API Metrics</span>
+                    <span className="stat-value">{consumerHealth.cfApiConfigured ? '✅ Skonfigurowane' : '—  brak tokenu'}</span>
+                  </div>
+                </div>
+                {consumerHealth.bindings && (
+                  <div className="status-list">
+                    {Object.entries(consumerHealth.bindings as Record<string, { binding: string; available: boolean }>).map(([name, info]) => (
+                      <div key={name} className="status-row">
+                        <span className={`dot ${info.available ? 'online' : 'offline'}`} />
+                        <span className="name">{name}</span>
+                        <code style={{ fontSize: 11, opacity: 0.6 }}>{info.binding}</code>
+                        <span style={{ marginLeft: 'auto', fontSize: 12, color: info.available ? '#4ade80' : '#f87171' }}>
+                          {info.available ? 'available' : 'unavailable'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {consumerHealth.metrics?.length > 0 && (
+                  <div style={{ marginTop: 12 }}>
+                    <h4 style={{ fontSize: 13, marginBottom: 8, opacity: 0.7 }}>CF Metrics</h4>
+                    {consumerHealth.metrics.map((m: any) => (
+                      <div key={m.queue_id} className="status-row">
+                        <span className="name">{m.queue_name}</span>
+                        <span>ready: {m.messages_ready}</span>
+                        <span>delayed: {m.messages_delayed}</span>
+                        <span>consumers: {m.consumers_total}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
             ) : (
-              <p className="muted">Sprawdzam status konsumera...</p>
+              <p className="muted">Sprawdzam binding-i kolejek...</p>
             )}
           </section>
 
