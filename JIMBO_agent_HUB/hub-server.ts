@@ -379,27 +379,6 @@ app.post('/skills/save', async (req, res) => {
   }
 });
 
-// GET /skills/:id — pobierz skill z pełnym kodem
-app.get('/skills/:id', (req, res) => {
-  const skill = skills.getById(req.params.id);
-  if (!skill) return res.status(404).json({ error: 'Skill nie znaleziony' });
-  res.json({ skill });
-});
-
-// POST /skills/:id/result — zapisz wynik (success: true/false)
-app.post('/skills/:id/result', (req, res) => {
-  const { success } = req.body as { success?: boolean };
-  if (typeof success !== 'boolean') return res.status(400).json({ error: 'Wymagane pole: success (boolean)' });
-  skills.recordResult(req.params.id, success);
-  res.json({ recorded: true, id: req.params.id, success });
-});
-
-// DELETE /skills/:id — usuń skill
-app.delete('/skills/:id', (req, res) => {
-  const deleted = skills.delete(req.params.id);
-  res.json({ deleted, id: req.params.id });
-});
-
 // GET /skills/export — eksport całej bazy skills jako JSON
 app.get('/skills/export', (req, res) => {
   const ns = req.query['namespace'] as string | undefined;
@@ -562,6 +541,32 @@ app.post('/skills/import-goose-session', async (req, res) => {
     return res.status(404).json(result);
   }
   res.json(result);
+});
+
+// ⚠️  UWAGA — KOLEJNOŚĆ ROUTES MA ZNACZENIE ⚠️
+// GET /skills/:id jest wildcardowym catchall — MUSI być OSTATNI w sekcji /skills/.
+// Wszystkie specyficzne ścieżki (/list, /search, /save, /export, /import, /graph,
+// /goose-sessions, /import-goose-session) MUSZĄ być zdefiniowane PRZED tym routem.
+// Dodając nowy endpoint /skills/<coś> — zawsze umieszczaj go PRZED tą linią.
+// GET /skills/:id — pobierz skill z pełnym kodem
+app.get('/skills/:id', (req, res) => {
+  const skill = skills.getById(req.params.id);
+  if (!skill) return res.status(404).json({ error: 'Skill nie znaleziony' });
+  res.json({ skill });
+});
+
+// POST /skills/:id/result — zapisz wynik (success: true/false)
+app.post('/skills/:id/result', (req, res) => {
+  const { success } = req.body as { success?: boolean };
+  if (typeof success !== 'boolean') return res.status(400).json({ error: 'Wymagane pole: success (boolean)' });
+  skills.recordResult(req.params.id, success);
+  res.json({ recorded: true, id: req.params.id, success });
+});
+
+// DELETE /skills/:id — usuń skill
+app.delete('/skills/:id', (req, res) => {
+  const deleted = skills.delete(req.params.id);
+  res.json({ deleted, id: req.params.id });
 });
 
 // ── REST: Session ─────────────────────────────────────────────────

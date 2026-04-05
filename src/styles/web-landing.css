@@ -1630,12 +1630,25 @@ footer {
    BUCH_CHAT WIDGET — Floating panel
    ═══════════════════════════════════════════════════ */
 
-/* ── Floating toggle button (reuses .chat-toggle base) ─ */
-.chat-toggle {
+/* ── Floating action bar — trzyma oba przyciski obok siebie ─ */
+.floating-actions {
   position: fixed;
   bottom: 28px;
   right: 28px;
   z-index: 1000;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 480px) {
+  .floating-actions { bottom: 16px; right: 16px; }
+}
+
+/* ── Floating toggle button (reuses .chat-toggle base) ─ */
+.chat-toggle {
+  position: static;    /* floating-actions container handles fixed positioning */
+  z-index: auto;
   height: auto;
   width: auto;
   padding: .5rem 1.1rem;
@@ -1678,8 +1691,18 @@ footer {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.35; }
 }
-@media (max-width: 480px) {
-  .chat-toggle { bottom: 16px; right: 16px; }
+/* ── Page Agent button — fioletowy akcent ────── */
+.page-agent-toggle {
+  border-color: rgba(180, 120, 255, 0.40) !important;
+  background:   rgba(180, 120, 255, 0.10) !important;
+  color:        #c084fc !important;
+  box-shadow:   0 4px 20px rgba(180, 120, 255, 0.15) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  .page-agent-toggle:hover {
+    background:  rgba(180, 120, 255, 0.20) !important;
+    box-shadow:  0 6px 28px rgba(180, 120, 255, 0.28) !important;
+  }
 }
 
 /* ── Widget panel ────────────────────────────── */

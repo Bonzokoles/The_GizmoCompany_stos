@@ -3,8 +3,13 @@
  * Replaces the broken CopilotKit trigger.
  * Backed by the existing /api/ai/chat endpoint.
  * Offers a quick-open panel + link to the full AssistantPage tab.
+ *
+ * PAGE AGENT — floating 🤖 button obok BUCH_CHAT.
+ * Używa /api/ai/v1/chat/completions (OpenAI-compatible proxy, CF Functions).
+ * Model: deepseek-chat, system prompt po polsku.
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { PageAgent } from 'page-agent';
 
 // Auto-detect: Vite dev (:5173) or Electron (file:) → proxy through wrangler at :8788
 // Production Cloudflare → relative paths work directly
@@ -68,8 +73,34 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   const [useTools,     setUseTools]     = useState(() => localStorage.getItem(TOOLS_KEY) === 'true');
   const [useStreaming, setUseStreaming]  = useState(() => localStorage.getItem(STREAMING_KEY) !== 'false');
 
-  const bottomRef   = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const bottomRef      = useRef<HTMLDivElement>(null);
+  const textareaRef    = useRef<HTMLTextAreaElement>(null);
+  const pageAgentRef   = useRef<PageAgent | null>(null);
+  const [agentReady, setAgentReady] = useState(false);
+
+  /* page-agent init */
+  useEffect(() => {
+    if (pageAgentRef.current) return;
+    const agent = new PageAgent({
+      baseURL: `${API_BASE}/api/ai/v1`,
+      model: 'deepseek-chat',
+      language: 'en-US',
+      customFetch: (url: string | URL | Request, init?: RequestInit) =>
+        fetch(url, { ...init, credentials: 'same-origin' }),
+      instructions: {
+        system: 'Jesteś asystentem przeglądarki ZENO. Odpowiadasz po polsku. Pomagasz użytkownikowi nawigować po stronie, klikać elementy, wypełniać formularze i obsługiwać interfejs.',
+        getPageInstructions: (url: string) =>
+          `Aktualny URL: ${url}. Nawiguj po stronie i pomagaj użytkownikowi w obsłudze interfejsu ZENO.`,
+      },
+    });
+    pageAgentRef.current = agent;
+    setAgentReady(true);
+    return () => { pageAgentRef.current = null; setAgentReady(false); };
+  }, []);
+
+  const togglePageAgent = useCallback(() => {
+    try { pageAgentRef.current?.panel.show(); } catch { /* panel already visible */ }
+  }, []);
 
   /* persist */
   useEffect(() => { localStorage.setItem(HISTORY_KEY,   JSON.stringify(history.slice(-80))); }, [history]);
@@ -209,13 +240,27 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(basePayload),
       });
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
+        throw new Error(errorData?.error?.message || `API error: ${res.status}`);
+      }
+      
       const data = await res.json() as { content?: string; provider?: string; usage?: { total_tokens?: number } };
       setHistory(h => [...h, {
         role: 'assistant', text: data?.content ?? '[Brak odpowiedzi]',
         provider: data?.provider ?? provider, tokens: data?.usage?.total_tokens, ts: Date.now(),
       }]);
-    } catch {
-      setHistory(h => [...h, { role: 'assistant', text: '⚠ Błąd połączenia z API', provider, ts: Date.now() }]);
+    } catch (err) {
+      console.error('BUCH_CHAT Error:', err);
+      
+      // Extract error message from response if available
+      let errorMsg = '⚠ Błąd połączenia z API';
+      if (err instanceof Error) {
+        errorMsg = `⚠ ${err.message}`;
+      }
+      
+      setHistory(h => [...h, { role: 'assistant', text: errorMsg, provider, ts: Date.now() }]);
     } finally {
       setLoading(false);
     }
@@ -345,17 +390,28 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
         </div>
       )}
 
-      {/* ── Toggle Button ── */}
-      <button
-        className={`chat-toggle buch-toggle${open ? ' buch-toggle-active' : ''}`}
-        onClick={() => setOpen(o => !o)}
-        title={open ? 'Zamknij BUCH_CHAT' : 'Otwórz BUCH_CHAT'}
-        aria-expanded={open}
-        aria-controls="buch-widget-panel"
-      >
-        <span className="ct-dot" />
-        BUCH_CHAT
-      </button>
+      {/* ── Floating action bar (page-agent + BUCH_CHAT side by side) ── */}
+      <div className="floating-actions">
+        {agentReady && (
+          <button
+            className="chat-toggle page-agent-toggle"
+            onClick={togglePageAgent}
+            title="Page Agent — AI steruje stroną"
+          >
+            🤖 PAGE AGENT
+          </button>
+        )}
+        <button
+          className={`chat-toggle buch-toggle${open ? ' buch-toggle-active' : ''}`}
+          onClick={() => setOpen(o => !o)}
+          title={open ? 'Zamknij BUCH_CHAT' : 'Otwórz BUCH_CHAT'}
+          aria-expanded={open}
+          aria-controls="buch-widget-panel"
+        >
+          <span className="ct-dot" />
+          BUCH_CHAT
+        </button>
+      </div>
     </>
   );
 }

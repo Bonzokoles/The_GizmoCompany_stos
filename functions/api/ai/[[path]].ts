@@ -496,7 +496,22 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
 
       if (!resp.ok) {
         const errText = await resp.text();
-        errors.push(`${config.name}: ${resp.status} ${errText.slice(0, 200)}`);
+        let errorMsg = `${config.name}: `;
+        
+        // Interpret HTTP status codes
+        if (resp.status === 401) {
+          errorMsg += 'API key invalid or expired';
+        } else if (resp.status === 402) {
+          errorMsg += 'No credits available';
+        } else if (resp.status === 429) {
+          errorMsg += 'Rate limit exceeded';
+        } else if (resp.status === 403) {
+          errorMsg += 'Access forbidden (check API key permissions)';
+        } else {
+          errorMsg += `HTTP ${resp.status}: ${errText.slice(0, 200)}`;
+        }
+        
+        errors.push(errorMsg);
         continue; // Try next provider
       }
 
