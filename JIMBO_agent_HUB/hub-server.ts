@@ -566,6 +566,29 @@ app.post('/skills/import-goose-session', async (req, res) => {
   res.json(result);
 });
 
+// GET /skills/export — dump całej bazy skills do JSON (backup/transfer)
+// Query: ?namespace=global
+app.get('/skills/export', (req, res) => {
+  const namespace = typeof req.query['namespace'] === 'string' ? req.query['namespace'] : undefined;
+  const data = skills.exportJson(namespace);
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Disposition', `attachment; filename="skills-export-${Date.now()}.json"`);
+  res.json({ exported: data.length, namespace: namespace ?? 'all', skills: data });
+});
+
+// POST /skills/import — przywróć skills z JSON
+// Body: { skills: Skill[], mode: 'merge' | 'replace' }
+// mode='merge' (default): zachowaj istniejące, mode='replace': wyczyść i wstaw od nowa
+app.post('/skills/import', async (req, res) => {
+  const { skills: incoming, mode } = req.body as { skills?: unknown[]; mode?: string };
+  if (!Array.isArray(incoming) || incoming.length === 0) {
+    return res.status(400).json({ error: 'Wymagane pole: skills (tablica)' });
+  }
+  const importMode = mode === 'replace' ? 'replace' : 'merge';
+  const result = await skills.importJson(incoming as Partial<import('./skills/skill-manager.js').Skill>[], importMode);
+  res.json({ mode: importMode, ...result });
+});
+
 // GET /skills/export-skill-md — eksport skills do formatu SKILL.md (Goose-native)
 // Query params:
 //   namespace=global    — filtr namespace (opcjonalny)

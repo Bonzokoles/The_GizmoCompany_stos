@@ -14,7 +14,7 @@
 
 import Database from 'better-sqlite3';
 import OpenAI from 'openai';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'crypto';
@@ -231,6 +231,60 @@ export class SkillManager {
 
   count(): number {
     return (this.db.prepare('SELECT COUNT(*) as n FROM skills').get() as any).n;
+  }
+
+  /**
+   * Eksportuje wszystkie skills do JSON (backup / transfer).
+   * Zwraca tablicę Skill z pełnym kodem.
+   */
+  exportJson(namespace?: string): Skill[] {
+    const rows = namespace
+      ? (this.db.prepare('SELECT * FROM skills WHERE namespace = ? ORDER BY namespace, created_at').all(namespace) as any[])
+      : (this.db.prepare('SELECT * FROM skills ORDER BY namespace, created_at').all() as any[]);
+    return rows.map(r => this.rowToSkill(r));
+  }
+
+  /**
+   * Importuje skills z JSON.
+   * @param skillsData  — tablica obiektów Skill (lub partial)
+   * @param mode        — 'merge' (domyślny): zachowaj istniejące; 'replace': wyczyść i wstaw od nowa
+   * @returns           — { imported, skipped, errors }
+   */
+  async importJson(
+    skillsData: Partial<Skill>[],
+    mode: 'merge' | 'replace' = 'merge',
+  ): Promise<{ imported: number; skipped: number; errors: string[] }> {
+    if (mode === 'replace') {
+      this.db.prepare('DELETE FROM skills').run();
+    }
+
+    let imported = 0;
+    let skipped = 0;
+    const errors: string[] = [];
+
+    for (const raw of skillsData) {
+      if (!raw.name?.trim() || !raw.description?.trim()) {
+        skipped++;
+        errors.push(`Pominięto (brak name/description): ${JSON.stringify(raw).slice(0, 80)}`);
+        continue;
+      }
+      try {
+        await this.save({
+          name:        raw.name.slice(0, 80),
+          description: raw.description.slice(0, 500),
+          code:        raw.code ?? '',
+          tags:        Array.isArray(raw.tags) ? raw.tags.slice(0, 5) : [],
+          namespace:   raw.namespace ?? 'global',
+        });
+        imported++;
+      } catch (err) {
+        skipped++;
+        errors.push(`Błąd przy "${raw.name}": ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    console.log(`[SkillManager] Import: ${imported} wstawiono, ${skipped} pominięto`);
+    return { imported, skipped, errors };
   }
 
   /**
