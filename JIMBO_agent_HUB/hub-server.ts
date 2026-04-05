@@ -60,10 +60,15 @@ TWÓJ STYL:
 - Nie tłumacz jak "można by" coś zrobić — podaj gotowe rozwiązanie
 - Używaj polskiego lub angielskiego zależnie od języka użytkownika
 
-KONTEKST PROJEKTU:
-- ZENO Browser: Electron + React + Vite + Cloudflare Workers/Pages
-- Stos: TypeScript, Node.js, SQLite, Anthropic API, Goose v1.29.1
-- Katalog projektu: U:\\WWW_Zen_BRo_wser_org3
+KONTEKST PROJEKTÓW:
+- ZENO Browser: Electron + React + Vite + CF Pages — U:\\WWW_Zen_BRo_wser_org3
+- mybonzo.com (ZENON Biznes HUB): Astro 5 SSR + CF Pages + D1(mybonzo) + R2 — U:\\WWW_MyBonzo_com
+  • ERP/CRM dla polskich MŚP: finanse, CRM, magazyn, projekty, AI Doradca (6 ról)
+  • AI: OpenAI gpt-4o primary, Gemini 2.0 Flash fallback, CF Workers AI fallback
+- jimbo77.com: Next.js + CF Workers — U:\\WWW_Jimbo77_com
+- mybonzoai blog: Astro + CF Pages + D1(jimbo-rag-db) — U:\\WWW_MYbonzoai_blog
+- jimbo.org: Vite/React + Vercel — U:\\WWW_Jimbo_ORG
+- Stos wspólny: TypeScript, Node.js, SQLite, Anthropic API, Goose v1.29.1
 
 ZARZĄDZANIE AGENTAMI ZENO (lokalnie masz pełne uprawnienia):
 - GET  http://localhost:${process.env.HUB_PORT ?? 4222}/zeno/agents      — lista agentów z D1 (status: idea/deployed)
@@ -976,6 +981,177 @@ app.post('/goose/desktop/launch', (_req, res) => {
     res.json({ launched: true, path: GOOSE_DESKTOP_PATH });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ── REST: MyBonzo.com — status + skills-aware chat ───────────────
+
+const MYBONZO_PROJECTS = [
+  {
+    id: 'mybonzo',
+    name: 'mybonzo.com — ZENON Biznes HUB',
+    dir: 'U:\\WWW_MyBonzo_com',
+    url: 'https://mybonzo.com',
+    cfProject: 'mybonzo-new',
+    stack: 'Astro 5 SSR + CF Pages',
+    namespace: 'mybonzo',
+    d1: 'mybonzo',
+  },
+  {
+    id: 'jimbo77',
+    name: 'jimbo77.com',
+    dir: 'U:\\WWW_Jimbo77_com',
+    url: 'https://jimbo77.com',
+    cfProject: 'the-jimbo77com-nxt',
+    stack: 'Next.js + CF Workers',
+    namespace: 'blog',
+  },
+  {
+    id: 'mybonzoai-blog',
+    name: 'mybonzoai blog',
+    dir: 'U:\\WWW_MYbonzoai_blog',
+    url: 'https://mybonzoai.blog',
+    cfProject: 'mybonzoaiblog',
+    stack: 'Astro + CF Pages',
+    namespace: 'blog',
+    d1: 'jimbo-rag-db',
+  },
+  {
+    id: 'jimbo-org',
+    name: 'jimbo.org — AI Social Club',
+    dir: 'U:\\WWW_Jimbo_ORG',
+    url: 'https://jimbo.org',
+    cfProject: 'jimbo77-ai-social-club',
+    stack: 'Vite + React + Vercel',
+    namespace: 'blog',
+  },
+];
+
+// GET /mybonzo/projects — lista projektów z namespace + skill count
+app.get('/mybonzo/projects', (_req, res) => {
+  const projectsWithSkills = MYBONZO_PROJECTS.map(p => {
+    const skillCount = skills.countByNamespace()[p.namespace] ?? 0;
+    return { ...p, skillCount };
+  });
+  res.json({ projects: projectsWithSkills, total: MYBONZO_PROJECTS.length });
+});
+
+// GET /mybonzo/status — status wszystkich projektów (lokalne katalogi + skills)
+app.get('/mybonzo/status', (_req, res) => {
+  const status = MYBONZO_PROJECTS.map(p => {
+    const dirExists = fs.existsSync(p.dir);
+    const skillCount = skills.countByNamespace()[p.namespace] ?? 0;
+    return {
+      id: p.id,
+      name: p.name,
+      url: p.url,
+      dir: p.dir,
+      dirExists,
+      stack: p.stack,
+      namespace: p.namespace,
+      skillCount,
+      cfProject: p.cfProject,
+    };
+  });
+  const nsByCount = skills.countByNamespace();
+  res.json({
+    ok: true,
+    projects: status,
+    skillsByNamespace: nsByCount,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// POST /mybonzo/chat — chat z kontekstem konkretnego projektu
+// body: { messages, projectId?, stream? }
+app.post('/mybonzo/chat', async (req, res) => {
+  const { messages = [], projectId = 'mybonzo', stream = false } = req.body as {
+    messages?: Message[];
+    projectId?: string;
+    stream?: boolean;
+  };
+
+  const project = MYBONZO_PROJECTS.find(p => p.id === projectId) ?? MYBONZO_PROJECTS[0];
+  const namespaces = new Set([project.namespace, 'global']);
+
+  const rawContent = [...messages].reverse().find(m => m.role === 'user')?.content ?? '';
+  const lastUserText = typeof rawContent === 'string' ? rawContent : '';
+
+  // Pobierz skills dla namespace projektu + global
+  const [skillsPrefix, recallMatches] = await Promise.all([
+    skillAgent.buildUserPrefix(lastUserText, namespaces),
+    lastUserText.trim() ? memory.searchRecall(lastUserText, 3) : Promise.resolve([]),
+  ]);
+
+  const recallPrefix = memory.formatRecallForPrefix(recallMatches);
+  const combinedPrefix = recallPrefix + skillsPrefix;
+
+  // System prompt z kontekstem projektu
+  const projectContext = `\n\n─── PROJEKT: ${project.name} ───\nStack: ${project.stack}\nDir: ${project.dir}\nURL: ${project.url}\nCF Project: ${project.cfProject}`;
+  const coreSection = memory.formatCoreForPrompt();
+  const systemContent = String(SYSTEM_PROMPT.content) + projectContext + coreSection;
+
+  const enrichedMessages: Message[] = combinedPrefix
+    ? messages.map((m, i) => i === messages.length - 1 && m.role === 'user'
+        ? { ...m, content: combinedPrefix + (typeof m.content === 'string' ? m.content : '') }
+        : m)
+    : messages;
+
+  const fullMessages: Message[] = [{ role: 'system', content: systemContent }, ...enrichedMessages];
+
+  try {
+    if (stream) {
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      const fullContent = await chatStream(
+        llm, fullMessages,
+        (chunk: string) => { res.write(`data: ${JSON.stringify({ delta: chunk })}\n\n`); }
+      );
+      if (lastUserText) {
+        memory.saveRecall('user', lastUserText, `mybonzo-${projectId}`);
+        memory.saveRecall('assistant', fullContent, `mybonzo-${projectId}`);
+      }
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } else {
+      const result = await chat(llm, fullMessages);
+      const content = result.choices[0]?.message?.content ?? '';
+      if (lastUserText) {
+        memory.saveRecall('user', lastUserText, `mybonzo-${projectId}`);
+        memory.saveRecall('assistant', content, `mybonzo-${projectId}`);
+      }
+      res.json({ content, project: project.id, skillsInjected: !!skillsPrefix });
+    }
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /mybonzo/skills — skills dla konkretnego projektu/namespace
+// query: ?projectId=mybonzo  lub  ?namespace=mybonzo
+app.get('/mybonzo/skills', (req, res) => {
+  const projectId = req.query['projectId'] as string | undefined;
+  const project = projectId ? MYBONZO_PROJECTS.find(p => p.id === projectId) : undefined;
+  const ns = (req.query['namespace'] as string | undefined) ?? project?.namespace ?? 'mybonzo';
+  const list = skills.list(ns);
+  res.json({ namespace: ns, skills: list, total: list.length });
+});
+
+// POST /mybonzo/skills/seed — trigger seedera (uruchamia mybonzo-seed.ts przez Goose)
+app.post('/mybonzo/skills/seed', async (_req, res) => {
+  const seedPath = path.join(__dirname, 'skills', 'mybonzo-seed.ts');
+  if (!fs.existsSync(seedPath)) {
+    return res.status(404).json({ error: 'mybonzo-seed.ts nie znaleziony' });
+  }
+  try {
+    const result = await goose.runTask({
+      id: randomUUID(),
+      instructions: `Uruchom plik: npx tsx ${seedPath}\nCel: zaseedować skills biznesowe mybonzo do bazy JIMBO HUB`,
+      workdir: path.dirname(seedPath),
+    });
+    res.json({ started: true, taskId: result.taskId, seedPath });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
   }
 });
 

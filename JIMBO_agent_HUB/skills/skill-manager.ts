@@ -34,7 +34,7 @@ export const CONTAINER_NAMESPACE: Record<string, string> = {
   'mydia':               'media',
 };
 
-export const ALL_NAMESPACES = ['global', 'analytics', 'search', 'media', 'finance', 'devtools'];
+export const ALL_NAMESPACES = ['global', 'analytics', 'search', 'media', 'finance', 'devtools', 'mybonzo', 'blog'];
 
 export interface Skill {
   id: string;
