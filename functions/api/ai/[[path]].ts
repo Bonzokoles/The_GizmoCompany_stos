@@ -701,10 +701,8 @@ async function handleToolChat(request: Request, env: Env): Promise<Response> {
   const anthropicKey = env.ANTHROPIC_API_KEY;
   if (!anthropicKey) return errorResponse('Anthropic API key required for tool use', 503);
 
-  // Prefer high model for tool use; fall back to sonnet
-  const model = body.model && body.model.includes('opus')
-    ? body.model
-    : 'claude-opus-4-6-20251101';
+  // Use sonnet for tool use (haiku too weak, opus too expensive)
+  const model = 'claude-sonnet-4-6';
 
   // Build messages array (skip system role — goes into `system` param)
   const messages: { role: string; content: unknown }[] = [];

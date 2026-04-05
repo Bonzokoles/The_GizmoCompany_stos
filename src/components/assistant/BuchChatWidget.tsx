@@ -183,6 +183,10 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(basePayload),
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({})) as { error?: string };
+          throw new Error(errData?.error || `Tools API error ${res.status}`);
+        }
         const data = await res.json() as {
           content?: string; provider?: string;
           tokens?: { total?: number }; toolTrace?: ToolCall[];
