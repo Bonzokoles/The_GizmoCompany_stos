@@ -162,6 +162,43 @@ const BUCH_TOOLS: BuchTool[] = [
       required: ['database', 'query'],
     },
   },
+  {
+    name: 'zeno_api',
+    description: 'Call any ZENO dashboard API endpoint on zenbrowsers.org. Use this to check workers, analytics, storage, content, images, MOA pipeline, render, crawlers, pipelines, databases, search, queues.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        endpoint: {
+          type: 'string',
+          description: 'API path without /api/ prefix. Examples: "workers/status", "analytics/overview", "storage/browse/mybonzo-blog-content", "content/generate", "moa/run", "images/generate", "render/screenshot", "crawlers/status", "pipelines/status", "search?q=query"',
+        },
+        method: { type: 'string', enum: ['GET', 'POST'], description: 'HTTP method (default: GET)' },
+        body: { type: 'object', description: 'Request body for POST requests' },
+      },
+      required: ['endpoint'],
+    },
+  },
+  {
+    name: 'agent_list',
+    description: 'List all saved ZENO agents from the database. Shows name, site, component, model and prompt preview.',
+    input_schema: { type: 'object', properties: {}, required: [] },
+  },
+  {
+    name: 'agent_save',
+    description: 'Save or update a ZENO agent in the database. Always include a quality_score (1-10) based on prompt specificity, role clarity, examples, constraints and response style. Refuse to save agents with score < 6.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        name:          { type: 'string', description: 'Unique agent name' },
+        site:          { type: 'string', description: 'Target site: zenbrowsers.org, mybonzo.com, jimbo77.org, etc.' },
+        component:     { type: 'string', description: 'Page component or section this agent handles' },
+        model:         { type: 'string', description: 'AI model: deepseek-chat, claude-sonnet-4-6, gemini-2.0-flash, etc.' },
+        prompt:        { type: 'string', description: 'Full system prompt for the agent (min 80 chars)' },
+        quality_score: { type: 'number', description: 'Quality score 1-10. Score breakdown: specificity(2) + role_clarity(2) + examples(2) + constraints(2) + response_style(2)' },
+      },
+      required: ['name', 'site', 'component', 'model', 'prompt', 'quality_score'],
+    },
+  },
 ];
 
 async function stripHtml(html: string): Promise<string> {
@@ -311,6 +348,67 @@ async function executeTool(name: string, input: Record<string, unknown>, env: En
         return JSON.stringify(qData.result, null, 2).slice(0, 20000);
       } catch (e: unknown) {
         return `d1_query error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case 'zeno_api': {
+      const endpoint = String(input.endpoint ?? '').replace(/^\/+/, '');
+      const method   = String(input.method ?? 'GET').toUpperCase();
+      const body     = input.body ? JSON.stringify(input.body) : undefined;
+      const allowed  = ['workers','analytics','storage','content','moa','images','render','crawlers','pipelines','db','search','sites','queues','webgate'];
+      const base     = endpoint.split('/')[0];
+      if (!allowed.includes(base)) return `zeno_api: endpoint '${base}' not allowed. Allowed: ${allowed.join(', ')}`;
+      try {
+        const resp = await fetch(`https://zenbrowsers.org/api/${endpoint}`, {
+          method,
+          headers: { 'Content-Type': 'application/json', 'User-Agent': 'BUCH-Agent/1.0' },
+          ...(body ? { body } : {}),
+          signal: AbortSignal.timeout(15000),
+        });
+        const text = await resp.text();
+        return text.slice(0, 12000);
+      } catch (e: unknown) {
+        return `zeno_api error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case 'agent_list': {
+      try {
+        if (!env.DB) return 'D1 not configured.';
+        await env.DB.exec(`CREATE TABLE IF NOT EXISTS admin_storage (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)`);
+        const row = await env.DB.prepare('SELECT value, updated_at FROM admin_storage WHERE key = ?').bind('zeno_agents_v1').first<{ value: string; updated_at: string }>();
+        if (!row) return 'Brak zapisanych agentów. Użyj agent_save aby dodać pierwszego.';
+        const agents = JSON.parse(row.value) as unknown[];
+        return `Znaleziono ${agents.length} agentów (sync: ${row.updated_at}):\n\n` +
+          (agents as any[]).map((a: any, i: number) =>
+            `${i + 1}. **${a.name}** — ${a.site} / ${a.component}\n   Model: ${a.model}\n   Prompt: ${String(a.prompt ?? '').slice(0, 120)}…`
+          ).join('\n\n');
+      } catch (e: unknown) {
+        return `agent_list error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case 'agent_save': {
+      const name      = String(input.name ?? '').trim();
+      const site      = String(input.site ?? 'zenbrowsers.org');
+      const component = String(input.component ?? '').trim();
+      const model     = String(input.model ?? 'deepseek-chat');
+      const prompt    = String(input.prompt ?? '').trim();
+      const score     = Number(input.quality_score ?? 0);
+      if (!name || !prompt) return 'agent_save: name i prompt są wymagane.';
+      if (prompt.length < 80) return `agent_save: prompt za krótki (${prompt.length} znaków). Dobry agent potrzebuje min. 80 znaków z konkretnym kontekstem.`;
+      try {
+        if (!env.DB) return 'D1 not configured.';
+        await env.DB.exec(`CREATE TABLE IF NOT EXISTS admin_storage (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)`);
+        const row = await env.DB.prepare('SELECT value FROM admin_storage WHERE key = ?').bind('zeno_agents_v1').first<{ value: string }>();
+        const agents: any[] = row ? JSON.parse(row.value) : [];
+        const idx = agents.findIndex((a: any) => a.name === name);
+        const agent = { name, site, component, model, prompt, quality_score: score, created_at: new Date().toISOString() };
+        if (idx >= 0) agents[idx] = agent; else agents.push(agent);
+        await env.DB.prepare('INSERT OR REPLACE INTO admin_storage (key, value, updated_at) VALUES (?, ?, ?)').bind('zeno_agents_v1', JSON.stringify(agents), new Date().toISOString()).run();
+        return `✅ Agent "${name}" zapisany (${idx >= 0 ? 'zaktualizowany' : 'nowy'}). Łącznie agentów: ${agents.length}. Jakość: ${score}/10.`;
+      } catch (e: unknown) {
+        return `agent_save error: ${e instanceof Error ? e.message : String(e)}`;
       }
     }
 
@@ -715,7 +813,38 @@ async function handleToolChat(request: Request, env: Env): Promise<Response> {
     messages.push({ role: 'user', content: body.prompt });
   }
 
-  const systemPrompt = body.systemPrompt || '';
+  const systemPrompt = body.systemPrompt || `Jesteś BUCH_CHAT — zaawansowanym asystentem operacyjnym ZENO Browser (zenbrowsers.org). Odpowiadasz po polsku.
+
+DOSTĘP DO DASHBOARDU ZENO — używaj narzędzia zeno_api:
+- workers/status — status 38 CF Workers
+- analytics/overview — statystyki Umami (pageviews, visitors, visits per site)
+- storage/list — 14 bucketów R2 | storage/browse/:bucket — pliki w buckecie
+- content/generate — generowanie treści AI (POST: {topic, type, language})
+- moa/run — pipeline MOA multi-agent writing (POST: {topic})
+- images/generate — generowanie obrazów AI (POST: {prompt})
+- render/screenshot — screenshot URL (POST: {url})
+- crawlers/status — monitor 43 profili botów
+- pipelines/status — 7 CF Pipelines (6 aktywnych)
+- db/tables/zeno-browser-db — tabele D1 | d1_query — zapytania SQL
+- search?q=:query — SearXNG metasearch
+- sites/status — status wszystkich connected sites
+
+TWORZENIE AGENTÓW — zasady jakości ZENO:
+Gdy użytkownik chce stworzyć agenta:
+1. Zapytaj: dla jakiej strony/komponentu, jaki cel, jakie ograniczenia
+2. Napisz system prompt (min 150 znaków) z: konkretną rolą, URL kontekstem, przykładami zadań, "czego NIE robić", formatem odpowiedzi
+3. Oceń prompt w skali 1-10:
+   - Specyficzność (0-2): czy konkretny dla danej strony/komponentu?
+   - Klarowność roli (0-2): czy jasno określona rola i zakres?
+   - Przykłady/zadania (0-2): czy zawiera 2+ przykłady co może zrobić?
+   - Ograniczenia (0-2): czy zawiera "czego NIE robić"?
+   - Format odpowiedzi (0-2): czy określony styl, język, długość?
+4. Jeśli wynik < 7: ulepsz prompt przed zapisem
+5. Zapisz agent_save z wynikiem jakości
+6. NIGDY nie zapisuj agenta z wynikiem < 6/10
+
+JAKOŚĆ — przykład dobrego agenta (9/10):
+"Jesteś asystentem sekcji Analytics na zenbrowsers.org. Pomagasz użytkownikowi interpretować dane z Umami — pageviews, visitors, bounce rate. Używasz narzędzia zeno_api(analytics/overview) aby pobrać aktualne dane. Wyjaśniasz trendy po polsku, porównujesz okresy. NIE: nie tworzysz danych, nie odpowiadasz na pytania niezwiązane z analityką. Format: krótka analiza + 2-3 rekomendacje w punktach."`;
   const toolTrace: { tool: string; input: Record<string, unknown>; result: string }[] = [];
 
   // Tool use loop — max 6 iterations

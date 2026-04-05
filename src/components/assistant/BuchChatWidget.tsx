@@ -125,7 +125,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     setHistory(h => [...h, { role: 'user', text, provider, ts: Date.now() }]);
     setLoading(true);
 
-    const basePayload = { prompt: text, provider, maxTokens: 1024 };
+    const basePayload = { prompt: text, provider, maxTokens: 2048 };
 
     try {
       /* PATH 0: JIMBO Agent HUB (localhost:4224) */
