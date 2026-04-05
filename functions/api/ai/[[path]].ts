@@ -184,6 +184,23 @@ const BUCH_TOOLS: BuchTool[] = [
     input_schema: { type: 'object', properties: {}, required: [] },
   },
   {
+    name: 'buch_learn',
+    description: 'Save a learning, observation or discovery to BUCH permanent knowledge base. Use this proactively when you discover something new about the system, a working pattern, user preference, or important fact. Knowledge persists across all future sessions.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        category: {
+          type: 'string',
+          enum: ['functions', 'agents', 'development', 'preferences', 'patterns', 'errors', 'integrations'],
+          description: 'Category of knowledge',
+        },
+        key:     { type: 'string', description: 'Short unique identifier, e.g. "r2_file_access_works", "analytics_umami_embedded"' },
+        content: { type: 'string', description: 'What was learned — be specific and actionable. Include context, how it works, gotchas.' },
+      },
+      required: ['category', 'key', 'content'],
+    },
+  },
+  {
     name: 'agent_save',
     description: 'Save or update a ZENO agent in the database. Always include a quality_score (1-10) based on prompt specificity, role clarity, examples, constraints and response style. Refuse to save agents with score < 6.',
     input_schema: {
@@ -348,6 +365,27 @@ async function executeTool(name: string, input: Record<string, unknown>, env: En
         return JSON.stringify(qData.result, null, 2).slice(0, 20000);
       } catch (e: unknown) {
         return `d1_query error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case 'buch_learn': {
+      const category = String(input.category ?? 'general');
+      const key      = String(input.key ?? '').trim().replace(/\s+/g, '_').toLowerCase();
+      const content  = String(input.content ?? '').trim();
+      if (!key || !content) return 'buch_learn: key i content są wymagane.';
+      if (content.length < 20) return 'buch_learn: content za krótki — opisz dokładniej co zostało odkryte.';
+      try {
+        if (!env.DB) return 'D1 not configured.';
+        await env.DB.exec(`CREATE TABLE IF NOT EXISTS admin_storage (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)`);
+        const row = await env.DB.prepare('SELECT value FROM admin_storage WHERE key = ?').bind('buch_knowledge_v1').first<{ value: string }>();
+        const kb: { entries: any[] } = row ? JSON.parse(row.value) : { entries: [] };
+        const idx = kb.entries.findIndex((e: any) => e.key === key);
+        const entry = { key, category, content, updated_at: new Date().toISOString() };
+        if (idx >= 0) kb.entries[idx] = entry; else kb.entries.push(entry);
+        await env.DB.prepare('INSERT OR REPLACE INTO admin_storage (key, value, updated_at) VALUES (?, ?, ?)').bind('buch_knowledge_v1', JSON.stringify(kb), new Date().toISOString()).run();
+        return `✅ Wiedza zapisana: [${category}] ${key} (łącznie wpisów: ${kb.entries.length})`;
+      } catch (e: unknown) {
+        return `buch_learn error: ${e instanceof Error ? e.message : String(e)}`;
       }
     }
 
@@ -793,6 +831,22 @@ interface AnthropicResponse {
   usage?: { input_tokens: number; output_tokens: number };
 }
 
+// ── Seed wiedzy bazowej BUCH — ładowany do D1 przy pierwszym uruchomieniu ──
+const BUCH_SEED_KNOWLEDGE = [
+  { key: 'stack', category: 'development', content: 'ZENO Browser: Electron + React 19 + Vite + TypeScript. Backend: Cloudflare Pages Functions (Workers). Baza: D1 SQLite + R2 Object Storage. AI: Anthropic Claude, DeepSeek, OpenRouter, Gemini. Lokalnie: JIMBO Agent HUB (port 4224) + Goose CLI v1.28.', updated_at: new Date().toISOString() },
+  { key: 'dashboard_tabs', category: 'functions', content: 'Dashboard zenbrowsers.org ma 17 zakładek: Overview(działa), Workers(38 CF Workers), Content(CMS+AI gen), Analytics(Umami+bar chart+iframe), Pipelines(7 CF Pipelines), Crawlers(43 profili), Storage(14 R2 bucketów, pliki otwieralne), Databases(7 D1), Images(AI gen+gallery), MOA(multi-agent writing), Render(screenshot+PDF+scrape), Queues(CF Queues), AI Chat(multi-provider), Asystent(JIMBO Hub lokalnie), Media Hub(zewnętrzny Worker), BizTools(katalog+Tavily), Workflows(mybonzo AI).', updated_at: new Date().toISOString() },
+  { key: 'buch_tools', category: 'functions', content: 'BUCH_CHAT tools (Claude Sonnet, tryb ⚒): fetch_url, extract_text, web_search(DuckDuckGo), searxng_search(search.mybonzo.com), r2_read, d1_query, zeno_api(dowolny /api/* endpoint), agent_list, agent_save(status:idea), buch_learn(zapis wiedzy do D1). Narzędzia działają tylko gdy model=anthropic i włączony tryb ⚒.', updated_at: new Date().toISOString() },
+  { key: 'agent_workflow', category: 'agents', content: 'Agenci: web BUCH_CHAT(⚒) tworzy→agent_save→status:idea w D1. Lokalnie JIMBO Hub(port 4224)+Goose testuje→POST /zeno/agents/deploy→status:deployed. ai-hub(zenbrowsers.org/ai-hub/) pokazuje badge 💡pomysł/✅wdrożony + ★score/10. Sync: ☁️Pull(D1→localStorage), ☁️Push(localStorage→D1). Jakość 1-10: specyficzność(2)+rola(2)+przykłady(2)+ograniczenia(2)+format(2). Nie zapisuj <6/10.', updated_at: new Date().toISOString() },
+  { key: 'r2_file_access', category: 'functions', content: 'R2 pliki otwieralne przez /api/storage/file/:bucket/:key. Wymaga CF_ACCOUNT_ID i CF_API_TOKEN w CF Pages secrets (ustawione). Typy: obrazy→🖼Podgląd, PDF→📄Otwórz, text/json/md/csv→📝Czytaj. Każdy plik ma ⬇Pobierz. Narzędzie r2_read czyta text/JSON z R2 bezpośrednio.', updated_at: new Date().toISOString() },
+  { key: 'analytics_setup', category: 'functions', content: 'Analytics: Umami na analytics.mybonzo.com, 5 trackownych stron. API: /api/analytics/overview zwraca pageviews/visitors/visits per site. Dashboard ma bar chart CSS (gradient) + iframe Umami osadzony (520px). Dane live po kliknięciu Refresh.', updated_at: new Date().toISOString() },
+  { key: 'page_agent', category: 'integrations', content: 'PAGE AGENT: page-agent v1.7.1 (alibaba, 15k stars). Floating button 🤖(fioletowy) obok BUCH_CHAT(zielony) na zenbrowsers.org. Używa /api/ai/v1/chat/completions → DeepSeek chat. Steruje stroną przez DOM bez screenshotów. Oba przyciski w .floating-actions flex container, position:fixed bottom:28px right:28px.', updated_at: new Date().toISOString() },
+  { key: 'jimbo_hub_local', category: 'integrations', content: 'JIMBO Agent HUB lokalnie: port 4224, model claude-haiku-4-5-20251001. Goose CLI: E:\\Programs\\goose\\goose.exe v1.28, args: --quiet --output-format text --max-turns 20. Goose Desktop: U:\\Goose-1.29.1\\dist-windows\\Goose.exe. Skill Manager: SQLite skills.db. SkillAgent: buildSuffix+evalAndSave. Goose sessions.db: C:\\Users\\Bonzo2\\AppData\\Roaming\\Block\\goose\\data\\sessions\\sessions.db.', updated_at: new Date().toISOString() },
+  { key: 'admin_sync', category: 'integrations', content: 'Admin API: /api/admin/agents (CF Pages Function). Auth: Basic(Jimbo77:Haos1977) — sekrety w CF Pages. D1 tabela admin_storage(key,value,updated_at). Klucze: zeno_agents_v1(lista agentów JSON), buch_knowledge_v1(wiedza BUCH). Hub endpointy: GET /zeno/agents, POST /zeno/agents/deploy.', updated_at: new Date().toISOString() },
+  { key: 'cf_secrets', category: 'development', content: 'CF Pages sekrety ustawione: ANTHROPIC_API_KEY, DEEPSEEK_API_KEY, OPENROUTER_API_KEY, GEMINI_API_KEY, CF_ACCOUNT_ID, CF_API_TOKEN, ADMIN_USER(Jimbo77), ADMIN_PASS. Skrypt update-cf-secrets-api.ps1 czyta z .workspace_meta/secrets/.env i patchuje CF Pages przez API.', updated_at: new Date().toISOString() },
+  { key: 'moa_pipeline', category: 'functions', content: 'MOA (Mixture of Agents): 4 etapy — parallel-writing→critique→aggregation→validation. Endpoint /api/moa/run POST:{topic}. Wyniki zapisywane w R2. Używaj zeno_api("moa/run","POST",{topic}) aby uruchomić.', updated_at: new Date().toISOString() },
+  { key: 'content_cms', category: 'functions', content: 'Content/CMS: generowanie AI przez /api/content/generate POST:{topic,type,language}. Typy: article,seo,translate,summary. CMS editor w zakładce Content z polami: tytuł, treść MD, excerpt, kategoria, tagi, SEO title/desc. Artykuły publikowane na mybonzoaiblog.com i jimbo77.org.', updated_at: new Date().toISOString() },
+];
+
 async function handleToolChat(request: Request, env: Env): Promise<Response> {
   const body = (await request.json()) as ChatRequest & { messages?: { role: string; content: string }[] };
 
@@ -813,7 +867,36 @@ async function handleToolChat(request: Request, env: Env): Promise<Response> {
     messages.push({ role: 'user', content: body.prompt });
   }
 
-  const systemPrompt = body.systemPrompt || `Jesteś BUCH_CHAT — zaawansowanym asystentem operacyjnym ZENO Browser (zenbrowsers.org). Odpowiadasz po polsku.
+  // ── Ładuj wiedzę z D1 ────────────────────────────────────────────
+  let knowledgeSection = '';
+  if (env.DB) {
+    try {
+      await env.DB.exec(`CREATE TABLE IF NOT EXISTS admin_storage (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)`);
+      // Seed wiedzy bazowej jeśli pusta
+      const kbRow = await env.DB.prepare('SELECT value FROM admin_storage WHERE key = ?').bind('buch_knowledge_v1').first<{ value: string }>();
+      let kb: { entries: any[] } = kbRow ? JSON.parse(kbRow.value) : { entries: [] };
+      if (kb.entries.length === 0) {
+        kb = { entries: BUCH_SEED_KNOWLEDGE };
+        await env.DB.prepare('INSERT OR REPLACE INTO admin_storage (key, value, updated_at) VALUES (?, ?, ?)').bind('buch_knowledge_v1', JSON.stringify(kb), new Date().toISOString()).run();
+      }
+      if (kb.entries.length > 0) {
+        const byCategory: Record<string, any[]> = {};
+        for (const e of kb.entries) {
+          const cat = e.category ?? 'general';
+          if (!byCategory[cat]) byCategory[cat] = [];
+          byCategory[cat].push(e);
+        }
+        knowledgeSection = '\n\n─── BUCH WIEDZA (z D1, aktualizowana na bieżąco) ───\n' +
+          Object.entries(byCategory).map(([cat, entries]) =>
+            `[${cat.toUpperCase()}]\n` + entries.map((e: any) => `• ${e.key}: ${e.content}`).join('\n')
+          ).join('\n\n') +
+          '\n─────────────────────────────────────────────────\n' +
+          'Ucz się nowych rzeczy używając narzędzia buch_learn. Wiedza jest trwała — inne sesje też ją zobaczą.';
+      }
+    } catch { /* ignoruj błąd ładowania wiedzy */ }
+  }
+
+  const systemPrompt = (body.systemPrompt || `Jesteś BUCH_CHAT — zaawansowanym asystentem operacyjnym ZENO Browser (zenbrowsers.org). Odpowiadasz po polsku.
 
 DOSTĘP DO DASHBOARDU ZENO — używaj narzędzia zeno_api:
 - workers/status — status 38 CF Workers
@@ -844,7 +927,7 @@ Gdy użytkownik chce stworzyć agenta:
 6. NIGDY nie zapisuj agenta z wynikiem < 6/10
 
 JAKOŚĆ — przykład dobrego agenta (9/10):
-"Jesteś asystentem sekcji Analytics na zenbrowsers.org. Pomagasz użytkownikowi interpretować dane z Umami — pageviews, visitors, bounce rate. Używasz narzędzia zeno_api(analytics/overview) aby pobrać aktualne dane. Wyjaśniasz trendy po polsku, porównujesz okresy. NIE: nie tworzysz danych, nie odpowiadasz na pytania niezwiązane z analityką. Format: krótka analiza + 2-3 rekomendacje w punktach."`;
+"Jesteś asystentem sekcji Analytics na zenbrowsers.org. Pomagasz użytkownikowi interpretować dane z Umami — pageviews, visitors, bounce rate. Używasz narzędzia zeno_api(analytics/overview) aby pobrać aktualne dane. Wyjaśniasz trendy po polsku, porównujesz okresy. NIE: nie tworzysz danych, nie odpowiadasz na pytania niezwiązane z analityką. Format: krótka analiza + 2-3 rekomendacje w punktach."`) + knowledgeSection;
   const toolTrace: { tool: string; input: Record<string, unknown>; result: string }[] = [];
 
   // Tool use loop — max 6 iterations
