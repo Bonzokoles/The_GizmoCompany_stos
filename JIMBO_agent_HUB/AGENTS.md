@@ -40,6 +40,14 @@ JIMBO_agent_HUB/
 | GET | `/skills/export-skill-md` | Eksport skills do SKILL.md (Goose-native) `?namespace=&limit=100&save=true` |
 | GET | `/skills/:id` | Pobierz skill z kodem |
 | DELETE | `/skills/:id` | Usuń skill |
+| GET | `/memory/core` | Core memory (tier 1) — wpisy zawsze w system prompt |
+| POST | `/memory/core` | Zapisz wpis `{key, value}` |
+| GET | `/memory/archival` | Archival memory (tier 2) — lista `?limit=50` |
+| POST | `/memory/archival/save` | Zapisz `{content, source?, tags?}` |
+| POST | `/memory/archival/search` | Szukaj semantycznie `{query, limit?, threshold?}` |
+| GET | `/memory/recall` | Recall memory (tier 3) — historia `?limit=20&sessionId=` |
+| POST | `/memory/recall/search` | FTS5 keyword search `{query, limit?}` |
+| GET | `/memory/stats` | Statystyki wszystkich tierów |
 | GET | `/zeno/agents` | Pobierz agentów z D1 (zenbrowsers.org) |
 | POST | `/zeno/agents/deploy` | Wdróż agenta (status: idea → deployed) |
 

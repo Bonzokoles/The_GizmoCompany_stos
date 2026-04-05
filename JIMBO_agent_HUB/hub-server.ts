@@ -36,6 +36,7 @@ import { loadAgents, getAgentById } from './core/agent-loader.js';
 import { PodmanBridge } from './core/podman-bridge.js';
 import { CONTAINER_NAMESPACE, ALL_NAMESPACES } from './skills/skill-manager.js';
 import { SkillAgent } from './agents/skill-agent.js';
+import { MemoryManager } from './skills/memory-manager.js';
 import { listGooseSessions, importGooseSession } from './agents/goose-session-importer.js';
 
 // ── System prompt — wstrzykiwany do każdej rozmowy ─────────────────
@@ -112,6 +113,7 @@ const goose = new GooseBridge(GOOSE_PATH);
 const llm = createLLMClient();
 const skills = new SkillManager();
 const skillAgent = new SkillAgent(llm, skills);
+const memory = new MemoryManager();
 
 // ── Session persistence ───────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -264,48 +266,59 @@ app.post('/chat', async (req, res) => {
     });
   }
 
-  // Wstrzyknij system prompt — połącz z aktywnym agentem jeśli ustawiony
+  // ── System prompt: SYSTEM_PROMPT + core memory (statyczny → cacheable) ──
   const agentSuffix = activeAgentName
     ? `\n\n--- ACTIVE AGENT MODE: ${activeAgentName} ---\n${activeAgentPrompt}`
     : '';
+  const coreSection  = memory.formatCoreForPrompt();
+  const systemContent = SYSTEM_PROMPT.content + coreSection + agentSuffix;
 
-  // Skill injection (Hermes pattern) — skills jako user message, nie system prompt
-  // System prompt pozostaje statyczny → Anthropic prompt caching → ~80% oszczędności
+  // ── User message prefix: skills + recall (Hermes pattern, per-query) ──
   const lastUserContent = messages[messages.length - 1]?.content;
   const lastUserText = typeof lastUserContent === 'string' ? lastUserContent : '';
-  const skillsPrefix = await skillAgent.buildUserPrefix(lastUserText, activeNamespaces);
 
-  const systemContent = SYSTEM_PROMPT.content + agentSuffix;
-  // Jeśli znaleziono skills — wstrzyknij je jako prefix ostatniej wiadomości użytkownika
-  const injectedMessages: Message[] = skillsPrefix
+  const [skillsPrefix, recallMatches] = await Promise.all([
+    skillAgent.buildUserPrefix(lastUserText, activeNamespaces),
+    lastUserText.trim() ? memory.searchRecall(lastUserText, 3) : Promise.resolve([]),
+  ]);
+  const recallPrefix = memory.formatRecallForPrefix(recallMatches);
+  const combinedPrefix = recallPrefix + skillsPrefix;
+
+  const injectedMessages: Message[] = combinedPrefix
     ? [
         ...messages.slice(0, -1),
-        {
-          role: 'user' as const,
-          content: skillsPrefix + lastUserText,
-        },
+        { role: 'user' as const, content: combinedPrefix + lastUserText },
       ]
     : messages;
   const fullMessages: Message[] = [{ role: 'system', content: systemContent }, ...injectedMessages];
+
+  // ── Zapisz user message do recall (fire-and-forget) ──
+  const sessionId = goose.getSessionName() ?? 'default';
+  if (lastUserText.trim()) {
+    memory.saveRecall('user', lastUserText, sessionId);
+  }
 
   try {
     if (stream) {
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
 
+      let assistantText = '';
       await chatStream(llm, fullMessages, (text) => {
+        assistantText += text;
         res.write(`data: ${JSON.stringify({ text })}\n\n`);
       }, model);
 
       res.write('data: [DONE]\n\n');
       res.end();
+      // Zapisz odpowiedź asystenta do recall
+      if (assistantText.trim()) memory.saveRecall('assistant', assistantText, sessionId);
     } else {
       const result = await chat(llm, fullMessages, undefined, model);
-      res.json({
-        model: result.model,
-        content: result.choices[0]?.message?.content ?? '',
-        usage: result.usage,
-      });
+      const content = result.choices[0]?.message?.content ?? '';
+      res.json({ model: result.model, content, usage: result.usage });
+      // Zapisz odpowiedź asystenta do recall
+      if (content.trim()) memory.saveRecall('assistant', content, sessionId);
     }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -640,6 +653,90 @@ app.post('/skills/:id/result', (req, res) => {
 app.delete('/skills/:id', (req, res) => {
   const deleted = skills.delete(req.params.id);
   res.json({ deleted, id: req.params.id });
+});
+
+// ── REST: Memory (Letta 3-tier) ───────────────────────────────────
+
+// ── TIER 1: Core Memory ──────────────────────────────────────────
+// GET /memory/core — lista wszystkich wpisów
+app.get('/memory/core', (_req, res) => {
+  res.json({ entries: memory.getCoreAll() });
+});
+
+// POST /memory/core — zapisz/zaktualizuj wpis { key, value }
+app.post('/memory/core', (req, res) => {
+  const { key, value } = req.body as { key?: string; value?: string };
+  if (!key?.trim() || !value?.trim()) return res.status(400).json({ error: 'Wymagane: key, value' });
+  memory.setCoreEntry(key.trim(), value.trim());
+  res.json({ saved: true, key: key.trim() });
+});
+
+// DELETE /memory/core/:key — usuń wpis
+app.delete('/memory/core/:key', (req, res) => {
+  const deleted = memory.deleteCoreEntry(req.params.key);
+  res.json({ deleted, key: req.params.key });
+});
+
+// ── TIER 2: Archival Memory ───────────────────────────────────────
+// GET /memory/archival — lista (limit=50)
+app.get('/memory/archival', (req, res) => {
+  const limit = Number(req.query['limit'] ?? 50);
+  res.json({ entries: memory.listArchival(limit), count: memory.countArchival() });
+});
+
+// POST /memory/archival/save — zapisz { content, source?, tags? }
+app.post('/memory/archival/save', async (req, res) => {
+  const { content, source, tags } = req.body as { content?: string; source?: string; tags?: string[] };
+  if (!content?.trim()) return res.status(400).json({ error: 'Wymagane: content' });
+  const id = await memory.saveArchival(content.trim(), source ?? 'manual', Array.isArray(tags) ? tags : []);
+  res.json({ saved: true, id });
+});
+
+// POST /memory/archival/search — { query, limit?, threshold? }
+app.post('/memory/archival/search', async (req, res) => {
+  const { query, limit, threshold } = req.body as { query?: string; limit?: number; threshold?: number };
+  if (!query?.trim()) return res.status(400).json({ error: 'Wymagane: query' });
+  const results = await memory.searchArchival(query.trim(), limit ?? 5, threshold ?? 0.55);
+  res.json({ results, total: results.length });
+});
+
+// DELETE /memory/archival/:id
+app.delete('/memory/archival/:id', (req, res) => {
+  const deleted = memory.deleteArchival(req.params.id);
+  res.json({ deleted, id: req.params.id });
+});
+
+// ── TIER 3: Recall Memory ─────────────────────────────────────────
+// GET /memory/recall — ostatnie N wpisów (limit=20, sessionId?)
+app.get('/memory/recall', (req, res) => {
+  const limit     = Number(req.query['limit'] ?? 20);
+  const sessionId = typeof req.query['sessionId'] === 'string' ? req.query['sessionId'] : undefined;
+  res.json({ entries: memory.getRecentRecall(limit, sessionId), count: memory.countRecall() });
+});
+
+// POST /memory/recall/search — FTS5 { query, limit? }
+app.post('/memory/recall/search', (req, res) => {
+  const { query, limit } = req.body as { query?: string; limit?: number };
+  if (!query?.trim()) return res.status(400).json({ error: 'Wymagane: query' });
+  const results = memory.searchRecall(query.trim(), limit ?? 10);
+  res.json({ results, total: results.length });
+});
+
+// POST /memory/recall/save — ręczny zapis { role, content, sessionId? }
+app.post('/memory/recall/save', (req, res) => {
+  const { role, content, sessionId } = req.body as { role?: string; content?: string; sessionId?: string };
+  if (!role || !content?.trim()) return res.status(400).json({ error: 'Wymagane: role, content' });
+  const id = memory.saveRecall(role, content.trim(), sessionId ?? '');
+  res.json({ saved: true, id });
+});
+
+// GET /memory/stats — statystyki wszystkich tierów
+app.get('/memory/stats', (_req, res) => {
+  res.json({
+    core:     { count: memory.getCoreAll().length },
+    archival: { count: memory.countArchival() },
+    recall:   { count: memory.countRecall() },
+  });
 });
 
 // ── REST: Session ─────────────────────────────────────────────────
