@@ -45,6 +45,8 @@ export interface Env {
 
   // Admin
   ADMIN_TOKEN?: string;
+  ADMIN_USER?: string;   // domyślnie 'Jimbo77' jeśli nie ustawiony
+  ADMIN_PASS?: string;   // wymagany — ustaw w CF Pages → Settings → Secrets
 
   // CF Account (for Workers API monitoring)
   CF_ACCOUNT_ID?: string;

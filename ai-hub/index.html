@@ -99,10 +99,15 @@
 
     <!-- LISTA AGENTÓW -->
     <div class="glass" style="padding:1.5rem;display:flex;flex-direction:column;gap:.8rem">
-      <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
         <h3 style="color:var(--accent2);font-size:.85rem;text-transform:uppercase;letter-spacing:2px">📋 Moi Agenci</h3>
-        <button class="app-open-btn" onclick="agentExportAll()" style="font-size:.75rem;padding:.35rem .7rem">⬇️ Eksport JSON</button>
+        <div style="display:flex;gap:.4rem;align-items:center">
+          <button class="app-open-btn" onclick="agentExportAll()" style="font-size:.75rem;padding:.35rem .7rem">⬇️ JSON</button>
+          <button class="app-open-btn" onclick="agentSyncPull()" id="sync-pull-btn" style="font-size:.75rem;padding:.35rem .7rem;background:rgba(99,102,241,0.12);border-color:rgba(99,102,241,0.3);color:#a5b4fc" title="Pobierz agentów z Cloudflare">☁️ Pull</button>
+          <button class="app-open-btn" onclick="agentSyncPush()" id="sync-push-btn" style="font-size:.75rem;padding:.35rem .7rem;background:rgba(0,255,204,0.08);border-color:rgba(0,255,204,0.25);color:var(--accent)" title="Wyślij agentów do Cloudflare">☁️ Push</button>
+        </div>
       </div>
+      <div id="sync-status" style="font-size:.72rem;color:var(--text-dim);display:none;padding:.3rem .5rem;border-radius:4px;background:rgba(255,255,255,0.04)"></div>
       <div id="ag-list" style="display:grid;gap:.6rem;overflow-y:auto;max-height:520px"></div>
       <div id="ag-empty" style="text-align:center;padding:2rem;color:var(--text-dim);font-size:.85rem">
         Brak agentów — utwórz pierwszego po lewej ➜
@@ -976,7 +981,133 @@ document.addEventListener('keydown', e => {
 
 // Init
 agentRender();
+
+// ─── ADMIN SYNC ──────────────────────────────────────────────────────────────
+const SYNC_API   = '/api/admin/agents';
+const SYNC_TOKEN_KEY = 'zeno_admin_token';
+
+function syncGetToken() {
+  return localStorage.getItem(SYNC_TOKEN_KEY);
+}
+
+function syncSetToken(user, pass) {
+  const token = btoa(user + ':' + pass);
+  localStorage.setItem(SYNC_TOKEN_KEY, token);
+  return token;
+}
+
+function syncStatus(msg, color) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  el.style.display = 'block';
+  el.style.color = color || 'var(--text-muted)';
+  el.textContent = msg;
+  if (color !== '#f87171') setTimeout(() => { el.style.display = 'none'; }, 3500);
+}
+
+async function syncRequest(method, body) {
+  let token = syncGetToken();
+  if (!token) {
+    token = await syncLogin();
+    if (!token) return null;
+  }
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + token },
+  };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(SYNC_API, opts);
+  if (res.status === 401) {
+    localStorage.removeItem(SYNC_TOKEN_KEY);
+    syncStatus('❌ Zły login lub hasło', '#f87171');
+    return null;
+  }
+  return res;
+}
+
+function syncLogin() {
+  return new Promise(resolve => {
+    document.getElementById('login-modal').style.display = 'flex';
+    document.getElementById('login-user').value = '';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-err').textContent = '';
+    document.getElementById('login-user').focus();
+
+    document.getElementById('login-ok').onclick = () => {
+      const user = document.getElementById('login-user').value.trim();
+      const pass = document.getElementById('login-pass').value;
+      if (!user || !pass) { document.getElementById('login-err').textContent = 'Wypełnij oba pola'; return; }
+      const token = syncSetToken(user, pass);
+      document.getElementById('login-modal').style.display = 'none';
+      resolve(token);
+    };
+    document.getElementById('login-cancel').onclick = () => {
+      document.getElementById('login-modal').style.display = 'none';
+      resolve(null);
+    };
+    document.getElementById('login-pass').onkeydown = e => {
+      if (e.key === 'Enter') document.getElementById('login-ok').click();
+    };
+  });
+}
+
+async function agentSyncPull() {
+  const btn = document.getElementById('sync-pull-btn');
+  btn.disabled = true;
+  syncStatus('⏳ Pobieranie z Cloudflare…');
+  try {
+    const res = await syncRequest('GET');
+    if (!res) { btn.disabled = false; return; }
+    if (!res.ok) { syncStatus('❌ Błąd serwera: ' + res.status, '#f87171'); btn.disabled = false; return; }
+    const data = await res.json();
+    if (!Array.isArray(data.agents)) { syncStatus('❌ Nieprawidłowa odpowiedź', '#f87171'); btn.disabled = false; return; }
+    agentStore(data.agents);
+    agentRender();
+    syncStatus(`✅ Pobrano ${data.agents.length} agentów (${data.updated_at ? new Date(data.updated_at).toLocaleString('pl') : 'brak daty'})`, '#34d399');
+  } catch (e) {
+    syncStatus('❌ ' + e.message, '#f87171');
+  }
+  btn.disabled = false;
+}
+
+async function agentSyncPush() {
+  const agents = agentLoad();
+  const btn = document.getElementById('sync-push-btn');
+  btn.disabled = true;
+  syncStatus(`⏳ Wysyłanie ${agents.length} agentów do Cloudflare…`);
+  try {
+    const res = await syncRequest('POST', { agents });
+    if (!res) { btn.disabled = false; return; }
+    if (!res.ok) { syncStatus('❌ Błąd serwera: ' + res.status, '#f87171'); btn.disabled = false; return; }
+    const data = await res.json();
+    syncStatus(`✅ Zapisano ${data.saved} agentów (${new Date(data.updated_at).toLocaleString('pl')})`, '#34d399');
+  } catch (e) {
+    syncStatus('❌ ' + e.message, '#f87171');
+  }
+  btn.disabled = false;
+}
 </script>
+
+<!-- ── ADMIN LOGIN MODAL ─────────────────────────────────────────────── -->
+<div id="login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#0f172a;border:1px solid rgba(0,255,204,.25);border-radius:10px;padding:2rem;width:min(340px,90vw);display:grid;gap:1rem;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <h3 style="color:var(--accent);margin:0;font-size:.9rem;letter-spacing:1px">🔐 ZENO Admin — Logowanie</h3>
+    <div style="display:grid;gap:.4rem">
+      <label style="font-size:.75rem;color:var(--text-muted)">Login</label>
+      <input id="login-user" type="text" autocomplete="username" placeholder="Login" style="padding:.6rem .8rem;border-radius:6px;border:1px solid var(--glass-border);background:rgba(255,255,255,.05);color:var(--text);font-family:inherit;font-size:.85rem">
+    </div>
+    <div style="display:grid;gap:.4rem">
+      <label style="font-size:.75rem;color:var(--text-muted)">Hasło</label>
+      <input id="login-pass" type="password" autocomplete="current-password" placeholder="Hasło" style="padding:.6rem .8rem;border-radius:6px;border:1px solid var(--glass-border);background:rgba(255,255,255,.05);color:var(--text);font-family:inherit;font-size:.85rem">
+    </div>
+    <div id="login-err" style="color:#f87171;font-size:.75rem;min-height:1rem"></div>
+    <div style="display:flex;gap:.6rem;justify-content:flex-end">
+      <button id="login-cancel" style="padding:.5rem 1rem;border-radius:6px;border:1px solid var(--glass-border);background:transparent;color:var(--text-muted);cursor:pointer;font-family:inherit">Anuluj</button>
+      <button id="login-ok" style="padding:.5rem 1.2rem;border-radius:6px;border:1px solid rgba(0,255,204,.4);background:rgba(0,255,204,.12);color:var(--accent);cursor:pointer;font-family:inherit;font-weight:700">Zaloguj</button>
+    </div>
+  </div>
+</div>
+
 <script type="module" src="js/main.js"></script>
 
 </body>
