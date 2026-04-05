@@ -861,15 +861,25 @@ function agentRender() {
   agentBadge();
   if (!list.length) { el.innerHTML = ''; empty.style.display='block'; return; }
   empty.style.display = 'none';
-  el.innerHTML = list.map((a, i) => `
+  el.innerHTML = list.map((a, i) => {
+    const status = a.status ?? 'idea';
+    const statusBadge = status === 'deployed'
+      ? `<span style="font-size:.65rem;padding:.15rem .45rem;border-radius:3px;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.35);color:#34d399">✅ wdrożony</span>`
+      : `<span style="font-size:.65rem;padding:.15rem .45rem;border-radius:3px;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);color:#fbbf24">💡 pomysł</span>`;
+    const score = a.quality_score ? `<span style="font-size:.65rem;color:var(--text-dim)">★${a.quality_score}/10</span>` : '';
+    return `
     <div style="padding:.8rem 1rem;border-radius:4px;border:1px solid var(--glass-border);background:rgba(255,255,255,0.02);display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:start;transition:var(--transition)" onmouseenter="this.style.borderColor='rgba(0,255,204,0.2)'" onmouseleave="this.style.borderColor='var(--glass-border)'">
       <div>
-        <div style="font-weight:700;color:var(--text);font-size:.9rem">${a.name}</div>
+        <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+          <span style="font-weight:700;color:var(--text);font-size:.9rem">${a.name}</span>
+          ${statusBadge} ${score}
+        </div>
         <div style="font-size:.75rem;color:var(--text-muted);margin-top:.2rem">
           <span style="color:var(--accent)">${a.site}</span> · ${a.component} · <span style="color:var(--accent2)">${a.model}</span>
         </div>
         <div style="font-size:.72rem;color:var(--text-dim);margin-top:.3rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-width:350px">${a.prompt.slice(0,80)}${a.prompt.length>80?'…':''}</div>
-      </div>
+      </div>`
+  }).map((html, i) => html + `
       <div style="display:flex;gap:.4rem;flex-shrink:0">
         <button onclick="agentEdit(${i})" style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;padding:.3rem .6rem;border-radius:3px;cursor:pointer;font-size:.75rem;transition:var(--transition)" onmouseenter="this.style.background='rgba(99,102,241,0.25)'" onmouseleave="this.style.background='rgba(99,102,241,0.12)'">✏️</button>
         <button onclick="agentExport(${i})" style="background:rgba(0,255,204,0.08);border:1px solid rgba(0,255,204,0.2);color:var(--accent);padding:.3rem .6rem;border-radius:3px;cursor:pointer;font-size:.75rem;transition:var(--transition)" onmouseenter="this.style.background='rgba(0,255,204,0.18)'" onmouseleave="this.style.background='rgba(0,255,204,0.08)'">⬇️</button>

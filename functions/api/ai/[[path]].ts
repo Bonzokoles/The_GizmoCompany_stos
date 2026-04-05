@@ -403,7 +403,7 @@ async function executeTool(name: string, input: Record<string, unknown>, env: En
         const row = await env.DB.prepare('SELECT value FROM admin_storage WHERE key = ?').bind('zeno_agents_v1').first<{ value: string }>();
         const agents: any[] = row ? JSON.parse(row.value) : [];
         const idx = agents.findIndex((a: any) => a.name === name);
-        const agent = { name, site, component, model, prompt, quality_score: score, created_at: new Date().toISOString() };
+        const agent = { name, site, component, model, prompt, quality_score: score, status: 'idea', created_at: new Date().toISOString() };
         if (idx >= 0) agents[idx] = agent; else agents.push(agent);
         await env.DB.prepare('INSERT OR REPLACE INTO admin_storage (key, value, updated_at) VALUES (?, ?, ?)').bind('zeno_agents_v1', JSON.stringify(agents), new Date().toISOString()).run();
         return `✅ Agent "${name}" zapisany (${idx >= 0 ? 'zaktualizowany' : 'nowy'}). Łącznie agentów: ${agents.length}. Jakość: ${score}/10.`;

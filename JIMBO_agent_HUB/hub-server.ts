@@ -62,7 +62,19 @@ TWÓJ STYL:
 KONTEKST PROJEKTU:
 - ZENO Browser: Electron + React + Vite + Cloudflare Workers/Pages
 - Stos: TypeScript, Node.js, SQLite, Anthropic API, Goose v1.29.1
-- Katalog projektu: U:\\WWW_Zen_BRo_wser_org3`,
+- Katalog projektu: U:\\WWW_Zen_BRo_wser_org3
+
+ZARZĄDZANIE AGENTAMI ZENO (lokalnie masz pełne uprawnienia):
+- GET  http://localhost:${process.env.HUB_PORT ?? 4222}/zeno/agents      — lista agentów z D1 (status: idea/deployed)
+- POST http://localhost:${process.env.HUB_PORT ?? 4222}/zeno/agents/deploy — wdróż agenta: { name, prompt, site, component, model }
+  Wdrożenie = Goose testuje agenta (symuluje rozmowę) → ocenia jakość → zmienia status na 'deployed'
+- POST http://localhost:${process.env.HUB_PORT ?? 4222}/agent/run — uruchom dowolne zadanie przez Goose
+
+GDY UŻYTKOWNIK CHCE WDROŻYĆ AGENTA:
+1. Pobierz agenta: GET /zeno/agents → znajdź po nazwie (status: idea)
+2. Napisz instrukcję dla Goose: "Przetestuj agenta '[nazwa]': wciel się w rolę użytkownika i zadaj 3 typowe pytania. System prompt: [prompt]. Oceń odpowiedzi 1-10. Raport: co działa, co poprawić."
+3. ⚡ Wyślij tę instrukcję do Goose — Goose przeprowadzi test
+4. Po teście: POST /zeno/agents/deploy z wynikiem testu → status zmienia się na 'deployed'`,
 };
 
 const PORT = Number(process.env.HUB_PORT ?? 4222);
@@ -708,6 +720,70 @@ app.post('/agents/activate', (req, res) => {
   activeAgentPrompt = agent.systemPrompt;
 
   res.json({ active: true, id: agent.id, name: agent.name });
+});
+
+// ── REST: ZENO Agents (sync z D1 przez admin API) ─────────────────
+
+const ZENO_ADMIN_URL = 'https://zenbrowsers.org/api/admin/agents';
+function zenoAdminToken(): string {
+  const user = process.env.ADMIN_USER ?? 'Jimbo77';
+  const pass = process.env.ADMIN_PASS ?? '';
+  return Buffer.from(`${user}:${pass}`).toString('base64');
+}
+
+// GET /zeno/agents — pobierz agentów z D1
+app.get('/zeno/agents', async (_req, res) => {
+  try {
+    const r = await fetch(ZENO_ADMIN_URL, {
+      headers: { Authorization: `Basic ${zenoAdminToken()}` },
+    });
+    if (!r.ok) return res.status(r.status).json({ error: `Admin API ${r.status}` });
+    const data = await r.json() as { agents: unknown[] };
+    res.json(data);
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /zeno/agents/deploy — wdróż agenta (zmień status na deployed)
+// body: { name: string, test_result?: string, score?: number }
+app.post('/zeno/agents/deploy', async (req, res) => {
+  const { name, test_result, score } = req.body as { name?: string; test_result?: string; score?: number };
+  if (!name) return res.status(400).json({ error: 'name wymagane' });
+
+  try {
+    // 1. Pobierz aktualną listę
+    const r = await fetch(ZENO_ADMIN_URL, {
+      headers: { Authorization: `Basic ${zenoAdminToken()}` },
+    });
+    if (!r.ok) return res.status(r.status).json({ error: `Admin API fetch ${r.status}` });
+    const data = await r.json() as { agents: any[] };
+    const agents = data.agents ?? [];
+
+    // 2. Znajdź agenta po nazwie i zaktualizuj status
+    const idx = agents.findIndex((a: any) => a.name === name);
+    if (idx < 0) return res.status(404).json({ error: `Agent "${name}" nie znaleziony` });
+
+    agents[idx] = {
+      ...agents[idx],
+      status: 'deployed',
+      deployed_at: new Date().toISOString(),
+      ...(test_result ? { test_result } : {}),
+      ...(score !== undefined ? { quality_score: score } : {}),
+    };
+
+    // 3. Zapisz z powrotem
+    const saveR = await fetch(ZENO_ADMIN_URL, {
+      method: 'POST',
+      headers: { Authorization: `Basic ${zenoAdminToken()}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agents }),
+    });
+    if (!saveR.ok) return res.status(saveR.status).json({ error: `Admin API save ${saveR.status}` });
+
+    res.json({ deployed: true, agent: agents[idx] });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ── REST: Goose Desktop launcher ─────────────────────────────────
