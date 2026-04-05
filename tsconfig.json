@@ -19,5 +19,5 @@
     }
   },
   "include": ["src/**/*", "src/**/*.d.ts", "vite.config.ts", "agents.config.ts"],
-  "exclude": ["node_modules", "dist", "dist-electron", "src-electron"]
+  "exclude": ["node_modules", "dist", "dist-electron", "src-electron", "src/vendor"]
 }

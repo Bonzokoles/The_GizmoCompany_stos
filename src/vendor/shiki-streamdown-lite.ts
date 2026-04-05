@@ -1,4 +1,3 @@
-// @ts-nocheck — vendor shim: shiki not a direct dep, resolved at runtime by Vite plugin
 import { createHighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import consoleLang from 'shiki/langs/console.mjs';
