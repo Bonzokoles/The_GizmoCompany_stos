@@ -38,6 +38,11 @@ import { CONTAINER_NAMESPACE, ALL_NAMESPACES } from './skills/skill-manager.js';
 import { SkillAgent } from './agents/skill-agent.js';
 import { MemoryManager } from './skills/memory-manager.js';
 import { listGooseSessions, importGooseSession } from './agents/goose-session-importer.js';
+import {
+  listCFProjects, listDeployments, triggerDeploy,
+  getLatestDeploymentLogs, getD1Stats, d1Query,
+  triggerGHWorkflow, listGHRuns,
+} from './core/cf-remote.js';
 
 // ── System prompt — wstrzykiwany do każdej rozmowy ─────────────────
 const SYSTEM_PROMPT: Message = {
@@ -986,7 +991,21 @@ app.post('/goose/desktop/launch', (_req, res) => {
 
 // ── REST: MyBonzo.com — status + skills-aware chat ───────────────
 
-const MYBONZO_PROJECTS = [
+interface ProjectDef {
+  id: string;
+  name: string;
+  dir: string;
+  url: string;
+  cfProject: string | null;    // null = nie CF Pages (np. Vercel)
+  stack: string;
+  namespace: string;
+  d1Id?: string;               // CF D1 database_id (jeśli jest)
+  ghOwner?: string;            // GitHub owner (dla GH Actions)
+  ghRepo?: string;             // GitHub repo name
+  ghWorkflow?: string;         // workflow file do dispatch (np. deploy.yml)
+}
+
+const MYBONZO_PROJECTS: ProjectDef[] = [
   {
     id: 'mybonzo',
     name: 'mybonzo.com — ZENON Biznes HUB',
@@ -995,7 +1014,10 @@ const MYBONZO_PROJECTS = [
     cfProject: 'mybonzo-new',
     stack: 'Astro 5 SSR + CF Pages',
     namespace: 'mybonzo',
-    d1: 'mybonzo',
+    d1Id: '84f0f3cb-7778-4cc4-a6ba-e823ef52f1f3',
+    ghOwner: 'Bonzokoles',
+    ghRepo: 'luc-de-zen-on',
+    ghWorkflow: 'deploy.yml',
   },
   {
     id: 'jimbo77',
@@ -1005,6 +1027,9 @@ const MYBONZO_PROJECTS = [
     cfProject: 'the-jimbo77com-nxt',
     stack: 'Next.js + CF Workers',
     namespace: 'blog',
+    ghOwner: 'Bonzokoles',
+    ghRepo: 'the-jimbo77com-nxt',
+    ghWorkflow: 'deploy.yml',
   },
   {
     id: 'mybonzoai-blog',
@@ -1014,16 +1039,22 @@ const MYBONZO_PROJECTS = [
     cfProject: 'mybonzoaiblog',
     stack: 'Astro + CF Pages',
     namespace: 'blog',
-    d1: 'jimbo-rag-db',
+    d1Id: '08ec6390-7b9f-4177-8e37-d1daed7c67bc',
+    ghOwner: 'Bonzokoles',
+    ghRepo: 'mybonzoaiblog',
+    ghWorkflow: 'deploy.yml',
   },
   {
     id: 'jimbo-org',
     name: 'jimbo.org — AI Social Club',
     dir: 'U:\\WWW_Jimbo_ORG',
     url: 'https://jimbo.org',
-    cfProject: 'jimbo77-ai-social-club',
+    cfProject: null,            // Vercel, nie CF Pages
     stack: 'Vite + React + Vercel',
     namespace: 'blog',
+    ghOwner: 'Bonzokoles',
+    ghRepo: 'jimbo77-ai-social-club',
+    ghWorkflow: 'deploy.yml',
   },
 ];
 
@@ -1150,6 +1181,204 @@ app.post('/mybonzo/skills/seed', async (_req, res) => {
       workdir: path.dirname(seedPath),
     });
     res.json({ started: true, taskId: result.taskId, seedPath });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ── REST: Projects — CF Remote Control (Etap B) ──────────────────
+
+function cfConfigured(): boolean {
+  return !!(process.env.CF_API_TOKEN && process.env.CF_ACCOUNT_ID);
+}
+function ghConfigured(): boolean {
+  return !!process.env.GITHUB_TOKEN;
+}
+
+// GET /projects/list — wszystkie projekty z CF build status
+app.get('/projects/list', async (_req, res) => {
+  const local = MYBONZO_PROJECTS.map(p => ({
+    id: p.id,
+    name: p.name,
+    url: p.url,
+    stack: p.stack,
+    cfProject: p.cfProject,
+    namespace: p.namespace,
+    skillCount: skills.countByNamespace()[p.namespace] ?? 0,
+    dirExists: fs.existsSync(p.dir),
+    hasCF: !!p.cfProject,
+    hasGH: !!(p.ghOwner && p.ghRepo),
+    cfConfigured: cfConfigured(),
+    ghConfigured: ghConfigured(),
+  }));
+
+  if (!cfConfigured()) {
+    return res.json({ projects: local, cfError: 'CF_API_TOKEN / CF_ACCOUNT_ID brak w .env', timestamp: new Date().toISOString() });
+  }
+
+  // Wzbogać o CF Pages latest deployment
+  try {
+    const cfProjects = await listCFProjects();
+    const cfMap = new Map(cfProjects.map(p => [p.name, p]));
+    const enriched = local.map(p => {
+      if (!p.cfProject) return { ...p, cf: null };
+      const cf = cfMap.get(p.cfProject);
+      if (!cf) return { ...p, cf: null };
+      return {
+        ...p,
+        cf: {
+          subdomain: cf.subdomain,
+          domains: cf.domains,
+          latestDeploy: cf.latest_deployment ? {
+            id: cf.latest_deployment.id,
+            url: cf.latest_deployment.url,
+            status: cf.latest_deployment.latest_stage.status,
+            env: cf.latest_deployment.environment,
+            createdOn: cf.latest_deployment.created_on,
+            branch: cf.latest_deployment.deployment_trigger?.metadata?.branch,
+            commitMsg: cf.latest_deployment.deployment_trigger?.metadata?.commit_message,
+          } : null,
+        },
+      };
+    });
+    res.json({ projects: enriched, total: enriched.length, timestamp: new Date().toISOString() });
+  } catch (e: any) {
+    res.json({ projects: local, cfError: e.message, timestamp: new Date().toISOString() });
+  }
+});
+
+// GET /projects/:id/deployments — historia deploymentów (limit ?n=5)
+app.get('/projects/:id/deployments', async (req, res) => {
+  const project = MYBONZO_PROJECTS.find(p => p.id === req.params['id']);
+  if (!project) return res.status(404).json({ error: `Projekt "${req.params['id']}" nie znaleziony` });
+  if (!project.cfProject) return res.status(400).json({ error: 'Projekt nie jest na CF Pages (Vercel?)' });
+  if (!cfConfigured()) return res.status(400).json({ error: 'CF_API_TOKEN / CF_ACCOUNT_ID brak w .env' });
+
+  try {
+    const limit = Math.min(Number(req.query['n'] ?? 5), 20);
+    const deployments = await listDeployments(project.cfProject, limit);
+    res.json({ project: project.id, deployments, total: deployments.length });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /projects/:id/logs — logi ostatniego deploymentu
+app.get('/projects/:id/logs', async (req, res) => {
+  const project = MYBONZO_PROJECTS.find(p => p.id === req.params['id']);
+  if (!project) return res.status(404).json({ error: `Projekt "${req.params['id']}" nie znaleziony` });
+  if (!project.cfProject) return res.status(400).json({ error: 'Projekt nie jest na CF Pages' });
+  if (!cfConfigured()) return res.status(400).json({ error: 'CF_API_TOKEN / CF_ACCOUNT_ID brak w .env' });
+
+  try {
+    const result = await getLatestDeploymentLogs(project.cfProject);
+    res.json({ project: project.id, ...result });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /projects/:id/deploy — trigger nowego deploymentu
+// Jeśli cfProject → CF Pages API; jeśli ghWorkflow → GH Actions workflow_dispatch
+app.post('/projects/:id/deploy', async (req, res) => {
+  const project = MYBONZO_PROJECTS.find(p => p.id === req.params['id']);
+  if (!project) return res.status(404).json({ error: `Projekt "${req.params['id']}" nie znaleziony` });
+
+  const via = (req.body as { via?: 'cf' | 'gh' })?.via ?? (project.cfProject ? 'cf' : 'gh');
+
+  try {
+    if (via === 'cf') {
+      if (!project.cfProject) return res.status(400).json({ error: 'Brak cfProject — użyj via:gh' });
+      if (!cfConfigured()) return res.status(400).json({ error: 'CF_API_TOKEN / CF_ACCOUNT_ID brak w .env' });
+      const deployment = await triggerDeploy(project.cfProject);
+      return res.json({
+        triggered: true,
+        via: 'cf',
+        deploymentId: deployment.id,
+        url: deployment.url,
+        status: deployment.latest_stage.status,
+      });
+    }
+
+    if (via === 'gh') {
+      if (!project.ghOwner || !project.ghRepo || !project.ghWorkflow) {
+        return res.status(400).json({ error: 'Brak ghOwner/ghRepo/ghWorkflow w projekcie' });
+      }
+      if (!ghConfigured()) return res.status(400).json({ error: 'GITHUB_TOKEN brak w .env' });
+      await triggerGHWorkflow(project.ghOwner, project.ghRepo, project.ghWorkflow);
+      return res.json({ triggered: true, via: 'gh', repo: `${project.ghOwner}/${project.ghRepo}`, workflow: project.ghWorkflow });
+    }
+
+    res.status(400).json({ error: 'via musi być "cf" lub "gh"' });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /projects/:id/gh/runs — ostatnie GH Actions runy
+app.get('/projects/:id/gh/runs', async (req, res) => {
+  const project = MYBONZO_PROJECTS.find(p => p.id === req.params['id']);
+  if (!project) return res.status(404).json({ error: `Projekt "${req.params['id']}" nie znaleziony` });
+  if (!project.ghOwner || !project.ghRepo || !project.ghWorkflow) {
+    return res.status(400).json({ error: 'Projekt bez konfiguracji GH Actions' });
+  }
+  if (!ghConfigured()) return res.status(400).json({ error: 'GITHUB_TOKEN brak w .env' });
+
+  try {
+    const limit = Math.min(Number(req.query['n'] ?? 5), 10);
+    const runs = await listGHRuns(project.ghOwner, project.ghRepo, project.ghWorkflow, limit);
+    res.json({ project: project.id, runs });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /projects/:id/d1 — statystyki D1 + opcjonalne query
+app.get('/projects/:id/d1', async (req, res) => {
+  const project = MYBONZO_PROJECTS.find(p => p.id === req.params['id']);
+  if (!project) return res.status(404).json({ error: `Projekt "${req.params['id']}" nie znaleziony` });
+  if (!project.d1Id) return res.status(400).json({ error: 'Projekt nie ma skonfigurowanej bazy D1' });
+  if (!cfConfigured()) return res.status(400).json({ error: 'CF_API_TOKEN / CF_ACCOUNT_ID brak w .env' });
+
+  try {
+    const stats = await getD1Stats(project.d1Id);
+    res.json({ project: project.id, d1: stats });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// POST /projects/:id/d1/query — SQL query do D1 przez REST API
+// body: { sql: string, params?: (string|number|null)[] }
+app.post('/projects/:id/d1/query', async (req, res) => {
+  const project = MYBONZO_PROJECTS.find(p => p.id === req.params['id']);
+  if (!project) return res.status(404).json({ error: `Projekt "${req.params['id']}" nie znaleziony` });
+  if (!project.d1Id) return res.status(400).json({ error: 'Projekt nie ma skonfigurowanej bazy D1' });
+  if (!cfConfigured()) return res.status(400).json({ error: 'CF_API_TOKEN / CF_ACCOUNT_ID brak w .env' });
+
+  const { sql, params = [] } = req.body as { sql?: string; params?: (string | number | null)[] };
+  if (!sql) return res.status(400).json({ error: 'sql wymagane' });
+
+  // Blokuj destruktywne zapytania
+  const sqlUpper = sql.trim().toUpperCase();
+  if (sqlUpper.startsWith('DROP') || sqlUpper.startsWith('DELETE') || sqlUpper.startsWith('TRUNCATE')) {
+    return res.status(403).json({ error: 'Destruktywne zapytania zablokowane. Użyj wrangler CLI.' });
+  }
+
+  try {
+    const result = await d1Query(project.d1Id, sql, params);
+    res.json({ project: project.id, sql, ...result });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// GET /projects/cf/all — wszystkie CF Pages projekty na koncie (raw)
+app.get('/projects/cf/all', async (_req, res) => {
+  if (!cfConfigured()) return res.status(400).json({ error: 'CF_API_TOKEN / CF_ACCOUNT_ID brak w .env' });
+  try {
+    const projects = await listCFProjects();
+    res.json({ projects, total: projects.length });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }
