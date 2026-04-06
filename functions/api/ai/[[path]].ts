@@ -735,17 +735,28 @@ async function executeTool(
       const vsCurrency = String(input.vs_currency ?? "usd").toLowerCase();
       const include24h = input.include_24h_change !== false;
       try {
-        const fields = ["current_price", "market_cap", "total_volume", include24h ? "price_change_percentage_24h" : ""].filter(Boolean).join(",");
-        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vsCurrency}&ids=${coins}&per_page=25&sparkline=false&price_change_percentage=24h`;
-        const resp = await fetch(url, { headers: { "Accept": "application/json" }, signal: AbortSignal.timeout(10000) });
-        if (!resp.ok) return `coingecko_price: error ${resp.status}`;
-        const data = await resp.json() as { name: string; symbol: string; current_price: number; market_cap: number; price_change_percentage_24h: number }[];
-        if (!data.length) return "coingecko_price: nie znaleziono podanych coin IDs.";
-        return data.map(c =>
-          `**${c.name} (${c.symbol.toUpperCase()})**: ${c.current_price.toLocaleString()} ${vsCurrency.toUpperCase()}` +
-          (include24h ? ` | 24h: ${c.price_change_percentage_24h?.toFixed(2)}%` : "") +
-          ` | MCap: ${(c.market_cap / 1e9).toFixed(2)}B`
-        ).join("\n");
+        // simple/price — działa bez klucza, szybki endpoint
+        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coins}&vs_currencies=${vsCurrency}&include_24hr_change=${include24h}&include_market_cap=true`;
+        const resp = await fetch(url, {
+          headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" },
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!resp.ok) {
+          // Fallback: spróbuj przez Tavily gdy CoinGecko blokuje
+          return `coingecko_price: CoinGecko zwrócił ${resp.status}. Spróbuj: tavily_search("cena ${coins} w ${vsCurrency} dzisiaj")`;
+        }
+        const data = await resp.json() as Record<string, Record<string, number>>;
+        const coinList = coins.split(",");
+        return coinList.map(coin => {
+          const d = data[coin];
+          if (!d) return `${coin}: nie znaleziono`;
+          const price = d[vsCurrency];
+          const change = d[`${vsCurrency}_24h_change`];
+          const mcap = d[`${vsCurrency}_market_cap`];
+          return `**${coin.charAt(0).toUpperCase() + coin.slice(1)}**: ${price?.toLocaleString()} ${vsCurrency.toUpperCase()}` +
+            (include24h && change != null ? ` | 24h: ${change.toFixed(2)}%` : "") +
+            (mcap ? ` | MCap: ${(mcap / 1e9).toFixed(1)}B` : "");
+        }).join("\n");
       } catch (e: unknown) {
         return `coingecko_price error: ${e instanceof Error ? e.message : String(e)}`;
       }
