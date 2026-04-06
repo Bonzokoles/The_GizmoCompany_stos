@@ -13,6 +13,7 @@
  */
 import { useState, useRef, useEffect, useCallback } from "react";
 import { AgentHubPanel } from "./AgentHubPanel";
+import { PhiloKitPanel } from "./PhiloKitPanel";
 
 const API_BASE =
   typeof window !== "undefined" &&
@@ -22,7 +23,7 @@ const API_BASE =
 
 /* ─── Types ─────────────────────────────────────── */
 
-type AssistantMode = "chat" | "prompts" | "kb" | "settings" | "agent";
+type AssistantMode = "chat" | "prompts" | "kb" | "settings" | "agent" | "philo";
 
 interface ToolCall {
   tool: string;
@@ -578,7 +579,7 @@ export function AssistantPage() {
 
         <nav className="ba-nav" role="navigation">
           {(
-            ["chat", "prompts", "kb", "settings", "agent"] as AssistantMode[]
+            ["chat", "prompts", "kb", "settings", "agent", "philo"] as AssistantMode[]
           ).map((m) => (
             <button
               key={m}
@@ -590,6 +591,7 @@ export function AssistantPage() {
               {m === "kb" && "◇ BAZA WIEDZY"}
               {m === "settings" && "⚙ USTAWIENIA"}
               {m === "agent" && "◈ AGENT HUB"}
+              {m === "philo" && "🦉 PHILO"}
             </button>
           ))}
         </nav>
@@ -1231,6 +1233,13 @@ export function AssistantPage() {
 
       {/* ══ AGENT HUB MODE ═════════════════════════ */}
       {mode === "agent" && <AgentHubPanel />}
+
+      {/* ══ PHILO MODE ══════════════════════════════ */}
+      {mode === "philo" && (
+        <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <PhiloKitPanel />
+        </div>
+      )}
     </div>
   );
 }

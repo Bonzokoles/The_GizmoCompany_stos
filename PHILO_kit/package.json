@@ -1,0 +1,20 @@
+{
+  "name": "philo-kit-server",
+  "version": "1.0.0",
+  "description": "PhiloKit — Philosophy AI assistant dla ZENO Browser (port 4112)",
+  "type": "module",
+  "scripts": {
+    "start": "tsx server.ts",
+    "dev": "tsx watch server.ts"
+  },
+  "dependencies": {
+    "openai": "^6.33.0",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
