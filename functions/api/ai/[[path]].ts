@@ -325,6 +325,22 @@ const BUCH_TOOLS: BuchTool[] = [
       ],
     },
   },
+  {
+    name: "goose_dispatch",
+    description:
+      "Send a task to local JIMBO HUB (Goose AI agent) running at localhost:4224. Use this when the user wants to: save files locally, write code, execute terminal commands, or do anything requiring local filesystem access. Goose will execute the task autonomously.",
+    input_schema: {
+      type: "object",
+      properties: {
+        instructions: {
+          type: "string",
+          description:
+            "Complete instructions for Goose. Include absolute paths (U:\\...), expected output, and all steps in one block.",
+        },
+      },
+      required: ["instructions"],
+    },
+  },
 ];
 
 async function stripHtml(html: string): Promise<string> {
@@ -569,6 +585,28 @@ async function executeTool(
         return `✅ Wiedza zapisana: [${category}] ${key} (łącznie wpisów: ${kb.entries.length})`;
       } catch (e: unknown) {
         return `buch_learn error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case "goose_dispatch": {
+      const instructions = String(input.instructions ?? "").trim();
+      if (!instructions) return "goose_dispatch: instructions są wymagane.";
+      try {
+        const hubUrl = "http://localhost:4224/agent/run";
+        const resp = await fetch(hubUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ instructions }),
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!resp.ok) {
+          const err = await resp.text();
+          return `goose_dispatch: HUB error ${resp.status}: ${err.slice(0, 200)}. Upewnij się że JIMBO HUB działa lokalnie (port 4224).`;
+        }
+        const data = await resp.json() as { taskId?: string; status?: string };
+        return `✅ Zadanie wysłane do Goose (taskId: ${data.taskId ?? "?"}, status: ${data.status ?? "queued"}). Wynik pojawi się w panelu Asystent → AgentHub.`;
+      } catch (e: unknown) {
+        return `goose_dispatch: Nie można połączyć z JIMBO HUB (localhost:4224). Sprawdź czy aplikacja ZENO jest uruchomiona. Błąd: ${e instanceof Error ? e.message : String(e)}`;
       }
     }
 
@@ -1593,7 +1631,11 @@ JAKOŚĆ — przykład dobrego agenta (9/10):
     if (data.stop_reason === "end_turn") {
       const textBlock = data.content.find((c) => c.type === "text");
       let content = textBlock?.text ?? "";
-      // Fallback: if model returned no text but tools ran, summarize results
+      // Fallback 1: model zwrócił pustą odpowiedź i nie użył narzędzi
+      if (!content && toolTrace.length === 0) {
+        content = `⚠️ Model (${data.model}) nie zwrócił odpowiedzi. Ten model może nie obsługiwać tool calling.\n\nSpróbuj zmienić model na: **moonshotai/kimi-k2** lub **google/gemini-2.0-flash-001**`;
+      }
+      // Fallback 2: if model returned no text but tools ran, summarize results
       if (!content && toolTrace.length > 0) {
         const parts: string[] = [];
         for (const t of toolTrace) {
