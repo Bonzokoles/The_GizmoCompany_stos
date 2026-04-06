@@ -1248,7 +1248,7 @@ const BUCH_SEED_KNOWLEDGE = [
     key: "tools_require_anthropic",
     category: "functions",
     content:
-      "Narzędzia (⚒ TOOLS ON) działają z: provider=openrouter (model: google/gemini-2.0-flash-exp:free — darmowy, dobry tool calling), provider=anthropic (claude-sonnet), provider=openai (gpt-4o-mini). Z DeepSeek narzędzia nie działają stabilnie. Aby używać narzędzi: wybierz provider i kliknij ⚒ TOOLS ON. Bez narzędzi (STREAM) model może tylko rozmawiać.",
+      "Narzędzia (⚒ TOOLS ON) działają z: provider=openrouter (domyślny model: moonshotai/kimi-k2 — dobry tool calling, dobra cena; alternatywy: google/gemini-2.0-flash-001, deepseek/deepseek-chat-v3-0324), provider=anthropic (claude-sonnet), provider=openai (gpt-4o-mini). Aby używać narzędzi: wybierz provider i kliknij ⚒ TOOLS ON.",
     updated_at: new Date().toISOString(),
   },
   {
@@ -1317,17 +1317,18 @@ async function handleToolChat(request: Request, env: Env): Promise<Response> {
     toolProvider = "openrouter";
     toolEndpoint = "https://openrouter.ai/api/v1/chat/completions";
     toolApiKey = openrouterKey;
-    // Modele z dobrym tool calling na OpenRouter (darmowe/tanie):
-    // google/gemini-2.0-flash-exp:free — darmowy, świetny tool calling
-    // meta-llama/llama-3.3-70b-instruct:free — darmowy, sprawdzony
-    // google/gemini-flash-1.5 — tani, niezawodny
-    model = body.model || "google/gemini-2.0-flash-exp:free";
+    // Modele z dobrym tool calling na OpenRouter (tanie/średnie):
+    // moonshotai/kimi-k2          — świetny tool calling, dobra cena
+    // google/gemini-2.0-flash-001 — tani, niezawodny
+    // google/gemini-flash-1.5     — bardzo tani
+    // deepseek/deepseek-chat-v3-0324 — tani, dobry kod
+    model = body.model || "moonshotai/kimi-k2";
   } else if (openrouterKey) {
-    // Fallback: OpenRouter z darmowym modelem obsługującym tool calling
+    // Fallback: OpenRouter z modelem obsługującym tool calling
     toolProvider = "openrouter";
     toolEndpoint = "https://openrouter.ai/api/v1/chat/completions";
     toolApiKey = openrouterKey;
-    model = body.model || "google/gemini-2.0-flash-exp:free";
+    model = body.model || "moonshotai/kimi-k2";
   } else if (openaiKey) {
     toolProvider = "openai";
     toolEndpoint = "https://api.openai.com/v1/chat/completions";
