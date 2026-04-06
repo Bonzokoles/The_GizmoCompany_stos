@@ -160,6 +160,13 @@ const taskSubscribers = new Map<string, Set<WebSocket>>();
 const taskInstructions = new Map<string, string>();
 // Mapa taskId → czas startu (do pomiaru executionMs dla ReflexionEngine)
 const taskStartTimes = new Map<string, number>();
+// Mapa taskId → liczba retry (auto-retry po słabej ocenie ReflexionEngine)
+const taskRetryCount = new Map<string, number>();
+// Mapa retryTaskId → originalTaskId (żeby subskrybenci dostali broadcast)
+const taskRetryParent = new Map<string, string>();
+
+const AUTO_RETRY_THRESHOLD = 0.7;  // score poniżej → retry
+const AUTO_RETRY_MAX       = 2;    // max prób retry
 
 // SkillAgent — skill injection + auto-save (zob. agents/skill-agent.ts)
 
@@ -203,14 +210,79 @@ goose.on('done', async (result) => {
   taskStartTimes.delete(result.taskId);
   // Ocena i auto-save w tle — nie blokuje odpowiedzi
   skillAgent.evalAndSave(instructions, result.output, result.exitCode).catch(() => {});
-  // Reflexion loop — ocena jakości, aktualizacja skill score
+
+  // Reflexion loop + auto-retry
   if (instructions && result.output) {
+    // Ustal originalTaskId (jeśli to retry, parent ma originalId)
+    const originalTaskId = taskRetryParent.get(result.taskId) ?? result.taskId;
+    const retryCount = taskRetryCount.get(originalTaskId) ?? 0;
+
     reflexion.reflect({
       taskId:          result.taskId,
       taskDescription: instructions,
       agentOutput:     result.output,
       executionMs,
-    }).catch(() => {});
+    }).then(async (reflexionResult) => {
+      // Broadcast wyniku oceny do UI
+      broadcast(originalTaskId, {
+        type:       'reflexion',
+        taskId:     originalTaskId,
+        verdict:    reflexionResult.verdict,
+        score:      reflexionResult.score,
+        reflection: reflexionResult.reflection,
+        improvement: reflexionResult.improvement,
+        retryCount,
+      });
+
+      // Auto-retry jeśli score < threshold i nie przekroczono limitu prób
+      if (
+        reflexionResult.score < AUTO_RETRY_THRESHOLD &&
+        reflexionResult.verdict !== 'success' &&
+        retryCount < AUTO_RETRY_MAX &&
+        result.exitCode === 0  // nie retry gdy crash
+      ) {
+        const retryNum = retryCount + 1;
+        taskRetryCount.set(originalTaskId, retryNum);
+
+        const improvedInstruction = `${instructions}
+
+---
+[AUTO-RETRY ${retryNum}/${AUTO_RETRY_MAX}] Poprzednia próba oceniona na ${reflexionResult.score.toFixed(2)}/1.0.
+Wskazówka do poprawy: ${reflexionResult.improvement}
+Poprzedni output: ${result.output.slice(0, 400)}
+---
+Wykonaj zadanie jeszcze raz uwzględniając powyższą wskazówkę.`;
+
+        const retryTaskId = randomUUID();
+        taskInstructions.set(retryTaskId, improvedInstruction);
+        taskStartTimes.set(retryTaskId, Date.now());
+        taskRetryParent.set(retryTaskId, originalTaskId);
+        // Przepisz subskrybentów oryginału na retry
+        const subs = taskSubscribers.get(originalTaskId);
+        if (subs?.size) taskSubscribers.set(retryTaskId, new Set(subs));
+
+        broadcast(originalTaskId, {
+          type:    'retry',
+          taskId:  originalTaskId,
+          retryTaskId,
+          retryNum,
+          maxRetries: AUTO_RETRY_MAX,
+          reason:  reflexionResult.improvement,
+          score:   reflexionResult.score,
+        });
+
+        console.log(`[AutoRetry] task=${originalTaskId} retry=${retryNum} score=${reflexionResult.score.toFixed(2)}`);
+        goose.runTask({ id: retryTaskId, instructions: improvedInstruction }).catch(err => {
+          console.error('[AutoRetry] goose.runTask failed:', err);
+        });
+      } else {
+        // Zakończono — wyczyść retry state
+        taskRetryCount.delete(originalTaskId);
+        taskRetryParent.delete(result.taskId);
+      }
+    }).catch(() => {
+      taskRetryCount.delete(originalTaskId);
+    });
   }
 
   // ── Goose synthesis: BUCH podsumowuje wynik Goose i odsyła do chatu ──
@@ -537,6 +609,21 @@ Zwróć wyniki w czytelnym formacie.`;
 });
 
 // ── REST: skills ──────────────────────────────────────────────────
+
+// GET /health — status HUBa
+app.get('/health', (req, res) => {
+  const byNamespace = skills.countByNamespace();
+  const total = Object.values(byNamespace).reduce((a, b) => a + b, 0);
+  res.json({
+    status: 'ok',
+    port: PORT,
+    uptime: Math.floor(process.uptime()),
+    skills: { total, byNamespace },
+    activeNamespaces: [...activeNamespaces],
+    goose: { session: goose.getSessionName() ?? null },
+    memory: { heapMB: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) },
+  });
+});
 
 // GET /skills/list — wszystkie skills, opcjonalnie filtruj ?namespace=analytics
 app.get('/skills/list', (req, res) => {

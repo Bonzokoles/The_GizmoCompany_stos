@@ -60,6 +60,12 @@ interface TaskEntry {
   lines: TaskLine[];
   status: 'running' | 'done' | 'error';
   durationMs?: number;
+  collapsed?: boolean;
+  reflexionScore?: number;
+  reflexionVerdict?: string;
+  reflexionImprovement?: string;
+  retryNum?: number;
+  maxRetries?: number;
 }
 
 /* ════════════════════════════════════════════════════════════ */
@@ -314,10 +320,12 @@ export function AgentHubPanel() {
 
   /* ── Hub status poll ── */
   useEffect(() => {
+    let connected = false;
     const check = async () => {
       try {
         const r = await fetch(`${HUB}/status`, { signal: AbortSignal.timeout(3000) });
         const d = await r.json() as { goose?: { available?: boolean }; model?: string };
+        connected = true;
         setHubOnline(true);
         setGooseAvail(d.goose?.available ?? false);
         setHubModel(d.model ?? '');
@@ -325,7 +333,6 @@ export function AgentHubPanel() {
           .then(r => r.json())
           .then((s: unknown) => setGooseDesktopAvail((s as { available?: boolean }).available ?? false))
           .catch(() => {});
-        // Pobierz info o sesji równolegle
         fetch(`${HUB}/session`).then(r => r.json()).then((s: unknown) => {
           const sd = s as { sessionName?: string | null; taskCount?: number };
           setSessionName(sd.sessionName ?? null);
@@ -336,9 +343,16 @@ export function AgentHubPanel() {
         setGooseAvail(false);
       }
     };
+    // Szybki retry co 2s dopóki nie połączy (max 60s), potem co 10s
     check();
-    const t = setInterval(check, 10_000);
-    return () => clearInterval(t);
+    const fastTimer = setInterval(() => { if (!connected) check(); }, 2_000);
+    const slowTimer = setInterval(check, 10_000);
+    const stopFast = setTimeout(() => clearInterval(fastTimer), 60_000);
+    return () => {
+      clearInterval(fastTimer);
+      clearInterval(slowTimer);
+      clearTimeout(stopFast);
+    };
   }, []);
 
   /* ── WebSocket (task streaming) ── */
@@ -353,6 +367,8 @@ export function AgentHubPanel() {
           const msg = JSON.parse(e.data as string) as {
             type: string; taskId: string; text?: string;
             isStderr?: boolean; exitCode?: number; durationMs?: number;
+            verdict?: string; score?: number; reflection?: string; improvement?: string; retryCount?: number;
+            retryTaskId?: string; retryNum?: number; maxRetries?: number; reason?: string;
           };
           if (msg.type === 'chunk') {
             setTasks(prev => prev.map(t =>
@@ -372,6 +388,27 @@ export function AgentHubPanel() {
               t.id === msg.taskId ? { ...t, status: 'error' } : t,
             ));
             setTaskRunning(false);
+          } else if (msg.type === 'reflexion') {
+            setTasks(prev => prev.map(t =>
+              t.id === msg.taskId
+                ? { ...t, reflexionScore: msg.score, reflexionVerdict: msg.verdict, reflexionImprovement: msg.improvement }
+                : t,
+            ));
+          } else if (msg.type === 'retry') {
+            setTaskRunning(true);
+            setTasks(prev => [
+              ...prev.map(t => t.id === msg.taskId ? { ...t, retryNum: msg.retryNum, maxRetries: msg.maxRetries } : t),
+              {
+                id: msg.retryTaskId!,
+                instructions: `[AUTO-RETRY ${msg.retryNum}/${msg.maxRetries}] ${msg.reason ?? ''}`,
+                lines: [],
+                status: 'running' as const,
+                collapsed: false,
+              },
+            ]);
+            if (wsRef.current?.readyState === WebSocket.OPEN) {
+              wsRef.current.send(JSON.stringify({ action: 'subscribe', taskId: msg.retryTaskId }));
+            }
           }
         } catch { /* ignore */ }
       };
@@ -444,7 +481,11 @@ export function AgentHubPanel() {
       });
       const data = await res.json() as { taskId?: string; error?: string };
       if (!data.taskId) throw new Error(data.error ?? 'Brak taskId');
-      setTasks(prev => [...prev, { id: data.taskId!, instructions, lines: [], status: 'running' }]);
+      // Auto-collapse poprzednich tasków gdy startuje nowy
+      setTasks(prev => [
+        ...prev.map(t => ({ ...t, collapsed: true })),
+        { id: data.taskId!, instructions, lines: [], status: 'running' as const, collapsed: false },
+      ]);
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({ action: 'subscribe', taskId: data.taskId }));
       }
@@ -453,7 +494,7 @@ export function AgentHubPanel() {
       setTasks(prev => [...prev, {
         id: crypto.randomUUID(), instructions,
         lines: [{ text: `⚠ ${err instanceof Error ? err.message : 'Błąd'}`, ts: Date.now() }],
-        status: 'error',
+        status: 'error' as const,
       }]);
     }
   }, [taskInput, taskRunning, gooseAvail]);
@@ -461,6 +502,8 @@ export function AgentHubPanel() {
   /* ── Helpers ── */
   const copy = (text: string) => navigator.clipboard.writeText(text).catch(() => {});
   const sendToChat  = (text: string) => setChatInput(prev => prev ? prev + '\n' + text : text);
+  const toggleTaskCollapse = (id: string) =>
+    setTasks(prev => prev.map(t => t.id === id ? { ...t, collapsed: !t.collapsed } : t));
 
   // sendToTask: wypełnia pole + od razu uruchamia jeśli Goose dostępny
   const sendToTask = useCallback(async (text: string) => {
@@ -475,7 +518,11 @@ export function AgentHubPanel() {
       });
       const data = await res.json() as { taskId?: string; error?: string };
       if (!data.taskId) throw new Error(data.error ?? 'Brak taskId');
-      setTasks(prev => [...prev, { id: data.taskId!, instructions: text, lines: [], status: 'running' }]);
+      // Auto-collapse poprzednich tasków gdy startuje nowy
+      setTasks(prev => [
+        ...prev.map(t => ({ ...t, collapsed: true })),
+        { id: data.taskId!, instructions: text, lines: [], status: 'running' as const, collapsed: false },
+      ]);
       if (wsRef.current?.readyState === WebSocket.OPEN) {
         wsRef.current.send(JSON.stringify({ action: 'subscribe', taskId: data.taskId }));
       }
@@ -851,33 +898,57 @@ export function AgentHubPanel() {
             )}
             {tasks.map(task => {
               const urls = extractUrls(taskOutput(task));
+              const isCollapsed = task.collapsed && task.status !== 'running';
               return (
-                <div key={task.id} className={`ah-task ah-task-${task.status}`}>
-                  <div className="ah-task-hdr">
+                <div key={task.id} className={`ah-task ah-task-${task.status}${isCollapsed ? ' ah-task-collapsed' : ''}`}>
+                  <div className="ah-task-hdr" onClick={() => toggleTaskCollapse(task.id)} style={{ cursor: 'pointer' }}>
                     <span className="ah-task-icon">
                       {task.status === 'running' ? '⟳' : task.status === 'done' ? '✓' : '✗'}
                     </span>
                     <span className="ah-task-instr" title={task.instructions}>
                       {task.instructions.slice(0, 70)}{task.instructions.length > 70 ? '…' : ''}
                     </span>
-                    {task.durationMs != null &&
-                      <span className="ah-task-dur">{(task.durationMs / 1000).toFixed(1)}s</span>}
+                    <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                      {task.reflexionScore != null && (
+                        <span
+                          title={task.reflexionImprovement ?? task.reflexionVerdict ?? ''}
+                          style={{
+                            fontSize: '10px', padding: '1px 5px', borderRadius: '10px',
+                            background: task.reflexionScore >= 0.7 ? '#1a3a1a' : '#3a1a1a',
+                            color: task.reflexionScore >= 0.7 ? '#4ade80' : '#f87171',
+                            border: `1px solid ${task.reflexionScore >= 0.7 ? '#4ade80' : '#f87171'}`,
+                          }}
+                        >
+                          {task.reflexionVerdict === 'success' ? '✓' : task.reflexionVerdict === 'failure' ? '✗' : '~'} {(task.reflexionScore * 100).toFixed(0)}%
+                        </span>
+                      )}
+                      {task.retryNum != null && (
+                        <span style={{ fontSize: '10px', color: '#fbbf24' }} title="Auto-retry w toku">
+                          ↺{task.retryNum}/{task.maxRetries}
+                        </span>
+                      )}
+                      {task.durationMs != null &&
+                        <span className="ah-task-dur">{(task.durationMs / 1000).toFixed(1)}s</span>}
+                      <span className="ah-task-toggle">{isCollapsed ? '▶' : '▼'}</span>
+                    </span>
                   </div>
-                  <pre className="ah-task-lines">
-                    {task.lines.map((l, i) => (
-                      <span key={i} className={l.isStderr ? 'ah-line-err' : ''}>{l.text}</span>
-                    ))}
-                    {task.status === 'running' && <span className="ah-typing">▋</span>}
-                  </pre>
-                  <div className="ah-task-actions">
-                    <button className="ah-act-btn" onClick={() => copy(taskOutput(task))} title="Kopiuj output">⎘ kopiuj</button>
-                    <button className="ah-act-btn" onClick={() => sendToChat(taskOutput(task).slice(0, 3000))} title="Wyślij do chatu">→ chat</button>
-                    {urls.map(url => (
-                      <button key={url} className="ah-act-btn ah-act-url" onClick={() => openIframe(url)} title={url}>
-                        ⊞ {new URL(url).hostname.replace('www.', '')}
-                      </button>
-                    ))}
-                  </div>
+                  {!isCollapsed && <>
+                    <pre className="ah-task-lines">
+                      {task.lines.map((l, i) => (
+                        <span key={i} className={l.isStderr ? 'ah-line-err' : ''}>{l.text}</span>
+                      ))}
+                      {task.status === 'running' && <span className="ah-typing">▋</span>}
+                    </pre>
+                    <div className="ah-task-actions">
+                      <button className="ah-act-btn" onClick={e => { e.stopPropagation(); copy(taskOutput(task)); }} title="Kopiuj output">⎘ kopiuj</button>
+                      <button className="ah-act-btn" onClick={e => { e.stopPropagation(); sendToChat(taskOutput(task).slice(0, 3000)); }} title="Wyślij do chatu">→ chat</button>
+                      {urls.map(url => (
+                        <button key={url} className="ah-act-btn ah-act-url" onClick={e => { e.stopPropagation(); openIframe(url); }} title={url}>
+                          ⊞ {new URL(url).hostname.replace('www.', '')}
+                        </button>
+                      ))}
+                    </div>
+                  </>}
                 </div>
               );
             })}
