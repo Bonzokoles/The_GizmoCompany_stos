@@ -37,6 +37,7 @@ import { PodmanBridge } from './core/podman-bridge.js';
 import { CONTAINER_NAMESPACE, ALL_NAMESPACES } from './skills/skill-manager.js';
 import { SkillAgent } from './agents/skill-agent.js';
 import { MemoryManager } from './skills/memory-manager.js';
+import { ReflexionEngine } from './core/reflexion-engine.js';
 import { listGooseSessions, importGooseSession } from './agents/goose-session-importer.js';
 import {
   listCFProjects, listDeployments, triggerDeploy,
@@ -47,45 +48,17 @@ import {
 // ── System prompt — wstrzykiwany do każdej rozmowy ─────────────────
 const SYSTEM_PROMPT: Message = {
   role: 'system',
-  content: `Jesteś JIMBO — asystentem AI zintegrowanym z JIMBO Agent HUB (ZENO Browser).
+  content: `Jesteś JIMBO — asystentem AI w JIMBO Agent HUB (ZENO Browser).
+Masz pamięć, bazę skills i Goose AI (autonomiczny agent kodujący).
+Projekty: ZENO Browser (U:\\WWW_Zen_BRo_wser_org3), mybonzo.com (U:\\WWW_MyBonzo_com), mybonzoai blog (U:\\WWW_MYbonzoai_blog), jimbo.org (U:\\WWW_Jimbo_ORG).
+Stos: TypeScript, Node.js, SQLite, Anthropic API, Goose v1.29.1, CF Pages/Workers/D1/R2.
 
-TWOJE MOŻLIWOŚCI:
-- Odpowiadasz na pytania i pomagasz w planowaniu zadań
-- Masz dostęp do Goose AI (autonomiczny agent kodujący) przez prawy panel
-- Goose może: tworzyć pliki, pisać kod, wykonywać komendy, przeglądać web
+Gdy zadanie wymaga kodu/plików/komend — ZAWSZE formuluj gotową instrukcję w bloku:
+\`\`\`goose
+[kompletna instrukcja — wszystkie kroki w jednym bloku, ścieżki absolutne]
+\`\`\`
 
-JAK PRZEKAZAĆ ZADANIE DO GOOSE:
-- Gdy użytkownik prosi o coś co wymaga kodu/plików/komend, sformułuj KONKRETNĄ instrukcję
-- Napisz: "⚡ Wyślij do Goose: [instrukcja]" — użytkownik klika ⚡ przy Twojej odpowiedzi
-- LUB: wpisz instrukcję bezpośrednio do pola "Instrukcja dla Goose" po prawej stronie
-
-TWÓJ STYL:
-- Zwięzły, konkretny, techniczny
-- Gdy zadanie jest do zrobienia przez Goose — od razu sformułuj gotową instrukcję
-- Nie tłumacz jak "można by" coś zrobić — podaj gotowe rozwiązanie
-- Używaj polskiego lub angielskiego zależnie od języka użytkownika
-
-KONTEKST PROJEKTÓW:
-- ZENO Browser: Electron + React + Vite + CF Pages — U:\\WWW_Zen_BRo_wser_org3
-- mybonzo.com (ZENON Biznes HUB): Astro 5 SSR + CF Pages + D1(mybonzo) + R2 — U:\\WWW_MyBonzo_com
-  • ERP/CRM dla polskich MŚP: finanse, CRM, magazyn, projekty, AI Doradca (6 ról)
-  • AI: OpenAI gpt-4o primary, Gemini 2.0 Flash fallback, CF Workers AI fallback
-- jimbo77.com: Next.js + CF Workers — U:\\WWW_Jimbo77_com
-- mybonzoai blog: Astro + CF Pages + D1(jimbo-rag-db) — U:\\WWW_MYbonzoai_blog
-- jimbo.org: Vite/React + Vercel — U:\\WWW_Jimbo_ORG
-- Stos wspólny: TypeScript, Node.js, SQLite, Anthropic API, Goose v1.29.1
-
-ZARZĄDZANIE AGENTAMI ZENO (lokalnie masz pełne uprawnienia):
-- GET  http://localhost:${process.env.HUB_PORT ?? 4222}/zeno/agents      — lista agentów z D1 (status: idea/deployed)
-- POST http://localhost:${process.env.HUB_PORT ?? 4222}/zeno/agents/deploy — wdróż agenta: { name, prompt, site, component, model }
-  Wdrożenie = Goose testuje agenta (symuluje rozmowę) → ocenia jakość → zmienia status na 'deployed'
-- POST http://localhost:${process.env.HUB_PORT ?? 4222}/agent/run — uruchom dowolne zadanie przez Goose
-
-GDY UŻYTKOWNIK CHCE WDROŻYĆ AGENTA:
-1. Pobierz agenta: GET /zeno/agents → znajdź po nazwie (status: idea)
-2. Napisz instrukcję dla Goose: "Przetestuj agenta '[nazwa]': wciel się w rolę użytkownika i zadaj 3 typowe pytania. System prompt: [prompt]. Oceń odpowiedzi 1-10. Raport: co działa, co poprawić."
-3. ⚡ Wyślij tę instrukcję do Goose — Goose przeprowadzi test
-4. Po teście: POST /zeno/agents/deploy z wynikiem testu → status zmienia się na 'deployed'`,
+Styl: zwięzły, techniczny, w języku rozmówcy. Nie tłumacz — działaj.`,
 };
 
 const PORT = Number(process.env.HUB_PORT ?? 4222);
@@ -96,7 +69,7 @@ const podman = new PodmanBridge();
 
 // ── Active namespaces — skill injection filtruje po tych domenach ─
 // 'global' zawsze aktywny; pozostałe dodawane gdy kontener running
-const activeNamespaces = new Set<string>(['global']);
+const activeNamespaces = new Set<string>(['global', 'prompts']);
 
 // ── Aktywny agent (awesome-copilot) ──────────────────────────────
 let activeAgentId     = '';
@@ -124,6 +97,7 @@ const llm = createLLMClient();
 const skills = new SkillManager();
 const skillAgent = new SkillAgent(llm, skills);
 const memory = new MemoryManager();
+const reflexion = new ReflexionEngine(skills.getDb(), llm);
 
 // ── Session persistence ───────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
@@ -184,6 +158,8 @@ const taskSubscribers = new Map<string, Set<WebSocket>>();
 
 // Mapa taskId → instrukcje (do skill smart-save)
 const taskInstructions = new Map<string, string>();
+// Mapa taskId → czas startu (do pomiaru executionMs dla ReflexionEngine)
+const taskStartTimes = new Map<string, number>();
 
 // SkillAgent — skill injection + auto-save (zob. agents/skill-agent.ts)
 
@@ -216,15 +192,50 @@ goose.on('chunk', ({ taskId, text, isStderr }) => {
   broadcast(taskId, { type: 'chunk', taskId, text, isStderr: !!isStderr });
 });
 
-goose.on('done', (result) => {
+goose.on('done', async (result) => {
   broadcast(result.taskId, { type: 'done', ...result });
   taskSubscribers.delete(result.taskId);
   saveSessionState();
 
-  const instructions = taskInstructions.get(result.taskId) ?? '';
+  const instructions  = taskInstructions.get(result.taskId) ?? '';
+  const executionMs   = Date.now() - (taskStartTimes.get(result.taskId) ?? Date.now());
   taskInstructions.delete(result.taskId);
+  taskStartTimes.delete(result.taskId);
   // Ocena i auto-save w tle — nie blokuje odpowiedzi
   skillAgent.evalAndSave(instructions, result.output, result.exitCode).catch(() => {});
+  // Reflexion loop — ocena jakości, aktualizacja skill score
+  if (instructions && result.output) {
+    reflexion.reflect({
+      taskId:          result.taskId,
+      taskDescription: instructions,
+      agentOutput:     result.output,
+      executionMs,
+    }).catch(() => {});
+  }
+
+  // ── Goose synthesis: BUCH podsumowuje wynik Goose i odsyła do chatu ──
+  if (instructions && result.output && result.exitCode === 0) {
+    try {
+      const truncatedOutput = result.output.slice(0, 4000);
+      const synthesisMessages: Message[] = [
+        { role: 'system', content: SYSTEM_PROMPT.content + memory.formatCoreForPrompt() },
+        { role: 'user', content: instructions },
+        { role: 'assistant', content: `⚡ Wyślij do Goose: ${instructions}` },
+        {
+          role: 'user',
+          content: `Goose wykonał zadanie (exit: ${result.exitCode}, ${Math.round(result.durationMs / 1000)}s).\n\nOutput:\n${truncatedOutput}\n\n---\nPodsumuj krótko co zostało zrobione i czy zadanie się powiodło.`,
+        },
+      ];
+      const synthesis = await chat(llm, synthesisMessages);
+      const summaryContent = synthesis.choices[0]?.message?.content ?? '';
+      if (summaryContent.trim()) {
+        broadcast(result.taskId, { type: 'goose:synthesis', taskId: result.taskId, content: summaryContent });
+        memory.saveRecall('assistant', `[Goose] ${summaryContent}`, goose.getSessionName() ?? 'default');
+      }
+    } catch {
+      // synthesis nie jest krytyczna — ignoruj błędy
+    }
+  }
 });
 
 goose.on('error', ({ taskId, error }) => {
@@ -249,17 +260,42 @@ app.get('/status', (_req, res) => {
   });
 });
 
+// ── Model router — wybiera model na podstawie treści zapytania ────
+// Używany gdy klient nie podał modelu explicite.
+// Wszystkie modele przez OpenRouter — wystarczy zmienić nazwę.
+function selectModel(query: string, explicitModel?: string): string | undefined {
+  if (explicitModel) return explicitModel;
+  const q = query.toLowerCase();
+  // Blog / content writing → darmowy Qwen dobry w językowych taskach
+  if (/blog|artykuł|artyku|post|treść|tre[sś]|seo|napisz tekst|content/.test(q))
+    return 'qwen/qwen3.6-plus:free';
+  // Analityka / dane → Gemini Flash szybki i dobry w strukturyzowanych danych
+  if (/analityk|statystyk|dashboard|wykres|raport|dane|umami|plausible/.test(q))
+    return process.env.ANALYTICS_MODEL ?? 'google/gemini-2.0-flash-001';
+  // Kod / debug → Claude najlepszy do tool-use i kodu TypeScript
+  if (/kod|debug|bł[aą]d|error|typescript|tsx?|fix|komponent|refaktor|plik|import/.test(q))
+    return process.env.CODE_MODEL ?? defaultModel();
+  // Domyślny model z .env
+  return undefined;
+}
+
 // ── REST: chat (OpenRouter) ───────────────────────────────────────
-// POST /chat  { messages: [{role, content}], stream?: boolean, model?: string }
+// POST /chat  { messages: [{role, content}] | message: string, stream?: bool, model?: string }
 app.post('/chat', async (req, res) => {
-  const { messages, stream = false, model } = req.body as {
+  let { messages, message, stream = false, model } = req.body as {
     messages?: Message[];
+    message?: string;   // shorthand — zostanie opakowany w messages
     stream?: boolean;
     model?: string;
   };
 
+  // Shorthand: message → messages
+  if (!messages?.length && message) {
+    messages = [{ role: 'user', content: message }];
+  }
+
   if (!messages?.length) {
-    return res.status(400).json({ error: 'Brak wiadomości (pole: messages)' });
+    return res.status(400).json({ error: 'Brak wiadomości (pole: messages lub message)' });
   }
 
   // Sprawdź klucz aktywnego providera
@@ -294,10 +330,30 @@ app.post('/chat', async (req, res) => {
   const recallPrefix = memory.formatRecallForPrefix(recallMatches);
   const combinedPrefix = recallPrefix + skillsPrefix;
 
-  const injectedMessages: Message[] = combinedPrefix
+  // Auto-select model na podstawie treści zapytania
+  const selectedModel = selectModel(lastUserText, model);
+
+  // ── File context injection — jeśli wiadomość zawiera ścieżkę/plik ──
+  // Wykryj ścieżki Windows/Unix + rozszerzenia plików → dodaj wpisy z katalogu
+  const filePathPattern = /(?:[A-Za-z]:\\[\w\\\s./-]+|\/[\w/\s.:-]+|[\w./\\-]+\.(?:csv|xlsx|json|md|ts|tsx|js|py|txt|pdf|log|yaml|yml))/gi;
+  const mentionedPaths = lastUserText.match(filePathPattern) ?? [];
+  let fileCatalogContext = '';
+  if (mentionedPaths.length > 0) {
+    const catalog = memory.listArchival(100).filter(e => e.source === 'file_catalog');
+    const relevant = catalog.filter(e =>
+      mentionedPaths.some(p => e.content.toLowerCase().includes(p.toLowerCase()))
+    );
+    if (relevant.length > 0) {
+      fileCatalogContext = '\n[Znalezione w katalogu plików:]\n' +
+        relevant.map(e => e.content).join('\n---\n') + '\n';
+    }
+  }
+
+  const fullPrefix = combinedPrefix + fileCatalogContext;
+  const injectedMessages: Message[] = fullPrefix
     ? [
         ...messages.slice(0, -1),
-        { role: 'user' as const, content: combinedPrefix + lastUserText },
+        { role: 'user' as const, content: fullPrefix + lastUserText },
       ]
     : messages;
   const fullMessages: Message[] = [{ role: 'system', content: systemContent }, ...injectedMessages];
@@ -317,18 +373,36 @@ app.post('/chat', async (req, res) => {
       await chatStream(llm, fullMessages, (text) => {
         assistantText += text;
         res.write(`data: ${JSON.stringify({ text })}\n\n`);
-      }, model);
+      }, selectedModel);
 
       res.write('data: [DONE]\n\n');
       res.end();
       // Zapisz odpowiedź asystenta do recall
       if (assistantText.trim()) memory.saveRecall('assistant', assistantText, sessionId);
     } else {
-      const result = await chat(llm, fullMessages, undefined, model);
+      const result = await chat(llm, fullMessages, undefined, selectedModel);
       const content = result.choices[0]?.message?.content ?? '';
-      res.json({ model: result.model, content, usage: result.usage });
-      // Zapisz odpowiedź asystenta do recall
-      if (content.trim()) memory.saveRecall('assistant', content, sessionId);
+
+      // ── Auto-dispatch Goose jeśli BUCH użył bloku ```goose ... ``` ──
+      const gooseMatch = content.match(/```goose\s*\n([\s\S]+?)```/);
+      if (gooseMatch && goose.isAvailable()) {
+        const instruction = gooseMatch[1].trim();
+        const taskId = randomUUID();
+        taskInstructions.set(taskId, instruction);
+        // Broadcast info że task został auto-dispatched
+        broadcast(taskId, { type: 'goose:dispatched', taskId, instruction });
+        res.json({
+          model: result.model, content, usage: result.usage,
+          gooseDispatched: true, gooseTaskId: taskId, gooseInstruction: instruction,
+        });
+        if (content.trim()) memory.saveRecall('assistant', content, sessionId);
+        goose.runTask({ id: taskId, instructions: instruction }).catch((err) => {
+          console.error(`[HUB] Auto-dispatch task ${taskId} błąd:`, err.message);
+        });
+      } else {
+        res.json({ model: result.model, content, usage: result.usage });
+        if (content.trim()) memory.saveRecall('assistant', content, sessionId);
+      }
     }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -338,13 +412,15 @@ app.post('/chat', async (req, res) => {
 
 // ── REST: run task ────────────────────────────────────────────────
 app.post('/agent/run', async (req, res) => {
-  const { instructions, workdir } = req.body as {
+  const { instructions, task, workdir } = req.body as {
     instructions?: string;
+    task?: string;      // alias dla instructions (kompatybilność ze skillami)
     workdir?: string;
   };
 
-  if (!instructions?.trim()) {
-    return res.status(400).json({ error: 'Brak instrukcji (pole: instructions)' });
+  const instruction = (instructions ?? task ?? '').trim();
+  if (!instruction) {
+    return res.status(400).json({ error: 'Brak instrukcji (pole: instructions lub task)' });
   }
 
   if (!goose.isAvailable()) {
@@ -357,18 +433,20 @@ app.post('/agent/run', async (req, res) => {
 
   const taskId = randomUUID();
 
-  // Zapisz instrukcje do auto-save skill po zakończeniu
-  taskInstructions.set(taskId, instructions);
+  // Zapisz instrukcje i czas startu (do skill auto-save + reflexion)
+  taskInstructions.set(taskId, instruction);
+  taskStartTimes.set(taskId, Date.now());
 
   // Odpowiedź z taskId — klient może subskrybować przez WS
   res.json({
     taskId,
     status: 'running',
+    instruction,
     subscribe: `ws://localhost:${PORT}/ws → { action: "subscribe", taskId: "${taskId}" }`,
   });
 
   // Uruchamiamy async — nie blokujemy odpowiedzi
-  goose.runTask({ id: taskId, instructions, workdir }).catch((err) => {
+  goose.runTask({ id: taskId, instructions: instruction, workdir }).catch((err) => {
     console.error(`[HUB] Task ${taskId} błąd:`, err.message);
   });
 });
@@ -382,6 +460,80 @@ app.get('/agent/tasks', (_req, res) => {
 app.delete('/agent/tasks/:id', (req, res) => {
   const killed = goose.killTask(req.params.id);
   res.json({ killed, taskId: req.params.id });
+});
+
+// ── REST: ReflexionEngine ─────────────────────────────────────────
+app.get('/reflexion/stats', (_req, res) => {
+  res.json(reflexion.getStats());
+});
+
+app.post('/reflexion/approve/:id', (req, res) => {
+  const ok = reflexion.approveCandidateSkill(req.params.id);
+  res.json({ ok, candidateId: req.params.id });
+});
+
+// ── REST: File Agent ──────────────────────────────────────────────
+// Rejestruje pliki/foldery jako bazę wiedzy w archival memory.
+// BUCH może wtedy znajdować je semantycznie i używać przez Goose.
+
+// POST /files/register { path, description, tags? }
+app.post('/files/register', async (req, res) => {
+  const { path: filePath, description, tags = [] } = req.body as {
+    path?: string; description?: string; tags?: string[];
+  };
+  if (!filePath || !description) {
+    return res.status(400).json({ error: 'Wymagane: path, description' });
+  }
+  const content = `[PLIK/FOLDER]: ${filePath}\n[OPIS]: ${description}\n[TAGI]: ${(tags as string[]).join(', ')}`;
+  const id = await memory.saveArchival(content, 'file_catalog', ['file', 'catalog', ...tags]);
+  console.log(`[FileAgent] Zarejestrowano: ${filePath}`);
+  res.json({ ok: true, id, path: filePath });
+});
+
+// GET /files/catalog — lista zarejestrowanych plików
+app.get('/files/catalog', (_req, res) => {
+  const entries = memory.listArchival(100).filter(e => e.source === 'file_catalog');
+  const catalog = entries.map(e => {
+    const pathMatch = e.content.match(/\[PLIK\/FOLDER\]: (.+)/);
+    const descMatch = e.content.match(/\[OPIS\]: (.+)/);
+    const tagsMatch = e.content.match(/\[TAGI\]: (.+)/);
+    return {
+      id:          e.id,
+      path:        pathMatch?.[1]?.trim() ?? '',
+      description: descMatch?.[1]?.trim() ?? '',
+      tags:        tagsMatch?.[1]?.split(', ').filter(Boolean) ?? [],
+      createdAt:   e.createdAt,
+    };
+  });
+  res.json({ catalog, count: catalog.length });
+});
+
+// POST /files/analyze { path, query } — Goose czyta plik + LLM analizuje
+app.post('/files/analyze', async (req, res) => {
+  const { path: filePath, query = 'Podsumuj zawartość' } = req.body as {
+    path?: string; query?: string;
+  };
+  if (!filePath) return res.status(400).json({ error: 'Wymagane: path' });
+  if (!goose.isAvailable()) return res.status(503).json({ error: 'Goose niedostępny' });
+
+  const taskId = randomUUID();
+  const instruction = `Odczytaj plik lub folder: ${filePath}
+
+Następnie wykonaj zadanie: ${query}
+
+Jeśli to plik CSV/Excel — użyj Python (pandas) do analizy danych.
+Jeśli to plik JSON — sformatuj i podsumuj strukturę.
+Jeśli to folder — wylistuj pliki i opisz zawartość.
+Jeśli to kod — przeanalizuj architekturę i wzorce.
+
+Zwróć wyniki w czytelnym formacie.`;
+
+  taskInstructions.set(taskId, instruction);
+  taskStartTimes.set(taskId, Date.now());
+  res.json({ taskId, status: 'running', path: filePath, query });
+  goose.runTask({ id: taskId, instructions: instruction }).catch((err: Error) => {
+    console.error(`[FileAgent] Analyze task ${taskId} błąd:`, err.message);
+  });
 });
 
 // ── REST: skills ──────────────────────────────────────────────────

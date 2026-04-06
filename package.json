@@ -4,7 +4,7 @@
   "description": "THE_Zenon_browser - AI-powered web browser",
   "main": "dist-electron/src-electron/main.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
+    "dev": "npx kill-port 5173 && concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
     "build": "npm run build:vite && npm run build:electron",

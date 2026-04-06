@@ -43,6 +43,68 @@ const PROVIDER_KEY  = 'buch-widget-provider';
 const TOOLS_KEY     = 'buch-widget-tools';
 const STREAMING_KEY = 'buch-widget-streaming';
 
+// ── Image helpers ──────────────────────────────────────────────────────────
+
+const IMG_URL_RE   = /https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S*)?/gi;
+const IMG_B64_RE   = /data:image\/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+=*/g;
+
+function extractImages(text: string): { url: string; isBase64: boolean }[] {
+  const out: { url: string; isBase64: boolean }[] = [];
+  let m: RegExpExecArray | null;
+  IMG_B64_RE.lastIndex = 0;
+  while ((m = IMG_B64_RE.exec(text)) !== null) out.push({ url: m[0], isBase64: true });
+  IMG_URL_RE.lastIndex = 0;
+  while ((m = IMG_URL_RE.exec(text)) !== null) out.push({ url: m[0], isBase64: false });
+  return out;
+}
+
+function MessageContent({ text, streaming, toolTrace }: {
+  text: string; streaming?: boolean; toolTrace?: ToolCall[];
+}) {
+  const inlineImages  = extractImages(text);
+  const traceImages   = (toolTrace ?? []).flatMap(t => extractImages(t.result));
+  const allImages     = [...inlineImages, ...traceImages];
+
+  // Usuń adresy obrazów z wyświetlanego tekstu
+  const cleanText = text
+    .replace(IMG_B64_RE, '')
+    .replace(IMG_URL_RE, '')
+    .trim();
+
+  return (
+    <>
+      {(cleanText || streaming) && (
+        <p className="buch-msg-text">
+          {cleanText}{streaming ? <span className="buch-typing">▋</span> : null}
+        </p>
+      )}
+      {allImages.map((img, i) => (
+        <div key={i} className="buch-msg-image">
+          <img src={img.url} alt="AI image" className="buch-img-preview"
+               style={{ maxWidth: '100%', borderRadius: 6, marginTop: 4 }} />
+          <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+            {img.isBase64 ? (
+              <a href={img.url} download="ai-image.png" className="buch-img-btn">⬇ Zapisz PNG</a>
+            ) : (
+              <a href={img.url} target="_blank" rel="noopener noreferrer" className="buch-img-btn">↗ Otwórz</a>
+            )}
+            <button className="buch-img-btn" onClick={() => {
+              fetch(img.url).then(r => r.blob()).then(blob => {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `ai-image-${Date.now()}.png`;
+                a.click();
+              }).catch(() => window.open(img.url, '_blank'));
+            }}>⬇ Pobierz</button>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+
 function parseSSEToken(line: string): string {
   if (!line.startsWith('data: ')) return '';
   const raw = line.slice(6).trim();
@@ -102,6 +164,9 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     try { pageAgentRef.current?.panel.show(); } catch { /* panel already visible */ }
   }, []);
 
+  /* tools i streaming są wzajemnie wykluczające — tools wygrywa */
+  useEffect(() => { if (useTools && useStreaming) setUseStreaming(false); }, [useTools]);
+
   /* persist */
   useEffect(() => { localStorage.setItem(HISTORY_KEY,   JSON.stringify(history.slice(-80))); }, [history]);
   useEffect(() => { localStorage.setItem(PROVIDER_KEY,  provider); }, [provider]);
@@ -135,7 +200,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           { role: 'user' as const, content: text },
         ];
 
-        if (useStreaming) {
+        if (useStreaming && !useTools) {
           setHistory(h => [...h, { role: 'assistant', text: '', provider: 'agent-hub', ts: Date.now(), streaming: true }]);
           const res = await fetch('http://localhost:4224/chat', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -347,9 +412,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                     <span className="buch-msg-tools" title={m.toolTrace.map(t => t.tool).join(', ')}>⚒{m.toolTrace.length}</span>
                   )}
                 </div>
-                <p className="buch-msg-text">
-                  {m.text}{m.streaming ? <span className="buch-typing">▋</span> : null}
-                </p>
+                <MessageContent text={m.text} streaming={m.streaming} toolTrace={m.toolTrace} />
               </div>
             ))}
             {loading && !history.some(m => m.streaming) && (

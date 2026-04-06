@@ -102,6 +102,30 @@ export class SkillManager {
 
     // Krok 3: indeks namespace (dopiero po upewnieniu się że kolumna istnieje)
     this.db.exec(`CREATE INDEX IF NOT EXISTS idx_skills_namespace ON skills(namespace);`);
+
+    // Krok 4: migracja — kolumny dla ReflexionEngine (pomija istniejące)
+    const reflexionCols: Record<string, string> = {
+      score:                'REAL DEFAULT 0.7',
+      usage_count:          'INTEGER DEFAULT 0',
+      last_used_at:         'TEXT',
+      consecutive_failures: 'INTEGER DEFAULT 0',
+      status:               "TEXT DEFAULT 'active'",
+      archived_at:          'TEXT',
+      source:               "TEXT DEFAULT 'goose'",
+    };
+    const currentCols = (this.db.prepare('PRAGMA table_info(skills)').all() as { name: string }[]).map(c => c.name);
+    for (const [col, def] of Object.entries(reflexionCols)) {
+      if (!currentCols.includes(col)) {
+        this.db.exec(`ALTER TABLE skills ADD COLUMN ${col} ${def}`);
+        console.log(`[SkillManager] Migracja: dodano kolumnę ${col}`);
+      }
+    }
+    this.db.exec(`CREATE INDEX IF NOT EXISTS idx_skills_status ON skills(status);`);
+  }
+
+  /** Ekspozycja instancji DB dla ReflexionEngine (shared connection) */
+  getDb(): Database.Database {
+    return this.db;
   }
 
   private async embed(text: string): Promise<number[]> {

@@ -60,6 +60,7 @@ export interface RecallEntry {
 export class MemoryManager {
   private db: Database.Database;
   private openai: OpenAI;
+  private embedCache = new Map<string, number[]>();
 
   /** Domyślne wpisy core memory — ładowane przy pierwszym starcie */
   private static readonly CORE_DEFAULTS: CoreEntry[] = [
@@ -144,6 +145,14 @@ export class MemoryManager {
       CREATE VIRTUAL TABLE IF NOT EXISTS recall_fts
         USING fts5(id UNINDEXED, role, content, tokenize='unicode61');
     `);
+
+    // Trigger: sync FTS5 przy DELETE z recall_memory (zapobiega zombie entries)
+    this.db.exec(`
+      CREATE TRIGGER IF NOT EXISTS recall_fts_delete
+        AFTER DELETE ON recall_memory BEGIN
+          DELETE FROM recall_fts WHERE id = old.id;
+        END;
+    `);
   }
 
   private seedCoreIfEmpty() {
@@ -164,13 +173,18 @@ export class MemoryManager {
   // ── Embeddings ──────────────────────────────────────────────────────────────
 
   private async embed(text: string): Promise<number[]> {
-    if (!process.env.OPENAI_API_KEY) return this.hashEmbed(text);
-    const res = await this.openai.embeddings.create({
-      model: 'text-embedding-3-small',
-      input: text.slice(0, 8000),
-      dimensions: 512,
-    });
-    return res.data[0].embedding;
+    const key = text.slice(0, 100);
+    if (this.embedCache.has(key)) return this.embedCache.get(key)!;
+    const vec = !process.env.OPENAI_API_KEY
+      ? this.hashEmbed(text)
+      : (await this.openai.embeddings.create({
+          model: 'text-embedding-3-small',
+          input: text.slice(0, 8000),
+          dimensions: 512,
+        })).data[0].embedding;
+    if (this.embedCache.size >= 20) this.embedCache.delete(this.embedCache.keys().next().value!);
+    this.embedCache.set(key, vec);
+    return vec;
   }
 
   private hashEmbed(text: string): number[] {
@@ -253,7 +267,8 @@ export class MemoryManager {
     minSimilarity  = 0.55,
   ): Promise<ArchivalMatch[]> {
     const queryEmbed = await this.embed(query);
-    const rows = this.db.prepare('SELECT * FROM archival_memory').all() as any[];
+    // Pre-filter: ostatnie 500 wpisów zamiast ładowania całej tabeli do RAM
+    const rows = this.db.prepare('SELECT * FROM archival_memory ORDER BY created_at DESC LIMIT 500').all() as any[];
     return rows
       .map(row => ({
         id:        row.id,
@@ -339,7 +354,7 @@ export class MemoryManager {
     if (matches.length === 0) return '';
     const lines = matches
       .slice(0, 3)
-      .map(m => `[${m.role}]: ${m.content.slice(0, 300)}`)
+      .map(m => `[${m.role} @ ${new Date(m.createdAt).toLocaleDateString('pl')}]: ${m.content.slice(0, 600)}`)
       .join('\n');
     return `[Relevant conversation history:\n${lines}\n]\n\n`;
   }
