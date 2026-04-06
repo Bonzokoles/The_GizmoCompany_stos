@@ -341,6 +341,62 @@ const BUCH_TOOLS: BuchTool[] = [
       required: ["instructions"],
     },
   },
+  // ── BizTools API (Etap C) ─────────────────────────────────────────────────
+  {
+    name: "tavily_search",
+    description:
+      "AI-powered semantic web search using Tavily. Better than basic web_search for research, news, fact-checking. Returns ranked results with content snippets.",
+    input_schema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search query" },
+        max_results: { type: "number", description: "Number of results (default 5, max 10)" },
+        search_depth: { type: "string", enum: ["basic", "advanced"], description: "basic=fast, advanced=deeper research" },
+        include_answer: { type: "boolean", description: "Include AI-generated answer summary (default true)" },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "jina_read",
+    description:
+      "Read and extract clean text content from any URL using Jina AI Reader (r.jina.ai). Better than fetch_url for complex pages with JS rendering. No API key needed.",
+    input_schema: {
+      type: "object",
+      properties: {
+        url: { type: "string", description: "URL to read and extract content from" },
+      },
+      required: ["url"],
+    },
+  },
+  {
+    name: "fred_data",
+    description:
+      "Fetch economic data from FRED (Federal Reserve Economic Data). Access 800k+ economic time series: inflation (CPIAUCSL), GDP (GDP), unemployment (UNRATE), interest rates, currency rates, Polish economy data.",
+    input_schema: {
+      type: "object",
+      properties: {
+        series_id: { type: "string", description: "FRED series ID, e.g. CPIAUCSL (CPI), GDP, UNRATE, FEDFUNDS, DEXUSEU (USD/EUR)" },
+        limit: { type: "number", description: "Number of observations to return (default 12)" },
+        sort_order: { type: "string", enum: ["asc", "desc"], description: "Sort order (default desc = newest first)" },
+      },
+      required: ["series_id"],
+    },
+  },
+  {
+    name: "coingecko_price",
+    description:
+      "Get cryptocurrency prices, market data, and trends from CoinGecko. Free API, no key needed. Supports 10k+ coins.",
+    input_schema: {
+      type: "object",
+      properties: {
+        coins: { type: "string", description: "Comma-separated coin IDs, e.g. bitcoin,ethereum,solana,polkadot" },
+        vs_currency: { type: "string", description: "Currency for prices (default: usd). Also supports pln, eur, btc." },
+        include_24h_change: { type: "boolean", description: "Include 24h price change % (default true)" },
+      },
+      required: ["coins"],
+    },
+  },
 ];
 
 async function stripHtml(html: string): Promise<string> {
@@ -607,6 +663,91 @@ async function executeTool(
         return `✅ Zadanie wysłane do Goose (taskId: ${data.taskId ?? "?"}, status: ${data.status ?? "queued"}). Wynik pojawi się w panelu Asystent → AgentHub.`;
       } catch (e: unknown) {
         return `goose_dispatch: Nie można połączyć z JIMBO HUB (localhost:4224). Sprawdź czy aplikacja ZENO jest uruchomiona. Błąd: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    // ── BizTools (Etap C) ────────────────────────────────────────────────────
+    case "tavily_search": {
+      const tavilyKey = env.TAVILY_API_KEY;
+      if (!tavilyKey) return "tavily_search: brak TAVILY_API_KEY w CF Pages secrets.";
+      const query = String(input.query ?? "").trim();
+      if (!query) return "tavily_search: query jest wymagane.";
+      const maxResults = Number(input.max_results ?? 5);
+      const searchDepth = String(input.search_depth ?? "basic");
+      const includeAnswer = input.include_answer !== false;
+      try {
+        const resp = await fetch("https://api.tavily.com/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ api_key: tavilyKey, query, max_results: maxResults, search_depth: searchDepth, include_answer: includeAnswer }),
+          signal: AbortSignal.timeout(15000),
+        });
+        if (!resp.ok) return `tavily_search: error ${resp.status}`;
+        const data = await resp.json() as { answer?: string; results?: { title: string; url: string; content: string; score: number }[] };
+        const parts: string[] = [];
+        if (data.answer) parts.push(`**Answer:** ${data.answer}\n`);
+        if (data.results) {
+          parts.push(...data.results.map((r, i) => `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.content.slice(0, 300)}`));
+        }
+        return parts.join("\n\n") || "Brak wyników.";
+      } catch (e: unknown) {
+        return `tavily_search error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case "jina_read": {
+      const url = String(input.url ?? "").trim();
+      if (!url) return "jina_read: url jest wymagane.";
+      try {
+        const resp = await fetch(`https://r.jina.ai/${url}`, {
+          headers: { "Accept": "text/plain", "X-Return-Format": "text", "User-Agent": "Mozilla/5.0" },
+          signal: AbortSignal.timeout(20000),
+        });
+        if (!resp.ok) return `jina_read: error ${resp.status} dla ${url}`;
+        const text = await resp.text();
+        return text.slice(0, 6000);
+      } catch (e: unknown) {
+        return `jina_read error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case "fred_data": {
+      const seriesId = String(input.series_id ?? "").trim().toUpperCase();
+      if (!seriesId) return "fred_data: series_id jest wymagane (np. CPIAUCSL, GDP, UNRATE).";
+      const limit = Number(input.limit ?? 12);
+      const sortOrder = String(input.sort_order ?? "desc");
+      try {
+        const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&limit=${limit}&sort_order=${sortOrder}&file_type=json&api_key=anonymous`;
+        const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+        if (!resp.ok) return `fred_data: error ${resp.status}. Sprawdź czy series_id jest poprawne.`;
+        const data = await resp.json() as { observations?: { date: string; value: string }[]; error_message?: string };
+        if (data.error_message) return `fred_data: ${data.error_message}`;
+        if (!data.observations?.length) return "fred_data: brak danych dla tego series_id.";
+        const rows = data.observations.map(o => `${o.date}: ${o.value}`).join("\n");
+        return `**FRED ${seriesId}** (${data.observations.length} obserwacji):\n${rows}`;
+      } catch (e: unknown) {
+        return `fred_data error: ${e instanceof Error ? e.message : String(e)}`;
+      }
+    }
+
+    case "coingecko_price": {
+      const coins = String(input.coins ?? "bitcoin").toLowerCase().replace(/\s/g, "");
+      const vsCurrency = String(input.vs_currency ?? "usd").toLowerCase();
+      const include24h = input.include_24h_change !== false;
+      try {
+        const fields = ["current_price", "market_cap", "total_volume", include24h ? "price_change_percentage_24h" : ""].filter(Boolean).join(",");
+        const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${vsCurrency}&ids=${coins}&per_page=25&sparkline=false&price_change_percentage=24h`;
+        const resp = await fetch(url, { headers: { "Accept": "application/json" }, signal: AbortSignal.timeout(10000) });
+        if (!resp.ok) return `coingecko_price: error ${resp.status}`;
+        const data = await resp.json() as { name: string; symbol: string; current_price: number; market_cap: number; price_change_percentage_24h: number }[];
+        if (!data.length) return "coingecko_price: nie znaleziono podanych coin IDs.";
+        return data.map(c =>
+          `**${c.name} (${c.symbol.toUpperCase()})**: ${c.current_price.toLocaleString()} ${vsCurrency.toUpperCase()}` +
+          (include24h ? ` | 24h: ${c.price_change_percentage_24h?.toFixed(2)}%` : "") +
+          ` | MCap: ${(c.market_cap / 1e9).toFixed(2)}B`
+        ).join("\n");
+      } catch (e: unknown) {
+        return `coingecko_price error: ${e instanceof Error ? e.message : String(e)}`;
       }
     }
 

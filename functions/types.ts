@@ -51,6 +51,10 @@ export interface Env {
   // CF Account (for Workers API monitoring)
   CF_ACCOUNT_ID?: string;
   CF_API_TOKEN?: string;
+
+  // BizTools (Etap C)
+  TAVILY_API_KEY?: string;
+  FIRECRAWL_API_KEY?: string;
 }
 
 // Worker registry for monitoring
