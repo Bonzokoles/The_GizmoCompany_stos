@@ -1248,7 +1248,7 @@ const BUCH_SEED_KNOWLEDGE = [
     key: "tools_require_anthropic",
     category: "functions",
     content:
-      "WAŻNE: Narzędzia (⚒) działają TYLKO gdy provider=anthropic. Z OpenRouter/DeepSeek/Gemini model NIE ma dostępu do narzędzi. Aby używać narzędzi: wybierz provider=anthropic i kliknij ⚒ TOOLS ON. Model: claude-sonnet-4-5 lub claude-haiku-4-5-20251001.",
+      "Narzędzia (⚒ TOOLS ON) działają z: provider=openrouter (model: google/gemini-2.0-flash-exp:free — darmowy, dobry tool calling), provider=anthropic (claude-sonnet), provider=openai (gpt-4o-mini). Z DeepSeek narzędzia nie działają stabilnie. Aby używać narzędzi: wybierz provider i kliknij ⚒ TOOLS ON. Bez narzędzi (STREAM) model może tylko rozmawiać.",
     updated_at: new Date().toISOString(),
   },
   {
@@ -1313,11 +1313,21 @@ async function handleToolChat(request: Request, env: Env): Promise<Response> {
     toolEndpoint = "https://api.anthropic.com/v1/messages";
     toolApiKey = anthropicKey;
     model = body.model || "claude-sonnet-4-20250514";
-  } else if (openrouterKey) {
+  } else if (body.provider === "openrouter" && openrouterKey) {
     toolProvider = "openrouter";
     toolEndpoint = "https://openrouter.ai/api/v1/chat/completions";
     toolApiKey = openrouterKey;
-    model = body.model || "qwen/qwen3.6-plus:free";
+    // Modele z dobrym tool calling na OpenRouter (darmowe/tanie):
+    // google/gemini-2.0-flash-exp:free — darmowy, świetny tool calling
+    // meta-llama/llama-3.3-70b-instruct:free — darmowy, sprawdzony
+    // google/gemini-flash-1.5 — tani, niezawodny
+    model = body.model || "google/gemini-2.0-flash-exp:free";
+  } else if (openrouterKey) {
+    // Fallback: OpenRouter z darmowym modelem obsługującym tool calling
+    toolProvider = "openrouter";
+    toolEndpoint = "https://openrouter.ai/api/v1/chat/completions";
+    toolApiKey = openrouterKey;
+    model = body.model || "google/gemini-2.0-flash-exp:free";
   } else if (openaiKey) {
     toolProvider = "openai";
     toolEndpoint = "https://api.openai.com/v1/chat/completions";
