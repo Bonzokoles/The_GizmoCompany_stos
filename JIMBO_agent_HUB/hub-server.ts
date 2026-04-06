@@ -728,15 +728,16 @@ app.post('/files/scan', async (req, res) => {
 
   // LLM batch — generuj opisy dla top 30 pozycji
   const toDescribe = entries.slice(0, 30);
-  const listText = toDescribe.map(e => `${e.type === 'dir' ? '[DIR]' : '[FILE]'} ${e.path}`).join('\n');
+  // Użyj tylko nazw plików jako kluczy — prostsze dla LLM
+  const listText = toDescribe.map(e => `${e.type === 'dir' ? '[DIR]' : '[FILE]'} ${path.basename(e.path)}`).join('\n');
   let descriptions: Record<string, string> = {};
   try {
     const scanCompletion = await chat(llm, [
       {
         role: 'system',
-        content: 'Jesteś analitykiem kodu. Przypisz krótki (max 20 słów) opis każdemu plikowi/folderowi. Odpowiedz JSON: { "ścieżka": "opis", ... }',
+        content: 'You are a code analyst. Return ONLY a JSON object mapping each filename to a short description (max 15 words). Format: {"filename.ts": "description", ...}',
       },
-      { role: 'user', content: `Projekt: ${dir}\n\nPliki:\n${listText}\n\nZwróć TYLKO JSON z opisami.` },
+      { role: 'user', content: `Project: ${dir}\n\nFiles:\n${listText}\n\nReturn ONLY JSON, no markdown, no explanation.` },
     ]);
     const scanText = scanCompletion.choices[0]?.message?.content ?? '';
     const jsonMatch = scanText.match(/\{[\s\S]*\}/);
@@ -745,7 +746,8 @@ app.post('/files/scan', async (req, res) => {
 
   const catalog: Array<{ path: string; type: string; ext: string; description: string }> = [];
   for (const entry of toDescribe) {
-    const description = descriptions[entry.path] ?? `${entry.type === 'dir' ? 'Folder' : 'Plik'} ${path.basename(entry.path)}`;
+    const basename = path.basename(entry.path);
+    const description = descriptions[basename] ?? `${entry.type === 'dir' ? 'Folder' : 'Plik'} ${basename}`;
     catalog.push({ ...entry, description });
     if (autoRegister) {
       const content = `[PLIK/FOLDER]: ${entry.path}\n[OPIS]: ${description}\n[TAGI]: file, scan, ${entry.ext || 'dir'}`;
