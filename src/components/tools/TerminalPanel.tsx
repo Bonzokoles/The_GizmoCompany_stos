@@ -35,6 +35,14 @@ interface CommandCategory {
 
 const api = () => window.electronAPI;
 
+// Strip ANSI escape codes from terminal output
+function stripAnsi(str: string): string {
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\x1B\[[0-9;]*[mGKHFABCDJsu]|\x1B\][^\x07]*\x07|\x1B[()][AB012]/g, '');
+}
+
+const HISTORY_KEY = 'zeno_terminal_history';
+
 // ── Pre-built command categories ───────────────────────────────
 
 const COMMAND_CATEGORIES: CommandCategory[] = [
@@ -135,6 +143,19 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
       { label: 'MCP Narzędzia', cmd: 'mcp-tools', icon: '🛠', description: 'Lista narzędzi MCP' },
       { label: 'Otwarte karty', cmd: 'tabs', icon: '📑', description: 'Pokaż otwarte karty' },
       { label: 'Statystyki sieci', cmd: 'network', icon: '📡', description: 'Statystyki sieciowe przeglądarki' },
+    ],
+  },
+  {
+    name: 'JIMBO Hub',
+    icon: '🤖',
+    commands: [
+      { label: 'Health', cmd: 'curl -s http://localhost:4224/health', icon: '💚', description: 'Status JIMBO HUB + skills count' },
+      { label: 'Skills lista', cmd: 'curl -s http://localhost:4224/skills/list | python -c "import sys,json; d=json.load(sys.stdin); [print(f\'{s[\\\"namespace\\\"]}/{s[\\\"name\\\"]}\') for s in d[\\\"skills\\\"]]"', icon: '📚', description: 'Wszystkie skills w DB' },
+      { label: 'Reflexion stats', cmd: 'curl -s http://localhost:4224/reflexion/stats', icon: '📊', description: 'Statystyki ocen Goose tasków' },
+      { label: 'Active namespaces', cmd: 'curl -s http://localhost:4224/namespaces/active', icon: '🏷', description: 'Aktywne namespace skills' },
+      { label: 'Memory core', cmd: 'curl -s http://localhost:4224/memory/core', icon: '🧠', description: 'Core memory JIMBO' },
+      { label: 'Agent tasks', cmd: 'curl -s http://localhost:4224/agent/tasks', icon: '📋', description: 'Aktywne zadania Goose' },
+      { label: 'Hub restart', cmd: 'cd U:\\WWW_Zen_BRo_wser_org3\\JIMBO_agent_HUB && npx tsx hub-server.ts', icon: '🔄', description: 'Zrestartuj JIMBO HUB' },
     ],
   },
 ];
@@ -238,7 +259,9 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
   ]);
   const [input, setInput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]'); } catch { return []; }
+  });
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [cwd, setCwd] = useState('~');
   const [isWide, setIsWide] = useState(false);
@@ -517,8 +540,8 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
         const safe = sanitizeShellInput(cmd);
         const result = await api()?.terminal?.execute?.(safe, cwd === '~' ? undefined : cwd);
         if (result?.success) {
-          if (result.stdout?.trim()) addLine('output', result.stdout.trim());
-          if (result.stderr?.trim()) addLine('error', result.stderr.trim());
+          if (result.stdout?.trim()) addLine('output', stripAnsi(result.stdout.trim()));
+          if (result.stderr?.trim()) addLine('error', stripAnsi(result.stderr.trim()));
           if (!result.stdout?.trim() && !result.stderr?.trim()) addLine('info', '(wykonane bez wyjścia)');
           // Update cwd if the command might have changed it
           if (result.cwd) setCwd(result.cwd);
@@ -576,8 +599,9 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
     if (!trimmed || isRunning) return;
 
     setHistory(prev => {
-      const next = [trimmed, ...prev.filter(h => h !== trimmed)];
-      return next.slice(0, 100);
+      const next = [trimmed, ...prev.filter(h => h !== trimmed)].slice(0, 100);
+      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(next)); } catch { /* ignore */ }
+      return next;
     });
     setHistoryIndex(-1);
 
