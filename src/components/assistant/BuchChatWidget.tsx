@@ -322,13 +322,20 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
       }]);
     } catch (err) {
       console.error('BUCH_CHAT Error:', err);
-      
-      // Extract error message from response if available
       let errorMsg = '⚠ Błąd połączenia z API';
       if (err instanceof Error) {
-        errorMsg = `⚠ ${err.message}`;
+        const m = err.message;
+        if (m.includes('524') || m.includes('timeout') || m.toLowerCase().includes('time'))
+          errorMsg = '⚠ Timeout — zapytanie trwało za długo (CF limit 30s). Spróbuj prostsze pytanie lub inny model.';
+        else if (m.includes('503') || m.includes('No API key'))
+          errorMsg = '⚠ Brak klucza API — sprawdź ustawienia providera w CF Pages → Secrets.';
+        else if (m.includes('Failed to fetch') || m.includes('NetworkError'))
+          errorMsg = '⚠ Brak połączenia z internetem lub serwer niedostępny.';
+        else
+          errorMsg = `⚠ ${m}`;
+      } else if (typeof err === 'string') {
+        errorMsg = `⚠ ${err}`;
       }
-      
       setHistory(h => [...h, { role: 'assistant', text: errorMsg, provider, ts: Date.now() }]);
     } finally {
       setLoading(false);

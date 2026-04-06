@@ -1622,6 +1622,11 @@ DOSTĘP DO DASHBOARDU ZENO — używaj narzędzia zeno_api:
 - search?q=:query — SearXNG metasearch
 - sites/status — status wszystkich connected sites
 
+ZASADY UŻYWANIA NARZĘDZI:
+- Przed użyciem narzędzi do lokalnych/aktualnych danych (pogoda, restauracje, sklepy, ceny, czas pracy, trasy) — ZAWSZE najpierw zapytaj o miasto/lokalizację jeśli nie podano. Przykład: "W jakim mieście?" / "Podaj lokalizację."
+- Pytania ogólne (historia, nauka, filozofia, definicje) — odpowiadaj BEZ narzędzi z własnej wiedzy.
+- Używaj tavily_search tylko gdy naprawdę potrzeba aktualnych danych z internetu.
+
 TWORZENIE AGENTÓW — zasady jakości ZENO:
 Gdy użytkownik chce stworzyć agenta:
 1. Zapytaj: dla jakiej strony/komponentu, jaki cel, jakie ograniczenia
