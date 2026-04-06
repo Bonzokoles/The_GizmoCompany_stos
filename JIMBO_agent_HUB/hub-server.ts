@@ -685,6 +685,17 @@ Koniec outputu oznacz: --- KONIEC ANALIZY ---`;
     await memory.saveArchival(content, 'file_catalog', ['file', 'catalog', ...report.tags]);
   }
 
+  // Zapisz raport do REPORTS/
+  try {
+    const reportsDir = path.resolve(__dirname, '..', 'REPORTS');
+    fs.mkdirSync(reportsDir, { recursive: true });
+    const slug = path.basename(filePath).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const ts   = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
+    const reportFile = path.join(reportsDir, `file-analysis_${slug}_${ts}.json`);
+    fs.writeFileSync(reportFile, JSON.stringify({ path: filePath, query, ...report }, null, 2), 'utf-8');
+    console.log(`[FileAgent] Raport zapisany: ${reportFile}`);
+  } catch (e) { /* nie blokuj jeśli zapis się nie uda */ }
+
   console.log(`[FileAgent] Analiza zakończona: ${filePath}`);
   res.json({ taskId, status: 'done', path: filePath, query, report });
 });
