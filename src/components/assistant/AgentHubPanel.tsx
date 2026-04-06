@@ -129,6 +129,7 @@ export function AgentHubPanel() {
   const [fileQuery,     setFileQuery]     = useState('Podsumuj zawartość');
   const [fileSync,      setFileSync]      = useState(true);
   const [fileAutoReg,   setFileAutoReg]   = useState(true);
+  const [fileSaveRep,   setFileSaveRep]   = useState(false);
   const [fileBusy,      setFileBusy]      = useState(false);
   const [fileReport,    setFileReport]    = useState<null | {
     summary: string; insights: string[]; fileType: string; tags: string[]; actionItems: string[]; rawOutput: string;
@@ -193,7 +194,7 @@ export function AgentHubPanel() {
     try {
       const r = await fetch(`${HUB}/files/analyze`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: filePath.trim(), query: fileQuery, sync: fileSync, autoRegister: fileAutoReg }),
+        body: JSON.stringify({ path: filePath.trim(), query: fileQuery, sync: fileSync, autoRegister: fileAutoReg, saveReport: fileSaveRep }),
       });
       const d = await r.json() as { taskId?: string; report?: typeof fileReport; status?: string };
       if (fileSync && d.report) {
@@ -984,6 +985,10 @@ export function AgentHubPanel() {
                   <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
                     <input type="checkbox" checked={fileAutoReg} onChange={e => setFileAutoReg(e.target.checked)} />
                     Auto-rejestruj w katalogu
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }} title="Zapisuje do REPORTS/ tylko gdy raport ma wartościowe insights">
+                    <input type="checkbox" checked={fileSaveRep} onChange={e => setFileSaveRep(e.target.checked)} />
+                    Zapisz raport (REPORTS/)
                   </label>
                 </div>
                 <button

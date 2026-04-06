@@ -592,8 +592,8 @@ app.get('/files/catalog', (_req, res) => {
 // POST /files/analyze { path, query, sync? } — Goose czyta plik + LLM analizuje
 // sync=true: czeka na wynik (max 90s) i zwraca strukturalny raport
 app.post('/files/analyze', async (req, res) => {
-  const { path: filePath, query = 'Podsumuj zawartość', sync = false, autoRegister = false } = req.body as {
-    path?: string; query?: string; sync?: boolean; autoRegister?: boolean;
+  const { path: filePath, query = 'Podsumuj zawartość', sync = false, autoRegister = false, saveReport = false } = req.body as {
+    path?: string; query?: string; sync?: boolean; autoRegister?: boolean; saveReport?: boolean;
   };
   if (!filePath) return res.status(400).json({ error: 'Wymagane: path' });
   if (!goose.isAvailable()) return res.status(503).json({ error: 'Goose niedostępny' });
@@ -685,16 +685,53 @@ Koniec outputu oznacz: --- KONIEC ANALIZY ---`;
     await memory.saveArchival(content, 'file_catalog', ['file', 'catalog', ...report.tags]);
   }
 
-  // Zapisz raport do REPORTS/
+  // Zapis raportu do REPORTS/ — tylko opt-in + wartościowy raport
+  const isValuable = report.insights.length > 0 && report.actionItems.length > 0
+    && !['package-lock.json', '.env', 'yarn.lock'].includes(path.basename(filePath));
+  if (saveReport && isValuable) {
+    try {
+      const reportsDir = path.resolve(__dirname, '..', 'REPORTS');
+      fs.mkdirSync(reportsDir, { recursive: true });
+      // Jeden plik per ścieżka — nadpisuj (brak duplikatów)
+      const slug = path.basename(filePath).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      const reportFile = path.join(reportsDir, `file-analysis_${slug}.json`);
+      fs.writeFileSync(reportFile, JSON.stringify({
+        path: filePath, query, analyzedAt: new Date().toISOString(), ...report,
+      }, null, 2), 'utf-8');
+      console.log(`[FileAgent] Raport zapisany: ${reportFile}`);
+    } catch { /* nie blokuj */ }
+  }
+
+  // ── User profile — aktualizuj relację z użytkownikiem ──────────────────
+  // Śledź wzorce: co analizuje, jakie projekty, technologie, zainteresowania
   try {
-    const reportsDir = path.resolve(__dirname, '..', 'REPORTS');
-    fs.mkdirSync(reportsDir, { recursive: true });
-    const slug = path.basename(filePath).replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    const ts   = new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
-    const reportFile = path.join(reportsDir, `file-analysis_${slug}_${ts}.json`);
-    fs.writeFileSync(reportFile, JSON.stringify({ path: filePath, query, ...report }, null, 2), 'utf-8');
-    console.log(`[FileAgent] Raport zapisany: ${reportFile}`);
-  } catch (e) { /* nie blokuj jeśli zapis się nie uda */ }
+    const existing = memory.getCoreEntry('human') ?? '';
+    const profileUpdate = await chat(llm, [
+      {
+        role: 'system',
+        content: `Aktualizujesz profil użytkownika JIMBO HUB. Masz dostęp do obecnego profilu i nowej aktywności.
+Zasady:
+- Dodawaj nowe fakty, nie usuwaj istniejących
+- Śledź: projekty, technologie, wzorce pracy, zainteresowania, styl zapytań
+- Max 400 słów, konkretnie i technicznie
+- Pisz w 3 osobie ("Użytkownik...")`,
+      },
+      {
+        role: 'user',
+        content: `Obecny profil:\n${existing || '(brak — pierwszy wpis)'}\n\nNowa aktywność:\nAnalizował plik: ${filePath}\nZapytanie: "${query}"\nTyp pliku: ${report.fileType}\nTagi: ${report.tags.join(', ')}\nInsights: ${report.insights.slice(0, 2).join('; ')}\n\nZaktualizuj profil.`,
+      },
+    ]);
+    const updatedProfile = profileUpdate.choices[0]?.message?.content ?? '';
+    if (updatedProfile.length > 30) {
+      memory.setCoreEntry('human', updatedProfile);
+      // Dodatkowo — archival log aktywności (lekki, bez rawOutput)
+      memory.saveArchival(
+        `[AKTYWNOŚĆ] ${new Date().toLocaleDateString('pl-PL')} — Analiza: ${path.basename(filePath)} | Zapytanie: "${query}" | Insights: ${report.insights.length}`,
+        'user_activity',
+        ['activity', 'file-analysis', ...report.tags.slice(0, 3)],
+      ).catch(() => {});
+    }
+  } catch { /* profil nie jest krytyczny */ }
 
   console.log(`[FileAgent] Analiza zakończona: ${filePath}`);
   res.json({ taskId, status: 'done', path: filePath, query, report });
