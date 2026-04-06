@@ -97,8 +97,8 @@ export function AgentHubPanel() {
   const [iframeInput,  setIframeInput]  = useState('');
   const [showIframe,   setShowIframe]   = useState(false);
 
-  /* Right pane tab: tasks | skills | podman | graph */
-  const [rightTab, setRightTab] = useState<'tasks' | 'skills' | 'podman' | 'graph'>('tasks');
+  /* Right pane tab: tasks | skills | podman | graph | files */
+  const [rightTab, setRightTab] = useState<'tasks' | 'skills' | 'podman' | 'graph' | 'files'>('tasks');
 
   /* Skills panel */
   const [skillsList,   setSkillsList]   = useState<SkillEntry[]>([]);
@@ -123,6 +123,25 @@ export function AgentHubPanel() {
   const [logsContainer, setLogsContainer] = useState<string | null>(null);
   const [containerLogs, setContainerLogs] = useState<Record<string, string>>({});
   const [podmanBusy,    setPodmanBusy]    = useState<Record<string, boolean>>({});
+
+  /* File Agent */
+  const [filePath,      setFilePath]      = useState('');
+  const [fileQuery,     setFileQuery]     = useState('Podsumuj zawartość');
+  const [fileSync,      setFileSync]      = useState(true);
+  const [fileAutoReg,   setFileAutoReg]   = useState(true);
+  const [fileBusy,      setFileBusy]      = useState(false);
+  const [fileReport,    setFileReport]    = useState<null | {
+    summary: string; insights: string[]; fileType: string; tags: string[]; actionItems: string[]; rawOutput: string;
+  }>(null);
+  const [fileTaskId,    setFileTaskId]    = useState<string | null>(null);
+  const [scanDir,       setScanDir]       = useState('');
+  const [scanDepth,     setScanDepth]     = useState(2);
+  const [scanBusy,      setScanBusy]      = useState(false);
+  const [scanResult,    setScanResult]    = useState<null | {
+    dir: string; scanned: number; cataloged: number;
+    catalog: Array<{ path: string; type: string; ext: string; description: string }>;
+  }>(null);
+  const [fileCatalog,   setFileCatalog]   = useState<Array<{ id: string; path: string; description: string; tags: string[] }>>([]);
 
   /* Agents picker */
   const [agents,          setAgents]          = useState<AgentEntry[]>([]);
@@ -162,6 +181,50 @@ export function AgentHubPanel() {
       setActiveAgentName(d.name ?? null);
       setShowAgentPicker(false);
       setAgentSearch('');
+    } catch { /* ignore */ }
+  }, []);
+
+  /* ── File Agent: analyze, scan, catalog ── */
+  const runFileAnalyze = useCallback(async () => {
+    if (!filePath.trim() || fileBusy) return;
+    setFileBusy(true);
+    setFileReport(null);
+    setFileTaskId(null);
+    try {
+      const r = await fetch(`${HUB}/files/analyze`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: filePath.trim(), query: fileQuery, sync: fileSync, autoRegister: fileAutoReg }),
+      });
+      const d = await r.json() as { taskId?: string; report?: typeof fileReport; status?: string };
+      if (fileSync && d.report) {
+        setFileReport(d.report);
+      } else {
+        setFileTaskId(d.taskId ?? null);
+      }
+    } catch { /* ignore */ }
+    finally { setFileBusy(false); }
+  }, [filePath, fileQuery, fileSync, fileAutoReg, fileBusy]);
+
+  const runFileScan = useCallback(async () => {
+    if (!scanDir.trim() || scanBusy) return;
+    setScanBusy(true);
+    setScanResult(null);
+    try {
+      const r = await fetch(`${HUB}/files/scan`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dir: scanDir.trim(), depth: scanDepth, autoRegister: true }),
+      });
+      const d = await r.json() as typeof scanResult;
+      setScanResult(d);
+    } catch { /* ignore */ }
+    finally { setScanBusy(false); }
+  }, [scanDir, scanDepth, scanBusy]);
+
+  const loadFileCatalog = useCallback(async () => {
+    try {
+      const r = await fetch(`${HUB}/files/catalog`);
+      const d = await r.json() as { catalog: typeof fileCatalog };
+      setFileCatalog(d.catalog ?? []);
     } catch { /* ignore */ }
   }, []);
 
@@ -704,6 +767,10 @@ export function AgentHubPanel() {
               className={`ah-tab-btn${rightTab === 'graph' ? ' ah-tab-btn-on' : ''}`}
               onClick={() => setRightTab('graph')}
             >🔮 GRAPH</button>
+            <button
+              className={`ah-tab-btn${rightTab === 'files' ? ' ah-tab-btn-on' : ''}`}
+              onClick={() => { setRightTab('files'); loadFileCatalog(); }}
+            >📂 FILES {fileCatalog.length > 0 && <span className="ah-tab-count">{fileCatalog.length}</span>}</button>
             <div className="ah-status-spacer" />
             {rightTab === 'tasks' && tasks.length > 0 &&
               <button className="ah-clear-btn" onClick={() => { setTasks([]); setTaskRunning(false); }}>⌫</button>}
@@ -885,6 +952,163 @@ export function AgentHubPanel() {
           {rightTab === 'graph' && (
             <div className="ah-graph-pane">
               <SkillGraphPanel />
+            </div>
+          )}
+
+          {/* ── File Agent tab ── */}
+          {rightTab === 'files' && (
+            <div className="ah-skills-panel" style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '10px' }}>
+
+              {/* Analyze section */}
+              <div style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '6px', padding: '10px' }}>
+                <div style={{ fontSize: '11px', color: '#8b949e', marginBottom: '8px', fontWeight: 600 }}>ANALYZE FILE / FOLDER</div>
+                <input
+                  className="ah-task-input"
+                  placeholder="Ścieżka absolutna (np. U:\projekt\src)"
+                  value={filePath}
+                  onChange={e => setFilePath(e.target.value)}
+                  style={{ width: '100%', marginBottom: '6px', boxSizing: 'border-box' }}
+                />
+                <input
+                  className="ah-task-input"
+                  placeholder="Zapytanie (np. Przeanalizuj architekturę)"
+                  value={fileQuery}
+                  onChange={e => setFileQuery(e.target.value)}
+                  style={{ width: '100%', marginBottom: '6px', boxSizing: 'border-box' }}
+                />
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', fontSize: '11px', color: '#8b949e' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={fileSync} onChange={e => setFileSync(e.target.checked)} />
+                    Sync (czeka na raport)
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={fileAutoReg} onChange={e => setFileAutoReg(e.target.checked)} />
+                    Auto-rejestruj w katalogu
+                  </label>
+                </div>
+                <button
+                  className="ah-send-btn"
+                  onClick={runFileAnalyze}
+                  disabled={fileBusy || !filePath.trim()}
+                  style={{ width: '100%' }}
+                >
+                  {fileBusy ? '⟳ Analizuję...' : '🔍 Analizuj'}
+                </button>
+                {fileTaskId && !fileReport && (
+                  <div style={{ marginTop: '8px', fontSize: '11px', color: '#4ade80' }}>
+                    Task uruchomiony: <code style={{ fontSize: '10px' }}>{fileTaskId.slice(0, 8)}…</code> — wynik pojawi się w zakładce TASKS
+                  </div>
+                )}
+                {fileReport && (
+                  <div style={{ marginTop: '10px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 600, color: '#58a6ff', marginBottom: '6px' }}>
+                      📄 {fileReport.fileType.toUpperCase()} — Raport
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#e6edf3', marginBottom: '8px', lineHeight: '1.5' }}>
+                      {fileReport.summary}
+                    </div>
+                    {fileReport.insights.length > 0 && (
+                      <ul style={{ margin: '0 0 8px', paddingLeft: '16px', fontSize: '11px', color: '#8b949e' }}>
+                        {fileReport.insights.map((ins, i) => <li key={i}>{ins}</li>)}
+                      </ul>
+                    )}
+                    {fileReport.actionItems.length > 0 && (
+                      <div style={{ fontSize: '11px', color: '#fbbf24' }}>
+                        <strong>Action items:</strong>
+                        <ul style={{ margin: '4px 0', paddingLeft: '16px' }}>
+                          {fileReport.actionItems.map((a, i) => <li key={i}>{a}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                      {fileReport.tags.map(t => (
+                        <span key={t} style={{ fontSize: '10px', background: '#1f2937', color: '#6b7280', padding: '1px 6px', borderRadius: '10px' }}>{t}</span>
+                      ))}
+                    </div>
+                    <details style={{ marginTop: '8px' }}>
+                      <summary style={{ fontSize: '10px', color: '#6b7280', cursor: 'pointer' }}>Raw Goose output</summary>
+                      <pre style={{ fontSize: '10px', color: '#8b949e', maxHeight: '150px', overflow: 'auto', margin: '4px 0 0', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                        {fileReport.rawOutput}
+                      </pre>
+                    </details>
+                  </div>
+                )}
+              </div>
+
+              {/* Scan section */}
+              <div style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '6px', padding: '10px' }}>
+                <div style={{ fontSize: '11px', color: '#8b949e', marginBottom: '8px', fontWeight: 600 }}>SCAN DIRECTORY</div>
+                <input
+                  className="ah-task-input"
+                  placeholder="Folder do skanowania"
+                  value={scanDir}
+                  onChange={e => setScanDir(e.target.value)}
+                  style={{ width: '100%', marginBottom: '6px', boxSizing: 'border-box' }}
+                />
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '11px', color: '#8b949e' }}>Głębokość:</label>
+                  <input
+                    type="number" min={1} max={5} value={scanDepth}
+                    onChange={e => setScanDepth(Number(e.target.value))}
+                    style={{ width: '50px', background: '#161b22', border: '1px solid #30363d', color: '#e6edf3', borderRadius: '4px', padding: '2px 6px', fontSize: '12px' }}
+                  />
+                </div>
+                <button
+                  className="ah-send-btn"
+                  onClick={runFileScan}
+                  disabled={scanBusy || !scanDir.trim()}
+                  style={{ width: '100%' }}
+                >
+                  {scanBusy ? '⟳ Skanuję...' : '📁 Skanuj i kataloguj'}
+                </button>
+                {scanResult && (
+                  <div style={{ marginTop: '8px', fontSize: '11px', color: '#8b949e' }}>
+                    <div style={{ color: '#4ade80', marginBottom: '6px' }}>
+                      ✓ Znaleziono {scanResult.scanned}, skatalogowano {scanResult.cataloged}
+                    </div>
+                    <div style={{ maxHeight: '160px', overflow: 'auto' }}>
+                      {scanResult.catalog.map((entry, i) => (
+                        <div key={i} style={{ marginBottom: '4px', borderBottom: '1px solid #21262d', paddingBottom: '4px' }}>
+                          <div style={{ color: entry.type === 'dir' ? '#58a6ff' : '#e6edf3', fontSize: '10px', wordBreak: 'break-all' }}>
+                            {entry.type === 'dir' ? '📁' : '📄'} {entry.path.split(/[\\/]/).pop()}
+                          </div>
+                          <div style={{ color: '#6b7280', fontSize: '10px' }}>{entry.description}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Catalog section */}
+              <div style={{ background: '#0d1117', border: '1px solid #30363d', borderRadius: '6px', padding: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <div style={{ fontSize: '11px', color: '#8b949e', fontWeight: 600 }}>KATALOG ({fileCatalog.length})</div>
+                  <button className="ah-act-btn" onClick={loadFileCatalog}>↺ odśwież</button>
+                </div>
+                <div style={{ maxHeight: '200px', overflow: 'auto' }}>
+                  {fileCatalog.length === 0 ? (
+                    <div style={{ fontSize: '11px', color: '#6b7280' }}>Brak wpisów — użyj Analyze lub Scan</div>
+                  ) : fileCatalog.map(entry => (
+                    <div key={entry.id} style={{ marginBottom: '6px', borderBottom: '1px solid #21262d', paddingBottom: '6px' }}>
+                      <div
+                        style={{ fontSize: '11px', color: '#58a6ff', cursor: 'pointer', wordBreak: 'break-all' }}
+                        onClick={() => { setFilePath(entry.path); setRightTab('files'); }}
+                        title="Kliknij żeby użyć tej ścieżki"
+                      >
+                        {entry.path.split(/[\\/]/).pop() ?? entry.path}
+                      </div>
+                      <div style={{ fontSize: '10px', color: '#8b949e' }}>{entry.description}</div>
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '2px' }}>
+                        {entry.tags.slice(0, 4).map(t => (
+                          <span key={t} style={{ fontSize: '9px', background: '#1f2937', color: '#6b7280', padding: '1px 4px', borderRadius: '8px' }}>{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           )}
 

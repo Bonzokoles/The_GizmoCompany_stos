@@ -155,6 +155,8 @@ if (savedSession) {
 
 // Mapa taskId → lista WS klientów subskrybujących
 const taskSubscribers = new Map<string, Set<WebSocket>>();
+// Mapa taskId → resolve callback (dla sync /files/analyze)
+const taskSyncResolvers = new Map<string, (output: string) => void>();
 
 // Mapa taskId → instrukcje (do skill smart-save)
 const taskInstructions = new Map<string, string>();
@@ -203,6 +205,13 @@ goose.on('done', async (result) => {
   broadcast(result.taskId, { type: 'done', ...result });
   taskSubscribers.delete(result.taskId);
   saveSessionState();
+
+  // Resolve sync waiters (np. /files/analyze?sync=true)
+  const syncResolve = taskSyncResolvers.get(result.taskId);
+  if (syncResolve) {
+    taskSyncResolvers.delete(result.taskId);
+    syncResolve(result.output ?? '');
+  }
 
   const instructions  = taskInstructions.get(result.taskId) ?? '';
   const executionMs   = Date.now() - (taskStartTimes.get(result.taskId) ?? Date.now());
@@ -580,10 +589,11 @@ app.get('/files/catalog', (_req, res) => {
   res.json({ catalog, count: catalog.length });
 });
 
-// POST /files/analyze { path, query } — Goose czyta plik + LLM analizuje
+// POST /files/analyze { path, query, sync? } — Goose czyta plik + LLM analizuje
+// sync=true: czeka na wynik (max 90s) i zwraca strukturalny raport
 app.post('/files/analyze', async (req, res) => {
-  const { path: filePath, query = 'Podsumuj zawartość' } = req.body as {
-    path?: string; query?: string;
+  const { path: filePath, query = 'Podsumuj zawartość', sync = false, autoRegister = false } = req.body as {
+    path?: string; query?: string; sync?: boolean; autoRegister?: boolean;
   };
   if (!filePath) return res.status(400).json({ error: 'Wymagane: path' });
   if (!goose.isAvailable()) return res.status(503).json({ error: 'Goose niedostępny' });
@@ -591,21 +601,160 @@ app.post('/files/analyze', async (req, res) => {
   const taskId = randomUUID();
   const instruction = `Odczytaj plik lub folder: ${filePath}
 
-Następnie wykonaj zadanie: ${query}
+Wykonaj zadanie: ${query}
 
-Jeśli to plik CSV/Excel — użyj Python (pandas) do analizy danych.
-Jeśli to plik JSON — sformatuj i podsumuj strukturę.
-Jeśli to folder — wylistuj pliki i opisz zawartość.
-Jeśli to kod — przeanalizuj architekturę i wzorce.
+Wskazówki:
+- Plik CSV/JSON/Excel → przeanalizuj strukturę i dane (użyj Python/pandas jeśli potrzeba)
+- Plik kodu (.ts/.py/.js itp.) → opisz architekturę, eksporty, zależności
+- Folder → wylistuj pliki według typu i opisz przeznaczenie
+- Zwróć wyniki w czytelnym, ustrukturyzowanym formacie
 
-Zwróć wyniki w czytelnym formacie.`;
+Koniec outputu oznacz: --- KONIEC ANALIZY ---`;
 
   taskInstructions.set(taskId, instruction);
   taskStartTimes.set(taskId, Date.now());
-  res.json({ taskId, status: 'running', path: filePath, query });
-  goose.runTask({ id: taskId, instructions: instruction }).catch((err: Error) => {
-    console.error(`[FileAgent] Analyze task ${taskId} błąd:`, err.message);
+
+  if (!sync) {
+    res.json({ taskId, status: 'running', path: filePath, query });
+    goose.runTask({ id: taskId, instructions: instruction }).catch((err: Error) => {
+      console.error(`[FileAgent] Analyze task ${taskId} błąd:`, err.message);
+    });
+    return;
+  }
+
+  // Tryb synchroniczny — czekamy na done event (max 90s)
+  const gooseOutput = await new Promise<string>((resolve) => {
+    const timeout = setTimeout(() => {
+      taskSyncResolvers.delete(taskId);
+      resolve('[TIMEOUT] Goose nie zakończył analizy w 90 sekund.');
+    }, 90_000);
+    taskSyncResolvers.set(taskId, (output) => {
+      clearTimeout(timeout);
+      resolve(output);
+    });
+    goose.runTask({ id: taskId, instructions: instruction }).catch((err: Error) => {
+      clearTimeout(timeout);
+      taskSyncResolvers.delete(taskId);
+      resolve(`[ERROR] ${err.message}`);
+    });
   });
+
+  // LLM post-processing — strukturalny raport
+  let report: {
+    summary: string;
+    insights: string[];
+    fileType: string;
+    tags: string[];
+    actionItems: string[];
+    rawOutput: string;
+  };
+  try {
+    const llmCompletion = await chat(llm, [
+      {
+        role: 'system',
+        content: 'Jesteś analitykiem plików. Na podstawie outputu Goose stwórz strukturalny raport w formacie JSON.',
+      },
+      {
+        role: 'user',
+        content: `Plik: ${filePath}\nZapytanie: ${query}\n\nOutput Goose:\n${gooseOutput.slice(0, 4000)}\n\nZwróć TYLKO JSON:\n{\n  "summary": "...",\n  "insights": ["...", "..."],\n  "fileType": "...",\n  "tags": ["...", "..."],\n  "actionItems": ["..."]\n}`,
+      },
+    ]);
+    const llmRes = llmCompletion.choices[0]?.message?.content ?? '';
+
+    const jsonMatch = llmRes.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      report = { ...parsed, rawOutput: gooseOutput };
+    } else {
+      throw new Error('Brak JSON w odpowiedzi LLM');
+    }
+  } catch {
+    report = {
+      summary: gooseOutput.slice(0, 500),
+      insights: [],
+      fileType: path.extname(filePath) || 'unknown',
+      tags: ['file-analysis'],
+      actionItems: [],
+      rawOutput: gooseOutput,
+    };
+  }
+
+  // Auto-rejestracja w katalogu jeśli flaga włączona
+  if (autoRegister && report.summary) {
+    const content = `[PLIK/FOLDER]: ${filePath}\n[OPIS]: ${report.summary}\n[TAGI]: ${report.tags.join(', ')}`;
+    await memory.saveArchival(content, 'file_catalog', ['file', 'catalog', ...report.tags]);
+  }
+
+  console.log(`[FileAgent] Analiza zakończona: ${filePath}`);
+  res.json({ taskId, status: 'done', path: filePath, query, report });
+});
+
+// POST /files/scan { dir, depth?, pattern?, autoRegister? }
+// Rekursywnie kataloguje folder — LLM generuje opisy per plik/podfolder
+app.post('/files/scan', async (req, res) => {
+  const { dir, depth = 2, pattern, autoRegister = true } = req.body as {
+    dir?: string; depth?: number; pattern?: string; autoRegister?: boolean;
+  };
+  if (!dir) return res.status(400).json({ error: 'Wymagane: dir' });
+
+  const IGNORED = new Set(['node_modules', '.git', 'dist', 'build', '.cache', '__pycache__']);
+
+  function scanDir(dirPath: string, currentDepth: number): Array<{ path: string; type: 'file' | 'dir'; ext: string }> {
+    if (currentDepth <= 0) return [];
+    let entries: fs.Dirent[];
+    try { entries = fs.readdirSync(dirPath, { withFileTypes: true }); }
+    catch { return []; }
+    const result: Array<{ path: string; type: 'file' | 'dir'; ext: string }> = [];
+    for (const entry of entries) {
+      if (IGNORED.has(entry.name)) continue;
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        result.push({ path: fullPath, type: 'dir', ext: '' });
+        result.push(...scanDir(fullPath, currentDepth - 1));
+      } else {
+        const ext = path.extname(entry.name).toLowerCase();
+        if (!pattern || entry.name.match(pattern)) {
+          result.push({ path: fullPath, type: 'file', ext });
+        }
+      }
+    }
+    return result;
+  }
+
+  const entries = scanDir(dir, depth);
+  if (entries.length === 0) {
+    return res.json({ dir, scanned: 0, catalog: [] });
+  }
+
+  // LLM batch — generuj opisy dla top 30 pozycji
+  const toDescribe = entries.slice(0, 30);
+  const listText = toDescribe.map(e => `${e.type === 'dir' ? '[DIR]' : '[FILE]'} ${e.path}`).join('\n');
+  let descriptions: Record<string, string> = {};
+  try {
+    const scanCompletion = await chat(llm, [
+      {
+        role: 'system',
+        content: 'Jesteś analitykiem kodu. Przypisz krótki (max 20 słów) opis każdemu plikowi/folderowi. Odpowiedz JSON: { "ścieżka": "opis", ... }',
+      },
+      { role: 'user', content: `Projekt: ${dir}\n\nPliki:\n${listText}\n\nZwróć TYLKO JSON z opisami.` },
+    ]);
+    const scanText = scanCompletion.choices[0]?.message?.content ?? '';
+    const jsonMatch = scanText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) descriptions = JSON.parse(jsonMatch[0]);
+  } catch { /* opisy będą puste */ }
+
+  const catalog: Array<{ path: string; type: string; ext: string; description: string }> = [];
+  for (const entry of toDescribe) {
+    const description = descriptions[entry.path] ?? `${entry.type === 'dir' ? 'Folder' : 'Plik'} ${path.basename(entry.path)}`;
+    catalog.push({ ...entry, description });
+    if (autoRegister) {
+      const content = `[PLIK/FOLDER]: ${entry.path}\n[OPIS]: ${description}\n[TAGI]: file, scan, ${entry.ext || 'dir'}`;
+      memory.saveArchival(content, 'file_catalog', ['file', 'catalog', 'scan']).catch(() => {});
+    }
+  }
+
+  console.log(`[FileAgent] Scan: ${dir} → ${catalog.length} pozycji`);
+  res.json({ dir, depth, scanned: entries.length, cataloged: catalog.length, catalog });
 });
 
 // ── REST: skills ──────────────────────────────────────────────────
