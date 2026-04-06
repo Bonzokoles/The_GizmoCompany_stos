@@ -543,7 +543,7 @@ async function executeTool(
         const row = await env.DB.prepare(
           "SELECT value FROM admin_storage WHERE key = ?",
         )
-          .bind("buch_knowledge_v1")
+          .bind("buch_knowledge_v2")
           .first<{ value: string }>();
         const kb: { entries: any[] } = row
           ? JSON.parse(row.value)
@@ -561,7 +561,7 @@ async function executeTool(
           "INSERT OR REPLACE INTO admin_storage (key, value, updated_at) VALUES (?, ?, ?)",
         )
           .bind(
-            "buch_knowledge_v1",
+            "buch_knowledge_v2",
             JSON.stringify(kb),
             new Date().toISOString(),
           )
@@ -1220,7 +1220,7 @@ const BUCH_SEED_KNOWLEDGE = [
     key: "admin_sync",
     category: "integrations",
     content:
-      "Admin API: /api/admin/agents (CF Pages Function). Auth: Basic(Jimbo77:Haos1977) — sekrety w CF Pages. D1 tabela admin_storage(key,value,updated_at). Klucze: zeno_agents_v1(lista agentów JSON), buch_knowledge_v1(wiedza BUCH). Hub endpointy: GET /zeno/agents, POST /zeno/agents/deploy.",
+      "Admin API: /api/admin/agents (CF Pages Function). Auth: Basic(Jimbo77:Haos1977) — sekrety w CF Pages. D1 tabela admin_storage(key,value,updated_at). Klucze: zeno_agents_v1(lista agentów JSON), buch_knowledge_v2(wiedza BUCH). Hub endpointy: GET /zeno/agents, POST /zeno/agents/deploy.",
     updated_at: new Date().toISOString(),
   },
   {
@@ -1242,6 +1242,41 @@ const BUCH_SEED_KNOWLEDGE = [
     category: "functions",
     content:
       "Content/CMS: generowanie AI przez /api/content/generate POST:{topic,type,language}. Typy: article,seo,translate,summary. CMS editor w zakładce Content z polami: tytuł, treść MD, excerpt, kategoria, tagi, SEO title/desc. Artykuły publikowane na mybonzoaiblog.com i jimbo77.org.",
+    updated_at: new Date().toISOString(),
+  },
+  {
+    key: "tools_require_anthropic",
+    category: "functions",
+    content:
+      "WAŻNE: Narzędzia (⚒) działają TYLKO gdy provider=anthropic. Z OpenRouter/DeepSeek/Gemini model NIE ma dostępu do narzędzi. Aby używać narzędzi: wybierz provider=anthropic i kliknij ⚒ TOOLS ON. Model: claude-sonnet-4-5 lub claude-haiku-4-5-20251001.",
+    updated_at: new Date().toISOString(),
+  },
+  {
+    key: "prompt_blog",
+    category: "prompts",
+    content:
+      "Zadanie: pisanie artykułu/bloga. Kolejność narzędzi: 1) web_search lub searxng_search — zbierz 3-5 źródeł. 2) fetch_url — przeczytaj najważniejszy artykuł. 3) zeno_api('content/generate','POST',{topic,type:'article',language:'pl'}) — wygeneruj draft. Format: H1 z słowem kluczowym, lead 2-3 zdania, 3-5 sekcji H2, konkluzja z CTA, meta description 120-160 znaków.",
+    updated_at: new Date().toISOString(),
+  },
+  {
+    key: "prompt_image",
+    category: "prompts",
+    content:
+      "Zadanie: generowanie obrazu. Narzędzie: zeno_api('images/generate','POST',{prompt:'opis obrazu',style:'digital art'}) — zwraca URL. Wyświetl obraz jako ![opis](URL). Style: realistic photo, digital art, watercolor, minimalist icon. Nie pytaj o potwierdzenie — wygeneruj od razu.",
+    updated_at: new Date().toISOString(),
+  },
+  {
+    key: "prompt_research",
+    category: "prompts",
+    content:
+      "Zadanie: research/analiza/raport. Kolejność: 1) web_search — aktualne fakty. 2) fetch_url — szczegóły ze strony. Format odpowiedzi: executive summary (3 punkty), dane w tabeli markdown gdy >3 pozycje, źródła z datą, dane >12 miesięcy oznacz '[może być nieaktualne]'.",
+    updated_at: new Date().toISOString(),
+  },
+  {
+    key: "prompt_agent_create",
+    category: "prompts",
+    content:
+      "Zadanie: tworzenie agenta. Kroki: 1) Zapytaj o: stronę/komponent, cel, ograniczenia. 2) Napisz system prompt (min 150 znaków) z: rolą, URL kontekstem, 2+ przykładami zadań, 'czego NIE robić', formatem odpowiedzi. 3) Oceń 1-10 (specyficzność+rola+przykłady+ograniczenia+format). 4) Jeśli <7 — ulepsz. 5) agent_save. Nigdy nie zapisuj <6/10.",
     updated_at: new Date().toISOString(),
   },
 ];
@@ -1327,7 +1362,7 @@ async function handleToolChat(request: Request, env: Env): Promise<Response> {
       const kbRow = await env.DB.prepare(
         "SELECT value FROM admin_storage WHERE key = ?",
       )
-        .bind("buch_knowledge_v1")
+        .bind("buch_knowledge_v2")
         .first<{ value: string }>();
       let kb: { entries: any[] } = kbRow
         ? JSON.parse(kbRow.value)
@@ -1338,7 +1373,7 @@ async function handleToolChat(request: Request, env: Env): Promise<Response> {
           "INSERT OR REPLACE INTO admin_storage (key, value, updated_at) VALUES (?, ?, ?)",
         )
           .bind(
-            "buch_knowledge_v1",
+            "buch_knowledge_v2",
             JSON.stringify(kb),
             new Date().toISOString(),
           )
