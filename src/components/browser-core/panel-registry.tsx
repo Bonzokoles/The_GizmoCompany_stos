@@ -74,6 +74,11 @@ const KBViewerPanel = lazy(() =>
     default: m.KBViewerPanel,
   })),
 );
+const CodeEditorPanel = lazy(() =>
+  import("../tools/CodeEditorPanel").then((m) => ({
+    default: m.CodeEditorPanel,
+  })),
+);
 // ── Registry entry type ───────────────────────────────────────────────────────
 
 export interface PanelEntry {
@@ -200,6 +205,12 @@ export const PANEL_REGISTRY: PanelEntry[] = [
         onSendToJimbo={ctx.onSendToJimbo}
       />
     ),
+  },
+  {
+    id: "code-editor",
+    icon: "💻",
+    title: "Code Editor — Monaco + AI",
+    render: (ctx) => <CodeEditorPanel onClose={ctx.onClose} />,
   },
 ];
 

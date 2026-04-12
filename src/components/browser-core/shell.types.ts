@@ -21,7 +21,8 @@ export type PanelId =
   | "agents-creator"
   | "copilot-dev"
   | "jimbo-kit"
-  | "kb-viewer";
+  | "kb-viewer"
+  | "code-editor";
 
 /** Kontekst dokumentu przekazywany z KB Viewer do Jimbo_kit */
 export interface KBDocContext {
