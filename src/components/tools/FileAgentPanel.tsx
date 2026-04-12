@@ -3,6 +3,7 @@
  * Etap D: browse local filesystem, view/edit files, ask AI about them.
  */
 
+import "../../vendor/monaco-setup"; // local workers — must be before <Editor>
 import { useState, useCallback, useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type { FsEntry } from "../../types/electron";

@@ -3,6 +3,7 @@
  * Etap B+C: full code editor with inline AI suggestions and AI sidebar
  */
 
+import "../../vendor/monaco-setup"; // local workers — must be before <Editor>
 import { useState, useCallback, useRef, useEffect } from "react";
 import Editor, { type Monaco, type OnMount } from "@monaco-editor/react";
 import type { editor as MonacoEditor, IDisposable, Position } from "monaco-editor";
