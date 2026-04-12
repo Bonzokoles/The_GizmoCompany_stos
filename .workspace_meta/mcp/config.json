@@ -1,8 +1,35 @@
 {
   "mcpServers": {
-    "_instructions": "Serwery MCP dla ZENO Browser. Klucze API ładowane z .env (gitignored). Używaj ${env:VARIABLE_NAME} dla secrets.",
+    "_instructions": "Serwery MCP dla ZENO Browser. Klucze API ładowane z .env (gitignored). Używaj ${env:VARIABLE_NAME} dla secrets. Guide: .workspace_meta/History/2026-04-07_mcp-setup-guide.md",
 
-    "zeno-browser-mcp": {
+    "zeno-browser": {
+      "_comment": "Remote MCP CF Worker — zawsze aktywny, 23 narzędzia (CF/AI/D1/R2/ZENO/JIMBO)",
+      "type": "http",
+      "url": "https://zeno-mcp.stolarnia-ams.workers.dev/mcp"
+    },
+
+    "zeno-browser-local": {
+      "_comment": "Remote MCP lokalnie (cd workers/zeno-mcp && npx wrangler dev)",
+      "type": "http",
+      "url": "http://localhost:8788/mcp"
+    },
+
+    "zeno-local": {
+      "_comment": "Local MCP stdio — JIMBO HUB/BUCH/SearXNG/Meilisearch/Podman. Wymaga start_zeno_hub.bat",
+      "type": "stdio",
+      "command": "node",
+      "args": ["U:/WWW_Zen_BRo_wser_org3/workers/zeno-local-mcp/dist/index.js"],
+      "env": {
+        "JIMBO_HUB_URL": "http://localhost:4224",
+        "BUCH_URL": "http://localhost:5180",
+        "SEARXNG_URL": "http://localhost:8088",
+        "MEILISEARCH_URL": "http://localhost:7700",
+        "MEILISEARCH_KEY": "${env:MEILISEARCH_KEY}"
+      }
+    },
+
+    "zeno-browser-mcp-legacy": {
+      "_comment": "Legacy Electron MCP server — nieużywany od 2026-04",
       "command": "node",
       "args": ["dist-electron/src-electron/mcp-server/mcp-server.js"],
       "env": {
@@ -58,6 +85,11 @@
 
     "cloudflare-observability": {
       "url": "https://observability.mcp.cloudflare.com/mcp"
+    },
+
+    "gitnexus": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "gitnexus@latest", "mcp"]
     }
   }
 }

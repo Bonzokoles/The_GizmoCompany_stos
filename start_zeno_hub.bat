@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 chcp 65001 >nul 2>&1
 title ZENO HUB - Browser + MyBonzo + Watchdog + Tunnel
 color 0A
@@ -16,8 +17,8 @@ cd /d "%~dp0"
 set "ZENO_DIR=%~dp0"
 set "MYBONZO_DIR=U:\WWW_MyBonzo_com"
 
-:: Node (NVM4W) w PATH
-set "PATH=C:\nvm4w\nodejs;C:\ProgramData\nvm;%PATH%"
+:: Node (NVM4W) + Podman w PATH
+set "PATH=C:\nvm4w\nodejs;C:\ProgramData\nvm;C:\Users\Bonzo2\AppData\Local\Programs\Podman;%PATH%"
 
 :: Katalog na logi
 if not exist "logs" mkdir logs
@@ -262,6 +263,31 @@ if not exist "%HUB_DIR%\node_modules" (
 start "JIMBO-agent-HUB" /MIN cmd /c "cd /d %HUB_DIR% && npm start > %ZENO_DIR%logs\jimbo_hub.log 2>&1"
 echo   [OK] JIMBO Agent HUB uruchomiony -^> http://localhost:%HUB_PORT%  (log: logs\jimbo_hub.log)
 
+:: =============================================
+:: JIMBO LOCAL TOOL SERVER (background, port 4111)
+:: =============================================
+echo [BG] JIMBO Local Tool Server (port 4111)...
+set "JIMBO_TOOL_DIR=U:\WWW_Zen_BRo_wser_tool"
+set "JIMBO_TOOL_PORT=4111"
+
+:: Kill-before-start
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%JIMBO_TOOL_PORT% " ^| findstr "LISTENING"') do (
+    echo   [TOOL] Zatrzymuje PID %%P na porcie %JIMBO_TOOL_PORT%...
+    taskkill /PID %%P /F >nul 2>&1
+)
+taskkill /FI "WINDOWTITLE eq JIMBO-LocalTool" /F >nul 2>&1
+
+if not exist "%JIMBO_TOOL_DIR%\node_modules" (
+    echo   [TOOL] Instalowanie zaleznosci...
+    cmd /c "cd /d %JIMBO_TOOL_DIR% && npm install > %ZENO_DIR%logs\jimbo_tool_install.log 2>&1"
+)
+
+start "JIMBO-LocalTool" /MIN cmd /c "cd /d %JIMBO_TOOL_DIR% && set JIMBO_PORT=4111&& set JIMBO_MODEL=openai/gpt-4o-mini&& set JIMBO_TOOL_MODEL=openai/gpt-4o-mini&& npx tsx server.ts > %ZENO_DIR%logs\jimbo_tool.log 2>&1"
+timeout /t 3 /nobreak >nul
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%JIMBO_TOOL_PORT% " ^| findstr "LISTENING"') do set JIMBO_TOOL_PID=%%P
+echo   [OK] JIMBO Local Tool Server uruchomiony -^> http://localhost:%JIMBO_TOOL_PORT%  (PID: %JIMBO_TOOL_PID%, log: logs\jimbo_tool.log)
+echo.
+
 :: Goose interactive terminal — widoczne okno, mozna wpisywac komendy
 if exist "E:\Programs\goose\goose.exe" (
     echo [BG] Uruchamianie Goose Terminal...
@@ -388,6 +414,7 @@ echo.
 echo   Lokalne serwisy:
 echo     ZENO Browser   http://localhost:5173
 echo     JIMBO Agent HUB http://localhost:4224
+echo     JIMBO Tool     http://localhost:4111
 echo     JIMBO Chat     http://localhost:5180
 echo     Libraries API  http://localhost:7070
 echo     MyBonzo        http://localhost:4321
@@ -420,6 +447,28 @@ start "Wrangler-CF-Dev" /MIN cmd /c "cd /d %ZENO_DIR% && npx wait-on http://loca
 echo   [OK] Wrangler uruchomi sie po starcie Vite -^> http://localhost:8788
 
 :: =============================================
+:: CZEKAJ NA JIMBO AGENT HUB
+:: Electron startuje dopiero gdy HUB odpowie na /status
+:: =============================================
+echo [WAIT] Czekam az JIMBO Agent HUB bedzie gotowy (max 30s)...
+set HUB_READY=0
+for /L %%i in (1,1,30) do (
+    if "!HUB_READY!"=="0" (
+        curl -s -o nul -w "%%{http_code}" http://localhost:%HUB_PORT%/status 2>nul | findstr "200" >nul 2>&1
+        if not errorlevel 1 (
+            set HUB_READY=1
+            echo   [OK] JIMBO HUB gotowy po %%i sekundach ^(http://localhost:%HUB_PORT%^)
+        ) else (
+            timeout /t 1 /nobreak >nul
+        )
+    )
+)
+if "!HUB_READY!"=="0" (
+    echo   [WARN] HUB nie odpowiada po 30s - uruchamiam Electron mimo to
+)
+echo.
+
+:: =============================================
 :: PHASE 8: ZENO BROWSER (foreground)
 :: =============================================
 echo [PHASE 8/8] Uruchamianie ZENO Browser...
@@ -428,3 +477,38 @@ echo       Wrangler CF: http://localhost:8788
 echo       Electron:    auto-launch
 echo.
 call npm run dev
+
+:: =============================================
+:: CLEANUP — ZENO Browser zamkniety
+:: Uruchamia sie automatycznie po zamknieciu aplikacji
+:: =============================================
+echo.
+echo  ======================================================
+echo   CLEANUP — Zamykam wszystkie serwisy...
+echo  ======================================================
+
+taskkill /FI "WINDOWTITLE eq JIMBO-LocalTool" /F >nul 2>&1
+if defined JIMBO_TOOL_PID taskkill /PID %JIMBO_TOOL_PID% /F >nul 2>&1
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":4111 " ^| findstr "LISTENING"') do taskkill /PID %%P /F >nul 2>&1
+echo   [OK] JIMBO Tool Server (port 4111)
+
+taskkill /FI "WINDOWTITLE eq JIMBO-agent-HUB" /F >nul 2>&1
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":4224 " ^| findstr "LISTENING"') do taskkill /PID %%P /F >nul 2>&1
+echo   [OK] JIMBO Agent HUB (port 4224)
+
+taskkill /FI "WINDOWTITLE eq JIMBO-Chat" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq LibrariesAPI" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq LibCuration" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq Wrangler-CF-Dev" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq MyBonzo-Astro" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq DevzHub-Sync" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq ZENO-Watchdog" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq Tunnel-ZENO" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq Tunnel-MyBonzo" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq Tunnel-Analytics" /F >nul 2>&1
+echo   [OK] Pozostale serwisy
+
+echo.
+echo   Sesja ZENO HUB zakonczona. Do zobaczenia!
+echo  ======================================================
+timeout /t 3 /nobreak >nul

@@ -111,3 +111,66 @@
 3. **Dashboard tab** — 11. tab "Pipelines" w WebLanding.tsx: stats grid, pipeline cards, data flow visualization, events table, ingest form.
 **Konsekwencje:** Dashboard ma 11 tabów i 14 API services. Pipelines daje real-time event analytics. Weft jest niezależny od ZENO (osobny deployment).
 **Alternatywy:** (1) Umami analytics tylko — za mało granularności. (2) Własny event system od zera — zbyt dużo pracy. (3) Weft jako moduł w ZENO — odrzucone, lepiej osobna instancja.
+
+---
+
+### ADR-008: Oort Outer Shell (O.O.S.) — 7-warstwowa architektura przeglądarki
+
+**Data:** 2026-04-07
+**Status:** accepted
+**Kontekst:**
+ZENO Browser rośnie ponad przeglądarkę: ma agentów AI (JIMBO, BUCH), plugin system, lokalne narzędzia (JIMBO_KIT port 4111), chmurę (CF Workers/D1/R2), lokalną bazę wiedzy (ChromaDB) i warstwę bezpieczeństwa. Brakuje modelu mentalnego, który opisuje jak te warstwy ze sobą współpracują i gdzie leżą granice odpowiedzialności. Refaktoryzacja BrowserUI.tsx (545 → 331 linii, Step_02) odsłoniła potrzebę formalnej architektury powłoki.
+
+**Decyzja:**
+Przyjęto 7-warstwowy model **Oort Outer Shell**:
+
+```
+┌─────────────────────────────────────────────────────┐
+│  1. Outer Shell      — BrowserUI (React, Electron)  │
+│     Toolbar, PanelHost, QuickNav, TabBar, StatusBar │
+├─────────────────────────────────────────────────────┤
+│  2. Secure Boundary  — contextIsolation + preload   │
+│     sanitizeUrl(), typed electronAPI bridge,         │
+│     CSP headers, sandbox per-panel                  │
+├─────────────────────────────────────────────────────┤
+│  3. Runtime Core     — Electron main process        │
+│     WebContents, BrowserView, IPC handlers,          │
+│     session/partition, update manager               │
+├─────────────────────────────────────────────────────┤
+│  4. Agentic Layer    — JIMBO_KIT (port 4111) +      │
+│     JIMBO Agent HUB (port 4224) + BUCH              │
+│     30 tools, RAG, streaming chat, OpenRouter       │
+├─────────────────────────────────────────────────────┤
+│  5. Plugin Shell     — PluginHub + plugin-system/   │
+│     Marketplace, sandboxed execution, capabilities  │
+├─────────────────────────────────────────────────────┤
+│  6. Cloud Shell      — CF Workers + D1 + R2 + Pages │
+│     zeno-mcp (23 tools), AI Gateway, Pipelines,     │
+│     Weft, BONZO Media Hub                           │
+├─────────────────────────────────────────────────────┤
+│  7. Memory Fabric    — ChromaDB (RAG) + SQLite HUB  │
+│     + MeiliSearch + JIMBO memory (core/archival)    │
+│     + Cloudflare KV                                 │
+└─────────────────────────────────────────────────────┘
+```
+
+Każda warstwa komunikuje się tylko z warstwą sąsiednią (lub przez zdefiniowane API pomosty). Warstwa 1 (Outer Shell) jest świadoma wyłącznie `PanelId` i `PanelContext` — nie zna implementacji paneli. Warstwa 4 (Agentic) jest świadoma narzędzi (tools) i modeli, ale nie zna UI. Warstwa 6 (Cloud) jest bezstanowa per-request.
+
+**Implementacja krokowa (zgodna z Step_01–05):**
+- ✅ **Step_01** — cleanup CopilotKit, martwy CSS, vendor stuby
+- ✅ **Step_02** — Outer Shell refaktor: `shell.types.ts` + `panel-registry.tsx` + `PanelHost.tsx` → BrowserUI 545→331 linii
+- 🔜 **Step_03** — Secure Boundary: preload namespaces (3–5 dni, ryzykowne — osobna sesja)
+- 🔜 **Step_04** — Runtime Core modularizacja: wydzielenie `main/ipc-handlers.ts`, `main/session-manager.ts`
+- 🔜 **Step_05** — Plugin Shell: capabilities API, sandboxed execution, plugin-to-agent bridge
+
+**Konsekwencje:**
+- Nowe panele dodaje się wyłącznie w `panel-registry.tsx` (1 wpis)
+- Nowe narzędzia AI dodaje się w `tools/` JIMBO_KIT (1 plik)
+- Nowe endpointy chmury dodaje się w `functions/api/` CF Workers
+- Każda warstwa może być testowana w izolacji
+- Step_03 (preload) jest flagowany jako HIGH RISK — wymaga osobnej sesji z pełnym testem IPC
+
+**Alternatywy:**
+1. **Monolityczna architektura** — wszystko w BrowserUI.tsx i main.ts — odrzucone, już powodowało 545-liniowe pliki
+2. **Micro-frontend (moduły federacyjne)** — zbyt duże narzuty dla Electron app
+3. **Bez formalnej architektury** — odrzucone: projekt zbyt duży żeby rozwijać intuicyjnie

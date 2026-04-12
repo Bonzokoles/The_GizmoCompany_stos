@@ -18,12 +18,16 @@ compatibility_flags = ["nodejs_compat"]
 
 # ─── Durable Objects (wymagane przez McpAgent) ──────────────
 [[durable_objects.bindings]]
-name = "MCP_DO"
-class_name = "ZenoMCP"
+name = "MCP_OBJECT"
+class_name = "ZenoMCPv2"
 
 [[migrations]]
 tag = "v1"
 new_classes = ["ZenoMCP"]
+
+[[migrations]]
+tag = "v2"
+new_sqlite_classes = ["ZenoMCPv2"]
 
 # ─── D1 (zeno-browser-db) ───────────────────────────────────
 [[d1_databases]]
@@ -31,7 +35,18 @@ binding = "DB"
 database_name = "zeno-browser-db"
 database_id = "ddac77ec-fe9e-4b5b-b3f5-ba0793152917"
 
+# ─── Workers AI ─────────────────────────────────────────────
+[ai]
+binding = "AI"
+
+# ─── R2 (static assets bucket) ──────────────────────────────
+[[r2_buckets]]
+binding = "STATIC_ASSETS"
+bucket_name = "zeno-static-assets"
+
 # ─── Secrets (wrangler secret put ...) ──────────────────────
 # OPENROUTER_API_KEY  — OpenRouter do zapytań AI (opcjonalny)
 # CF_ACCOUNT_ID       — account ID do listowania workerów
 # CF_API_TOKEN        — CF API token (workers:read scope)
+# JIMBO_GATEWAY_URL   — URL jimbo-gateway Worker (opcjonalny)
+# ZENO_ORIGIN         — origin CF Pages (domyślnie zenbrowsers.org)

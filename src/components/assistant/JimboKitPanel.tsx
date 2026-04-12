@@ -25,7 +25,7 @@ import '../../styles/jimbokit.css';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
-type Tab = 'chat' | 'terminal';
+type Tab = 'chat' | 'terminal' | 'settings';
 
 interface JimboKitPanelProps {
   /** Called to navigate the browser */
@@ -159,6 +159,165 @@ const SessionItem: React.FC<{
   </div>
 );
 
+// ─── Popular OpenRouter models ────────────────────────────────────────────────
+
+const POPULAR_MODELS = [
+  { label: '── Płatne (OpenAI) ──', value: '', disabled: true },
+  { label: 'GPT-4o mini  💰tani ⚡szybki', value: 'openai/gpt-4o-mini' },
+  { label: 'GPT-4o', value: 'openai/gpt-4o' },
+  { label: 'GPT-4.1 mini', value: 'openai/gpt-4.1-mini' },
+  { label: '── Płatne (Anthropic) ──', value: '', disabled: true },
+  { label: 'Claude 3.5 Haiku  💰tani', value: 'anthropic/claude-3-5-haiku' },
+  { label: 'Claude 3.7 Sonnet', value: 'anthropic/claude-3.7-sonnet' },
+  { label: '── Płatne (Google) ──', value: '', disabled: true },
+  { label: 'Gemini 2.0 Flash  💰tani ⚡szybki', value: 'google/gemini-2.0-flash-001' },
+  { label: 'Gemini 2.5 Pro', value: 'google/gemini-2.5-pro-preview-03-25' },
+  { label: '── Darmowe ──', value: '', disabled: true },
+  { label: 'Qwen 3.6-plus :free', value: 'qwen/qwen3.6-plus:free' },
+  { label: 'DeepSeek Chat V3 :free', value: 'deepseek/deepseek-chat-v3-0324:free' },
+  { label: 'Gemma 3 12B :free', value: 'google/gemma-3-12b-it:free' },
+  { label: 'Llama 3.3 70B :free', value: 'meta-llama/llama-3.3-70b-instruct:free' },
+];
+
+const API_BASE_SETTINGS = 'http://localhost:4111';
+
+const ModelSettings: React.FC = () => {
+  const [chatModel, setChatModel]     = useState('');
+  const [toolModel, setToolModel]     = useState('');
+  const [customChat, setCustomChat]   = useState('');
+  const [customTool, setCustomTool]   = useState('');
+  const [status, setStatus]           = useState<'idle' | 'saving' | 'ok' | 'err'>('idle');
+  const [statusMsg, setStatusMsg]     = useState('');
+
+  // Załaduj aktualny config
+  useEffect(() => {
+    fetch(`${API_BASE_SETTINGS}/api/config`)
+      .then(r => r.json() as Promise<{ model: string; toolModel: string }>)
+      .then(cfg => {
+        setChatModel(cfg.model);
+        setToolModel(cfg.toolModel);
+      })
+      .catch(() => {});
+  }, []);
+
+  const effectiveChatModel = chatModel === '__custom__' ? customChat : chatModel;
+  const effectiveToolModel = toolModel === '__custom__' ? customTool : toolModel;
+
+  async function handleSave() {
+    setStatus('saving');
+    try {
+      const r = await fetch(`${API_BASE_SETTINGS}/api/config`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ model: effectiveChatModel, toolModel: effectiveToolModel }),
+      });
+      const data = await r.json() as { ok?: boolean; model?: string; toolModel?: string };
+      if (data.ok) {
+        setStatus('ok');
+        setStatusMsg(`✅ Zapisano: ${data.model} / ${data.toolModel}`);
+      } else {
+        setStatus('err');
+        setStatusMsg('❌ Błąd zapisu');
+      }
+    } catch {
+      setStatus('err');
+      setStatusMsg('❌ Brak połączenia z serwerem');
+    }
+    setTimeout(() => setStatus('idle'), 3000);
+  }
+
+  return (
+    <div className="jk-settings">
+      <div className="jk-settings-section">
+        <h3 className="jk-settings-title">⚙ Konfiguracja modeli</h3>
+        <p className="jk-settings-info">
+          OpenRouter obsługuje wiele modeli jednocześnie — każde zapytanie wskazuje swój model.
+          BUCH może używać innego modelu niezależnie.
+        </p>
+      </div>
+
+      <div className="jk-settings-section">
+        <label className="jk-settings-label">💬 Model odpowiedzi (streaming)</label>
+        <select
+          className="jk-settings-select"
+          value={chatModel}
+          onChange={e => setChatModel(e.target.value)}
+        >
+          {POPULAR_MODELS.map((m, i) => (
+            <option key={i} value={m.value} disabled={m.disabled}>
+              {m.label}
+            </option>
+          ))}
+          <option value="__custom__">✏ Własny model…</option>
+        </select>
+        {chatModel === '__custom__' && (
+          <input
+            className="jk-settings-input"
+            placeholder="np. openai/gpt-4o-mini"
+            value={customChat}
+            onChange={e => setCustomChat(e.target.value)}
+          />
+        )}
+        {chatModel && chatModel !== '__custom__' && (
+          <div className="jk-settings-current">Aktywny: <code>{chatModel}</code></div>
+        )}
+      </div>
+
+      <div className="jk-settings-section">
+        <label className="jk-settings-label">🔧 Model tool-use (function calling)</label>
+        <select
+          className="jk-settings-select"
+          value={toolModel}
+          onChange={e => setToolModel(e.target.value)}
+        >
+          {POPULAR_MODELS.map((m, i) => (
+            <option key={i} value={m.value} disabled={m.disabled}>
+              {m.label}
+            </option>
+          ))}
+          <option value="__custom__">✏ Własny model…</option>
+        </select>
+        {toolModel === '__custom__' && (
+          <input
+            className="jk-settings-input"
+            placeholder="np. openai/gpt-4o-mini"
+            value={customTool}
+            onChange={e => setCustomTool(e.target.value)}
+          />
+        )}
+        {toolModel && toolModel !== '__custom__' && (
+          <div className="jk-settings-current">Aktywny: <code>{toolModel}</code></div>
+        )}
+      </div>
+
+      <div className="jk-settings-section">
+        <button
+          className="jk-btn jk-btn--primary"
+          onClick={() => void handleSave()}
+          disabled={status === 'saving'}
+        >
+          {status === 'saving' ? '⏳ Zapisuję…' : '💾 Zastosuj (bez restartu)'}
+        </button>
+        {statusMsg && (
+          <div className={`jk-settings-status jk-settings-status--${status}`}>
+            {statusMsg}
+          </div>
+        )}
+      </div>
+
+      <div className="jk-settings-section jk-settings-note">
+        <strong>OpenRouter — równoległe modele:</strong>
+        <ul>
+          <li>✅ Każde zapytanie wysyła swój <code>model</code> — pełna izolacja</li>
+          <li>✅ BUCH może używać np. Claude 3.5, JIMBO GPT-4o-mini — działają niezależnie</li>
+          <li>✅ Ten sam klucz API <code>OPENROUTER_API_KEY</code> obsługuje wszystkie</li>
+          <li>⚠ Zmiana modelu działa natychmiast — nowe wiadomości używają nowego modelu</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
 // ─── Main Panel ────────────────────────────────────────────────────────────────
 
 export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
@@ -241,6 +400,13 @@ export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
             onClick={() => setActiveTab('terminal')}
           >
             ⌨ Terminal
+          </button>
+          <button
+            className={`jk-tab-btn ${activeTab === 'settings' ? 'jk-tab-btn--active' : ''}`}
+            onClick={() => setActiveTab('settings')}
+            title="Ustawienia modeli"
+          >
+            ⚙ Modele
           </button>
           {onClose && (
             <button className="jk-icon-btn" onClick={onClose} title="Zamknij">
@@ -337,6 +503,8 @@ export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
               currentUrl={currentUrl}
             />
           )}
+
+          {activeTab === 'settings' && <ModelSettings />}
         </div>
       </div>
 

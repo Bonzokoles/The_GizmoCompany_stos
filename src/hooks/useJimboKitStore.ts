@@ -79,7 +79,7 @@ function chatIdFromKey(key: string): string {
 
 // ─── API base URL ─────────────────────────────────────────────────────────────
 
-const API_BASE = 'http://127.0.0.1:4111';
+const API_BASE = 'http://localhost:4111';
 
 async function apiPost<T = unknown>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -120,7 +120,7 @@ type WsHandler = (event: string, data: unknown) => void;
 
 function createWsConnection(onMessage: WsHandler): WebSocket | null {
   try {
-    const ws = new WebSocket(`ws://127.0.0.1:4111/ws`);
+    const ws = new WebSocket(`ws://localhost:4111/ws`);
     ws.onmessage = (e) => {
       try {
         const parsed = JSON.parse(e.data as string) as { event?: string; type?: string; data?: unknown };

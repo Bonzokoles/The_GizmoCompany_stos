@@ -11,6 +11,7 @@
  */
 
 import type { Env, AIProviderConfig } from "../../types";
+import type { PagesFunction } from "@cloudflare/workers-types";
 import { jsonResponse, errorResponse, corsHeaders } from "../../types";
 
 const PROVIDERS: AIProviderConfig[] = [
@@ -350,9 +351,19 @@ const BUCH_TOOLS: BuchTool[] = [
       type: "object",
       properties: {
         query: { type: "string", description: "Search query" },
-        max_results: { type: "number", description: "Number of results (default 5, max 10)" },
-        search_depth: { type: "string", enum: ["basic", "advanced"], description: "basic=fast, advanced=deeper research" },
-        include_answer: { type: "boolean", description: "Include AI-generated answer summary (default true)" },
+        max_results: {
+          type: "number",
+          description: "Number of results (default 5, max 10)",
+        },
+        search_depth: {
+          type: "string",
+          enum: ["basic", "advanced"],
+          description: "basic=fast, advanced=deeper research",
+        },
+        include_answer: {
+          type: "boolean",
+          description: "Include AI-generated answer summary (default true)",
+        },
       },
       required: ["query"],
     },
@@ -364,7 +375,10 @@ const BUCH_TOOLS: BuchTool[] = [
     input_schema: {
       type: "object",
       properties: {
-        url: { type: "string", description: "URL to read and extract content from" },
+        url: {
+          type: "string",
+          description: "URL to read and extract content from",
+        },
       },
       required: ["url"],
     },
@@ -376,9 +390,20 @@ const BUCH_TOOLS: BuchTool[] = [
     input_schema: {
       type: "object",
       properties: {
-        series_id: { type: "string", description: "FRED series ID, e.g. CPIAUCSL (CPI), GDP, UNRATE, FEDFUNDS, DEXUSEU (USD/EUR)" },
-        limit: { type: "number", description: "Number of observations to return (default 12)" },
-        sort_order: { type: "string", enum: ["asc", "desc"], description: "Sort order (default desc = newest first)" },
+        series_id: {
+          type: "string",
+          description:
+            "FRED series ID, e.g. CPIAUCSL (CPI), GDP, UNRATE, FEDFUNDS, DEXUSEU (USD/EUR)",
+        },
+        limit: {
+          type: "number",
+          description: "Number of observations to return (default 12)",
+        },
+        sort_order: {
+          type: "string",
+          enum: ["asc", "desc"],
+          description: "Sort order (default desc = newest first)",
+        },
       },
       required: ["series_id"],
     },
@@ -390,9 +415,20 @@ const BUCH_TOOLS: BuchTool[] = [
     input_schema: {
       type: "object",
       properties: {
-        coins: { type: "string", description: "Comma-separated coin IDs, e.g. bitcoin,ethereum,solana,polkadot" },
-        vs_currency: { type: "string", description: "Currency for prices (default: usd). Also supports pln, eur, btc." },
-        include_24h_change: { type: "boolean", description: "Include 24h price change % (default true)" },
+        coins: {
+          type: "string",
+          description:
+            "Comma-separated coin IDs, e.g. bitcoin,ethereum,solana,polkadot",
+        },
+        vs_currency: {
+          type: "string",
+          description:
+            "Currency for prices (default: usd). Also supports pln, eur, btc.",
+        },
+        include_24h_change: {
+          type: "boolean",
+          description: "Include 24h price change % (default true)",
+        },
       },
       required: ["coins"],
     },
@@ -659,7 +695,10 @@ async function executeTool(
           const err = await resp.text();
           return `goose_dispatch: HUB error ${resp.status}: ${err.slice(0, 200)}. Upewnij się że JIMBO HUB działa lokalnie (port 4224).`;
         }
-        const data = await resp.json() as { taskId?: string; status?: string };
+        const data = (await resp.json()) as {
+          taskId?: string;
+          status?: string;
+        };
         return `✅ Zadanie wysłane do Goose (taskId: ${data.taskId ?? "?"}, status: ${data.status ?? "queued"}). Wynik pojawi się w panelu Asystent → AgentHub.`;
       } catch (e: unknown) {
         return `goose_dispatch: Nie można połączyć z JIMBO HUB (localhost:4224). Sprawdź czy aplikacja ZENO jest uruchomiona. Błąd: ${e instanceof Error ? e.message : String(e)}`;
@@ -669,7 +708,8 @@ async function executeTool(
     // ── BizTools (Etap C) ────────────────────────────────────────────────────
     case "tavily_search": {
       const tavilyKey = env.TAVILY_API_KEY;
-      if (!tavilyKey) return "tavily_search: brak TAVILY_API_KEY w CF Pages secrets.";
+      if (!tavilyKey)
+        return "tavily_search: brak TAVILY_API_KEY w CF Pages secrets.";
       const query = String(input.query ?? "").trim();
       if (!query) return "tavily_search: query jest wymagane.";
       const maxResults = Number(input.max_results ?? 5);
@@ -679,15 +719,34 @@ async function executeTool(
         const resp = await fetch("https://api.tavily.com/search", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ api_key: tavilyKey, query, max_results: maxResults, search_depth: searchDepth, include_answer: includeAnswer }),
+          body: JSON.stringify({
+            api_key: tavilyKey,
+            query,
+            max_results: maxResults,
+            search_depth: searchDepth,
+            include_answer: includeAnswer,
+          }),
           signal: AbortSignal.timeout(15000),
         });
         if (!resp.ok) return `tavily_search: error ${resp.status}`;
-        const data = await resp.json() as { answer?: string; results?: { title: string; url: string; content: string; score: number }[] };
+        const data = (await resp.json()) as {
+          answer?: string;
+          results?: {
+            title: string;
+            url: string;
+            content: string;
+            score: number;
+          }[];
+        };
         const parts: string[] = [];
         if (data.answer) parts.push(`**Answer:** ${data.answer}\n`);
         if (data.results) {
-          parts.push(...data.results.map((r, i) => `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.content.slice(0, 300)}`));
+          parts.push(
+            ...data.results.map(
+              (r, i) =>
+                `${i + 1}. **${r.title}**\n   ${r.url}\n   ${r.content.slice(0, 300)}`,
+            ),
+          );
         }
         return parts.join("\n\n") || "Brak wyników.";
       } catch (e: unknown) {
@@ -700,7 +759,11 @@ async function executeTool(
       if (!url) return "jina_read: url jest wymagane.";
       try {
         const resp = await fetch(`https://r.jina.ai/${url}`, {
-          headers: { "Accept": "text/plain", "X-Return-Format": "text", "User-Agent": "Mozilla/5.0" },
+          headers: {
+            Accept: "text/plain",
+            "X-Return-Format": "text",
+            "User-Agent": "Mozilla/5.0",
+          },
           signal: AbortSignal.timeout(20000),
         });
         if (!resp.ok) return `jina_read: error ${resp.status} dla ${url}`;
@@ -712,18 +775,28 @@ async function executeTool(
     }
 
     case "fred_data": {
-      const seriesId = String(input.series_id ?? "").trim().toUpperCase();
-      if (!seriesId) return "fred_data: series_id jest wymagane (np. CPIAUCSL, GDP, UNRATE).";
+      const seriesId = String(input.series_id ?? "")
+        .trim()
+        .toUpperCase();
+      if (!seriesId)
+        return "fred_data: series_id jest wymagane (np. CPIAUCSL, GDP, UNRATE).";
       const limit = Number(input.limit ?? 12);
       const sortOrder = String(input.sort_order ?? "desc");
       try {
         const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&limit=${limit}&sort_order=${sortOrder}&file_type=json&api_key=anonymous`;
         const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        if (!resp.ok) return `fred_data: error ${resp.status}. Sprawdź czy series_id jest poprawne.`;
-        const data = await resp.json() as { observations?: { date: string; value: string }[]; error_message?: string };
+        if (!resp.ok)
+          return `fred_data: error ${resp.status}. Sprawdź czy series_id jest poprawne.`;
+        const data = (await resp.json()) as {
+          observations?: { date: string; value: string }[];
+          error_message?: string;
+        };
         if (data.error_message) return `fred_data: ${data.error_message}`;
-        if (!data.observations?.length) return "fred_data: brak danych dla tego series_id.";
-        const rows = data.observations.map(o => `${o.date}: ${o.value}`).join("\n");
+        if (!data.observations?.length)
+          return "fred_data: brak danych dla tego series_id.";
+        const rows = data.observations
+          .map((o) => `${o.date}: ${o.value}`)
+          .join("\n");
         return `**FRED ${seriesId}** (${data.observations.length} obserwacji):\n${rows}`;
       } catch (e: unknown) {
         return `fred_data error: ${e instanceof Error ? e.message : String(e)}`;
@@ -731,32 +804,43 @@ async function executeTool(
     }
 
     case "coingecko_price": {
-      const coins = String(input.coins ?? "bitcoin").toLowerCase().replace(/\s/g, "");
+      const coins = String(input.coins ?? "bitcoin")
+        .toLowerCase()
+        .replace(/\s/g, "");
       const vsCurrency = String(input.vs_currency ?? "usd").toLowerCase();
       const include24h = input.include_24h_change !== false;
       try {
         // simple/price — działa bez klucza, szybki endpoint
         const url = `https://api.coingecko.com/api/v3/simple/price?ids=${coins}&vs_currencies=${vsCurrency}&include_24hr_change=${include24h}&include_market_cap=true`;
         const resp = await fetch(url, {
-          headers: { "Accept": "application/json", "User-Agent": "Mozilla/5.0" },
+          headers: { Accept: "application/json", "User-Agent": "Mozilla/5.0" },
           signal: AbortSignal.timeout(10000),
         });
         if (!resp.ok) {
           // Fallback: spróbuj przez Tavily gdy CoinGecko blokuje
           return `coingecko_price: CoinGecko zwrócił ${resp.status}. Spróbuj: tavily_search("cena ${coins} w ${vsCurrency} dzisiaj")`;
         }
-        const data = await resp.json() as Record<string, Record<string, number>>;
+        const data = (await resp.json()) as Record<
+          string,
+          Record<string, number>
+        >;
         const coinList = coins.split(",");
-        return coinList.map(coin => {
-          const d = data[coin];
-          if (!d) return `${coin}: nie znaleziono`;
-          const price = d[vsCurrency];
-          const change = d[`${vsCurrency}_24h_change`];
-          const mcap = d[`${vsCurrency}_market_cap`];
-          return `**${coin.charAt(0).toUpperCase() + coin.slice(1)}**: ${price?.toLocaleString()} ${vsCurrency.toUpperCase()}` +
-            (include24h && change != null ? ` | 24h: ${change.toFixed(2)}%` : "") +
-            (mcap ? ` | MCap: ${(mcap / 1e9).toFixed(1)}B` : "");
-        }).join("\n");
+        return coinList
+          .map((coin) => {
+            const d = data[coin];
+            if (!d) return `${coin}: nie znaleziono`;
+            const price = d[vsCurrency];
+            const change = d[`${vsCurrency}_24h_change`];
+            const mcap = d[`${vsCurrency}_market_cap`];
+            return (
+              `**${coin.charAt(0).toUpperCase() + coin.slice(1)}**: ${price?.toLocaleString()} ${vsCurrency.toUpperCase()}` +
+              (include24h && change != null
+                ? ` | 24h: ${change.toFixed(2)}%`
+                : "") +
+              (mcap ? ` | MCap: ${(mcap / 1e9).toFixed(1)}B` : "")
+            );
+          })
+          .join("\n");
       } catch (e: unknown) {
         return `coingecko_price error: ${e instanceof Error ? e.message : String(e)}`;
       }

@@ -1,0 +1,571 @@
+{
+  "metadata": {
+    "reportType": "Agents Tools Mapping",
+    "generatedAt": "2026-04-05T08:11:24.001Z"
+  },
+  "agentToolMapping": [
+    {
+      "agentId": "planner",
+      "tools": [
+        {
+          "toolId": "file_read",
+          "permissions": [
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "file_write",
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        }
+      ],
+      "dependencies": [
+        "data-researcher",
+        "code-analyzer"
+      ],
+      "requiredPermissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "agentId": "ml-trainer",
+      "tools": [
+        {
+          "toolId": "file_read",
+          "permissions": [
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "file_write",
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "terminal",
+          "permissions": [
+            "execute"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        }
+      ],
+      "dependencies": [
+        "data-researcher"
+      ],
+      "requiredPermissions": [
+        "read",
+        "write",
+        "execute"
+      ]
+    },
+    {
+      "agentId": "data-researcher",
+      "tools": [
+        {
+          "toolId": "file_read",
+          "permissions": [
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "file_write",
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "web_search",
+          "permissions": [
+            "network",
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        }
+      ],
+      "dependencies": [
+        "web-crawler"
+      ],
+      "requiredPermissions": [
+        "read",
+        "write",
+        "network"
+      ]
+    },
+    {
+      "agentId": "web-crawler",
+      "tools": [
+        {
+          "toolId": "web_search",
+          "permissions": [
+            "network",
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "file_read",
+          "permissions": [
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "file_write",
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        }
+      ],
+      "dependencies": [],
+      "requiredPermissions": [
+        "network",
+        "read",
+        "write"
+      ]
+    },
+    {
+      "agentId": "content-generator",
+      "tools": [
+        {
+          "toolId": "file_write",
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "file_read",
+          "permissions": [
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "code_gen",
+          "permissions": [
+            "write"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        }
+      ],
+      "dependencies": [
+        "planner",
+        "data-researcher"
+      ],
+      "requiredPermissions": [
+        "read",
+        "write"
+      ]
+    },
+    {
+      "agentId": "code-analyzer",
+      "tools": [
+        {
+          "toolId": "file_read",
+          "permissions": [
+            "read"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "file_write",
+          "permissions": [
+            "read",
+            "write"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        },
+        {
+          "toolId": "terminal",
+          "permissions": [
+            "execute"
+          ],
+          "required": true,
+          "usageFrequency": "high"
+        }
+      ],
+      "dependencies": [
+        "planner"
+      ],
+      "requiredPermissions": [
+        "read",
+        "write",
+        "execute"
+      ]
+    }
+  ],
+  "toolAgentMatrix": [
+    {
+      "toolId": "file_read",
+      "usedBy": [
+        "planner",
+        "ml-trainer",
+        "data-researcher",
+        "web-crawler",
+        "content-generator",
+        "code-analyzer"
+      ],
+      "agentCount": 6,
+      "permissionLevel": "low"
+    },
+    {
+      "toolId": "file_write",
+      "usedBy": [
+        "planner",
+        "ml-trainer",
+        "data-researcher",
+        "web-crawler",
+        "content-generator",
+        "code-analyzer"
+      ],
+      "agentCount": 6,
+      "permissionLevel": "medium"
+    },
+    {
+      "toolId": "terminal",
+      "usedBy": [
+        "ml-trainer",
+        "code-analyzer"
+      ],
+      "agentCount": 2,
+      "permissionLevel": "high"
+    },
+    {
+      "toolId": "web_search",
+      "usedBy": [
+        "data-researcher",
+        "web-crawler"
+      ],
+      "agentCount": 2,
+      "permissionLevel": "medium"
+    },
+    {
+      "toolId": "code_gen",
+      "usedBy": [
+        "content-generator"
+      ],
+      "agentCount": 1,
+      "permissionLevel": "medium"
+    }
+  ],
+  "capabilityToolMapping": [
+    {
+      "capability": "task-decomposition",
+      "agent": "planner",
+      "requiredTools": [
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 2
+    },
+    {
+      "capability": "step-by-step-planning",
+      "agent": "planner",
+      "requiredTools": [
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 2
+    },
+    {
+      "capability": "resource-allocation",
+      "agent": "planner",
+      "requiredTools": [
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 2
+    },
+    {
+      "capability": "timeline-estimation",
+      "agent": "planner",
+      "requiredTools": [
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 2
+    },
+    {
+      "capability": "risk-assessment",
+      "agent": "planner",
+      "requiredTools": [
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 2
+    },
+    {
+      "capability": "llm-finetuning",
+      "agent": "ml-trainer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "vision-training",
+      "agent": "ml-trainer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "model-evaluation",
+      "agent": "ml-trainer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "experiment-tracking",
+      "agent": "ml-trainer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "dataset-exploration",
+      "agent": "data-researcher",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "web_search"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "paper-research",
+      "agent": "data-researcher",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "web_search"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "gradio-demos",
+      "agent": "data-researcher",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "web_search"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "data-analysis",
+      "agent": "data-researcher",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "web_search"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "web-crawling",
+      "agent": "web-crawler",
+      "requiredTools": [
+        "web_search",
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "content-extraction",
+      "agent": "web-crawler",
+      "requiredTools": [
+        "web_search",
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "web-search",
+      "agent": "web-crawler",
+      "requiredTools": [
+        "web_search",
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "url-mapping",
+      "agent": "web-crawler",
+      "requiredTools": [
+        "web_search",
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "site-structure-analysis",
+      "agent": "web-crawler",
+      "requiredTools": [
+        "web_search",
+        "file_read",
+        "file_write"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "content-generation",
+      "agent": "content-generator",
+      "requiredTools": [
+        "file_write",
+        "file_read",
+        "code_gen"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "code-generation",
+      "agent": "content-generator",
+      "requiredTools": [
+        "file_write",
+        "file_read",
+        "code_gen"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "documentation-writing",
+      "agent": "content-generator",
+      "requiredTools": [
+        "file_write",
+        "file_read",
+        "code_gen"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "demo-creation",
+      "agent": "content-generator",
+      "requiredTools": [
+        "file_write",
+        "file_read",
+        "code_gen"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "template-generation",
+      "agent": "content-generator",
+      "requiredTools": [
+        "file_write",
+        "file_read",
+        "code_gen"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "code-review",
+      "agent": "code-analyzer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "performance-analysis",
+      "agent": "code-analyzer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "security-audit",
+      "agent": "code-analyzer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "refactoring",
+      "agent": "code-analyzer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    },
+    {
+      "capability": "bug-detection",
+      "agent": "code-analyzer",
+      "requiredTools": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "toolCount": 3
+    }
+  ],
+  "recommendations": {
+    "highUsageTools": [
+      "file_read",
+      "file_write"
+    ],
+    "underutilizedTools": [
+      "code_gen"
+    ],
+    "permissionReview": [
+      "terminal"
+    ]
+  }
+}

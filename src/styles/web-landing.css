@@ -1863,6 +1863,32 @@ footer {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0; }
 }
+.buch-msg-image {
+  margin-top: 6px;
+}
+.buch-img-preview {
+  max-width: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(124,255,178,0.15);
+  display: block;
+}
+.buch-img-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(124,255,178,0.25);
+  background: rgba(124,255,178,0.07);
+  color: #7cffb2;
+  font-size: 11px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.buch-img-btn:hover {
+  background: rgba(124,255,178,0.15);
+}
 .buch-widget-footer {
   flex-shrink: 0;
   padding: 10px 12px;
@@ -2734,7 +2760,12 @@ footer {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ah-task-dur { color: #6b7a99; margin-left: auto; }
+.ah-task-dur { color: #6b7a99; }
+.ah-task-toggle { color: #4b5a78; font-size: 9px; opacity: 0.7; }
+.ah-task-hdr:hover .ah-task-toggle { opacity: 1; color: #7b8fac; }
+.ah-task-collapsed .ah-task-hdr { border-bottom: none; }
+.ah-task-collapsed { opacity: 0.7; }
+.ah-task-collapsed:hover { opacity: 1; }
 .ah-task-lines {
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;

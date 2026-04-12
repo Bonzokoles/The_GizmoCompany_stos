@@ -1,0 +1,755 @@
+{
+  "timestamp": "2026-04-05T08:04:33.989Z",
+  "root": "U:\\WWW_Zen_BRo_wser_org3",
+  "toolCategories": {
+    "agentTools": {
+      "source": "agents.config.ts",
+      "description": "Tool IDs defined for agents",
+      "tools": [
+        {
+          "id": "file_read",
+          "type": "agent_tool",
+          "enabled": true,
+          "permissions": [
+            "agent_execution"
+          ]
+        },
+        {
+          "id": "file_write",
+          "type": "agent_tool",
+          "enabled": true,
+          "permissions": [
+            "agent_execution"
+          ]
+        },
+        {
+          "id": "terminal",
+          "type": "agent_tool",
+          "enabled": true,
+          "permissions": [
+            "agent_execution"
+          ]
+        },
+        {
+          "id": "web_search",
+          "type": "agent_tool",
+          "enabled": true,
+          "permissions": [
+            "agent_execution"
+          ]
+        },
+        {
+          "id": "code_gen",
+          "type": "agent_tool",
+          "enabled": true,
+          "permissions": [
+            "agent_execution"
+          ]
+        }
+      ]
+    },
+    "apiEndpoints": {
+      "source": "hub-server.ts",
+      "description": "REST API endpoints exposed by JIMBO Agent HUB",
+      "tools": [
+        {
+          "id": "GET /status",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /chat",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /agent/run",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /agent/tasks",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "DELETE /agent/tasks/:id",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /skills/list",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /skills/search",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /skills/save",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /skills/export",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /skills/import",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /skills/graph",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /skills/goose-sessions",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /skills/import-goose-session",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /skills/export",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /skills/import",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /skills/export-skill-md",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /skills/:id",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /skills/:id/result",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "DELETE /skills/:id",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /memory/core",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /memory/core",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "DELETE /memory/core/:key",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /memory/archival",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /memory/archival/save",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /memory/archival/search",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "DELETE /memory/archival/:id",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /memory/recall",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /memory/recall/search",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /memory/recall/save",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /memory/stats",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /session",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /session/reset",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /podman/status",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /podman/containers",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /podman/containers/:name/start",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /podman/containers/:name/stop",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /podman/containers/:name/restart",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /podman/containers/:name/logs",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /namespaces",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /namespaces/activate",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /namespaces/deactivate",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /agents/list",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /agents/active",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /agents/activate",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /zeno/agents",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /zeno/agents/deploy",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /goose/desktop/status",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /goose/desktop/launch",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /mybonzo/projects",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /mybonzo/status",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /mybonzo/chat",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /mybonzo/skills",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /mybonzo/skills/seed",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /projects/list",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /projects/:id/deployments",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /projects/:id/logs",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /projects/:id/deploy",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /projects/:id/gh/runs",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /projects/:id/d1",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "POST /projects/:id/d1/query",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        },
+        {
+          "id": "GET /projects/cf/all",
+          "type": "api_endpoint",
+          "enabled": true,
+          "permissions": [
+            "http_access"
+          ]
+        }
+      ]
+    },
+    "moaFunctions": {
+      "source": "moa-pipeline.mjs",
+      "description": "Functions defined in MOA Pipeline",
+      "tools": [
+        {
+          "id": "loadEnv",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "sleep",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "postJSON",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "callLLM",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "createEmbedding",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "tfidfEmbedding",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "cosineSimilarity",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "ensureDirs",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "runAnalyzer",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "runTranslator",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "runHTMLWriter",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "applyFilters",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "applySort",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "runEmbedder",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "generateSearchModule",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "loadVectors",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "cosineSimilarity",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "searchKB",
+          "type": "function",
+          "isExported": true,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "searchKBKeyword",
+          "type": "function",
+          "isExported": true,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "listCategories",
+          "type": "function",
+          "isExported": true,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "getByCategory",
+          "type": "function",
+          "isExported": true,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        },
+        {
+          "id": "main",
+          "type": "function",
+          "isExported": false,
+          "enabled": true,
+          "permissions": [
+            "script_execution"
+          ]
+        }
+      ]
+    }
+  },
+  "summary": {
+    "totalTools": 88,
+    "categories": 3,
+    "timestamp": "2026-04-05T08:04:34.034Z"
+  }
+}

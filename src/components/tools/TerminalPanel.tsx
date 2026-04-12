@@ -158,6 +158,20 @@ const COMMAND_CATEGORIES: CommandCategory[] = [
       { label: 'Hub restart', cmd: 'cd U:\\WWW_Zen_BRo_wser_org3\\JIMBO_agent_HUB && npx tsx hub-server.ts', icon: '🔄', description: 'Zrestartuj JIMBO HUB' },
     ],
   },
+  {
+    name: 'Code Agent',
+    icon: '💻',
+    commands: [
+      { label: 'Narzędzie TS', cmd: 'jimbo napisz narzędzie TypeScript dla JIMBO_KIT które', icon: '🔧', description: 'Wygeneruj nowy tool .ts' },
+      { label: 'Skrypt Python', cmd: 'jimbo napisz skrypt Python który', icon: '🐍', description: 'Wygeneruj skrypt .py' },
+      { label: 'Refaktor kodu', cmd: 'jimbo zrefaktoruj i uprość następujący kod:', icon: '♻', description: 'Popraw / uprość kod' },
+      { label: 'Wyjaśnij kod', cmd: 'jimbo wyjaśnij krok po kroku co robi:', icon: '📖', description: 'Analiza i dokumentacja kodu' },
+      { label: 'Fix błędu TS', cmd: 'jimbo napraw ten błąd TypeScript:', icon: '🐛', description: 'Debug TypeScript' },
+      { label: 'Testy jednostkowe', cmd: 'jimbo napisz testy jednostkowe (vitest) dla:', icon: '✅', description: 'Generuj testy' },
+      { label: 'JIMBO tools config', cmd: 'curl -s http://localhost:4111/api/config', icon: '⚙', description: 'Aktualny model JIMBO' },
+      { label: 'JIMBO wszystkie tools', cmd: 'curl -s http://localhost:4111/tools', icon: '🛠', description: 'Lista wszystkich narzędzi JIMBO' },
+    ],
+  },
 ];
 
 // Sanitize user input to prevent injection
@@ -319,6 +333,7 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
           '  tabs              — otwarte karty',
           '  network           — statystyki sieci',
           '  navigate <url>    — nawiguj kartę',
+          '  jimbo <prompt>    — zapytaj Code Agent (model kodujący)',
           '  sysinfo           — informacje systemowe',
           '  env [nazwa]       — zmienne środowiskowe',
           '  kill <pid>        — zakończ proces',
@@ -369,6 +384,7 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
           '  network   → statystyki sieci',
           '  sysinfo   → info systemowe',
           '  mcp-tools → narzędzia MCP',
+          '  jimbo     → Code Agent (deepseek-coder / GPT-4o-mini)',
         ].join('\n'));
         return true;
       }
@@ -518,6 +534,36 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
         return true;
       }
 
+      if (lower.startsWith('jimbo ')) {
+        const prompt = cmd.slice(6).trim();
+        if (!prompt) { addLine('error', 'Użycie: jimbo <zapytanie>  np: jimbo napisz funkcję fibonacci'); return true; }
+        void (async () => {
+          addLine('info', `🤖 JIMBO [Code Agent] — ${prompt.slice(0, 60)}${prompt.length > 60 ? '...' : ''}`);
+          try {
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 60_000);
+            const res = await fetch('http://localhost:4111/api/ask', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: prompt }),
+              signal: ctrl.signal,
+            });
+            clearTimeout(timer);
+            if (!res.ok) { addLine('error', `JIMBO error: HTTP ${res.status}`); return; }
+            const data = await res.json() as { text?: string; error?: string; model?: string };
+            if (data.error) {
+              addLine('error', data.error);
+            } else {
+              addLine('output', `[model: ${data.model ?? 'JIMBO'}]\n${data.text ?? ''}`);
+            }
+          } catch (e: unknown) {
+            const msg = e instanceof Error ? e.message : String(e);
+            addLine('error', `Błąd połączenia z JIMBO (port 4111): ${msg}`);
+          }
+        })();
+        return true;
+      }
+
       if (lower.startsWith('navigate ')) {
         const url = cmd.slice(9).trim();
         if (url) {
@@ -627,7 +673,7 @@ export function TerminalPanel({ onClose, onNavigate }: TerminalPanelProps) {
   const handlePaletteRun = useCallback((cmd: string) => {
     // If it's a built-in alias, handle directly
     const lower = cmd.toLowerCase().trim();
-    const builtins = ['providers', 'metrics', 'tabs', 'network', 'mcp-tools', 'sysinfo'];
+    const builtins = ['providers', 'metrics', 'tabs', 'network', 'mcp-tools', 'sysinfo', 'jimbo'];
     if (builtins.includes(lower)) {
       addLine('input', `$ ${cmd}`);
       handleBuiltinCommand(cmd);

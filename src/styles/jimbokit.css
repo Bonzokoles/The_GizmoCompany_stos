@@ -595,3 +595,167 @@
 .jk-btn--danger:hover {
   background: rgba(248, 113, 113, 0.1);
 }
+
+.jk-btn--primary {
+  border-color: rgba(100, 255, 218, 0.5);
+  color: #64ffda;
+  padding: 8px 18px;
+}
+
+.jk-btn--primary:hover {
+  background: rgba(100, 255, 218, 0.1);
+}
+
+.jk-btn--primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Settings tab ────────────────────────────────────────────────────────── */
+
+.jk-settings {
+  padding: 12px 14px;
+  overflow-y: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.jk-settings-section {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.jk-settings-section:last-child {
+  border-bottom: none;
+}
+
+.jk-settings-title {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ccd6f6;
+}
+
+.jk-settings-info {
+  margin: 0;
+  font-size: 11px;
+  color: #8892b0;
+  line-height: 1.5;
+}
+
+.jk-settings-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #a8b2d8;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.jk-settings-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e6f1ff;
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.jk-settings-select:focus {
+  border-color: rgba(100, 255, 218, 0.4);
+}
+
+.jk-settings-select option[disabled] {
+  color: #4a5568;
+  font-style: italic;
+}
+
+.jk-settings-input {
+  width: 100%;
+  margin-top: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  color: #e6f1ff;
+  padding: 7px 10px;
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 12px;
+  border-radius: 4px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.jk-settings-input:focus {
+  border-color: rgba(100, 255, 218, 0.6);
+}
+
+.jk-settings-current {
+  margin-top: 5px;
+  font-size: 11px;
+  color: #8892b0;
+}
+
+.jk-settings-current code {
+  color: #64ffda;
+  background: rgba(100, 255, 218, 0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+}
+
+.jk-settings-status {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.jk-settings-status--ok {
+  background: rgba(100, 255, 218, 0.08);
+  color: #64ffda;
+  border: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+.jk-settings-status--err {
+  background: rgba(248, 113, 113, 0.08);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+.jk-settings-note {
+  font-size: 11px;
+  color: #8892b0;
+  line-height: 1.6;
+}
+
+.jk-settings-note strong {
+  color: #a8b2d8;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.jk-settings-note ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.jk-settings-note li {
+  margin-bottom: 3px;
+}
+
+.jk-settings-note code {
+  color: #64ffda;
+  background: rgba(100, 255, 218, 0.08);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: 'Fira Code', monospace;
+}

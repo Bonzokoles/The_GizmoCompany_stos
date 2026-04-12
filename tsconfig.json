@@ -13,11 +13,23 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "allowImportingTsExtensions": true,
+    "ignoreDeprecations": "6.0",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*", "src/**/*.d.ts", "vite.config.ts", "agents.config.ts"],
-  "exclude": ["node_modules", "dist", "dist-electron", "src-electron", "src/vendor"]
+  "include": [
+    "src/**/*",
+    "src/**/*.d.ts",
+    "vite.config.ts",
+    "agents.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-electron",
+    "src-electron",
+    "src/vendor"
+  ]
 }

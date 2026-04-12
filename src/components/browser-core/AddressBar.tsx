@@ -2,8 +2,14 @@
  * Address Bar Component — React 19 + URL validation (CR-006 fix)
  */
 
-import { useState, useEffect, useCallback, useOptimistic, useDeferredValue } from 'react';
-import { BLOCKED_PROTOCOLS } from '../../types/security-constants';
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useOptimistic,
+  useDeferredValue,
+} from "react";
+import { BLOCKED_PROTOCOLS } from "../../types/security-constants";
 
 interface AddressBarProps {
   url: string;
@@ -17,9 +23,14 @@ function sanitizeUrl(raw: string): string | null {
 
   // CR-006: Block dangerous protocols
   const lower = trimmed.toLowerCase();
-  if (BLOCKED_PROTOCOLS.some(p => lower.startsWith(p))) {
+  if (BLOCKED_PROTOCOLS.some((p) => lower.startsWith(p))) {
     console.warn(`❌ Blocked unsafe protocol in URL: ${trimmed}`);
     return null;
+  }
+
+  // Allow special browser URLs (about:blank, about:newtab, etc.)
+  if (/^about:/i.test(lower)) {
+    return trimmed;
   }
 
   // Add https:// if missing protocol
@@ -40,10 +51,10 @@ function sanitizeUrl(raw: string): string | null {
 
 export function AddressBar({ url, onNavigate, loading }: AddressBarProps) {
   const [input, setInput] = useState(url);
-  
+
   // React 19: useOptimistic for instant URL display feedback
   const [optimisticUrl, setOptimisticUrl] = useOptimistic(url);
-  
+
   // React 19: useDeferredValue for non-urgent validation feedback
   const deferredInput = useDeferredValue(input);
 
@@ -51,18 +62,23 @@ export function AddressBar({ url, onNavigate, loading }: AddressBarProps) {
     setInput(url);
   }, [url]);
 
-  const handleSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    const sanitized = sanitizeUrl(input);
-    if (sanitized) {
-      // Set optimistic state immediately for instant feedback
-      setOptimisticUrl(sanitized);
-      onNavigate(sanitized);
-    }
-  }, [input, onNavigate, setOptimisticUrl]);
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      const sanitized = sanitizeUrl(input);
+      if (sanitized) {
+        // Set optimistic state immediately for instant feedback
+        setOptimisticUrl(sanitized);
+        onNavigate(sanitized);
+      }
+    },
+    [input, onNavigate, setOptimisticUrl],
+  );
 
   // Validate deferred input for visual feedback (non-blocking)
-  const isValid = deferredInput.trim() ? sanitizeUrl(deferredInput) !== null : true;
+  const isValid = deferredInput.trim()
+    ? sanitizeUrl(deferredInput) !== null
+    : true;
 
   return (
     <form className="address-bar" onSubmit={handleSubmit} role="search">
@@ -72,12 +88,17 @@ export function AddressBar({ url, onNavigate, loading }: AddressBarProps) {
         onChange={(e) => setInput(e.target.value)}
         placeholder="Wpisz adres URL lub szukaj..."
         disabled={loading}
-        className={`address-input ${!isValid ? 'invalid' : ''}`}
+        className={`address-input ${!isValid ? "invalid" : ""}`}
         aria-label="Pasek adresu"
         aria-invalid={!isValid}
       />
-      <button type="submit" disabled={loading || !isValid} className="btn-navigate" aria-label={loading ? 'Ładowanie' : 'Przejdź'}>
-        {loading ? '⟳' : '→'}
+      <button
+        type="submit"
+        disabled={loading || !isValid}
+        className="btn-navigate"
+        aria-label={loading ? "Ładowanie" : "Przejdź"}
+      >
+        {loading ? "⟳" : "→"}
       </button>
     </form>
   );

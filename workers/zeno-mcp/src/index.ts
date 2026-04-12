@@ -7,10 +7,11 @@
  *   ALL  /mcp    — MCP StreamableHTTP + SSE (dla Claude Desktop / Cursor)
  */
 
-import { ZenoMCP } from './mcp';
+import { ZenoMCPv2, ZenoMCP } from './mcp';
 import type { Env } from './mcp';
 
-export { ZenoMCP };
+// Both exported: ZenoMCP (legacy, being deleted in v2 migration) + ZenoMCPv2 (new SQLite class)
+export { ZenoMCP, ZenoMCPv2 };
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
@@ -41,7 +42,7 @@ export default {
     }
 
     if (url.pathname === '/mcp') {
-      return ZenoMCP.serve('/mcp').fetch(request, env, ctx);
+      return ZenoMCPv2.serve('/mcp').fetch(request, env, ctx);
     }
 
     return new Response('Not Found', { status: 404 });

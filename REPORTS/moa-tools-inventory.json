@@ -1,0 +1,569 @@
+{
+  "metadata": {
+    "reportType": "MOA Tools Inventory",
+    "generatedAt": "2026-04-05T08:11:24.001Z",
+    "project": "ZENO Browser",
+    "version": "1.0.0"
+  },
+  "tools": {
+    "basicToolIds": [
+      {
+        "id": "file_read",
+        "type": "basic",
+        "usedBy": [
+          "planner",
+          "ml-trainer",
+          "data-researcher",
+          "web-crawler",
+          "content-generator",
+          "code-analyzer"
+        ],
+        "usageCount": 6,
+        "defaultPermissions": [
+          "read"
+        ],
+        "defaultTimeout": 30000,
+        "enabled": true,
+        "cost": 0
+      },
+      {
+        "id": "file_write",
+        "type": "basic",
+        "usedBy": [
+          "planner",
+          "ml-trainer",
+          "data-researcher",
+          "web-crawler",
+          "content-generator",
+          "code-analyzer"
+        ],
+        "usageCount": 6,
+        "defaultPermissions": [
+          "read",
+          "write"
+        ],
+        "defaultTimeout": 30000,
+        "enabled": true,
+        "cost": 0
+      },
+      {
+        "id": "terminal",
+        "type": "basic",
+        "usedBy": [
+          "ml-trainer",
+          "code-analyzer"
+        ],
+        "usageCount": 2,
+        "defaultPermissions": [
+          "execute"
+        ],
+        "defaultTimeout": 30000,
+        "enabled": true,
+        "cost": 0
+      },
+      {
+        "id": "web_search",
+        "type": "basic",
+        "usedBy": [
+          "data-researcher",
+          "web-crawler"
+        ],
+        "usageCount": 2,
+        "defaultPermissions": [
+          "network",
+          "read"
+        ],
+        "defaultTimeout": 30000,
+        "enabled": true,
+        "cost": 0
+      },
+      {
+        "id": "code_gen",
+        "type": "basic",
+        "usedBy": [
+          "content-generator"
+        ],
+        "usageCount": 1,
+        "defaultPermissions": [
+          "write"
+        ],
+        "defaultTimeout": 30000,
+        "enabled": true,
+        "cost": 0
+      }
+    ],
+    "moaFunctions": [
+      {
+        "name": "loadEnv",
+        "type": "function",
+        "params": [],
+        "paramCount": 0,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "sleep",
+        "type": "function",
+        "params": [
+          "ms"
+        ],
+        "paramCount": 1,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "postJSON",
+        "type": "function",
+        "params": [
+          "url",
+          "headers",
+          "body"
+        ],
+        "paramCount": 3,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "callLLM",
+        "type": "function",
+        "params": [
+          "ENV",
+          "prompt",
+          "_model = 'deepseek-chat'",
+          "maxTokens = 2000"
+        ],
+        "paramCount": 4,
+        "isExported": false,
+        "category": "utility",
+        "description": "Wywołanie modelu LLM przez OpenRouter API"
+      },
+      {
+        "name": "createEmbedding",
+        "type": "function",
+        "params": [
+          "ENV",
+          "text"
+        ],
+        "paramCount": 2,
+        "isExported": false,
+        "category": "embedding",
+        "description": "Tworzenie embeddingów tekstowych"
+      },
+      {
+        "name": "tfidfEmbedding",
+        "type": "function",
+        "params": [
+          "text"
+        ],
+        "paramCount": 1,
+        "isExported": false,
+        "category": "embedding",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "cosineSimilarity",
+        "type": "function",
+        "params": [
+          "a",
+          "b"
+        ],
+        "paramCount": 2,
+        "isExported": false,
+        "category": "embedding",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "ensureDirs",
+        "type": "function",
+        "params": [],
+        "paramCount": 0,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "runAnalyzer",
+        "type": "function",
+        "params": [
+          "rawDataset"
+        ],
+        "paramCount": 1,
+        "isExported": false,
+        "category": "agent",
+        "description": "Grupuje rekordy wg tematu, deduplikuje, ocenia jakość"
+      },
+      {
+        "name": "runTranslator",
+        "type": "function",
+        "params": [
+          "ENV",
+          "topics"
+        ],
+        "paramCount": 2,
+        "isExported": false,
+        "category": "agent",
+        "description": "Tłumaczy na polski + generuje podsumowania per temat"
+      },
+      {
+        "name": "runHTMLWriter",
+        "type": "function",
+        "params": [
+          "translated",
+          "metadata"
+        ],
+        "paramCount": 2,
+        "isExported": false,
+        "category": "agent",
+        "description": "Generuje polską bazę wiedzy HTML (dark theme)"
+      },
+      {
+        "name": "applyFilters",
+        "type": "function",
+        "params": [],
+        "paramCount": 0,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "applySort",
+        "type": "function",
+        "params": [
+          "mode"
+        ],
+        "paramCount": 1,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "runEmbedder",
+        "type": "function",
+        "params": [
+          "ENV",
+          "translated"
+        ],
+        "paramCount": 2,
+        "isExported": false,
+        "category": "agent",
+        "description": "Tworzy embeddingi OpenAI → wektorowa baza wiedzy"
+      },
+      {
+        "name": "generateSearchModule",
+        "type": "function",
+        "params": [
+          "vectors"
+        ],
+        "paramCount": 1,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "loadVectors",
+        "type": "function",
+        "params": [],
+        "paramCount": 0,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "searchKB",
+        "type": "function",
+        "params": [
+          "queryEmbedding",
+          "topK = 5"
+        ],
+        "paramCount": 2,
+        "isExported": true,
+        "category": "search",
+        "description": "Semantyczne wyszukiwanie w bazie wiedzy"
+      },
+      {
+        "name": "searchKBKeyword",
+        "type": "function",
+        "params": [
+          "query",
+          "topK = 10"
+        ],
+        "paramCount": 2,
+        "isExported": true,
+        "category": "search",
+        "description": "Keyword-based search w bazie wiedzy"
+      },
+      {
+        "name": "listCategories",
+        "type": "function",
+        "params": [],
+        "paramCount": 0,
+        "isExported": true,
+        "category": "exported",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "getByCategory",
+        "type": "function",
+        "params": [
+          "category"
+        ],
+        "paramCount": 1,
+        "isExported": true,
+        "category": "exported",
+        "description": "Funkcja pomocnicza"
+      },
+      {
+        "name": "main",
+        "type": "function",
+        "params": [],
+        "paramCount": 0,
+        "isExported": false,
+        "category": "utility",
+        "description": "Funkcja pomocnicza"
+      }
+    ],
+    "apiEndpoints": [
+      {
+        "method": "GET",
+        "path": "/status",
+        "category": "status"
+      },
+      {
+        "method": "POST",
+        "path": "/chat",
+        "category": "chat"
+      },
+      {
+        "method": "POST",
+        "path": "/agent/run",
+        "category": "agent"
+      },
+      {
+        "method": "GET",
+        "path": "/agent/tasks",
+        "category": "agent"
+      },
+      {
+        "method": "DELETE",
+        "path": "/agent/tasks/:id",
+        "category": "agent"
+      },
+      {
+        "method": "POST",
+        "path": "/skills/search",
+        "category": "skills"
+      },
+      {
+        "method": "POST",
+        "path": "/skills/save",
+        "category": "skills"
+      },
+      {
+        "method": "GET",
+        "path": "/skills/list",
+        "category": "skills"
+      },
+      {
+        "method": "GET",
+        "path": "/skills/export-skill-md",
+        "category": "skills"
+      },
+      {
+        "method": "GET",
+        "path": "/skills/:id",
+        "category": "skills"
+      },
+      {
+        "method": "DELETE",
+        "path": "/skills/:id",
+        "category": "skills"
+      },
+      {
+        "method": "GET",
+        "path": "/memory/core",
+        "category": "memory"
+      },
+      {
+        "method": "POST",
+        "path": "/memory/core",
+        "category": "memory"
+      },
+      {
+        "method": "GET",
+        "path": "/memory/archival",
+        "category": "memory"
+      },
+      {
+        "method": "POST",
+        "path": "/memory/archival/save",
+        "category": "memory"
+      },
+      {
+        "method": "POST",
+        "path": "/memory/archival/search",
+        "category": "memory"
+      },
+      {
+        "method": "GET",
+        "path": "/memory/recall",
+        "category": "memory"
+      },
+      {
+        "method": "POST",
+        "path": "/memory/recall/search",
+        "category": "memory"
+      },
+      {
+        "method": "GET",
+        "path": "/memory/stats",
+        "category": "memory"
+      },
+      {
+        "method": "GET",
+        "path": "/zeno/agents",
+        "category": "zeno"
+      },
+      {
+        "method": "POST",
+        "path": "/zeno/agents/deploy",
+        "category": "zeno"
+      }
+    ]
+  },
+  "agents": [
+    {
+      "id": "planner",
+      "toolIds": [
+        "file_read",
+        "file_write"
+      ],
+      "capabilities": [
+        "task-decomposition",
+        "step-by-step-planning",
+        "resource-allocation",
+        "timeline-estimation",
+        "risk-assessment"
+      ],
+      "toolCount": 2,
+      "capabilityCount": 5
+    },
+    {
+      "id": "ml-trainer",
+      "toolIds": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "capabilities": [
+        "llm-finetuning",
+        "vision-training",
+        "model-evaluation",
+        "experiment-tracking"
+      ],
+      "toolCount": 3,
+      "capabilityCount": 4
+    },
+    {
+      "id": "data-researcher",
+      "toolIds": [
+        "file_read",
+        "file_write",
+        "web_search"
+      ],
+      "capabilities": [
+        "dataset-exploration",
+        "paper-research",
+        "gradio-demos",
+        "data-analysis"
+      ],
+      "toolCount": 3,
+      "capabilityCount": 4
+    },
+    {
+      "id": "web-crawler",
+      "toolIds": [
+        "web_search",
+        "file_read",
+        "file_write"
+      ],
+      "capabilities": [
+        "web-crawling",
+        "content-extraction",
+        "web-search",
+        "url-mapping",
+        "site-structure-analysis"
+      ],
+      "toolCount": 3,
+      "capabilityCount": 5
+    },
+    {
+      "id": "content-generator",
+      "toolIds": [
+        "file_write",
+        "file_read",
+        "code_gen"
+      ],
+      "capabilities": [
+        "content-generation",
+        "code-generation",
+        "documentation-writing",
+        "demo-creation",
+        "template-generation"
+      ],
+      "toolCount": 3,
+      "capabilityCount": 5
+    },
+    {
+      "id": "code-analyzer",
+      "toolIds": [
+        "file_read",
+        "file_write",
+        "terminal"
+      ],
+      "capabilities": [
+        "code-review",
+        "performance-analysis",
+        "security-audit",
+        "refactoring",
+        "bug-detection"
+      ],
+      "toolCount": 3,
+      "capabilityCount": 5
+    }
+  ],
+  "configuration": {
+    "hubPort": 4222,
+    "defaultModel": "claude-haiku-4-5-20251001",
+    "fallbackModel": "google/gemini-2.0-flash-001",
+    "requiredEnvVars": [
+      "LLM_PROVIDER",
+      "ANTHROPIC_API_KEY",
+      "HUB_PORT",
+      "GOOSE_PATH"
+    ],
+    "skillNamespaces": [
+      "global",
+      "zeno",
+      "electron",
+      "react",
+      "cloudflare"
+    ]
+  },
+  "statistics": {
+    "totalBasicTools": 5,
+    "totalMoaFunctions": 21,
+    "totalExportFunctions": 4,
+    "totalAgents": 6,
+    "totalApiEndpoints": 21,
+    "toolUsageDistribution": {
+      "file_read": 6,
+      "file_write": 6,
+      "terminal": 2,
+      "web_search": 2,
+      "code_gen": 1
+    }
+  }
+}

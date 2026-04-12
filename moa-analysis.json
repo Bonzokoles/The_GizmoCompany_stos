@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "analysisDate": "2026-04-05T08:19:49.079Z",
+    "script": "moa-pipeline.mjs",
+    "parameters": [
+      "--analyze"
+    ],
+    "status": "completed"
+  },
+  "dataset": {
+    "path": "U:\\WWW_Zen_BRo_wser_org3\\ai-hub\\js\\data\\datasets\\ai-tools-workflow-2026-2026-03-25.json",
+    "records": 486,
+    "topics": 55,
+    "categories": 44
+  },
+  "agents": [
+    {
+      "name": "ANALYZER",
+      "id": 1,
+      "description": "Grupowanie rekordów wg tematu, deduplikacja, ocena jakości",
+      "output": "55 tematów z 486 rekordów"
+    },
+    {
+      "name": "TRANSLATOR",
+      "id": 2,
+      "description": "Tłumaczenie na polski + generowanie podsumowań per temat",
+      "model": "gpt-4o-mini → fallback deepseek-chat",
+      "cache": {
+        "hits": 55,
+        "total": 55,
+        "hitRate": "100%"
+      },
+      "topicsProcessed": 55
+    },
+    {
+      "name": "HTML WRITER",
+      "id": 3,
+      "description": "Generowanie polskiej bazy wiedzy HTML (dark theme)",
+      "output": {
+        "htmlFile": "U:\\WWW_Zen_BRo_wser_org3\\ai-hub\\knowledge-base\\index.html",
+        "topics": 55,
+        "categories": 44
+      }
+    },
+    {
+      "name": "EMBEDDER",
+      "id": 4,
+      "description": "Tworzenie embeddingów OpenAI → wektorowa baza wiedzy",
+      "model": "HuggingFace all-MiniLM-L6-v2 (384 dim, fallback TF-IDF lokalnie)",
+      "vectors": {
+        "cached": 55,
+        "new": 0,
+        "total": 55,
+        "dimensions": 384
+      },
+      "searchModule": "ai-hub/js/data/vectors/kb-search.mjs"
+    }
+  ],
+  "outputs": {
+    "html": "U:\\WWW_Zen_BRo_wser_org3\\ai-hub\\knowledge-base\\index.html",
+    "vectors": "U:\\WWW_Zen_BRo_wser_org3\\ai-hub\\js\\data\\vectors\\kb-vectors.json",
+    "searchModule": "U:\\WWW_Zen_BRo_wser_org3\\ai-hub\\js\\data\\vectors\\kb-search.mjs"
+  },
+  "performance": {
+    "totalRecords": 486,
+    "topicsGenerated": 55,
+    "categories": 44,
+    "cacheEfficiency": "100%",
+    "apiCalls": 0,
+    "estimatedProcessingTime": "~2 minutes",
+    "embeddingSize": "55 vectors × 384 dim = 21,120 values"
+  },
+  "agentTools": {
+    "basicToolIds": [
+      "file_read",
+      "file_write",
+      "terminal",
+      "web_search",
+      "code_gen"
+    ],
+    "toolDistribution": {
+      "file_read": {
+        "agents": 5,
+        "percentage": "83%"
+      },
+      "file_write": {
+        "agents": 6,
+        "percentage": "100%"
+      },
+      "terminal": {
+        "agents": 3,
+        "percentage": "50%"
+      },
+      "web_search": {
+        "agents": 2,
+        "percentage": "33%"
+      },
+      "code_gen": {
+        "agents": 1,
+        "percentage": "17%"
+      }
+    }
+  },
+  "configuration": {
+    "hubPort": 4222,
+    "defaultModel": "claude-haiku-4-5-20251001",
+    "fallbackModel": "google/gemini-2.0-flash-001",
+    "skillNamespaces": [
+      "global",
+      "zeno",
+      "electron",
+      "react",
+      "cloudflare"
+    ]
+  }
+}
