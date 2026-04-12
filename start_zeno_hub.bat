@@ -282,7 +282,7 @@ if not exist "%JIMBO_TOOL_DIR%\node_modules" (
     cmd /c "cd /d %JIMBO_TOOL_DIR% && npm install > %ZENO_DIR%logs\jimbo_tool_install.log 2>&1"
 )
 
-start "JIMBO-LocalTool" /MIN cmd /c "cd /d %JIMBO_TOOL_DIR% && set JIMBO_PORT=4111&& set JIMBO_MODEL=openai/gpt-4o-mini&& set JIMBO_TOOL_MODEL=openai/gpt-4o-mini&& npx tsx server.ts > %ZENO_DIR%logs\jimbo_tool.log 2>&1"
+start "JIMBO-LocalTool" /MIN cmd /c "cd /d %JIMBO_TOOL_DIR% && set JIMBO_PORT=4111&& set JIMBO_MODEL=gpt-4o-mini&& set JIMBO_TOOL_MODEL=gpt-4o-mini&& set JIMBO_CODING_MODEL=gpt-4o&& npx tsx server.ts > %ZENO_DIR%logs\jimbo_tool.log 2>&1"
 timeout /t 3 /nobreak >nul
 for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%JIMBO_TOOL_PORT% " ^| findstr "LISTENING"') do set JIMBO_TOOL_PID=%%P
 echo   [OK] JIMBO Local Tool Server uruchomiony -^> http://localhost:%JIMBO_TOOL_PORT%  (PID: %JIMBO_TOOL_PID%, log: logs\jimbo_tool.log)
@@ -308,6 +308,15 @@ echo.
 echo [BG] Library curation...
 start "LibCuration" /MIN cmd /c "cd /d %ZENO_DIR% && npm run curate > logs\curate.log 2>&1"
 echo   [OK] Curation uruchomiona (log: logs\curate.log)
+echo.
+
+:: =============================================
+:: KB VIEWER (background, port 8765)
+:: =============================================
+echo [BG] KB Viewer (Baza Wiedzy HTML — port 8765)...
+set "KB_DIR=U:\The_DEVz_HUB_of_work\knowledge_base"
+start "KB-Viewer" /MIN cmd /c "set PYTHONIOENCODING=utf-8 && cd /d %KB_DIR% && python kb_viewer.py > %ZENO_DIR%logs\kb_viewer.log 2>&1"
+echo   [OK] KB Viewer -^> http://localhost:8765
 echo.
 
 :: =============================================
@@ -499,6 +508,8 @@ echo   [OK] JIMBO Agent HUB (port 4224)
 taskkill /FI "WINDOWTITLE eq JIMBO-Chat" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq LibrariesAPI" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq LibCuration" /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq KB-Viewer" /F >nul 2>&1
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":8765 " ^| findstr "LISTENING"') do taskkill /PID %%P /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq Wrangler-CF-Dev" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq MyBonzo-Astro" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq DevzHub-Sync" /F >nul 2>&1
