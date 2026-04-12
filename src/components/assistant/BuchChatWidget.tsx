@@ -11,11 +11,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { PageAgent } from 'page-agent';
 
-// Auto-detect: Vite dev (:5173) or Electron (file:) → proxy through wrangler at :8788
-// Production Cloudflare → relative paths work directly
-const API_BASE = (typeof window !== 'undefined' && (
-  window.location.protocol === 'file:' || window.location.port === '5173'
-)) ? 'http://localhost:8788' : '';
+// Vite proxy (/api → localhost:8788) obsługuje dev i Electron webview.
+// Na CF Pages ścieżki relatywne działają bezpośrednio.
+const API_BASE = '';
 
 interface ToolCall {
   tool:   string;
@@ -329,8 +327,12 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           errorMsg = '⚠ Timeout — zapytanie trwało za długo (CF limit 30s). Spróbuj prostsze pytanie lub inny model.';
         else if (m.includes('503') || m.includes('No API key'))
           errorMsg = '⚠ Brak klucza API — sprawdź ustawienia providera w CF Pages → Secrets.';
-        else if (m.includes('Failed to fetch') || m.includes('NetworkError'))
-          errorMsg = '⚠ Brak połączenia z internetem lub serwer niedostępny.';
+        else if (
+          m.includes('Failed to fetch') || m.includes('NetworkError') ||
+          m.includes('ERR_CONNECTION_REFUSED') || m.includes('ERR_FAILED') ||
+          m.includes('net::') || m.includes('ECONNREFUSED')
+        )
+          errorMsg = '⚠ Brak połączenia z API — uruchom: npx wrangler pages dev --proxy 5173 --port 8788';
         else
           errorMsg = `⚠ ${m}`;
       } else if (typeof err === 'string') {

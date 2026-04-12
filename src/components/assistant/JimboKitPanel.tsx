@@ -38,6 +38,15 @@ interface JimboKitPanelProps {
   /** Whether the panel floats (true) or is embedded (false, default) */
   floating?: boolean;
   onClose?: () => void;
+  /** Kontekst dokumentu z KB Viewer */
+  kbDocContext?: {
+    title: string;
+    url: string;
+    category: string;
+    query: string;
+    content: string;
+    md_path: string;
+  } | null;
 }
 
 // ─── Markdown-lite renderer (no external deps) ────────────────────────────────
@@ -329,6 +338,7 @@ export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
   currentUrl = '',
   floating = false,
   onClose,
+  kbDocContext,
 }) => {
   const store = useJimboKitStore();
   const [activeTab, setActiveTab] = useState<Tab>('chat');
@@ -350,6 +360,13 @@ export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
       store.clearTerminalLog();
     }
   }, [store.terminalLog, store.clearTerminalLog]);
+
+  // Gdy kbDocContext się zmienia → przełącz na chat
+  useEffect(() => {
+    if (kbDocContext) {
+      setActiveTab('chat');
+    }
+  }, [kbDocContext]);
 
   const handleSend = useCallback(async () => {
     const text = inputText.trim();
@@ -469,6 +486,52 @@ export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
                 <div ref={messagesEndRef} />
               </div>
               <div className="jk-input-area">
+                {kbDocContext && (
+                  <div style={{
+                    background: '#1e1b4b',
+                    border: '1px solid #7c3aed',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    marginBottom: '8px',
+                    fontSize: '12px',
+                  }}>
+                    <div style={{ color: '#a78bfa', fontWeight: 700, marginBottom: '6px' }}>
+                      📄 Artykuł z KB Viewer:
+                    </div>
+                    <div style={{ color: '#e2e8f0', marginBottom: '8px', lineHeight: 1.4 }}>
+                      {kbDocContext.title}
+                    </div>
+                    {kbDocContext.url && (
+                      <div style={{ color: '#64748b', fontSize: '11px', marginBottom: '8px' }}>
+                        🌐 {kbDocContext.url.slice(0, 60)}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {[
+                        { label: '✍️ Napisz artykuł', prompt: `Na podstawie tego artykułu napisz po polsku profesjonalny artykuł blogowy:\n\nTytuł: ${kbDocContext.title}\nŹródło: ${kbDocContext.url}\nKategoria: ${kbDocContext.category}\n\nTreść:\n${kbDocContext.content.slice(0, 3000)}` },
+                        { label: '🔧 Plan integracji ZENO', prompt: `Przeanalizuj poniższy artykuł i stwórz szczegółowy plan integracji tej technologii/narzędzia z projektem ZENO Browser (Electron + React + Vite + Cloudflare Workers AI):\n\nTytuł: ${kbDocContext.title}\nŹródło: ${kbDocContext.url}\n\nTreść:\n${kbDocContext.content.slice(0, 3000)}` },
+                        { label: '📋 Podsumuj', prompt: `Podsumuj po polsku w 5 punktach najważniejsze informacje z artykułu:\n\nTytuł: ${kbDocContext.title}\n\nTreść:\n${kbDocContext.content.slice(0, 3000)}` },
+                        { label: '💡 Wnioski dla projektu', prompt: `Co z tego artykułu możemy wykorzystać w projekcie ZENO Browser? Wymień konkretne zastosowania:\n\nTytuł: ${kbDocContext.title}\n\nTreść:\n${kbDocContext.content.slice(0, 3000)}` },
+                      ].map(({ label, prompt }) => (
+                        <button
+                          key={label}
+                          onClick={() => setInputText(prompt)}
+                          style={{
+                            padding: '4px 10px',
+                            background: '#312e81',
+                            color: '#c4b5fd',
+                            border: '1px solid #4c1d95',
+                            borderRadius: '6px',
+                            fontSize: '11px',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <textarea
                   ref={textareaRef}
                   className="jk-input"

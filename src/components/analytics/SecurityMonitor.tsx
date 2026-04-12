@@ -71,17 +71,14 @@ function getSnapshot() {
   return cachedLogs;
 }
 // Guard: Only refresh if electronAPI exists (Electron mode)
-if (
-  typeof window === "undefined" ||
-  !window.electronAPI?.security?.getAuditLogs
-) {
-  return;
-}
+const hasSecurityApi =
+  typeof window !== "undefined" && !!window.electronAPI?.security?.getAuditLogs;
 
 export function SecurityMonitor({ onClose }: SecurityMonitorProps) {
   const logs = useSyncExternalStore(subscribe, getSnapshot);
 
   const refreshLogs = useCallback(async () => {
+    if (!hasSecurityApi) return;
     try {
       const auditLogs = await window.electronAPI.security.getAuditLogs();
       cachedLogs = auditLogs;
