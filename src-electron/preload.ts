@@ -7,6 +7,7 @@ import { searchAPI } from "./preload/search-api";
 import { catalogAPI } from "./preload/catalog-api";
 import { systemAPI } from "./preload/system-api";
 import { pluginAPI } from "./preload/plugin-api";
+import { terminalAPI } from "./preload/terminal-api";
 
 const electronAPI = {
   browser: browserAPI,
@@ -17,6 +18,7 @@ const electronAPI = {
   catalog: catalogAPI,
   system: systemAPI,
   plugin: pluginAPI,
+  terminal: terminalAPI,
   on: (channel: string, listener: (...args: unknown[]) => void) => {
     ipcRenderer.on(channel, (_event, ...args) => listener(...args));
     return () => ipcRenderer.removeAllListeners(channel);

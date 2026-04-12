@@ -95,6 +95,14 @@ export const IPC = {
         SET_CWD: 'terminal:set-cwd',
         SYSTEM_INFO: 'terminal:system-info',
     },
+    PTY: {
+        CREATE: 'pty:create',
+        WRITE: 'pty:write',
+        RESIZE: 'pty:resize',
+        KILL: 'pty:kill',
+        DATA: 'pty:data',       // main → renderer (push)
+        EXIT: 'pty:exit',       // main → renderer (push)
+    },
     WINDOW: {
         CLOSE: 'window:close',
         MAXIMIZE: 'window:maximize',

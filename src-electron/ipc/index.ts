@@ -12,6 +12,7 @@ import { registerHub } from "./register-hub";
 import { registerWindow } from "./register-window";
 import { registerDialog } from "./register-dialog";
 import { registerPlugin } from "./register-plugin";
+import { registerPty } from "./register-pty";
 
 export function registerAllIpc(
   win: BrowserWindow,
@@ -29,4 +30,5 @@ export function registerAllIpc(
   registerWindow(win, container);
   registerDialog(win, container);
   registerPlugin(win, container);
+  registerPty(win);
 }

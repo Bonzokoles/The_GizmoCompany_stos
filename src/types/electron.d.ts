@@ -238,6 +238,15 @@ export interface SystemInfo {
   hostname: string;
 }
 
+export interface PtyAPI {
+  create(cols: number, rows: number, cwd?: string): Promise<{ success: boolean; id?: string; error?: string }>;
+  write(id: string, data: string): Promise<{ success: boolean; error?: string }>;
+  resize(id: string, cols: number, rows: number): Promise<{ success: boolean; error?: string }>;
+  kill(id: string): Promise<{ success: boolean; error?: string }>;
+  onData(callback: (id: string, data: string) => void): () => void;
+  onExit(callback: (id: string, exitCode: number) => void): () => void;
+}
+
 export interface TerminalAPI {
   execute(command: string, cwd?: string): Promise<TerminalExecuteResult>;
   getCwd(): Promise<string>;
@@ -245,6 +254,7 @@ export interface TerminalAPI {
   getSystemInfo(): Promise<SystemInfo>;
   getEnv(name?: string): Promise<string | Record<string, string>>;
   killProcess(pid: number): Promise<{ success: boolean; error?: string }>;
+  pty?: PtyAPI;
 }
 
 export interface UpdaterAPI {
