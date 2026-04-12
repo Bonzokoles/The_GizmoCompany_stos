@@ -79,6 +79,11 @@ const CodeEditorPanel = lazy(() =>
     default: m.CodeEditorPanel,
   })),
 );
+const FileAgentPanel = lazy(() =>
+  import("../tools/FileAgentPanel").then((m) => ({
+    default: m.FileAgentPanel,
+  })),
+);
 // ── Registry entry type ───────────────────────────────────────────────────────
 
 export interface PanelEntry {
@@ -211,6 +216,12 @@ export const PANEL_REGISTRY: PanelEntry[] = [
     icon: "💻",
     title: "Code Editor — Monaco + AI",
     render: (ctx) => <CodeEditorPanel onClose={ctx.onClose} />,
+  },
+  {
+    id: "file-agent",
+    icon: "🗂",
+    title: "File Agent — przeglądarka plików + AI",
+    render: (ctx) => <FileAgentPanel onClose={ctx.onClose} />,
   },
 ];
 

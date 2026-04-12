@@ -22,7 +22,8 @@ export type PanelId =
   | "copilot-dev"
   | "jimbo-kit"
   | "kb-viewer"
-  | "code-editor";
+  | "code-editor"
+  | "file-agent";
 
 /** Kontekst dokumentu przekazywany z KB Viewer do Jimbo_kit */
 export interface KBDocContext {

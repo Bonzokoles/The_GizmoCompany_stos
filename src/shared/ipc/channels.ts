@@ -103,6 +103,14 @@ export const IPC = {
         DATA: 'pty:data',       // main → renderer (push)
         EXIT: 'pty:exit',       // main → renderer (push)
     },
+    FILE: {
+        LIST: 'file:list',
+        READ: 'file:read',
+        WRITE: 'file:write',
+        DELETE: 'file:delete',
+        STAT: 'file:stat',
+        OPEN_FOLDER: 'file:open-folder',
+    },
     WINDOW: {
         CLOSE: 'window:close',
         MAXIMIZE: 'window:maximize',

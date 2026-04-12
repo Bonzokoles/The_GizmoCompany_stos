@@ -262,6 +262,24 @@ export interface UpdaterAPI {
   installUpdate(): Promise<void>;
 }
 
+export interface FsEntry {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  size: number;
+  modified: number;
+  extension: string;
+}
+
+export interface FileAPI {
+  list(dirPath: string): Promise<{ success: boolean; entries: FsEntry[]; error?: string }>;
+  read(filePath: string): Promise<{ success: boolean; content?: string; size?: number; modified?: number; error?: string }>;
+  write(filePath: string, content: string): Promise<{ success: boolean; error?: string }>;
+  delete(targetPath: string): Promise<{ success: boolean; error?: string }>;
+  stat(targetPath: string): Promise<{ success: boolean; size?: number; modified?: number; created?: number; isDirectory?: boolean; isFile?: boolean; error?: string }>;
+  openFolder(defaultPath?: string): Promise<string | null>;
+}
+
 export interface MarketplacePlugin {
   id: string;
   name: string;
@@ -627,6 +645,7 @@ export interface ElectronAPI {
   crawler?: CrawlerAPI;
   umami?: UmamiAPI;
   mcp?: McpAPI;
+  file?: FileAPI;
 
   /** Subscribe to IPC events from main process. Returns unsubscribe function. */
   on(channel: string, callback: (...args: unknown[]) => void): () => void;
