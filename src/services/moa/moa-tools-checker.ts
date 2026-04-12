@@ -322,11 +322,11 @@ export async function testMOATool(
           configUsed: config || {}
         };
         
-            case 'writer':
+            case 'writer': {
         // Test writer - sprawdź możliwość zapisu
         // Użyj przykładowego katalogu
-        const testOutputDir = typeof config === 'object' && config !== null && 'outputDir' in config 
-          ? config.outputDir 
+        const testOutputDir = typeof config === 'object' && config !== null && 'outputDir' in config
+          ? config.outputDir
           : './test-output';
         try {
           // Sprawdź czy katalog istnieje, jeśli nie spróbuj utworzyć
@@ -349,7 +349,9 @@ export async function testMOATool(
             timestamp: new Date(),
             configUsed: config
           };
-        }break;
+        }
+        break;
+      }
     }
     
     // Domyślny sukces dla narzędzi bez specyficznych testów
