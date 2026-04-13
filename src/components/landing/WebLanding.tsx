@@ -145,9 +145,11 @@ export function WebLanding() {
       <header className="hero compact">
         <div className="hero-glow" />
         <h1>
-          <span className="accent">ZENO</span> Ops
+          <span className="accent">ZENO</span> O_O_SHELL
         </h1>
-        <p className="subtitle">Operations Dashboard — zenbrowsers.org</p>
+        <p className="subtitle">
+          THE_second Layer_Operations_Dashboard_Zenbrowsers.org
+        </p>
         <div className="hero-stats">
           <span className="stat">
             <b>{onlineApis}</b>/{apis.length} APIs
