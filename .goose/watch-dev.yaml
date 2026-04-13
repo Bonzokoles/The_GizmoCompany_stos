@@ -1,0 +1,33 @@
+version: 1.0.0
+title: ZENO Browser — Dev Server Error Watcher
+description: |
+  Uruchamia dev serwer, monitoruje błędy w czasie rzeczywistym i naprawia je.
+  Uruchom: goose run .goose/watch-dev.yaml
+
+extensions:
+  - developer
+  - code_execution
+
+prompt: |
+  Jesteś agentem monitorującym dev serwer ZENO Browser.
+  Katalog projektu: U:\WWW_Zen_BRo_wser_org3
+
+  ## Krok 1 — Szybki TypeScript check
+  Uruchom: `cd "U:\WWW_Zen_BRo_wser_org3" && npx tsc --noEmit 2>&1 | head -80`
+  Jeśli są błędy → napraw je natychmiast przed uruchomieniem dev.
+
+  ## Krok 2 — Sprawdź logi Vite build (jeśli dist/ istnieje)
+  Sprawdź czy `dist/` zawiera pliki — jeśli tak, przejrzyj `dist/` strukturę.
+
+  ## Krok 3 — Sprawdź logi z ostatniej sesji
+  Sprawdź plik `.goose/errors.log` jeśli istnieje.
+  Wylistuj nienaprawione błędy z poprzednich sesji.
+
+  ## Krok 4 — Raport
+  Podsumuj:
+  - Liczba błędów TypeScript
+  - Liczba błędów ESLint
+  - Status: gotowy do uruchomienia / wymaga napraw
+  - Lista top 5 najważniejszych problemów do naprawy
+
+  Zapisz raport do `.goose/last-check.md` z datą.

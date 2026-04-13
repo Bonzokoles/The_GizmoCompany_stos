@@ -1,10 +1,5 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'jsdom',
-  roots: ['<rootDir>/src', '<rootDir>/src-electron'],
-  testMatch: ['**/__tests__/**/*.+(spec|test).ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
-  testPathIgnorePatterns: ['/node_modules/', '/src/__tests__/setup.ts'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  testTimeout: 15000,
   collectCoverageFrom: [
     'src/plugin-system/**/*.{ts,tsx}',
     '!src/plugin-system/core/plugin-loader.ts',
@@ -21,9 +16,33 @@ module.exports = {
       statements: 45,
     },
   },
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-    '^@electron/(.*)$': '<rootDir>/src-electron/$1',
-  },
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+  projects: [
+    {
+      displayName: 'unit',
+      preset: 'ts-jest',
+      testEnvironment: 'jsdom',
+      roots: ['<rootDir>/src', '<rootDir>/src-electron'],
+      testMatch: ['**/__tests__/**/*.+(spec|test).ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
+      testPathIgnorePatterns: ['/node_modules/', '/src/__tests__/setup.ts'],
+      moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+        '^@electron/(.*)$': '<rootDir>/src-electron/$1',
+      },
+      setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+    },
+    {
+      displayName: 'integration',
+      preset: 'ts-jest',
+      testEnvironment: 'node',
+      testMatch: ['<rootDir>/test/integration/scenarios/**/*.test.ts'],
+      setupFilesAfterEnv: ['<rootDir>/test/integration/setup.ts'],
+      globals: {
+        'ts-jest': { tsconfig: { strict: false } },
+      },
+      moduleNameMapper: {
+        '^@/(.*)$': '<rootDir>/src/$1',
+      },
+    },
+  ],
 };

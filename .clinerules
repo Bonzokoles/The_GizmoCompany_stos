@@ -1,0 +1,185 @@
+# .clinerules — ZENO Browser Workspace
+> Auto-ładowany przez Cline. Data: 2026-04-11
+> Ten plik = jedyne źródło zasad. Pliki CLINE_GLOBAL_RULES.md i CLINE_WORKSPACE_RULES.md nie istnieją — pomiń odwołania do nich.
+
+---
+
+## DUAL-AGENT WORKFLOW
+
+**Cline:** Explore → Plan → Scaffold → Implement draft → HANDOFF  
+**Copilot:** Review → Security → Fix edge cases → Finalize → Commit  
+
+- Max **3 iteracje** na jeden problem, potem `[BLOCKED]`
+- **NIGDY** nie commituj ani nie pushujesz kodu
+- **NIGDY** nie usuwaj plików bez potwierdzenia
+
+---
+
+## ARCHITEKTURA — 5 Warstw
+
+```
+L1  Electron Core   src-electron/main/ + src-electron/preload/
+L2  React UI Shell  src/components/shell/ + src/components/panels/
+L3  JIMbo MCP       JIMbo_kit/  (port 3701)
+L4  BUCH Backend    backend/    (port 5180)
+L5  CF Edge         workers/  + functions/
+```
+
+**NIE** importuj typów z wyższych warstw do niższych.
+
+---
+
+## PORTY
+
+| Serwis | Port | UWAGA |
+|--------|------|-------|
+| Vite dev | 5173 | — |
+| JIMbo_kit MCP | **3701** (docelowy) | aktualny kod: 4111 — TASK_E to zmienia |
+| BUCH uvicorn | **5180** | — |
+
+---
+
+## PLIKI KRYTYCZNE (READ-ONLY bez wyraźnego polecenia)
+
+| Plik | Uwaga |
+|------|-------|
+| `src-electron/main/main.ts` | `app.disableHardwareAcceleration()` = **1. linia zawsze** |
+| `src-electron/preload/preload.ts` | Każda zmiana łamie renderer API |
+| `src/plugin-system/core/*.ts` | Tylko po TASK_D |
+| `src/shared/ipc/` | Tworzyć dopiero w TASK_H |
+| `JIMbo_kit/hub-server.ts` | Port 3701 hardcoded |
+| `vite.config.mts` | Nie zmieniaj aliasów |
+| `electron-builder.config.js` | Nie zmieniaj |
+| `tsconfig.json` + `tsconfig.electron.json` | Dwa osobne configs |
+
+---
+
+## TASK → AGENT → SKILLS MATRIX
+
+| Task | Opis | Copilot Agent | Skills Cline wykonuje |
+|------|------|---------------|----------------------|
+| **A** | Shell Components | `electron-angular-native` | `context-map`, `review-and-refactor` |
+| **B** | Preload Split | `electron-angular-native` | `context-map`, `refactor`, `breakdown-feature-implementation` |
+| **C** | main.ts Split | `electron-angular-native` | `refactor`, `context-map`, `breakdown-feature-implementation` |
+| **D** | Plugin Security | `se-security-reviewer` | `create-implementation-plan`, `review-and-refactor` |
+| **E** | MCP Tools | `typescript-mcp-expert` | `breakdown-feature-implementation`, `javascript-typescript-jest` |
+| **F** | File Pipeline | `typescript-mcp-expert` | `breakdown-feature-implementation`, `javascript-typescript-jest` |
+| **G** | BUCH Endpoints | `api-architect` | `create-implementation-plan`, `javascript-typescript-jest` |
+| **H** | IPC Contracts | `electron-angular-native` | `context-map`, `refactor`, `review-and-refactor` |
+| **I** | Integration Tests | `tdd-red` → `tdd-green` | `javascript-typescript-jest`, `breakdown-test`, `webapp-testing`, `playwright-generate-test` |
+
+> Re-verificaton po implementacji A–H: `se-system-architecture-reviewer` → `se-security-reviewer` → `principal-software-engineer` → `debug`
+
+---
+
+## SKILLS — Ścieżki (awesome-copilot)
+
+Przed użyciem skilla — przeczytaj jego `SKILL.md`.
+
+| Skill | Plik SKILL.md | Kiedy używać |
+|-------|---------------|--------------|
+| `context-map` | `.workspace_meta/awesome-copilot/skills/context-map/SKILL.md` | **Przed każdą zmianą** |
+| `breakdown-feature-implementation` | `...skills/breakdown-feature-implementation/SKILL.md` | Planowanie implementacji |
+| `create-implementation-plan` | `...skills/create-implementation-plan/SKILL.md` | Tworzenie planu dla taska D, G |
+| `update-implementation-plan` | `...skills/update-implementation-plan/SKILL.md` | Aktualizacja istniejącego planu |
+| `refactor` | `...skills/refactor/SKILL.md` | Refaktoring bez zmiany zachowania |
+| `review-and-refactor` | `...skills/review-and-refactor/SKILL.md` | Przekazanie do Copilot (draft review) |
+| `javascript-typescript-jest` | `...skills/javascript-typescript-jest/SKILL.md` | Pisanie unit testów |
+| `playwright-generate-test` | `...skills/playwright-generate-test/SKILL.md` | Generowanie E2E testów |
+| `webapp-testing` | `...skills/webapp-testing/SKILL.md` | Testowanie UI w przeglądarce |
+| `breakdown-test` | `...skills/breakdown-test/SKILL.md` | Planowanie testów dla TASK_I |
+
+---
+
+## AGENTS — Ścieżki (awesome-copilot)
+
+| Agent | Plik .agent.md | Używany w |
+|-------|----------------|-----------|
+| `electron-angular-native` | `.workspace_meta/awesome-copilot/agents/electron-angular-native.agent.md` | A, B, C, H |
+| `typescript-mcp-expert` | `...agents/typescript-mcp-expert.agent.md` | E, F |
+| `se-security-reviewer` | `...agents/se-security-reviewer.agent.md` | D + security review |
+| `api-architect` | `...agents/api-architect.agent.md` | G |
+| `tdd-red` | `...agents/tdd-red.agent.md` | I — failing tests |
+| `tdd-green` | `...agents/tdd-green.agent.md` | I — make tests pass |
+| `tdd-refactor` | `...agents/tdd-refactor.agent.md` | I — clean up |
+| `se-system-architecture-reviewer` | `...agents/se-system-architecture-reviewer.agent.md` | Re-verify arch |
+| `principal-software-engineer` | `...agents/principal-software-engineer.agent.md` | Final quality |
+| `debug` | `...agents/debug.agent.md` | Rozwiązywanie błędów runtime |
+| `expert-react-frontend-engineer` | `...agents/expert-react-frontend-engineer.agent.md` | A — React 19 components |
+| `playwright-tester` | `...agents/playwright-tester.agent.md` | I — E2E Playwright |
+
+---
+
+## KOLEJNOŚĆ TASKÓW
+
+```
+TASK_B (preload split)
+  └─► TASK_C (main.ts split)
+        ├─► TASK_H (IPC contracts — po C)
+        └─► TASK_D (plugin security — po A+C)
+
+TASK_A (shell components) ─────────────────► TASK_D
+
+TASK_E (MCP tools)
+  └─► TASK_F (file pipeline)
+        └─► TASK_G (BUCH endpoints)
+
+TASK_I ◄── OSTATNI — Cline robi tylko scaffold+failing shells
+```
+
+---
+
+## BEZPIECZEŃSTWO
+
+```typescript
+// env_get — filtruj ZAWSZE:
+const BLOCKED = ['SECRET', 'TOKEN', 'PASSWORD', 'API_KEY', 'AUTH', 'CREDENTIAL'];
+if (BLOCKED.some(b => key.toUpperCase().includes(b))) {
+  return { ok: false, error: 'Access denied' };
+}
+
+// CF credentials — tylko z process.env, NIGDY hardcoded
+// main.ts — app.disableHardwareAcceleration() = pierwsza linia ZAWSZE
+```
+
+---
+
+## URUCHAMIANIE SERWISÓW
+
+```bash
+# BUCH (prawidłowo):
+cd U:\WWW_Zen_BRo_wser_org3\backend\app
+uvicorn main:app --reload --port 5180
+
+# JIMbo_kit:
+cd U:\WWW_Zen_BRo_wser_org3\JIMbo_kit
+npm run dev
+
+# Vite:
+npm run dev
+
+# Electron + Vite:
+npm run electron:dev
+```
+
+---
+
+## HANDOFF FORMAT
+
+```
+[HANDOFF]
+## Co zrobiłem
+- <lista zmian>
+
+## Pliki zmienione
+- path/to/file.ts — <opis>
+
+## Pliki do weryfikacji (Copilot)
+- path/to/file.ts — <co sprawdzić>
+
+## TODOs / edge cases
+- <lista>
+
+## Jak testować
+- <komenda>
+```

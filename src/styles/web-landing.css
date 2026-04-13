@@ -1889,6 +1889,51 @@ footer {
 .buch-img-btn:hover {
   background: rgba(124,255,178,0.15);
 }
+
+/* ── BUCH ⚡ Goose dispatch ────────────────────────────────────── */
+.buch-goose-dispatch {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.buch-goose-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  background: rgba(255,200,50,0.12);
+  border: 1px solid rgba(255,200,50,0.35);
+  border-radius: 4px;
+  color: #ffc832;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.buch-goose-btn:hover {
+  background: rgba(255,200,50,0.22);
+}
+.buch-goose-status {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.buch-goose-running { color: #ffc832; animation: buch-pulse 1s infinite; }
+.buch-goose-done    { color: #7cffb2; }
+.buch-goose-error   { color: #ff6b6b; display: flex; align-items: center; gap: 4px; }
+.buch-goose-retry {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 2px;
+}
+@keyframes buch-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
 .buch-widget-footer {
   flex-shrink: 0;
   padding: 10px 12px;

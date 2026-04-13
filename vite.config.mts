@@ -39,6 +39,14 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    proxy: {
+      // Forward /api/* → wrangler pages dev (port 8788) — eliminuje CORS w dev
+      '/api': {
+        target: 'http://localhost:8788',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   optimizeDeps: {
     include: ['use-sync-external-store/shim/index.js'],

@@ -635,11 +635,16 @@ app.post("/agent/run", async (req, res) => {
   });
 
   // Uruchamiamy async — nie blokujemy odpowiedzi
+  console.log(`[HUB] Przed wywołaniem goose.runTask. TaskId: ${taskId}, Instrukcje: "${instruction}", Workdir: "${workdir ?? 'N/A'}"`);
   goose
     .runTask({ id: taskId, instructions: instruction, workdir })
+    .then(() => {
+        console.log(`[HUB] goose.runTask zakończono dla TaskId: ${taskId}`);
+    })
     .catch((err) => {
       console.error(`[HUB] Task ${taskId} błąd:`, err.message);
     });
+  console.log(`[HUB] Po wywołaniu goose.runTask (asynchronicznie) dla TaskId: ${taskId}`);
 });
 
 // ── REST: aktywne taski ───────────────────────────────────────────

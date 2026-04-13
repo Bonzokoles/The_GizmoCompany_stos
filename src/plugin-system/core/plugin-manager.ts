@@ -6,6 +6,8 @@ import { EventEmitter } from 'events';
 import { BasePlugin, PluginMetadata, PluginContext } from './plugin-api';
 import { PluginLoader } from './plugin-loader';
 import { PluginRegistry } from './plugin-registry';
+import { setCapabilities, clearCapabilities } from './security/permission-gate';
+import type { Capability } from './security/capability-types';
 
 export interface PluginLoadOptions {
   sandboxed?: boolean;
@@ -55,6 +57,11 @@ export class PluginManager extends EventEmitter {
       this.registry.register(metadata);
       this.plugins.set(metadata.id, plugin);
 
+      // Grant declared capabilities to permission gate
+      if (Array.isArray(metadata.permissions)) {
+        setCapabilities(metadata.id, metadata.permissions as Capability[]);
+      }
+
       // Create context
       const context = this.createContext(metadata);
       plugin.setContext(context);
@@ -99,6 +106,7 @@ export class PluginManager extends EventEmitter {
       // Cleanup
       this.plugins.delete(pluginId);
       this.registry.unregister(pluginId);
+      clearCapabilities(pluginId);
 
       console.log(`✅ Plugin unloaded: ${pluginId}`);
       this.emit('plugin-unloaded', pluginId);
@@ -218,35 +226,35 @@ export class PluginManager extends EventEmitter {
     return {
       api: {
         // Implement API methods here
-        createPanel: async () => ({ show: () => {}, hide: () => {}, close: () => {}, setContent: () => {} }),
-        registerCommand: () => {},
-        registerShortcut: () => {},
+        createPanel: async () => ({ show: () => { }, hide: () => { }, close: () => { }, setContent: () => { } }),
+        registerCommand: () => { },
+        registerShortcut: () => { },
         getCurrentTab: async () => null,
         getTabs: async () => [],
-        navigateTo: async () => {},
-        executeScript: async () => {},
+        navigateTo: async () => { },
+        executeScript: async () => { },
         callAI: async () => '',
         getAIProviders: async () => [],
-        on: () => {},
-        off: () => {},
-        emit: () => {},
+        on: () => { },
+        off: () => { },
+        emit: () => { },
         getStorage: () => ({
-          get: async () => {},
-          set: async () => {},
-          remove: async () => {},
-          clear: async () => {},
+          get: async () => { },
+          set: async () => { },
+          remove: async () => { },
+          clear: async () => { },
           keys: async () => [],
         }),
         fetch: async (url) => fetch(url),
-        showNotification: () => {},
+        showNotification: () => { },
         showDialog: async () => 0,
       },
       config: {},
       storage: {
-        get: async () => {},
-        set: async () => {},
-        remove: async () => {},
-        clear: async () => {},
+        get: async () => { },
+        set: async () => { },
+        remove: async () => { },
+        clear: async () => { },
         keys: async () => [],
       },
       logger: {

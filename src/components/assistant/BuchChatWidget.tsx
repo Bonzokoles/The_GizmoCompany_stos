@@ -31,6 +31,11 @@ interface Message {
   toolTrace?: ToolCall[];
 }
 
+type GooseStatus = 'idle' | 'running' | 'done' | 'error';
+
+// Wykrywa "⚡ Wyślij do Goose: instrukcja" lub samo "⚡ instrukcja" w odpowiedzi JIMBO
+const GOOSE_RE = /⚡\s*(?:Wyślij do Goose[:\s]+)?(.+?)(?:\n|$)/i;
+
 interface BuchChatWidgetProps {
   /** Called when user clicks "Open Full Assistant" → parent switches to 'assistant' tab */
   onOpenFull?: () => void;
@@ -132,6 +137,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   const [loading,      setLoading]      = useState(false);
   const [useTools,     setUseTools]     = useState(() => localStorage.getItem(TOOLS_KEY) === 'true');
   const [useStreaming, setUseStreaming]  = useState(() => localStorage.getItem(STREAMING_KEY) !== 'false');
+  const [gooseStatuses, setGooseStatuses] = useState<Record<number, GooseStatus>>({});
 
   const bottomRef      = useRef<HTMLDivElement>(null);
   const textareaRef    = useRef<HTMLTextAreaElement>(null);
@@ -180,6 +186,19 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   useEffect(() => {
     if (open) textareaRef.current?.focus();
   }, [open]);
+
+  const dispatchToGoose = useCallback(async (msgIdx: number, instructions: string) => {
+    setGooseStatuses(s => ({ ...s, [msgIdx]: 'running' }));
+    try {
+      const res = await fetch('http://localhost:4224/agent/run', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instructions }),
+      });
+      setGooseStatuses(s => ({ ...s, [msgIdx]: res.ok ? 'done' : 'error' }));
+    } catch {
+      setGooseStatuses(s => ({ ...s, [msgIdx]: 'error' }));
+    }
+  }, []);
 
   const sendMessage = useCallback(async () => {
     const text = prompt.trim();
@@ -422,6 +441,30 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                   )}
                 </div>
                 <MessageContent text={m.text} streaming={m.streaming} toolTrace={m.toolTrace} />
+                {m.role === 'assistant' && provider === 'agent-hub' && !m.streaming && (() => {
+                  const match = GOOSE_RE.exec(m.text);
+                  if (!match) return null;
+                  const status = gooseStatuses[i] ?? 'idle';
+                  return (
+                    <div className="buch-goose-dispatch">
+                      {status === 'idle' && (
+                        <button
+                          className="buch-goose-btn"
+                          onClick={() => dispatchToGoose(i, match[1].trim())}
+                          title="Wyślij zadanie do Goose"
+                        >⚡ Goose</button>
+                      )}
+                      {status === 'running' && <span className="buch-goose-status buch-goose-running">⚡ Goose: running…</span>}
+                      {status === 'done'    && <span className="buch-goose-status buch-goose-done">✓ Goose: wysłano</span>}
+                      {status === 'error'   && (
+                        <span className="buch-goose-status buch-goose-error">
+                          ⚠ Goose: błąd
+                          <button className="buch-goose-retry" onClick={() => dispatchToGoose(i, match[1].trim())}>↺</button>
+                        </span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
             {loading && !history.some(m => m.streaming) && (

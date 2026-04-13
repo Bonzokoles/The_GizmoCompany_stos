@@ -1,16 +1,29 @@
 /* ZENO Browser — Global Styles */
 
 :root {
-  --color-bg: #0d0d1a;
-  --color-surface: #1a1a2e;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-text: #e0e0e0;
-  --color-text-muted: #888;
-  --color-accent: #00d4ff;
-  --color-accent-green: #00ff88;
-  --color-danger: #ff4444;
-  --radius: 6px;
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  /* Deep dark palette — OpenAI-inspired */
+  --color-bg: #050508;
+  --color-bg-grid: #0a0a12;
+  --color-surface: #0f0f1a;
+  --color-surface-raised: #141420;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-bright: rgba(255, 255, 255, 0.14);
+  --color-text: #c8c8d4;
+  --color-text-muted: #5a5a72;
+  --color-text-bright: #f0f0f8;
+  --color-accent: #00e87a;
+  --color-accent-cyan: #00d4ff;
+  --color-accent-green: #00e87a;
+  --color-danger: #ff3b3b;
+  --color-warning: #ffa040;
+
+  /* Glow effects */
+  --glow-accent: 0 0 18px rgba(0, 232, 122, 0.35);
+  --glow-cyan: 0 0 18px rgba(0, 212, 255, 0.3);
+  --glow-green: 0 0 18px rgba(0, 232, 122, 0.35);
+
+  --radius: 4px;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
 *,
@@ -37,6 +50,40 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Dot-grid background ─────────────────────────────── */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.07) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+/* Radial vignette over grid */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    rgba(0, 232, 122, 0.04) 0%,
+    transparent 70%
+  );
+}
+
+#root {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Browser Container ──────────────────────────────── */
@@ -138,7 +185,7 @@ body {
   height: 14px;
   border: 2px solid var(--color-border);
   border-top-color: var(--color-accent);
-  border-radius: 50%;
+  border-radius: 4px;
   animation: spin 0.6s linear infinite;
 }
 
@@ -302,4 +349,113 @@ body {
     bottom: 10px;
     right: 10px;
   }
+}
+
+/* ── App Folder Panel ────────────────────────────────── */
+.folder-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+  min-width: 0;
+  user-select: none;
+}
+
+.folder-panel__header {
+  padding: 10px 12px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.folder-panel__tree {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.folder-panel__item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 12.5px;
+  line-height: 22px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 8px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.folder-panel__item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-bright);
+}
+
+.folder-panel__item:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+.folder-panel__icon {
+  font-size: 10px;
+  width: 12px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+.folder-panel__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Glow accents ────────────────────────────────────── */
+
+/* Active tab glow */
+.tab-item.active,
+.tab--active,
+.tab.active {
+  box-shadow: var(--glow-accent);
+  border-bottom: 2px solid var(--color-accent);
+}
+
+/* Address bar focus glow */
+.address-bar:focus,
+.url-input:focus,
+input[type="url"]:focus,
+input[type="text"]:focus {
+  box-shadow: var(--glow-cyan);
+  border-color: var(--color-accent-cyan) !important;
+  outline: none;
+}
+
+/* Button primary glow */
+.btn-primary,
+button.accent {
+  box-shadow: var(--glow-accent);
+}
+
+/* Sidebar active item */
+.sidebar-item.active,
+.sidebar-item--active,
+.folder-panel__item[aria-current="true"] {
+  background: rgba(0, 232, 122, 0.08);
+  color: var(--color-text-bright);
+  box-shadow: inset 2px 0 0 var(--color-accent);
 }

@@ -1,0 +1,43 @@
+version: 1.0.0
+title: ZENO Browser — Error Monitor & Auto-Fix
+description: |
+  Sprawdza błędy TypeScript, ESLint i Vite build w projekcie ZENO Browser.
+  Zapisuje raport do .goose/errors.log, a potem naprawia wszystkie wykryte problemy.
+
+extensions:
+  - developer
+  - code_execution
+
+prompt: |
+  Jesteś agentem naprawiającym błędy w projekcie ZENO Browser (Electron + React + Vite + Cloudflare Workers).
+  Katalog projektu: U:\WWW_Zen_BRo_wser_org3
+
+  ## Krok 1 — TypeScript check
+  Uruchom: `npx tsc --noEmit 2>&1`
+  Zapisz wynik do `.goose/errors.log` z timestampem.
+
+  ## Krok 2 — ESLint check
+  Uruchom: `npx eslint src src-electron --ext .ts,.tsx --max-warnings 0 2>&1`
+  Dołącz wynik do `.goose/errors.log`.
+
+  ## Krok 3 — Vite build check
+  Uruchom: `npx vite build --mode development 2>&1 | tail -50`
+  Dołącz błędy (nie warningi) do `.goose/errors.log`.
+
+  ## Krok 4 — Analiza i naprawy
+  Przejrzyj `.goose/errors.log`. Dla każdego błędu:
+  1. Przeczytaj odpowiedni plik (Read tool)
+  2. Zrozum kontekst błędu
+  3. Napraw go (Edit tool) — bez zmiany logiki biznesowej
+  4. Priorytet: błędy TypeScript > ESLint errors > build errors > ESLint warnings
+
+  ## Krok 5 — Weryfikacja
+  Uruchom ponownie: `npx tsc --noEmit 2>&1`
+  Jeśli 0 błędów → zapisz "✅ CLEAN" do `.goose/errors.log`.
+  Jeśli zostały błędy → wylistuj je i wyjaśnij dlaczego nie zostały naprawione.
+
+  ## Zasady
+  - Nie zmieniaj logiki biznesowej — tylko naprawiaj typy, importy, składnię
+  - Jeśli naprawa wymaga dużej refaktoryzacji — opisz problem ale nie naprawiaj
+  - Zawsze czytaj plik przed edycją
+  - Używaj `// @ts-expect-error` tylko gdy typ jest naprawdę niemożliwy do naprawy

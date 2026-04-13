@@ -7,30 +7,39 @@
  *   openai     → gpt-4o-mini
  */
 
-import OpenAI from 'openai';
+import OpenAI from "openai";
+import { ROLE_MODELS } from "../../config/openrouter-models.js";
 
 export type Message = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 export type ToolDefinition = OpenAI.Chat.Completions.ChatCompletionTool;
 
 const PROVIDERS = {
-  anthropic:   { baseURL: 'https://api.anthropic.com/v1',  keyEnv: 'ANTHROPIC_API_KEY' },
-  openrouter:  { baseURL: 'https://openrouter.ai/api/v1',  keyEnv: 'OPENROUTER_API_KEY' },
-  openai:      { baseURL: 'https://api.openai.com/v1',     keyEnv: 'OPENAI_API_KEY' },
+  anthropic: {
+    baseURL: "https://api.anthropic.com/v1",
+    keyEnv: "ANTHROPIC_API_KEY",
+  },
+  openrouter: {
+    baseURL: "https://openrouter.ai/api/v1",
+    keyEnv: "OPENROUTER_API_KEY",
+  },
+  openai: { baseURL: "https://api.openai.com/v1", keyEnv: "OPENAI_API_KEY" },
 } as const;
 
 type Provider = keyof typeof PROVIDERS;
 
 export function getProvider(): Provider {
-  const p = (process.env.LLM_PROVIDER ?? 'anthropic').toLowerCase();
-  return (p in PROVIDERS ? p : 'anthropic') as Provider;
+  const p = (process.env.LLM_PROVIDER ?? "anthropic").toLowerCase();
+  return (p in PROVIDERS ? p : "anthropic") as Provider;
 }
 
 export function defaultModel(): string {
   const provider = getProvider();
-  if (provider === 'anthropic')  return process.env.ANTHROPIC_MODEL  ?? 'claude-haiku-4-5-20251001';
-  if (provider === 'openrouter') return process.env.OPENROUTER_MODEL ?? 'google/gemini-2.0-flash-001';
-  if (provider === 'openai')     return process.env.OPENAI_MODEL     ?? 'gpt-4o-mini';
-  return 'claude-haiku-4-5-20251001';
+  if (provider === "anthropic")
+    return process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5-20251001";
+  if (provider === "openrouter")
+    return process.env.OPENROUTER_MODEL ?? ROLE_MODELS.HUB_DEFAULT;
+  if (provider === "openai") return process.env.OPENAI_MODEL ?? "gpt-4o-mini";
+  return ROLE_MODELS.HUB_DEFAULT;
 }
 
 export function createLLMClient(): OpenAI {
@@ -43,19 +52,19 @@ export function createLLMClient(): OpenAI {
   }
 
   const headers: Record<string, string> = {
-    'HTTP-Referer': 'http://localhost:4222',
-    'X-Title': 'JIMBO-agent-hub',
+    "HTTP-Referer": "http://localhost:4222",
+    "X-Title": "JIMBO-agent-hub",
   };
 
   // Anthropic wymaga dodatkowego nagłówka wersji API
-  if (provider === 'anthropic') {
-    headers['anthropic-version'] = '2023-06-01';
+  if (provider === "anthropic") {
+    headers["anthropic-version"] = "2023-06-01";
   }
 
   console.log(`[LLM] Provider: ${provider} | Model: ${defaultModel()}`);
 
   return new OpenAI({
-    apiKey: apiKey ?? 'missing',
+    apiKey: apiKey ?? "missing",
     baseURL,
     defaultHeaders: headers,
   });
@@ -71,7 +80,7 @@ export async function chat(
     model: model ?? defaultModel(),
     messages,
     tools: tools?.length ? tools : undefined,
-    tool_choice: tools?.length ? 'auto' : undefined,
+    tool_choice: tools?.length ? "auto" : undefined,
   });
 }
 
@@ -87,9 +96,9 @@ export async function chatStream(
     stream: true,
   });
 
-  let full = '';
+  let full = "";
   for await (const chunk of stream) {
-    const text = chunk.choices[0]?.delta?.content ?? '';
+    const text = chunk.choices[0]?.delta?.content ?? "";
     if (text) {
       full += text;
       onChunk(text);

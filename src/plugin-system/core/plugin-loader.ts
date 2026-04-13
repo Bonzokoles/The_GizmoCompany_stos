@@ -4,6 +4,7 @@
 
 import * as vm from 'vm';
 import { BasePlugin } from './plugin-api';
+import { validateManifest } from './security/manifest-validator';
 
 export interface LoaderOptions {
   sandboxed?: boolean;
@@ -17,9 +18,13 @@ export class PluginLoader {
     try {
       // Determine source type
       if (source.startsWith('http://') || source.startsWith('https://')) {
-        return await this.loadFromURL(source, options);
+        const loadedModule = await this.loadFromURL(source, options);
+        this.validateModuleManifest(loadedModule);
+        return loadedModule;
       } else {
-        return await this.loadFromFile(source, options);
+        const loadedModule = await this.loadFromFile(source, options);
+        this.validateModuleManifest(loadedModule);
+        return loadedModule;
       }
     } catch (error) {
       console.error(`Failed to load plugin from ${source}:`, error);
@@ -104,6 +109,16 @@ export class PluginLoader {
       return { default: result || sandbox.exports.default };
     } catch (error) {
       throw new Error(`Sandboxed execution failed: ${error}`);
+    }
+  }
+
+  /**
+   * Validate manifest exported by plugin module (if present)
+   */
+  private validateModuleManifest(loadedModule: any): void {
+    const manifest = loadedModule?.manifest ?? loadedModule?.default?.manifest;
+    if (manifest !== undefined) {
+      validateManifest(manifest);
     }
   }
 }

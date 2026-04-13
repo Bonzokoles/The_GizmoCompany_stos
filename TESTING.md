@@ -61,3 +61,51 @@ describe('MyPlugin', () => {
 ---
 
 ✅ Testing setup complete!
+
+---
+
+## Integration Tests
+
+Tests in `test/integration/` verify cross-layer communication. They are separated into a dedicated Jest project (`integration`).
+
+### Run all integration tests
+
+```bash
+npx jest --testPathPattern="test/integration" --runInBand --selectProjects integration
+```
+
+### Run only non-network tests (always green, no services required)
+
+```bash
+npx jest --testPathPattern="0[4-6]" --runInBand --selectProjects integration
+```
+
+### Scenarios
+
+| # | File | Requires services |
+|---|------|-------------------|
+| 01 | `01-health-check.test.ts` | 3701 + 4224 + 5180 |
+| 02 | `02-jimbokit-tool.test.ts` | 3701 |
+| 03 | `03-d1-roundtrip.test.ts` | 5180 |
+| 04 | `04-electron-ipc.test.ts` | no |
+| 05 | `05-plugin-rejection.test.ts` | no |
+| 06 | `06-permission-gate.test.ts` | no |
+
+Scenarios 01–03 **gracefully skip** with a descriptive warning when services are not running.  
+Before running 01–03, start:
+
+```bash
+# JIMbo_kit
+cd JIMbo_kit && JIMBO_PORT=3701 npm start
+
+# JIMBO_agent_HUB
+cd JIMBO_agent_HUB && npm start
+
+# BUCH
+cd backend/app && uvicorn main:app --reload --port 5180
+```
+
+### Helpers
+
+- `test/integration/helpers/service-checker.ts` — `isServiceUp(port)`, `assertServiceUp(port, name)`
+- `test/integration/helpers/retry.ts` — `withRetry(fn, attempts, delayMs)`
