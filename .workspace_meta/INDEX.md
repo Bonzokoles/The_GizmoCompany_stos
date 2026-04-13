@@ -1,5 +1,5 @@
 # ZENO Browser — Workspace Index
-> Zaktualizowano: 2026-04-04
+> Zaktualizowano: 2026-04-10
 
 ---
 
@@ -11,14 +11,20 @@
 
 ---
 
-## Aktualny Status (2026-04-04)
+## Aktualny Status (2026-04-10)
+
+> **ARCHITEKTURA DUALNA:** LOCAL (Electron) | WEB (Cloudflare) | SHARED (oba)
+> `CloudAgentPanel` + `functions/api/ai/agents/` = celowy web runtime, nie dead code
 
 ```
 ✅ P0 — Infrastruktura (bat, watchdog, MCP, API_BASE)
 ✅ P1 — Core Loop (Goose → skill auto-save → injection → UI)
 ✅ P2 — Stabilizacja (export/import, OpenRouter, session persistence, Electron autostart)
-⚠️  CLEANUP — cofnąć niezaplanowane zmiany (copilotkit stub, CloudAgentPanel, storage routing)
-⬜ P3 — Multi-agent (BUCH_CHAT⚡Goose, GSD-2, EvoAgentX, CloudAgentPanel właściwy)
+✅ CLEANUP C-1 — useJimboCopilotActions / copilotkit-stub (usunięte)
+✅ CLEANUP C-3 — storage.js już używa /api/storage
+✅ CLEANUP C-4 — docs/jawris* nie istnieją w repo
+🚫 CLEANUP C-2 — ANULOWANE (CloudAgentPanel = celowy web runtime)
+⬜ P3 — Multi-agent (BUCH_CHAT⚡Goose, GSD-2, EvoAgentX, CloudAgentPanel dokończenie)
 ⬜ P4 — OpenEvolve (czekać na stabilność repo ~2026-04-23)
 ⬜ P5 — Upgrady stacku (TS→ESLint→Vite→React→Electron, osobna sesja)
 ```

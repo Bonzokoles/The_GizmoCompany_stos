@@ -84,6 +84,30 @@
 
 ---
 
+### ADR-007: Architektura dualna — Local (Electron) vs Web (Cloudflare)
+
+**Data:** 2026-04-10
+**Status:** accepted
+**Kontekst:** ZENO Browser działa w dwóch trybach: jako aplikacja desktopowa (Electron) z dostępem do lokalnych narzędzi, oraz jako web app (CF Pages) bez localhost. Model agentów musi działać w obu trybach, ale przez różne backendy.
+**Decyzja:**
+1. **LOCAL-only components** — dostęp do localhost, Goose CLI, JIMBO Hub :4224, Podman:
+   - `AgentHubPanel.tsx` — pełna kontrola, 5 zakładek
+   - `JIMBO_agent_HUB/hub-server.ts` — centralny backend agentów
+   - `GooseBridge`, `SkillDB`, `PodmanBridge`
+2. **WEB-only components** — bez localhost, przez Cloudflare Pages Functions:
+   - `CloudAgentPanel.tsx` — web runtime agentów przez `/api/ai/agents/*`
+   - `functions/api/ai/agents/[[path]].ts` — proxy do CF Worker
+   - `workers/bonzo-web-bridge.mjs` — Service Bindings router
+   - `app/api/ai-gate/route.ts` — failover LLM chain
+3. **SHARED components** — działają w obu trybach:
+   - `BuchChatWidget.tsx` — provider: `agent-hub` (local) lub `cloudflare` (web)
+   - `AddressBar`, `TabBar`, `BrowserUI`, `PluginHub`
+4. **Detekcja trybu:** `window.electronAPI` istnieje → Electron; brak → web/CF Pages
+**Konsekwencje:** Kod w `CloudAgentPanel.tsx` i `functions/api/ai/agents/` jest **celowym web runtimem**, nie dead code. Nie usuwamy tych plików. Każdy nowy feature musi być opisany jako LOCAL/WEB/SHARED.
+**Alternatywy:** (1) Jeden panel obsługujący oba tryby — odrzucone, zbyt różne wymagania. (2) Tylko desktop — odrzucone, web jest celem produktowym.
+
+---
+
 ### ADR-006: MCP Connection — VS Code + Claude (Anthropic)
 
 **Data:** 2026-03-19
