@@ -8,30 +8,30 @@
  * Używa /api/ai/v1/chat/completions (OpenAI-compatible proxy, CF Functions).
  * Model: deepseek-chat, system prompt po polsku.
  */
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { PageAgent } from 'page-agent';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { PageAgent } from "page-agent";
 
 // Vite proxy (/api → localhost:8788) obsługuje dev i Electron webview.
 // Na CF Pages ścieżki relatywne działają bezpośrednio.
-const API_BASE = '';
+const API_BASE = "";
 
 interface ToolCall {
-  tool:   string;
-  input:  Record<string, unknown>;
+  tool: string;
+  input: Record<string, unknown>;
   result: string;
 }
 
 interface Message {
-  role:       'user' | 'assistant';
-  text:       string;
-  provider:   string;
-  tokens?:    number;
-  ts:         number;
+  role: "user" | "assistant";
+  text: string;
+  provider: string;
+  tokens?: number;
+  ts: number;
   streaming?: boolean;
   toolTrace?: ToolCall[];
 }
 
-type GooseStatus = 'idle' | 'running' | 'done' | 'error';
+type GooseStatus = "idle" | "running" | "done" | "error";
 
 // Wykrywa "⚡ Wyślij do Goose: instrukcja" lub samo "⚡ instrukcja" w odpowiedzi JIMBO
 const GOOSE_RE = /⚡\s*(?:Wyślij do Goose[:\s]+)?(.+?)(?:\n|$)/i;
@@ -41,64 +41,95 @@ interface BuchChatWidgetProps {
   onOpenFull?: () => void;
 }
 
-const HISTORY_KEY   = 'buch-widget-history';
-const PROVIDER_KEY  = 'buch-widget-provider';
-const TOOLS_KEY     = 'buch-widget-tools';
-const STREAMING_KEY = 'buch-widget-streaming';
+const HISTORY_KEY = "buch-widget-history";
+const PROVIDER_KEY = "buch-widget-provider";
+const TOOLS_KEY = "buch-widget-tools";
+const STREAMING_KEY = "buch-widget-streaming";
 
 // ── Image helpers ──────────────────────────────────────────────────────────
 
-const IMG_URL_RE   = /https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S*)?/gi;
-const IMG_B64_RE   = /data:image\/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+=*/g;
+const IMG_URL_RE = /https?:\/\/\S+\.(?:png|jpe?g|gif|webp|svg)(?:\?\S*)?/gi;
+const IMG_B64_RE = /data:image\/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+=*/g;
 
 function extractImages(text: string): { url: string; isBase64: boolean }[] {
   const out: { url: string; isBase64: boolean }[] = [];
   let m: RegExpExecArray | null;
   IMG_B64_RE.lastIndex = 0;
-  while ((m = IMG_B64_RE.exec(text)) !== null) out.push({ url: m[0], isBase64: true });
+  while ((m = IMG_B64_RE.exec(text)) !== null)
+    out.push({ url: m[0], isBase64: true });
   IMG_URL_RE.lastIndex = 0;
-  while ((m = IMG_URL_RE.exec(text)) !== null) out.push({ url: m[0], isBase64: false });
+  while ((m = IMG_URL_RE.exec(text)) !== null)
+    out.push({ url: m[0], isBase64: false });
   return out;
 }
 
-function MessageContent({ text, streaming, toolTrace }: {
-  text: string; streaming?: boolean; toolTrace?: ToolCall[];
+function MessageContent({
+  text,
+  streaming,
+  toolTrace,
+}: {
+  text: string;
+  streaming?: boolean;
+  toolTrace?: ToolCall[];
 }) {
-  const inlineImages  = extractImages(text);
-  const traceImages   = (toolTrace ?? []).flatMap(t => extractImages(t.result));
-  const allImages     = [...inlineImages, ...traceImages];
+  const inlineImages = extractImages(text);
+  const traceImages = (toolTrace ?? []).flatMap((t) => extractImages(t.result));
+  const allImages = [...inlineImages, ...traceImages];
 
   // Usuń adresy obrazów z wyświetlanego tekstu
-  const cleanText = text
-    .replace(IMG_B64_RE, '')
-    .replace(IMG_URL_RE, '')
-    .trim();
+  const cleanText = text.replace(IMG_B64_RE, "").replace(IMG_URL_RE, "").trim();
 
   return (
     <>
       {(cleanText || streaming) && (
         <p className="buch-msg-text">
-          {cleanText}{streaming ? <span className="buch-typing">▋</span> : null}
+          {cleanText}
+          {streaming ? <span className="buch-typing">▋</span> : null}
         </p>
       )}
       {allImages.map((img, i) => (
         <div key={i} className="buch-msg-image">
-          <img src={img.url} alt="AI image" className="buch-img-preview"
-               style={{ maxWidth: '100%', borderRadius: 6, marginTop: 4 }} />
-          <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+          <img
+            src={img.url}
+            alt="AI image"
+            className="buch-img-preview"
+            style={{ maxWidth: "100%", borderRadius: 6, marginTop: 4 }}
+          />
+          <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
             {img.isBase64 ? (
-              <a href={img.url} download="ai-image.png" className="buch-img-btn">⬇ Zapisz PNG</a>
+              <a
+                href={img.url}
+                download="ai-image.png"
+                className="buch-img-btn"
+              >
+                ⬇ Zapisz PNG
+              </a>
             ) : (
-              <a href={img.url} target="_blank" rel="noopener noreferrer" className="buch-img-btn">↗ Otwórz</a>
+              <a
+                href={img.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="buch-img-btn"
+              >
+                ↗ Otwórz
+              </a>
             )}
-            <button className="buch-img-btn" onClick={() => {
-              fetch(img.url).then(r => r.blob()).then(blob => {
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = `ai-image-${Date.now()}.png`;
-                a.click();
-              }).catch(() => window.open(img.url, '_blank'));
-            }}>⬇ Pobierz</button>
+            <button
+              className="buch-img-btn"
+              onClick={() => {
+                fetch(img.url)
+                  .then((r) => r.blob())
+                  .then((blob) => {
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `ai-image-${Date.now()}.png`;
+                    a.click();
+                  })
+                  .catch(() => window.open(img.url, "_blank"));
+              }}
+            >
+              ⬇ Pobierz
+            </button>
           </div>
         </div>
       ))}
@@ -108,40 +139,69 @@ function MessageContent({ text, streaming, toolTrace }: {
 
 // ────────────────────────────────────────────────────────────────────────────
 
+function isNetworkError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  const m = err.message;
+  return (
+    m.includes("Failed to fetch") ||
+    m.includes("NetworkError") ||
+    m.includes("ERR_CONNECTION_REFUSED") ||
+    m.includes("ERR_FAILED") ||
+    m.includes("net::") ||
+    m.includes("ECONNREFUSED") ||
+    m.includes("Load failed")
+  );
+}
+
 function parseSSEToken(line: string): string {
-  if (!line.startsWith('data: ')) return '';
+  if (!line.startsWith("data: ")) return "";
   const raw = line.slice(6).trim();
-  if (raw === '[DONE]') return '';
+  if (raw === "[DONE]") return "";
   try {
     const parsed = JSON.parse(raw);
     const oaiToken = parsed?.choices?.[0]?.delta?.content;
-    if (typeof oaiToken === 'string') return oaiToken;
-    if (parsed?.type === 'content_block_delta' && parsed?.delta?.type === 'text_delta') {
-      return parsed.delta.text ?? '';
+    if (typeof oaiToken === "string") return oaiToken;
+    if (
+      parsed?.type === "content_block_delta" &&
+      parsed?.delta?.type === "text_delta"
+    ) {
+      return parsed.delta.text ?? "";
     }
     // JIMBO Agent HUB format: { text: "..." }
-    if (typeof parsed?.text === 'string') return parsed.text;
-  } catch { /* ignore */ }
-  return '';
+    if (typeof parsed?.text === "string") return parsed.text;
+  } catch {
+    /* ignore */
+  }
+  return "";
 }
 
 export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
-  const [open, setOpen]         = useState(false);
+  const [open, setOpen] = useState(false);
   const [provider, setProvider] = useState<string>(
-    () => localStorage.getItem(PROVIDER_KEY) ?? 'agent-hub',
+    () => localStorage.getItem(PROVIDER_KEY) ?? "agent-hub",
   );
-  const [history, setHistory]   = useState<Message[]>(() => {
-    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]'); } catch { return []; }
+  const [history, setHistory] = useState<Message[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]");
+    } catch {
+      return [];
+    }
   });
-  const [prompt,       setPrompt]       = useState('');
-  const [loading,      setLoading]      = useState(false);
-  const [useTools,     setUseTools]     = useState(() => localStorage.getItem(TOOLS_KEY) === 'true');
-  const [useStreaming, setUseStreaming]  = useState(() => localStorage.getItem(STREAMING_KEY) !== 'false');
-  const [gooseStatuses, setGooseStatuses] = useState<Record<number, GooseStatus>>({});
+  const [prompt, setPrompt] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [useTools, setUseTools] = useState(
+    () => localStorage.getItem(TOOLS_KEY) === "true",
+  );
+  const [useStreaming, setUseStreaming] = useState(
+    () => localStorage.getItem(STREAMING_KEY) !== "false",
+  );
+  const [gooseStatuses, setGooseStatuses] = useState<
+    Record<number, GooseStatus>
+  >({});
 
-  const bottomRef      = useRef<HTMLDivElement>(null);
-  const textareaRef    = useRef<HTMLTextAreaElement>(null);
-  const pageAgentRef   = useRef<PageAgent | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const pageAgentRef = useRef<PageAgent | null>(null);
   const [agentReady, setAgentReady] = useState(false);
 
   /* page-agent init */
@@ -149,37 +209,55 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     if (pageAgentRef.current) return;
     const agent = new PageAgent({
       baseURL: `${API_BASE}/api/ai/v1`,
-      model: 'deepseek-chat',
-      language: 'en-US',
+      model: "deepseek-chat",
+      language: "en-US",
       customFetch: (url: string | URL | Request, init?: RequestInit) =>
-        fetch(url, { ...init, credentials: 'same-origin' }),
+        fetch(url, { ...init, credentials: "same-origin" }),
       instructions: {
-        system: 'Jesteś asystentem przeglądarki ZENO. Odpowiadasz po polsku. Pomagasz użytkownikowi nawigować po stronie, klikać elementy, wypełniać formularze i obsługiwać interfejs.',
+        system:
+          "Jesteś asystentem przeglądarki ZENO. Odpowiadasz po polsku. Pomagasz użytkownikowi nawigować po stronie, klikać elementy, wypełniać formularze i obsługiwać interfejs.",
         getPageInstructions: (url: string) =>
           `Aktualny URL: ${url}. Nawiguj po stronie i pomagaj użytkownikowi w obsłudze interfejsu ZENO.`,
       },
     });
     pageAgentRef.current = agent;
     setAgentReady(true);
-    return () => { pageAgentRef.current = null; setAgentReady(false); };
+    return () => {
+      pageAgentRef.current = null;
+      setAgentReady(false);
+    };
   }, []);
 
   const togglePageAgent = useCallback(() => {
-    try { pageAgentRef.current?.panel.show(); } catch { /* panel already visible */ }
+    try {
+      pageAgentRef.current?.panel.show();
+    } catch {
+      /* panel already visible */
+    }
   }, []);
 
   /* tools i streaming są wzajemnie wykluczające — tools wygrywa */
-  useEffect(() => { if (useTools && useStreaming) setUseStreaming(false); }, [useTools]);
+  useEffect(() => {
+    if (useTools && useStreaming) setUseStreaming(false);
+  }, [useTools]);
 
   /* persist */
-  useEffect(() => { localStorage.setItem(HISTORY_KEY,   JSON.stringify(history.slice(-80))); }, [history]);
-  useEffect(() => { localStorage.setItem(PROVIDER_KEY,  provider); }, [provider]);
-  useEffect(() => { localStorage.setItem(TOOLS_KEY,     String(useTools)); }, [useTools]);
-  useEffect(() => { localStorage.setItem(STREAMING_KEY, String(useStreaming)); }, [useStreaming]);
+  useEffect(() => {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-80)));
+  }, [history]);
+  useEffect(() => {
+    localStorage.setItem(PROVIDER_KEY, provider);
+  }, [provider]);
+  useEffect(() => {
+    localStorage.setItem(TOOLS_KEY, String(useTools));
+  }, [useTools]);
+  useEffect(() => {
+    localStorage.setItem(STREAMING_KEY, String(useStreaming));
+  }, [useStreaming]);
 
   /* scroll to bottom */
   useEffect(() => {
-    if (open) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (open) bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [history, open, loading]);
 
   /* focus on open */
@@ -187,193 +265,327 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     if (open) textareaRef.current?.focus();
   }, [open]);
 
-  const dispatchToGoose = useCallback(async (msgIdx: number, instructions: string) => {
-    setGooseStatuses(s => ({ ...s, [msgIdx]: 'running' }));
-    try {
-      const res = await fetch('http://localhost:4224/agent/run', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ instructions }),
-      });
-      setGooseStatuses(s => ({ ...s, [msgIdx]: res.ok ? 'done' : 'error' }));
-    } catch {
-      setGooseStatuses(s => ({ ...s, [msgIdx]: 'error' }));
-    }
-  }, []);
+  const dispatchToGoose = useCallback(
+    async (msgIdx: number, instructions: string) => {
+      setGooseStatuses((s) => ({ ...s, [msgIdx]: "running" }));
+      try {
+        const res = await fetch("http://localhost:4224/agent/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ instructions }),
+        });
+        setGooseStatuses((s) => ({
+          ...s,
+          [msgIdx]: res.ok ? "done" : "error",
+        }));
+      } catch {
+        setGooseStatuses((s) => ({ ...s, [msgIdx]: "error" }));
+      }
+    },
+    [],
+  );
 
   const sendMessage = useCallback(async () => {
     const text = prompt.trim();
     if (!text || loading) return;
-    setPrompt('');
-    setHistory(h => [...h, { role: 'user', text, provider, ts: Date.now() }]);
+    setPrompt("");
+    setHistory((h) => [...h, { role: "user", text, provider, ts: Date.now() }]);
     setLoading(true);
 
     const basePayload = { prompt: text, provider, maxTokens: 2048 };
 
     try {
       /* PATH 0: JIMBO Agent HUB (localhost:4224) */
-      if (provider === 'agent-hub') {
+      if (provider === "agent-hub") {
         const hubMessages = [
-          ...history.slice(-20).map(m => ({ role: m.role, content: m.text })),
-          { role: 'user' as const, content: text },
+          ...history.slice(-20).map((m) => ({ role: m.role, content: m.text })),
+          { role: "user" as const, content: text },
         ];
-
-        if (useStreaming && !useTools) {
-          setHistory(h => [...h, { role: 'assistant', text: '', provider: 'agent-hub', ts: Date.now(), streaming: true }]);
-          const res = await fetch('http://localhost:4224/chat', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: hubMessages, stream: true }),
-          });
-          if (!res.ok || !res.body) throw new Error(`Agent HUB error ${res.status}`);
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-          // eslint-disable-next-line no-constant-condition
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() ?? '';
-            for (const line of lines) {
-              const chunk = parseSSEToken(line);
-              if (!chunk) continue;
-              setHistory(h => h.map((m, i) =>
-                i === h.length - 1 && m.streaming ? { ...m, text: m.text + chunk } : m,
-              ));
+        let agentStreamStarted = false;
+        try {
+          if (useStreaming && !useTools) {
+            agentStreamStarted = true;
+            setHistory((h) => [
+              ...h,
+              {
+                role: "assistant",
+                text: "",
+                provider: "agent-hub",
+                ts: Date.now(),
+                streaming: true,
+              },
+            ]);
+            const res = await fetch("http://localhost:4224/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ messages: hubMessages, stream: true }),
+            });
+            if (!res.ok || !res.body)
+              throw new Error(`Agent HUB error ${res.status}`);
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = "";
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split("\n");
+              buffer = lines.pop() ?? "";
+              for (const line of lines) {
+                const chunk = parseSSEToken(line);
+                if (!chunk) continue;
+                setHistory((h) =>
+                  h.map((m, i) =>
+                    i === h.length - 1 && m.streaming
+                      ? { ...m, text: m.text + chunk }
+                      : m,
+                  ),
+                );
+              }
             }
+            setHistory((h) =>
+              h.map((m, i) =>
+                i === h.length - 1 && m.streaming
+                  ? { ...m, streaming: false }
+                  : m,
+              ),
+            );
+          } else {
+            const res = await fetch("http://localhost:4224/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ messages: hubMessages, stream: false }),
+            });
+            const data = (await res.json()) as {
+              content?: string;
+              model?: string;
+              usage?: { total_tokens?: number };
+            };
+            setHistory((h) => [
+              ...h,
+              {
+                role: "assistant",
+                text: data?.content ?? "[Brak odpowiedzi]",
+                provider: data?.model ?? "agent-hub",
+                tokens: data?.usage?.total_tokens,
+                ts: Date.now(),
+              },
+            ]);
           }
-          setHistory(h => h.map((m, i) =>
-            i === h.length - 1 && m.streaming ? { ...m, streaming: false } : m,
-          ));
-        } else {
-          const res = await fetch('http://localhost:4224/chat', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: hubMessages, stream: false }),
+          return;
+        } catch (hubErr) {
+          if (!isNetworkError(hubErr)) throw hubErr;
+          /* JIMbo HUB niedostępny (CF Pages / offline) → fallback do CF API */
+          if (agentStreamStarted) {
+            /* usuń cząstkową wiadomość streamującą */
+            setHistory((h) => h.filter((m) => !m.streaming));
+          }
+          const fbRes = await fetch(`${API_BASE}/api/ai/chat`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: text,
+              provider: "deepseek",
+              maxTokens: 2048,
+            }),
           });
-          const data = await res.json() as { content?: string; model?: string; usage?: { total_tokens?: number } };
-          setHistory(h => [...h, {
-            role: 'assistant', text: data?.content ?? '[Brak odpowiedzi]',
-            provider: data?.model ?? 'agent-hub', tokens: data?.usage?.total_tokens, ts: Date.now(),
-          }]);
+          if (!fbRes.ok) throw new Error(`CF fallback error ${fbRes.status}`);
+          const fbData = (await fbRes.json()) as {
+            content?: string;
+            provider?: string;
+            usage?: { total_tokens?: number };
+          };
+          setHistory((h) => [
+            ...h,
+            {
+              role: "assistant",
+              text: fbData?.content ?? "[Brak odpowiedzi]",
+              provider: `${fbData?.provider ?? "deepseek"} (CF↑)`,
+              tokens: fbData?.usage?.total_tokens,
+              ts: Date.now(),
+            },
+          ]);
+          return;
         }
-        return;
       }
 
       /* PATH 1: Tool use */
       if (useTools) {
         const res = await fetch(`${API_BASE}/api/ai/chat/tools`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(basePayload),
         });
         if (!res.ok) {
-          const errData = await res.json().catch(() => ({})) as { error?: string };
+          const errData = (await res.json().catch(() => ({}))) as {
+            error?: string;
+          };
           throw new Error(errData?.error || `Tools API error ${res.status}`);
         }
-        const data = await res.json() as {
-          content?: string; provider?: string;
-          tokens?: { total?: number }; toolTrace?: ToolCall[];
+        const data = (await res.json()) as {
+          content?: string;
+          provider?: string;
+          tokens?: { total?: number };
+          toolTrace?: ToolCall[];
         };
-        setHistory(h => [...h, {
-          role:      'assistant',
-          text:      data?.content ?? '[Brak odpowiedzi]',
-          provider:  data?.provider ?? provider,
-          tokens:    data?.tokens?.total,
-          toolTrace: data?.toolTrace,
-          ts:        Date.now(),
-        }]);
+        setHistory((h) => [
+          ...h,
+          {
+            role: "assistant",
+            text: data?.content ?? "[Brak odpowiedzi]",
+            provider: data?.provider ?? provider,
+            tokens: data?.tokens?.total,
+            toolTrace: data?.toolTrace,
+            ts: Date.now(),
+          },
+        ]);
         return;
       }
 
       /* PATH 2: Streaming SSE */
       if (useStreaming) {
         const msgId = `stream-${Date.now()}`;
-        setHistory(h => [...h, { role: 'assistant', text: '', provider, ts: Date.now(), streaming: true }]);
+        setHistory((h) => [
+          ...h,
+          {
+            role: "assistant",
+            text: "",
+            provider,
+            ts: Date.now(),
+            streaming: true,
+          },
+        ]);
 
         const res = await fetch(`${API_BASE}/api/ai/chat/stream`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(basePayload),
         });
         if (!res.ok || !res.body) throw new Error(`Stream error ${res.status}`);
 
-        const reader  = res.body.getReader();
+        const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let buffer    = '';
+        let buffer = "";
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() ?? '';
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
           for (const line of lines) {
             const chunk = parseSSEToken(line);
             if (!chunk) continue;
-            setHistory(h => h.map((m, i) =>
-              i === h.length - 1 && m.streaming ? { ...m, text: m.text + chunk } : m,
-            ));
+            setHistory((h) =>
+              h.map((m, i) =>
+                i === h.length - 1 && m.streaming
+                  ? { ...m, text: m.text + chunk }
+                  : m,
+              ),
+            );
           }
         }
-        setHistory(h => h.map((m, i) =>
-          i === h.length - 1 && m.streaming ? { ...m, streaming: false } : m,
-        ));
+        setHistory((h) =>
+          h.map((m, i) =>
+            i === h.length - 1 && m.streaming ? { ...m, streaming: false } : m,
+          ),
+        );
         void msgId;
         return;
       }
 
       /* PATH 3: Plain fetch */
-      const res  = await fetch(`${API_BASE}/api/ai/chat`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`${API_BASE}/api/ai/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(basePayload),
       });
-      
+
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
-        throw new Error(errorData?.error?.message || `API error: ${res.status}`);
+        const errorData = await res
+          .json()
+          .catch(() => ({ error: { message: `HTTP ${res.status}` } }));
+        throw new Error(
+          errorData?.error?.message || `API error: ${res.status}`,
+        );
       }
-      
-      const data = await res.json() as { content?: string; provider?: string; usage?: { total_tokens?: number } };
-      setHistory(h => [...h, {
-        role: 'assistant', text: data?.content ?? '[Brak odpowiedzi]',
-        provider: data?.provider ?? provider, tokens: data?.usage?.total_tokens, ts: Date.now(),
-      }]);
+
+      const data = (await res.json()) as {
+        content?: string;
+        provider?: string;
+        usage?: { total_tokens?: number };
+      };
+      setHistory((h) => [
+        ...h,
+        {
+          role: "assistant",
+          text: data?.content ?? "[Brak odpowiedzi]",
+          provider: data?.provider ?? provider,
+          tokens: data?.usage?.total_tokens,
+          ts: Date.now(),
+        },
+      ]);
     } catch (err) {
-      console.error('BUCH_CHAT Error:', err);
-      let errorMsg = '⚠ Błąd połączenia z API';
+      console.error("BUCH_CHAT Error:", err);
+      let errorMsg = "⚠ Błąd połączenia z API";
       if (err instanceof Error) {
         const m = err.message;
-        if (m.includes('524') || m.includes('timeout') || m.toLowerCase().includes('time'))
-          errorMsg = '⚠ Timeout — zapytanie trwało za długo (CF limit 30s). Spróbuj prostsze pytanie lub inny model.';
-        else if (m.includes('503') || m.includes('No API key'))
-          errorMsg = '⚠ Brak klucza API — sprawdź ustawienia providera w CF Pages → Secrets.';
-        else if (
-          m.includes('Failed to fetch') || m.includes('NetworkError') ||
-          m.includes('ERR_CONNECTION_REFUSED') || m.includes('ERR_FAILED') ||
-          m.includes('net::') || m.includes('ECONNREFUSED')
+        if (
+          m.includes("524") ||
+          m.includes("timeout") ||
+          m.toLowerCase().includes("time")
         )
-          errorMsg = '⚠ Brak połączenia z API — uruchom: npx wrangler pages dev --proxy 5173 --port 8788';
-        else
-          errorMsg = `⚠ ${m}`;
-      } else if (typeof err === 'string') {
+          errorMsg =
+            "⚠ Timeout — zapytanie trwało za długo (CF limit 30s). Spróbuj prostsze pytanie lub inny model.";
+        else if (m.includes("503") || m.includes("No API key"))
+          errorMsg =
+            "⚠ Brak klucza API — sprawdź ustawienia providera w CF Pages → Secrets.";
+        else if (
+          m.includes("Failed to fetch") ||
+          m.includes("NetworkError") ||
+          m.includes("ERR_CONNECTION_REFUSED") ||
+          m.includes("ERR_FAILED") ||
+          m.includes("net::") ||
+          m.includes("ECONNREFUSED")
+        )
+          errorMsg =
+            "⚠ Brak połączenia z API — uruchom: npx wrangler pages dev --proxy 5173 --port 8788";
+        else errorMsg = `⚠ ${m}`;
+      } else if (typeof err === "string") {
         errorMsg = `⚠ ${err}`;
       }
-      setHistory(h => [...h, { role: 'assistant', text: errorMsg, provider, ts: Date.now() }]);
+      setHistory((h) => [
+        ...h,
+        { role: "assistant", text: errorMsg, provider, ts: Date.now() },
+      ]);
     } finally {
       setLoading(false);
     }
   }, [prompt, provider, loading, useTools, useStreaming]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
   };
 
-  const openFull = () => { setOpen(false); onOpenFull?.(); };
+  const openFull = () => {
+    setOpen(false);
+    onOpenFull?.();
+  };
 
   return (
     <>
       {/* ── Floating Panel ── */}
       {open && (
-        <div className="buch-widget-panel" role="dialog" aria-label="BUCH_CHAT Assistant">
+        <div
+          className="buch-widget-panel"
+          role="dialog"
+          aria-label="BUCH_CHAT Assistant"
+        >
           {/* Header */}
           <div className="buch-widget-hdr">
             <span className="buch-widget-brand">◈ BUCH_CHAT</span>
@@ -381,7 +593,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
               <select
                 className="buch-widget-sel"
                 value={provider}
-                onChange={e => setProvider(e.target.value)}
+                onChange={(e) => setProvider(e.target.value)}
                 aria-label="Provider AI"
               >
                 <option value="deepseek">DeepSeek R1</option>
@@ -391,30 +603,40 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                 <option value="agent-hub">◈ Agent HUB</option>
               </select>
               <button
-                className={`buch-widget-btn${useStreaming && !useTools ? ' buch-btn-active' : ''}`}
-                onClick={() => { if (!useTools) setUseStreaming(v => !v); }}
+                className={`buch-widget-btn${useStreaming && !useTools ? " buch-btn-active" : ""}`}
+                onClick={() => {
+                  if (!useTools) setUseStreaming((v) => !v);
+                }}
                 title="Streaming SSE"
                 aria-label="Streaming"
-              >~</button>
+              >
+                ~
+              </button>
               <button
-                className={`buch-widget-btn${useTools ? ' buch-btn-active' : ''}`}
-                onClick={() => setUseTools(v => !v)}
+                className={`buch-widget-btn${useTools ? " buch-btn-active" : ""}`}
+                onClick={() => setUseTools((v) => !v)}
                 title="Narzędzia webowe (Claude)"
                 aria-label="Narzędzia"
-              >⚒</button>
+              >
+                ⚒
+              </button>
               {onOpenFull && (
                 <button
                   className="buch-widget-btn"
                   onClick={openFull}
                   title="Otwórz pełnego asystenta"
                   aria-label="Pełny asystent"
-                >⊞</button>
+                >
+                  ⊞
+                </button>
               )}
               <button
                 className="buch-widget-btn"
                 onClick={() => setOpen(false)}
                 aria-label="Zamknij"
-              >✕</button>
+              >
+                ✕
+              </button>
             </div>
           </div>
 
@@ -433,41 +655,74 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
             {history.map((m, i) => (
               <div key={i} className={`buch-widget-msg buch-msg-${m.role}`}>
                 <div className="buch-msg-meta">
-                  <span className="buch-msg-role">{m.role === 'user' ? 'TY' : 'AI'}</span>
+                  <span className="buch-msg-role">
+                    {m.role === "user" ? "TY" : "AI"}
+                  </span>
                   <span className="buch-msg-prov">{m.provider}</span>
-                  {m.tokens != null && <span className="buch-msg-tok">{m.tokens}t</span>}
+                  {m.tokens != null && (
+                    <span className="buch-msg-tok">{m.tokens}t</span>
+                  )}
                   {m.toolTrace && m.toolTrace.length > 0 && (
-                    <span className="buch-msg-tools" title={m.toolTrace.map(t => t.tool).join(', ')}>⚒{m.toolTrace.length}</span>
+                    <span
+                      className="buch-msg-tools"
+                      title={m.toolTrace.map((t) => t.tool).join(", ")}
+                    >
+                      ⚒{m.toolTrace.length}
+                    </span>
                   )}
                 </div>
-                <MessageContent text={m.text} streaming={m.streaming} toolTrace={m.toolTrace} />
-                {m.role === 'assistant' && provider === 'agent-hub' && !m.streaming && (() => {
-                  const match = GOOSE_RE.exec(m.text);
-                  if (!match) return null;
-                  const status = gooseStatuses[i] ?? 'idle';
-                  return (
-                    <div className="buch-goose-dispatch">
-                      {status === 'idle' && (
-                        <button
-                          className="buch-goose-btn"
-                          onClick={() => dispatchToGoose(i, match[1].trim())}
-                          title="Wyślij zadanie do Goose"
-                        >⚡ Goose</button>
-                      )}
-                      {status === 'running' && <span className="buch-goose-status buch-goose-running">⚡ Goose: running…</span>}
-                      {status === 'done'    && <span className="buch-goose-status buch-goose-done">✓ Goose: wysłano</span>}
-                      {status === 'error'   && (
-                        <span className="buch-goose-status buch-goose-error">
-                          ⚠ Goose: błąd
-                          <button className="buch-goose-retry" onClick={() => dispatchToGoose(i, match[1].trim())}>↺</button>
-                        </span>
-                      )}
-                    </div>
-                  );
-                })()}
+                <MessageContent
+                  text={m.text}
+                  streaming={m.streaming}
+                  toolTrace={m.toolTrace}
+                />
+                {m.role === "assistant" &&
+                  provider === "agent-hub" &&
+                  !m.streaming &&
+                  (() => {
+                    const match = GOOSE_RE.exec(m.text);
+                    if (!match) return null;
+                    const status = gooseStatuses[i] ?? "idle";
+                    return (
+                      <div className="buch-goose-dispatch">
+                        {status === "idle" && (
+                          <button
+                            className="buch-goose-btn"
+                            onClick={() => dispatchToGoose(i, match[1].trim())}
+                            title="Wyślij zadanie do Goose"
+                          >
+                            ⚡ Goose
+                          </button>
+                        )}
+                        {status === "running" && (
+                          <span className="buch-goose-status buch-goose-running">
+                            ⚡ Goose: running…
+                          </span>
+                        )}
+                        {status === "done" && (
+                          <span className="buch-goose-status buch-goose-done">
+                            ✓ Goose: wysłano
+                          </span>
+                        )}
+                        {status === "error" && (
+                          <span className="buch-goose-status buch-goose-error">
+                            ⚠ Goose: błąd
+                            <button
+                              className="buch-goose-retry"
+                              onClick={() =>
+                                dispatchToGoose(i, match[1].trim())
+                              }
+                            >
+                              ↺
+                            </button>
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
               </div>
             ))}
-            {loading && !history.some(m => m.streaming) && (
+            {loading && !history.some((m) => m.streaming) && (
               <div className="buch-widget-msg buch-msg-assistant">
                 <div className="buch-msg-meta">
                   <span className="buch-msg-role">AI</span>
@@ -487,7 +742,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                 className="buch-widget-textarea"
                 placeholder="Pytanie… (Enter = wyślij, Shift+Enter = nowy wiersz)"
                 value={prompt}
-                onChange={e => setPrompt(e.target.value)}
+                onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={onKeyDown}
                 rows={2}
                 disabled={loading}
@@ -498,10 +753,15 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                 onClick={sendMessage}
                 disabled={loading || !prompt.trim()}
                 aria-label="Wyślij"
-              >{loading ? '…' : '▶'}</button>
+              >
+                {loading ? "…" : "▶"}
+              </button>
             </div>
             {history.length > 0 && (
-              <button className="buch-widget-clear" onClick={() => setHistory([])}>
+              <button
+                className="buch-widget-clear"
+                onClick={() => setHistory([])}
+              >
                 ⌫ wyczyść historię
               </button>
             )}
@@ -521,9 +781,9 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           </button>
         )}
         <button
-          className={`chat-toggle buch-toggle${open ? ' buch-toggle-active' : ''}`}
-          onClick={() => setOpen(o => !o)}
-          title={open ? 'Zamknij BUCH_CHAT' : 'Otwórz BUCH_CHAT'}
+          className={`chat-toggle buch-toggle${open ? " buch-toggle-active" : ""}`}
+          onClick={() => setOpen((o) => !o)}
+          title={open ? "Zamknij BUCH_CHAT" : "Otwórz BUCH_CHAT"}
           aria-expanded={open}
           aria-controls="buch-widget-panel"
         >

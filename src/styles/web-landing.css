@@ -5,7 +5,7 @@
 /* ── CopilotKit overrides ────────────────────────── */
 /* ══════════════════════════════════════════════════════
    AI-HUB VISUAL PARITY
-   Dark glass (#03040b), teal accent (#00ffcc), Inter,
+   Dark glass (#03040b), teal accent (#2dd4bf), Inter,
    4 px sharp radius, 200 ms cubic-bezier transitions.
 ══════════════════════════════════════════════════════ */
 /* ── Design token overrides ── */
@@ -21,15 +21,15 @@
   --color-border:     rgba(255,255,255,0.08);
   --color-text:       #f8fafc;
   --color-text-muted: #94a3b8;
-  --color-accent:     #00ffcc;
+  --color-accent:     #2dd4bf;
   --color-accent-green: #a78bfa;
   --color-danger:     #f87171;
   --color-success:    #34d399;
   --radius:           4px;
   --glass-bg:         rgba(15,23,42,0.45);
   --glass-border:     rgba(255,255,255,0.08);
-  --glass-glow:       rgba(0,255,204,0.15);
-  --accent-dim:       rgba(0,255,204,0.12);
+  --glass-glow:       rgba(45,212,191,0.15);
+  --accent-dim:       rgba(45,212,191,0.12);
   --t:                200ms cubic-bezier(0.23,1,0.32,1);
   font-family: 'Inter', system-ui, sans-serif;
   background: radial-gradient(ellipse at 20% -10%, #1a2238 0%, #03040b 55%) fixed;
@@ -63,7 +63,7 @@
   margin: 0;
   padding: 0;
 }
-.ops-dashboard header.hero.compact .accent { color: #00ffcc; }
+.ops-dashboard header.hero.compact .accent { color: #2dd4bf; }
 .ops-dashboard header.hero.compact .subtitle {
   font-size: .75rem;
   color: #94a3b8;
@@ -82,7 +82,7 @@
   color: #64748b;
   white-space: nowrap;
 }
-.ops-dashboard header.hero.compact .hero-stats .stat b { color: #00ffcc; }
+.ops-dashboard header.hero.compact .hero-stats .stat b { color: #2dd4bf; }
 
 /* ── Tab nav — horizontal underline bar ── */
 .ops-dashboard .tab-nav {
@@ -99,12 +99,12 @@
   gap: 0;
   margin-bottom: 0;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0,255,204,0.35) transparent;
+  scrollbar-color: rgba(45,212,191,0.35) transparent;
 }
 .ops-dashboard .tab-nav::-webkit-scrollbar { height: 6px; }
 .ops-dashboard .tab-nav::-webkit-scrollbar-track { background: transparent; }
 .ops-dashboard .tab-nav::-webkit-scrollbar-thumb {
-  background: rgba(0,255,204,0.35);
+  background: rgba(45,212,191,0.35);
   border-radius: 3px;
 }
 
@@ -130,9 +130,9 @@
 }
 .ops-dashboard .tab-btn:active { transform: scale(0.97); }
 .ops-dashboard .tab-btn.active {
-  color: #00ffcc;
+  color: #2dd4bf;
   background: transparent;
-  border-bottom-color: #00ffcc;
+  border-bottom-color: #2dd4bf;
 }
 .ops-dashboard .tab-icon { font-size: .85rem; line-height: 1; }
 
@@ -151,7 +151,7 @@
 @media (hover: hover) and (pointer: fine) {
   .ops-dashboard .card:hover {
     border-color: rgba(255,255,255,0.14);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px rgba(0,255,204,0.06);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35), 0 0 12px rgba(45,212,191,0.06);
   }
 }
 /* ── Worker cards ── */
@@ -162,13 +162,13 @@
   border-radius: 4px;
   transition: border-color var(--t);
 }
-.ops-dashboard .worker-card.online  { border-left: 2px solid #00ffcc; }
+.ops-dashboard .worker-card.online  { border-left: 2px solid #2dd4bf; }
 .ops-dashboard .worker-card.offline { border-left: 2px solid #f87171; }
 .ops-dashboard .worker-cat {
-  background: rgba(0,255,204,0.1);
-  color: #00ffcc;
+  background: rgba(45,212,191,0.1);
+  color: #2dd4bf;
   border-radius: 3px;
-  border: 1px solid rgba(0,255,204,0.2);
+  border: 1px solid rgba(45,212,191,0.2);
   padding: 2px 7px;
   font-size: 11px;
 }
@@ -180,7 +180,7 @@
   border-radius: 4px;
 }
 .ops-dashboard .stat-value {
-  color: #00ffcc;
+  color: #2dd4bf;
 }
 /* ── Buttons ── */
 .ops-dashboard button,
@@ -192,13 +192,13 @@
 }
 .ops-dashboard .btn-sm:active { transform: scale(0.97); }
 .ops-dashboard .btn-sm.btn-accent {
-  background: rgba(0,255,204,0.12);
-  color: #00ffcc;
-  border-color: rgba(0,255,204,0.25);
+  background: rgba(45,212,191,0.12);
+  color: #2dd4bf;
+  border-color: rgba(45,212,191,0.25);
 }
 @media (hover: hover) and (pointer: fine) {
   .ops-dashboard .btn-sm.btn-accent:hover {
-    background: #00ffcc;
+    background: #2dd4bf;
     color: #000;
     opacity: 1;
   }
@@ -223,8 +223,8 @@
 .ops-dashboard .tab-actions select:focus,
 .ops-dashboard .input-row input:focus,
 .ops-dashboard .input-row textarea:focus {
-  border-color: rgba(0,255,204,0.4);
-  box-shadow: 0 0 0 3px rgba(0,255,204,0.08);
+  border-color: rgba(45,212,191,0.4);
+  box-shadow: 0 0 0 3px rgba(45,212,191,0.08);
   outline: none;
 }
 
@@ -248,9 +248,9 @@
 }
 /* ── Tags / badges ── */
 .ops-dashboard .tag {
-  background: rgba(0,255,204,0.1);
-  color: #00ffcc;
-  border: 1px solid rgba(0,255,204,0.2);
+  background: rgba(45,212,191,0.1);
+  color: #2dd4bf;
+  border: 1px solid rgba(45,212,191,0.2);
   border-radius: 3px;
   font-size: 11px;
   padding: 2px 7px;
@@ -264,7 +264,7 @@
 @media (hover: hover) and (pointer: fine) {
   .ops-dashboard .article-row:hover {
     background: rgba(255,255,255,0.04);
-    border-color: rgba(0,255,204,0.25);
+    border-color: rgba(45,212,191,0.25);
   }
 }
 /* ── Status badges ── */
@@ -1655,7 +1655,7 @@ footer {
   border-radius: 4px;
   border: 1px solid rgba(0, 255, 204, 0.30);
   background: rgba(0, 255, 204, 0.10);
-  color: #00ffcc;
+  color: #2dd4bf;
   font-family: 'Inter', system-ui, sans-serif;
   font-size: .78rem;
   font-weight: 700;
@@ -1678,13 +1678,13 @@ footer {
 .chat-toggle:active { transform: scale(0.97); }
 .buch-toggle-active {
   background: rgba(0, 255, 204, 0.20) !important;
-  box-shadow: 0 0 0 2px rgba(0,255,204,0.35), 0 6px 32px rgba(0,255,204,0.25) !important;
+  box-shadow: 0 0 0 2px rgba(45,212,191,0.35), 0 6px 32px rgba(45,212,191,0.25) !important;
 }
 .chat-toggle .ct-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #00ffcc;
+  background: #2dd4bf;
   animation: ctPulse 2s ease-in-out infinite;
 }
 @keyframes ctPulse {
@@ -2636,11 +2636,11 @@ footer {
   background: #334155;
   flex-shrink: 0;
 }
-.ah-dot.ah-dot-ok   { background: #00ffcc; box-shadow: 0 0 5px #00ffcc88; }
+.ah-dot.ah-dot-ok   { background: #2dd4bf; box-shadow: 0 0 5px #2dd4bf88; }
 .ah-dot.ah-dot-warn { background: #f59e0b; }
 .ah-dot.ah-dot-err  { background: #f87171; }
 .ah-status-lbl   { font-weight: 600; color: #94a3b8; }
-.ah-status-model { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #00ffcc; }
+.ah-status-model { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #2dd4bf; }
 .ah-status-hint  { color: #f59e0b; font-style: italic; }
 .ah-sep          { color: #2d3a50; }
 .ah-status-spacer { flex: 1; }
@@ -2703,7 +2703,7 @@ footer {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #00ffcc;
+  color: #2dd4bf;
 }
 .ah-pane-sub {
   font-size: 10px;
@@ -2761,7 +2761,7 @@ footer {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #00ffcc;
+  color: #2dd4bf;
 }
 .ah-msg-actions {
   display: flex;
@@ -2842,16 +2842,16 @@ footer {
   cursor: pointer;
   transition: all 0.15s;
 }
-.ah-act-btn:hover      { border-color: #00ffcc; color: #00ffcc; }
-.ah-act-primary        { border-color: #00ffcc44; color: #00ffcc; }
-.ah-act-primary:hover  { background: #00ffcc22; }
+.ah-act-btn:hover      { border-color: #2dd4bf; color: #2dd4bf; }
+.ah-act-primary        { border-color: #2dd4bf44; color: #2dd4bf; }
+.ah-act-primary:hover  { background: #2dd4bf22; }
 .ah-act-url            { border-color: #3b82f644; color: #60a5fa; }
 .ah-act-url:hover      { background: #3b82f622; }
 
 /* Typing cursor */
 .ah-typing {
   display: inline-block;
-  color: #00ffcc;
+  color: #2dd4bf;
   animation: ah-blink 1s step-end infinite;
 }
 @keyframes ah-blink { 0%,100%{opacity:1} 50%{opacity:0} }
@@ -2878,13 +2878,13 @@ footer {
   outline: none;
   transition: border-color 0.15s;
 }
-.ah-textarea:focus { border-color: #00ffcc66; }
+.ah-textarea:focus { border-color: #2dd4bf66; }
 .ah-textarea:disabled { opacity: 0.5; }
 .ah-btn-send,
 .ah-btn-run {
-  background: #00ffcc18;
-  border: 1px solid #00ffcc55;
-  color: #00ffcc;
+  background: #2dd4bf18;
+  border: 1px solid #2dd4bf55;
+  color: #2dd4bf;
   border-radius: 6px;
   padding: 0 14px;
   font-size: 13px;
@@ -2894,7 +2894,7 @@ footer {
   white-space: nowrap;
 }
 .ah-btn-send:hover,
-.ah-btn-run:hover   { background: #00ffcc30; }
+.ah-btn-run:hover   { background: #2dd4bf30; }
 .ah-btn-send:disabled,
 .ah-btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
 
