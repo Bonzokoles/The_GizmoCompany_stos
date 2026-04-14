@@ -1161,13 +1161,6 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
 
   // Cascade: try all available providers in priority order
   const availableProviders = getAvailableProviders(body, env);
-  if (availableProviders.length === 0) {
-    return errorResponse(
-      "No AI provider available. Check API key configuration.",
-      503,
-    );
-  }
-
   const errors: string[] = [];
   const startTime = Date.now();
 
@@ -1225,7 +1218,28 @@ async function handleChat(request: Request, env: Env): Promise<Response> {
     }
   }
 
-  return errorResponse(`All providers failed: ${errors.join(" | ")}`, 502);
+  // Workers AI fallback — free tier, no API key needed
+  try {
+    const aiResp = await (env.AI.run as any)("@cf/meta/llama-3.1-8b-instruct", {
+      messages: [{ role: "user", content: body.prompt }],
+    });
+    return jsonResponse({
+      id: crypto.randomUUID(),
+      provider: "workers-ai",
+      model: "@cf/meta/llama-3.1-8b-instruct",
+      content: (aiResp as any).response ?? "",
+      tokens: { prompt: 0, completion: 0, total: 0 },
+      cost: 0,
+      latency: Date.now() - startTime,
+      cached: false,
+      timestamp: new Date().toISOString(),
+      fallback: true,
+    });
+  } catch (waiErr: any) {
+    errors.push(`workers-ai: ${waiErr.message}`);
+  }
+
+  return errorResponse(`All providers failed: ${errors.join(" | ")}`, 503);
 }
 
 async function handleStream(request: Request, env: Env): Promise<Response> {
@@ -1238,11 +1252,8 @@ async function handleStream(request: Request, env: Env): Promise<Response> {
 
   // Use fallback loop like handleChat — try all available providers
   const availableProviders = getAvailableProviders(body, env);
-  if (availableProviders.length === 0) {
-    return errorResponse("No AI provider available", 503);
-  }
-
   const errors: string[] = [];
+  const startTime = Date.now();
 
   for (const { config, apiKey } of availableProviders) {
     try {
@@ -1277,9 +1288,29 @@ async function handleStream(request: Request, env: Env): Promise<Response> {
     }
   }
 
+  // Workers AI streaming fallback — free tier, no API key needed
+  try {
+    const aiStream = await (env.AI.run as any)("@cf/meta/llama-3.1-8b-instruct", {
+      messages: [{ role: "user", content: body.prompt }],
+      stream: true,
+    });
+    return new Response(aiStream as ReadableStream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "X-Zeno-Provider": "workers-ai",
+      },
+    });
+  } catch (waiErr: any) {
+    errors.push(`workers-ai: ${waiErr.message}`);
+  }
+
+  void startTime;
   return errorResponse(
     `All stream providers failed: ${errors.join(" | ")}`,
-    502,
+    503,
   );
 }
 

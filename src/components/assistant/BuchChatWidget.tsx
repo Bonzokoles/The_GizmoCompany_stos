@@ -198,6 +198,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   const [gooseStatuses, setGooseStatuses] = useState<
     Record<number, GooseStatus>
   >({});
+  const [cfOnline, setCfOnline] = useState<boolean | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -254,6 +255,15 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   useEffect(() => {
     localStorage.setItem(STREAMING_KEY, String(useStreaming));
   }, [useStreaming]);
+
+  /* CF API status ping */
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_BASE}/api/ai/status`, { signal: AbortSignal.timeout(3000) })
+      .then((r) => { if (!cancelled) setCfOnline(r.ok); })
+      .catch(() => { if (!cancelled) setCfOnline(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   /* scroll to bottom */
   useEffect(() => {
@@ -550,8 +560,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           m.includes("net::") ||
           m.includes("ECONNREFUSED")
         )
-          errorMsg =
-            "⚠ Brak połączenia z API — uruchom: npx wrangler pages dev --proxy 5173 --port 8788";
+          errorMsg = "⚠ AI chwilowo niedostępne, spróbuj później.";
         else errorMsg = `⚠ ${m}`;
       } else if (typeof err === "string") {
         errorMsg = `⚠ ${err}`;
@@ -588,7 +597,13 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
         >
           {/* Header */}
           <div className="buch-widget-hdr">
-            <span className="buch-widget-brand">◈ BUCH_CHAT</span>
+            <span className="buch-widget-brand">
+              ◈ BUCH_CHAT
+              <span
+                className={`buch-status-dot${cfOnline === true ? " online" : cfOnline === false ? " offline" : ""}`}
+                title={cfOnline === true ? "CF API online" : cfOnline === false ? "CF API offline" : "Sprawdzanie..."}
+              />
+            </span>
             <div className="buch-widget-hdr-actions">
               <select
                 className="buch-widget-sel"

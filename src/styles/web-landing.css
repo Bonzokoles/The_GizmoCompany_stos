@@ -1747,7 +1747,20 @@ footer {
   font-weight: 700;
   letter-spacing: 1px;
   color: #7cffb2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+.buch-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  background: #444;
+  flex-shrink: 0;
+}
+.buch-status-dot.online  { background: #2dd4bf; }
+.buch-status-dot.offline { background: #888; }
 .buch-widget-hdr-actions {
   display: flex;
   align-items: center;
