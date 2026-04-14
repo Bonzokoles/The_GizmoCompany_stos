@@ -284,10 +284,64 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ instructions }),
         });
-        setGooseStatuses((s) => ({
-          ...s,
-          [msgIdx]: res.ok ? "done" : "error",
-        }));
+        if (!res.ok) {
+          setGooseStatuses((s) => ({ ...s, [msgIdx]: "error" }));
+          return;
+        }
+        const data = (await res.json()) as { taskId?: string };
+        const taskId = data.taskId;
+        if (!taskId) {
+          setGooseStatuses((s) => ({ ...s, [msgIdx]: "done" }));
+          return;
+        }
+
+        // Subskrybuj wynik przez WebSocket
+        const ws = new WebSocket("ws://localhost:4224/ws");
+        let synthTimer: ReturnType<typeof setTimeout> | null = null;
+
+        const finish = (status: GooseStatus) => {
+          if (synthTimer) clearTimeout(synthTimer);
+          setGooseStatuses((s) => ({ ...s, [msgIdx]: status }));
+          if (ws.readyState === WebSocket.OPEN) ws.close();
+        };
+
+        ws.onopen = () => {
+          ws.send(JSON.stringify({ action: "subscribe", taskId }));
+        };
+
+        ws.onmessage = (e) => {
+          try {
+            const msg = JSON.parse(e.data as string) as {
+              type: string;
+              content?: string;
+              error?: string;
+            };
+            if (msg.type === "goose:synthesis" && msg.content?.trim()) {
+              setHistory((h) => [
+                ...h,
+                {
+                  role: "assistant" as const,
+                  text: `[Goose] ${msg.content}`,
+                  provider: "goose",
+                  ts: Date.now(),
+                },
+              ]);
+              finish("done");
+            } else if (msg.type === "done") {
+              // Czekamy max 15s na synthesis — jeśli nie przyjdzie, zamykamy
+              synthTimer = setTimeout(() => finish("done"), 15_000);
+            } else if (msg.type === "error") {
+              finish("error");
+            }
+          } catch { /* ignore */ }
+        };
+
+        ws.onerror = () => finish("error");
+
+        // Bezpieczny timeout całego zadania: 5 minut
+        setTimeout(() => {
+          if (ws.readyState === WebSocket.OPEN) finish("done");
+        }, 5 * 60_000);
       } catch {
         setGooseStatuses((s) => ({ ...s, [msgIdx]: "error" }));
       }
@@ -716,7 +770,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                         )}
                         {status === "done" && (
                           <span className="buch-goose-status buch-goose-done">
-                            ✓ Goose: wysłano
+                            ✓ Goose: gotowe
                           </span>
                         )}
                         {status === "error" && (

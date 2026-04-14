@@ -237,7 +237,8 @@ goose.on("chunk", ({ taskId, text, isStderr }) => {
 
 goose.on("done", async (result) => {
   broadcast(result.taskId, { type: "done", ...result });
-  taskSubscribers.delete(result.taskId);
+  // UWAGA: nie usuwamy subskrybentów tutaj — synthesis broadcast jest niżej.
+  // Subskrybenci są usuwani PO synthesis żeby BuchChatWidget mógł odebrać wynik.
   saveSessionState();
 
   // Resolve sync waiters (np. /files/analyze?sync=true)
@@ -372,6 +373,8 @@ Wykonaj zadanie jeszcze raz uwzględniając powyższą wskazówkę.`;
       // synthesis nie jest krytyczna — ignoruj błędy
     }
   }
+  // Usuń subskrybentów dopiero po synthesis (żeby odebrali goose:synthesis)
+  taskSubscribers.delete(result.taskId);
 });
 
 goose.on("error", ({ taskId, error }) => {
