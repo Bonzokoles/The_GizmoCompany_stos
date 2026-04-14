@@ -19,7 +19,6 @@ export type PanelId =
   | "catalog"
   | "knowledge"
   | "agents-creator"
-  | "copilot-dev"
   | "jimbo-kit"
   | "kb-viewer"
   | "code-editor"

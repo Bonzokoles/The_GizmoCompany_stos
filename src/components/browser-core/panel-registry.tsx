@@ -61,9 +61,6 @@ const AgentsCreatorPanel = lazy(() =>
     default: m.AgentsCreatorPanel,
   })),
 );
-const CopilotDevPanel = lazy(() =>
-  import("../ai/CopilotDevPanel").then((m) => ({ default: m.CopilotDevPanel })),
-);
 const JimboKitPanel = lazy(() =>
   import("../assistant/JimboKitPanel").then((m) => ({
     default: m.JimboKitPanel,
@@ -175,12 +172,6 @@ export const PANEL_REGISTRY: PanelEntry[] = [
     icon: "🧑‍💻",
     title: "Agents Creator — tworzenie agentów z bazami wiedzy",
     render: (ctx) => <AgentsCreatorPanel onClose={ctx.onClose} />,
-  },
-  {
-    id: "copilot-dev",
-    icon: "⚡",
-    title: "ZENO DevTools — narzędzia developerskie",
-    render: (ctx) => <CopilotDevPanel onClose={ctx.onClose} />,
   },
   {
     id: "jimbo-kit",

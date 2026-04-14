@@ -11,7 +11,7 @@
  *  ─ Dark ZENO theme throughout
  *  ─ WebSocket streaming with REST fallback
  *
- * Usage: Render inside <CopilotKit> wrapper (BrowserUI context).
+ * Usage: Render inside BrowserUI context.
  */
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';

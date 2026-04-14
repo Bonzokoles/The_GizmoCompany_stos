@@ -610,18 +610,6 @@ export interface Sist2API {
 
 // ── Main ElectronAPI Interface ─────────────────────────────────
 
-export interface CopilotAPI {
-  status(): Promise<{ configured: boolean; connected: boolean; cliPath: string; state: string }>;
-  start(): Promise<{ configured: boolean; connected: boolean; cliPath: string; state: string }>;
-  runPrompt(request: { prompt: string; model?: string; cwd?: string }): Promise<{
-    success: boolean;
-    sessionId?: string;
-    response?: string;
-    model?: string;
-    error?: string;
-  }>;
-}
-
 export interface ElectronAPI {
   browser: BrowserAPI;
   ai: AIAPI;
@@ -640,7 +628,6 @@ export interface ElectronAPI {
   meilisearch: MeilisearchAPI;
   websurfx: WebsurfxAPI;
   sist2: Sist2API;
-  copilot: CopilotAPI;
   workflow?: WorkflowAPI;
   crawler?: CrawlerAPI;
   umami?: UmamiAPI;

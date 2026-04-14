@@ -18,7 +18,6 @@ import { WebsurfxService } from "../services/websurfx-service";
 import { Sist2Service } from "../services/sist2-service";
 import { KnowledgeHubService } from "../services/knowledge-hub-service";
 import { AgentsCreatorService } from "../services/agents-creator-service";
-import { CopilotSdkService } from "../services/copilot-sdk-service";
 import { SecuritySandbox } from "../services/security-sandbox";
 import { UmamiService } from "../services/umami-service";
 import { SyncService } from "../services/sync-service";
@@ -40,7 +39,6 @@ type ServicesMap = {
   sist2Service: Sist2Service;
   knowledgeHubService: KnowledgeHubService;
   agentsCreatorService: AgentsCreatorService;
-  copilotSdkService: CopilotSdkService;
   securitySandbox: SecuritySandbox;
   umamiService: UmamiService;
   syncService: SyncService;
@@ -90,7 +88,6 @@ export class ServiceContainer {
     const knowledgeHubService = new KnowledgeHubService(catalogService);
     void knowledgeHubService.autoRegisterHubLibraries();
     const agentsCreatorService = new AgentsCreatorService(catalogService);
-    const copilotSdkService = new CopilotSdkService();
     const securitySandbox = new SecuritySandbox();
     const umamiService = new UmamiService();
     umamiService.registerIPC();
@@ -113,7 +110,6 @@ export class ServiceContainer {
     this.register("sist2Service", sist2Service);
     this.register("knowledgeHubService", knowledgeHubService);
     this.register("agentsCreatorService", agentsCreatorService);
-    this.register("copilotSdkService", copilotSdkService);
     this.register("securitySandbox", securitySandbox);
     this.register("umamiService", umamiService);
     this.register("syncService", syncService);
