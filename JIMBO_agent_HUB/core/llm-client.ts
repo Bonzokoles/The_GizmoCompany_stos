@@ -8,7 +8,10 @@
  */
 
 import OpenAI from "openai";
-import { ROLE_MODELS } from "../../config/openrouter-models.js";
+
+// Domyślny model HUBa — zmień w .env: OPENROUTER_MODEL=<model-id>
+// Zsynchronizowane z config/openrouter-models.ts :: HUB_DEFAULT_MODEL
+const HUB_DEFAULT_MODEL = "google/gemini-2.0-flash-001";
 
 export type Message = OpenAI.Chat.Completions.ChatCompletionMessageParam;
 export type ToolDefinition = OpenAI.Chat.Completions.ChatCompletionTool;
@@ -37,9 +40,9 @@ export function defaultModel(): string {
   if (provider === "anthropic")
     return process.env.ANTHROPIC_MODEL ?? "claude-haiku-4-5-20251001";
   if (provider === "openrouter")
-    return process.env.OPENROUTER_MODEL ?? ROLE_MODELS.HUB_DEFAULT;
+    return process.env.OPENROUTER_MODEL ?? HUB_DEFAULT_MODEL;
   if (provider === "openai") return process.env.OPENAI_MODEL ?? "gpt-4o-mini";
-  return ROLE_MODELS.HUB_DEFAULT;
+  return HUB_DEFAULT_MODEL;
 }
 
 export function createLLMClient(): OpenAI {
