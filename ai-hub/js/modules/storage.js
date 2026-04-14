@@ -1,12 +1,29 @@
 /* ═══════════════════════════════════════════════════
    MODULE — R2 Storage Browser
    API: /api/storage/buckets  /api/storage/browse/:bucket
+   Write ops (upload/delete) — ZENO Browser only
    ═══════════════════════════════════════════════════ */
 
 const API = '/api/storage';
 
+// Detect ZENO Browser (Electron) — upload/delete only shown here
+const IS_ELECTRON = (() => {
+  if (typeof window === 'undefined') return false;
+  if (window.electronAPI !== undefined) return true;
+  if (typeof navigator !== 'undefined' && navigator.userAgent?.includes('Electron/')) return true;
+  return false;
+})();
+
+// Three Media Hub folders (mybonzo-media bucket)
+const MEDIA_HUB_FOLDERS = [
+  { label: '🎵 Muzyka',   bucket: 'mybonzo-media', prefix: 'music/',   accept: 'audio/*,.mp3,.flac,.wav,.ogg,.m4a,.aac' },
+  { label: '🎬 Wideo',    bucket: 'mybonzo-media', prefix: 'videos/',  accept: 'video/*,.mp4,.mkv,.mov,.avi,.webm' },
+  { label: '🖼️ Zdjęcia',  bucket: 'mybonzo-media', prefix: 'images/',  accept: 'image/*,.jpg,.jpeg,.png,.webp,.gif,.avif' },
+];
+
 const FILE_ICONS = {
   mp4: '🎬', mov: '🎬', avi: '🎬', mkv: '🎬', webm: '🎬',
+  mp3: '🎵', flac: '🎵', wav: '🎵', ogg: '🎵', m4a: '🎵', aac: '🎵',
   jpg: '🖼', jpeg: '🖼', png: '🖼', gif: '🖼', webp: '🖼', svg: '🖼', avif: '🖼',
   pdf: '📄',
   json: '📝', js: '📝', ts: '📝', md: '📝', txt: '📝', csv: '📝', xml: '📝',
@@ -87,7 +104,34 @@ function renderBuckets() {
     templates: '#fbbf24', general: 'var(--text-muted)',
   };
 
-  grid.innerHTML = sorted.map(b => `
+  // Media Hub shortcuts (always at top)
+  const mediaHubHtml = `
+    <div style="grid-column:1/-1;margin-bottom:.3rem">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-bottom:.5rem">📂 Media Hub — szybki dostęp</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem">
+        ${MEDIA_HUB_FOLDERS.map(f => `
+          <div onclick="stBrowseMediaHub('${f.bucket}','${f.prefix}')"
+               style="padding:.8rem 1rem;cursor:pointer;border:1px solid var(--glass-border);border-radius:10px;
+                      background:rgba(96,165,250,0.06);display:flex;align-items:center;gap:.6rem;
+                      transition:var(--transition)"
+               onmouseover="this.style.background='rgba(96,165,250,0.14)'"
+               onmouseout="this.style.background='rgba(96,165,250,0.06)'">
+            <span style="font-size:1.4rem">${f.label.split(' ')[0]}</span>
+            <div>
+              <div style="font-size:.82rem;font-weight:600;color:var(--text)">${f.label.split(' ').slice(1).join(' ')}</div>
+              <div style="font-size:.72rem;color:var(--text-dim)">${f.bucket}/${f.prefix}</div>
+            </div>
+            ${IS_ELECTRON ? `<span onclick="event.stopPropagation();stUploadToFolder('${f.bucket}','${f.prefix}','${f.accept}')"
+              style="margin-left:auto;font-size:.75rem;padding:.2rem .55rem;border-radius:6px;
+                     background:rgba(52,211,153,0.15);color:#34d399;cursor:pointer;border:1px solid rgba(52,211,153,0.3)"
+              title="Wgraj plik">+ wgraj</span>` : ''}
+          </div>`).join('')}
+      </div>
+    </div>
+    <div style="grid-column:1/-1;height:1px;background:var(--glass-border);margin-bottom:.3rem"></div>
+  `;
+
+  grid.innerHTML = mediaHubHtml + sorted.map(b => `
     <div class="glass st-bucket-card" onclick="stOpenBucket('${b.name}')"
          style="padding:1.1rem 1.2rem;cursor:pointer;border:1px solid var(--glass-border);border-radius:12px;
                 transition:var(--transition);display:flex;flex-direction:column;gap:.4rem">
@@ -142,7 +186,29 @@ function renderObjects() {
     return;
   }
 
-  list.innerHTML = objects.map(o => {
+  // Upload zone (Electron only) — inline in object list header
+  const uploadZone = IS_ELECTRON && !state.search ? `
+    <div id="st-drop-zone"
+         ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+         ondragleave="this.style.borderColor='var(--glass-border)'"
+         ondrop="stHandleDrop(event,'${state.currentBucket}','${state.prefix}')"
+         onclick="stTriggerUpload('${state.currentBucket}','${state.prefix}','')"
+         style="margin:.5rem .8rem;padding:.9rem;border:2px dashed var(--glass-border);border-radius:10px;
+                text-align:center;cursor:pointer;font-size:.8rem;color:var(--text-dim);
+                transition:border-color .2s">
+      ⬆️ Przeciągnij pliki tutaj lub kliknij, aby wgrać do <strong>${state.currentBucket}/${state.prefix || ''}</strong>
+    </div>` : '';
+
+  // Dynamic column header
+  const headerCols = IS_ELECTRON ? '2rem 1fr auto auto 3rem' : '2rem 1fr auto auto';
+  const headerRow = `
+    <div style="display:grid;grid-template-columns:${headerCols};gap:.6rem;padding:.5rem .8rem;
+                border-bottom:1px solid var(--glass-border);font-size:.72rem;color:var(--text-dim);
+                text-transform:uppercase;letter-spacing:.5px">
+      <span></span><span>Nazwa</span><span>Rozmiar</span><span>Data</span>${IS_ELECTRON ? '<span></span>' : ''}
+    </div>`;
+
+  list.innerHTML = uploadZone + headerRow + objects.map(o => {
     const key = o.key ?? '';
     const name = key.startsWith(state.prefix) ? key.slice(state.prefix.length) : key;
     const isFolder = key.endsWith('/');
@@ -152,17 +218,25 @@ function renderObjects() {
     const clickFn = isFolder
       ? `stBrowse('${key}')`
       : `stOpenFile('${state.currentBucket}', '${key.replace(/'/g, "\\'")}')`;
+    const safeKey = key.replace(/'/g, "\\'");
+    const deleteBtn = IS_ELECTRON && !isFolder
+      ? `<span onclick="event.stopPropagation();stDelete('${state.currentBucket}','${safeKey}')"
+           style="padding:.15rem .5rem;border-radius:6px;background:rgba(248,113,113,0.15);color:#f87171;
+                  cursor:pointer;font-size:.72rem;border:1px solid rgba(248,113,113,0.3);white-space:nowrap"
+           title="Usuń plik">🗑</span>`
+      : '';
 
     return `
-      <div onclick="${clickFn}" style="display:grid;grid-template-columns:2rem 1fr auto auto;gap:.6rem;
-           align-items:center;padding:.6rem .8rem;border-radius:8px;cursor:pointer;
+      <div style="display:grid;grid-template-columns:2rem 1fr auto auto ${IS_ELECTRON && !isFolder ? '3rem' : ''};gap:.6rem;
+           align-items:center;padding:.6rem .8rem;border-radius:8px;
            border:1px solid transparent;transition:var(--transition)"
            onmouseover="this.style.background='rgba(255,255,255,0.04)'"
            onmouseout="this.style.background='transparent'">
-        <span style="font-size:1.1rem;text-align:center">${icon}</span>
-        <span style="font-size:.83rem;color:var(--text);word-break:break-all">${name || key}</span>
+        <span onclick="${clickFn}" style="font-size:1.1rem;text-align:center;cursor:pointer">${icon}</span>
+        <span onclick="${clickFn}" style="font-size:.83rem;color:var(--text);word-break:break-all;cursor:pointer">${name || key}</span>
         <span style="font-size:.75rem;color:var(--text-muted);white-space:nowrap">${size}</span>
         <span style="font-size:.73rem;color:var(--text-dim);white-space:nowrap">${date}</span>
+        ${deleteBtn}
       </div>`;
   }).join('');
 }
@@ -256,11 +330,146 @@ export async function stLoadMore() {
   }
 }
 
+// ── Write operations ──────────────────────────────
+
+function zenoHeaders(contentType) {
+  const ua = navigator.userAgent;
+  const isElec = ua.includes('Electron/');
+  return {
+    ...(contentType ? { 'Content-Type': contentType } : {}),
+    ...(isElec ? { 'X-Zeno-Client': 'electron' } : {}),
+  };
+}
+
+export async function stUploadFile(bucket, key, file) {
+  if (!IS_ELECTRON) { alert('Upload dostępny tylko w ZENO Browser'); return; }
+  setLoading(true);
+  try {
+    const res = await fetch(`${API}/upload/${encodeURIComponent(bucket)}/${encodeURIComponent(key)}`, {
+      method: 'POST',
+      headers: zenoHeaders(file.type || 'application/octet-stream'),
+      body: file,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.status }));
+      throw new Error(err.error ?? String(res.status));
+    }
+    toast(`✅ Wgrano: ${key}`, 'success');
+    // refresh
+    const data = await fetchObjects(state.currentBucket, state.prefix);
+    state.objects = data.objects ?? [];
+    state.cursor = data.cursor ?? null;
+    renderObjects();
+  } catch (e) {
+    toast(`❌ Upload error: ${e.message}`, 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
+export async function stDelete(bucket, key) {
+  if (!IS_ELECTRON) return;
+  if (!confirm(`Usunąć plik?\n${key}`)) return;
+  setLoading(true);
+  try {
+    const res = await fetch(`${API}/file/${encodeURIComponent(bucket)}/${encodeURIComponent(key)}`, {
+      method: 'DELETE',
+      headers: zenoHeaders(null),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    toast(`🗑 Usunięto: ${key}`, 'success');
+    state.objects = state.objects.filter(o => o.key !== key);
+    renderObjects();
+  } catch (e) {
+    toast(`❌ Błąd usuwania: ${e.message}`, 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
+export async function stBrowseMediaHub(bucket, prefix) {
+  setLoading(true);
+  setError(null);
+  state.currentBucket = bucket;
+  state.prefix = prefix;
+  state.objects = [];
+  state.cursor = null;
+  state.search = '';
+  showObjectView();
+  renderBreadcrumb();
+  try {
+    const data = await fetchObjects(bucket, prefix);
+    state.objects = data.objects ?? [];
+    state.cursor = data.cursor ?? null;
+    renderObjects();
+  } catch (e) {
+    setError(`Błąd: ${e.message}`);
+  } finally {
+    setLoading(false);
+  }
+}
+
+export function stTriggerUpload(bucket, prefix, accept) {
+  if (!IS_ELECTRON) return;
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.multiple = true;
+  if (accept) inp.accept = accept;
+  inp.onchange = async () => {
+    for (const file of Array.from(inp.files)) {
+      const key = prefix + file.name;
+      await stUploadFile(bucket, key, file);
+    }
+  };
+  inp.click();
+}
+
+export function stUploadToFolder(bucket, prefix, accept) {
+  stTriggerUpload(bucket, prefix, accept);
+}
+
+export async function stHandleDrop(event, bucket, prefix) {
+  if (!IS_ELECTRON) return;
+  event.preventDefault();
+  const dropZone = document.getElementById('st-drop-zone');
+  if (dropZone) dropZone.style.borderColor = 'var(--glass-border)';
+  const files = Array.from(event.dataTransfer.files);
+  for (const file of files) {
+    const key = (prefix || '') + file.name;
+    await stUploadFile(bucket, key, file);
+  }
+}
+
 // ── Init ───────────────────────────────────────────
 
 export async function initStorage() {
   // expose globals
-  Object.assign(window, { stBack, stOpenBucket, stBrowse, stOpenFile, stSearch, stLoadMore });
+  Object.assign(window, {
+    stBack, stOpenBucket, stBrowse, stOpenFile, stSearch, stLoadMore,
+    stDelete, stUploadFile, stBrowseMediaHub, stTriggerUpload, stUploadToFolder, stHandleDrop,
+  });
+
+  // Update mode banner based on runtime context
+  const banner = document.getElementById('st-readonly-banner');
+  if (banner) {
+    if (IS_ELECTRON) {
+      banner.style.background = 'rgba(74,222,128,0.07)';
+      banner.style.borderColor = 'rgba(74,222,128,0.25)';
+      banner.style.color = '#86efac';
+      banner.innerHTML = '<span>✏️</span><span><strong>ZENO Browser</strong> — upload i usuwanie plików aktywne.</span>';
+    }
+  }
+
+  // Update mode banner based on runtime context
+  const banner = document.getElementById('st-readonly-banner');
+  if (banner) {
+    if (IS_ELECTRON) {
+      banner.style.background = 'rgba(74,222,128,0.07)';
+      banner.style.borderColor = 'rgba(74,222,128,0.25)';
+      banner.style.color = '#86efac';
+      banner.innerHTML = '<span>✏️</span><span><strong>ZENO Browser</strong> — upload i usuwanie plików aktywne.</span>';
+    }
+  }
 
   // load buckets when storage tab is activated
   const nav = document.querySelector('[data-tab="storage"]');

@@ -751,11 +751,11 @@
   <div id="st-spinner" style="display:none;text-align:center;padding:1.5rem;color:var(--text-muted);font-size:.9rem">⏳ Ładowanie...</div>
   <div id="st-error" style="display:none;padding:.8rem 1rem;border-radius:8px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.3);color:#f87171;font-size:.83rem;margin-bottom:1rem"></div>
 
-  <!-- Read-only note -->
-  <div style="display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-radius:8px;margin-bottom:1rem;
+  <!-- Mode banner — updated by initStorage() based on IS_ELECTRON -->
+  <div id="st-readonly-banner" style="display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-radius:8px;margin-bottom:1rem;
               background:rgba(96,165,250,0.07);border:1px solid rgba(96,165,250,0.2);font-size:.8rem;color:#93c5fd">
     <span>🔒</span>
-    <span><strong>Tryb tylko do odczytu.</strong> Upload i usuwanie plików możliwe do dodania — tylko dla <strong>R2</strong> (nie D1). Wymaga tokenu z uprawnieniami R2:Write + autentykacji po stronie UI.</span>
+    <span><strong>Tryb tylko do odczytu.</strong> Upload i usuwanie plików dostępne wyłącznie w <strong>ZENO Browser</strong> (Electron).</span>
   </div>
 
   <!-- Bucket list -->
@@ -783,11 +783,6 @@
 
     <!-- Objects list -->
     <div class="glass" style="border-radius:12px;overflow:hidden">
-      <!-- Header row -->
-      <div style="display:grid;grid-template-columns:2rem 1fr auto auto;gap:.6rem;padding:.5rem .8rem;
-                  border-bottom:1px solid var(--glass-border);font-size:.72rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px">
-        <span></span><span>Nazwa</span><span>Rozmiar</span><span>Data</span>
-      </div>
       <div id="st-objects-list"></div>
     </div>
 
