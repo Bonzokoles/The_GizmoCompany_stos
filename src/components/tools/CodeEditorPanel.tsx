@@ -323,7 +323,7 @@ export function CodeEditorPanel({ onClose }: CodeEditorPanelProps) {
     monacoRef.current = monaco;
 
     // Track cursor position
-    editor.onDidChangeCursorPosition((e) => {
+    editor.onDidChangeCursorPosition((e: monaco.editor.ICursorPositionChangedEvent) => {
       setCursorPos({ line: e.position.lineNumber, col: e.position.column });
     });
 

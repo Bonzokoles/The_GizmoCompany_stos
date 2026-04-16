@@ -25,16 +25,18 @@ export default defineConfig({
   root: '.',
   base: './',
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-      // Stubuj CopilotKit tylko dla builda webowego (CF Pages).
+    alias: [
+      { find: '@', replacement: path.resolve(__dirname, 'src') },
+      // Stubuj CopilotKit i Monaco tylko dla builda webowego (CF Pages).
       // Electron (npm run dev) używa prawdziwych paczek — stąd guard na VITE_BUILD_TARGET.
-      ...(process.env.VITE_BUILD_TARGET === 'web' ? {
-        '@copilotkit/react-ui/styles.css': path.resolve(__dirname, 'src/vendor/copilotkit-react-ui-stub.css'),
-        '@copilotkit/react-core': path.resolve(__dirname, 'src/vendor/copilotkit-react-core-stub.tsx'),
-        '@copilotkit/react-ui': path.resolve(__dirname, 'src/vendor/copilotkit-react-ui-stub.tsx'),
-      } : {}),
-    },
+      ...(process.env.VITE_BUILD_TARGET === 'web' ? [
+        { find: '@copilotkit/react-ui/styles.css', replacement: path.resolve(__dirname, 'src/vendor/copilotkit-react-ui-stub.css') },
+        { find: '@copilotkit/react-core', replacement: path.resolve(__dirname, 'src/vendor/copilotkit-react-core-stub.tsx') },
+        { find: '@copilotkit/react-ui', replacement: path.resolve(__dirname, 'src/vendor/copilotkit-react-ui-stub.tsx') },
+        // Monaco jest Electron-only — stubbuj dla web buildu (CF Pages)
+        { find: /\/vendor\/monaco-setup/, replacement: path.resolve(__dirname, 'src/vendor/monaco-setup-stub.ts') },
+      ] : []),
+    ],
   },
   server: {
     port: 5173,

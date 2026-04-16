@@ -4,6 +4,7 @@
   "description": "THE_Zenon_browser - AI-powered web browser",
   "main": "dist-electron/src-electron/main.js",
   "scripts": {
+    "start": "cross-env ELECTRON_IS_DEV=0 electron .",
     "dev": "npx kill-port 5173 && concurrently \"npm run dev:vite\" \"npm run dev:electron\"",
     "dev:vite": "vite",
     "dev:electron": "wait-on http://localhost:5173 && electron .",
@@ -118,6 +119,7 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "localflare": "^0.5.0",
+    "monaco-editor": "^0.52.0",
     "playwright": "^1.40.1",
     "prettier": "^3.1.0",
     "ts-jest": "^29.1.1",
