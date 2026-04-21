@@ -5,26 +5,25 @@ color 0A
 
 echo.
 echo.
-echo   ██████████████████████████████████████████████████████████████
-echo   █                                                            █
-echo   █                                                            █
-echo   █    ░░░░░░  ░░░░░░░ ░░░░░░░░░ ░░░░░░░   ░░░░░░░            █
-echo   █      ██  ██████   ██     ██  ██████    ██  ██             █
-echo   █      ██    ██    ██████  ██  ██   ██  ██████              █
-echo   █      ██    ██   ██    ██ ██  ██████  ██    ██             █
-echo   █      ██    ██   ██    ██ ██  ██  ██  ██    ██             █
-echo   █                                                            █
-echo   █         ░░░░██╗ ██╗   ██╗ ██████╗                         █
-echo   █         ██╔══██╗██║   ██║ ██╔══██╗                        █
-echo   █         ███████║██║   ██║ ██████╔╝                        █
-echo   █         ██╔══██║██║   ██║ ██╔══██╗                        █
-echo   █         ██║  ██║╚██████╔╝ ██████╔╝                        █
-echo   █         ╚═╝  ╚═╝ ╚═════╝  ╚═════╝                        █
-echo   █                                                            █
-echo   █                                                            █
-echo   █      ona tu jest i tanczy dla mnie...                     █
-echo   █                                                            █
-echo   ██████████████████████████████████████████████████████████████
+echo   ╔══════════════════════════════════════════════════════════════════╗
+echo   ║                                                                  ║
+echo   ║         ██╗ ██╗  ███╗   ███╗██████╗  ██████╗                      ║
+echo   ║         ██║ ██║  ████╗ ████║██╔══██╗██╔═══██╗                    ║
+echo   ║         ██║ ██║  ██╔████╔██║██████╔╝██║   ██║                    ║
+echo   ║    ██   ██║ ██║  ██║╚██╔╝██║██╔══██╗██║   ██║                    ║
+echo   ║    ╚█████╔╝ ██║  ██║ ╚═╝ ██║██████╔╝╚██████╔╝                    ║
+echo   ║     ╚════╝  ╚═╝  ╚═╝     ╚═╝╚═════╝  ╚═════╝                     ║
+echo   ║                                                                  ║
+echo   ║          ██╗  ██╗██╗   ██╗██████╗                               ║
+echo   ║          ██║  ██║██║   ██║██╔══██╗                              ║
+echo   ║          ███████║██║   ██║██████╔╝                              ║
+echo   ║          ██╔══██║██║   ██║██╔══██╗                              ║
+echo   ║          ██║  ██║╚██████╔╝██████╔╝                              ║
+echo   ║          ╚═╝  ╚═╝ ╚═════╝ ╚═════╝                               ║
+echo   ║                                                                  ║
+echo   ║        ona tu jest i tanczy dla mnie...                         ║
+echo   ║                                                                  ║
+echo   ╚══════════════════════════════════════════════════════════════════╝
 echo.
 echo.
 
@@ -40,4 +39,11 @@ echo   Wpisz komendy lub obserwuj taski z AgentHubPanel
 echo   Ctrl+C = wyjscie
 echo.
 
-"%GOOSE_EXE%" session
+:: Uruchom sesję Goose — --name dla persistencji z JIMBO Hub
+"%GOOSE_EXE%" session --name jimbo-hub
+
+if errorlevel 1 (
+    echo.
+    echo  [BLAD] Goose zakonczyl sie z bledem. Sprawdz konfiguracje.
+    pause
+)

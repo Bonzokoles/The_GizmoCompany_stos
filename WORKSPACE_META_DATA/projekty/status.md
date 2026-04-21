@@ -1,0 +1,2 @@
+- Przeniesiono sesję do warstwy asystenta
+- Odnaleziono plik z systemowym promptem  - Zapisano kopię systemowego promptu do nowej lokalizacji

@@ -16,8 +16,12 @@ export const terminalAPI = {
 
   // ── PTY (real terminal via node-pty) ──────────────────────
   pty: {
-    create: (cols: number, rows: number, cwd?: string) =>
-      ipcRenderer.invoke(PTY.CREATE, cols, rows, cwd),
+    create: (cols: number, rows: number, cwd?: string, opts?: {
+      command?: string;
+      args?: string[];
+      env?: Record<string, string>;
+    }) =>
+      ipcRenderer.invoke(PTY.CREATE, cols, rows, cwd, opts),
     write: (id: string, data: string) =>
       ipcRenderer.invoke(PTY.WRITE, id, data),
     resize: (id: string, cols: number, rows: number) =>

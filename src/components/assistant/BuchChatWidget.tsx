@@ -21,6 +21,13 @@ interface ToolCall {
   result: string;
 }
 
+interface AgentToolEvent {
+  tool: string;
+  input: Record<string, unknown>;
+  output?: string;
+  status: "calling" | "done" | "error";
+}
+
 interface Message {
   role: "user" | "assistant";
   text: string;
@@ -29,12 +36,16 @@ interface Message {
   ts: number;
   streaming?: boolean;
   toolTrace?: ToolCall[];
+  agentTrace?: AgentToolEvent[];
 }
 
 type GooseStatus = "idle" | "running" | "done" | "error";
 
 // Wykrywa "⚡ Wyślij do Goose: instrukcja" lub samo "⚡ instrukcja" w odpowiedzi JIMBO
 const GOOSE_RE = /⚡\s*(?:Wyślij do Goose[:\s]+)?(.+?)(?:\n|$)/i;
+
+// Rozszerzona flaga dla wiadomości live-buffer Goose (streaming chunks)
+const GOOSE_LIVE_PROVIDER = "goose-live";
 
 interface BuchChatWidgetProps {
   /** Called when user clicks "Open Full Assistant" → parent switches to 'assistant' tab */
@@ -45,6 +56,7 @@ const HISTORY_KEY = "buch-widget-history";
 const PROVIDER_KEY = "buch-widget-provider";
 const TOOLS_KEY = "buch-widget-tools";
 const STREAMING_KEY = "buch-widget-streaming";
+const AGENT_KEY = "buch-widget-agent";
 
 // ── Image helpers ──────────────────────────────────────────────────────────
 
@@ -137,6 +149,50 @@ function MessageContent({
   );
 }
 
+// ── Agent Tool Trace Block ───────────────────────────────────────────────────
+
+function AgentTraceBlock({ events }: { events: AgentToolEvent[] }) {
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  if (!events.length) return null;
+  return (
+    <div className="buch-agent-trace">
+      {events.map((ev, i) => (
+        <div
+          key={i}
+          className={`buch-agent-tool buch-agent-tool-${ev.status}`}
+        >
+          <button
+            className="buch-agent-tool-hdr"
+            onClick={() => setExpanded((s) => ({ ...s, [i]: !s[i] }))}
+          >
+            <span className="buch-agent-tool-icon">
+              {ev.status === "calling" ? "⏳" : ev.status === "error" ? "⚠" : "✓"}
+            </span>
+            <code className="buch-agent-tool-name">{ev.tool}</code>
+            <span className="buch-agent-tool-toggle">{expanded[i] ? "▲" : "▼"}</span>
+          </button>
+          {expanded[i] && (
+            <div className="buch-agent-tool-body">
+              <div className="buch-agent-tool-section">
+                <span className="buch-agent-tool-label">Wejście:</span>
+                <pre className="buch-agent-tool-pre">
+                  {JSON.stringify(ev.input, null, 2)}
+                </pre>
+              </div>
+              {ev.output != null && (
+                <div className="buch-agent-tool-section">
+                  <span className="buch-agent-tool-label">Wyjście:</span>
+                  <pre className="buch-agent-tool-pre">{ev.output.slice(0, 800)}</pre>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 
 function isNetworkError(err: unknown): boolean {
@@ -198,6 +254,9 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   const [gooseStatuses, setGooseStatuses] = useState<
     Record<number, GooseStatus>
   >({});
+  const [useAgent, setUseAgent] = useState(
+    () => localStorage.getItem(AGENT_KEY) === "true",
+  );
   const [cfOnline, setCfOnline] = useState<boolean | null>(null);
 
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -241,6 +300,10 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   useEffect(() => {
     if (useTools && useStreaming) setUseStreaming(false);
   }, [useTools]);
+  /* agent mode wyklucza tools i streaming */
+  useEffect(() => {
+    if (useAgent) { setUseTools(false); setUseStreaming(false); }
+  }, [useAgent]);
 
   /* persist */
   useEffect(() => {
@@ -255,6 +318,9 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   useEffect(() => {
     localStorage.setItem(STREAMING_KEY, String(useStreaming));
   }, [useStreaming]);
+  useEffect(() => {
+    localStorage.setItem(AGENT_KEY, String(useAgent));
+  }, [useAgent]);
 
   /* CF API status ping */
   useEffect(() => {
@@ -278,6 +344,38 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
   const dispatchToGoose = useCallback(
     async (msgIdx: number, instructions: string) => {
       setGooseStatuses((s) => ({ ...s, [msgIdx]: "running" }));
+
+      // Dodaj live-buffer wiadomość — będzie się wypełniać chunkami z Goose
+      const bufferTs = Date.now() + Math.random(); // unikalny klucz
+      setHistory((h) => [
+        ...h,
+        {
+          role: "assistant" as const,
+          text: "",
+          provider: GOOSE_LIVE_PROVIDER,
+          ts: bufferTs,
+          streaming: true,
+        },
+      ]);
+
+      const updateBuffer = (append: string) =>
+        setHistory((h) =>
+          h.map((m) =>
+            m.ts === bufferTs && m.provider === GOOSE_LIVE_PROVIDER
+              ? { ...m, text: m.text + append }
+              : m,
+          ),
+        );
+
+      const finalizeBuffer = (finalText: string, providerName = "goose") =>
+        setHistory((h) =>
+          h.map((m) =>
+            m.ts === bufferTs && m.provider === GOOSE_LIVE_PROVIDER
+              ? { ...m, text: finalText, provider: providerName, streaming: false }
+              : m,
+          ),
+        );
+
       try {
         const res = await fetch("http://localhost:4224/agent/run", {
           method: "POST",
@@ -285,19 +383,22 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           body: JSON.stringify({ instructions }),
         });
         if (!res.ok) {
+          finalizeBuffer("⚠ HUB niedostępny lub błąd wysyłania zadania.", "goose-error");
           setGooseStatuses((s) => ({ ...s, [msgIdx]: "error" }));
           return;
         }
         const data = (await res.json()) as { taskId?: string };
         const taskId = data.taskId;
         if (!taskId) {
+          finalizeBuffer("⚠ Brak taskId w odpowiedzi HUB.", "goose-error");
           setGooseStatuses((s) => ({ ...s, [msgIdx]: "done" }));
           return;
         }
 
-        // Subskrybuj wynik przez WebSocket
+        // WebSocket — subskrypcja na eventy Goose
         const ws = new WebSocket("ws://localhost:4224/ws");
         let synthTimer: ReturnType<typeof setTimeout> | null = null;
+        let synthReceived = false;
 
         const finish = (status: GooseStatus) => {
           if (synthTimer) clearTimeout(synthTimer);
@@ -313,45 +414,181 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
           try {
             const msg = JSON.parse(e.data as string) as {
               type: string;
+              text?: string;
               content?: string;
               error?: string;
+              isStderr?: boolean;
+              verdict?: string;
+              score?: number;
+              reflection?: string;
+              improvement?: string;
+              retryNum?: number;
+              maxRetries?: number;
+              reason?: string;
             };
-            if (msg.type === "goose:synthesis" && msg.content?.trim()) {
+
+            if (msg.type === "chunk" && msg.text && !msg.isStderr) {
+              // Live streaming output — dołącz do buffera
+              updateBuffer(msg.text);
+
+            } else if (msg.type === "reflexion" && msg.verdict) {
+              // Ocena jakości Goose — pokaż jako meta-wiadomość
+              const score = typeof msg.score === "number"
+                ? msg.score.toFixed(2)
+                : "?";
+              const icon = msg.verdict === "success" ? "✓" : msg.verdict === "partial" ? "⚠" : "✗";
+              const reflexionText = [
+                `${icon} Ocena: ${msg.verdict} · ${score}/1.0`,
+                msg.reflection ? `📝 ${msg.reflection}` : "",
+                msg.improvement ? `💡 ${msg.improvement}` : "",
+              ].filter(Boolean).join("\n");
               setHistory((h) => [
                 ...h,
                 {
                   role: "assistant" as const,
-                  text: `[Goose] ${msg.content}`,
-                  provider: "goose",
+                  text: reflexionText,
+                  provider: "reflexion",
                   ts: Date.now(),
                 },
               ]);
+
+            } else if (msg.type === "retry") {
+              // Auto-retry — poinformuj użytkownika i wyczyść buffer
+              setHistory((h) => [
+                ...h,
+                {
+                  role: "assistant" as const,
+                  text: `🔄 Auto-retry ${msg.retryNum ?? "?"}/${msg.maxRetries ?? "?"}: ${msg.reason ?? "poprzednia próba niekompletna"}`,
+                  provider: "goose-retry",
+                  ts: Date.now(),
+                },
+              ]);
+              // Nowy live-buffer dla retry (stary buffer zamrażamy jako archiwum)
+              setHistory((h) =>
+                h.map((m) =>
+                  m.ts === bufferTs && m.provider === GOOSE_LIVE_PROVIDER
+                    ? { ...m, streaming: false, provider: "goose-archive" }
+                    : m,
+                ),
+              );
+
+            } else if (msg.type === "goose:synthesis" && msg.content?.trim()) {
+              // Synthesis — zastąp buffer finalną wiadomością
+              synthReceived = true;
+              finalizeBuffer(`[Goose] ${msg.content}`, "goose");
               finish("done");
+
             } else if (msg.type === "done") {
-              // Czekamy max 15s na synthesis — jeśli nie przyjdzie, zamykamy
-              synthTimer = setTimeout(() => finish("done"), 15_000);
+              // Czekamy max 20s na synthesis
+              synthTimer = setTimeout(() => {
+                if (!synthReceived) {
+                  // Brak synthesis — buffer zostaje jako surowy output
+                  setHistory((h) =>
+                    h.map((m) =>
+                      m.ts === bufferTs && m.provider === GOOSE_LIVE_PROVIDER
+                        ? { ...m, streaming: false, provider: "goose" }
+                        : m,
+                    ),
+                  );
+                }
+                finish("done");
+              }, 20_000);
+
             } else if (msg.type === "error") {
+              updateBuffer("\n⚠ Błąd wykonania zadania.");
+              setHistory((h) =>
+                h.map((m) =>
+                  m.ts === bufferTs && m.provider === GOOSE_LIVE_PROVIDER
+                    ? { ...m, streaming: false }
+                    : m,
+                ),
+              );
               finish("error");
             }
-          } catch { /* ignore */ }
+          } catch { /* ignore malformed WS messages */ }
         };
 
-        ws.onerror = () => finish("error");
+        ws.onerror = () => {
+          finalizeBuffer("⚠ Błąd WebSocket — brak połączenia z HUB.", "goose-error");
+          finish("error");
+        };
 
-        // Bezpieczny timeout całego zadania: 5 minut
+        // Globalny timeout: 5 minut
         setTimeout(() => {
-          if (ws.readyState === WebSocket.OPEN) finish("done");
+          if (ws.readyState === WebSocket.OPEN) {
+            setHistory((h) =>
+              h.map((m) =>
+                m.ts === bufferTs && m.provider === GOOSE_LIVE_PROVIDER
+                  ? { ...m, streaming: false, provider: "goose" }
+                  : m,
+              ),
+            );
+            finish("done");
+          }
         }, 5 * 60_000);
+
       } catch {
+        finalizeBuffer("⚠ Nie można połączyć z HUB (localhost:4224).", "goose-error");
         setGooseStatuses((s) => ({ ...s, [msgIdx]: "error" }));
       }
     },
     [],
   );
 
+  // Pobiera ostatnie wpisy changelog z HUB i dodaje do historii
+  const showChangelog = useCallback(async () => {
+    try {
+      const res = await fetch("http://localhost:4224/agent/changelog");
+      if (!res.ok) throw new Error(`${res.status}`);
+      const entries = (await res.json()) as Array<{
+        ts: number;
+        instruction: string;
+        summary: string;
+        taskId: string;
+      }>;
+      if (!entries.length) {
+        setHistory((h) => [
+          ...h,
+          { role: "assistant" as const, text: "📋 Changelog pusty — Goose jeszcze nic nie zmienił.", provider: "system", ts: Date.now() },
+        ]);
+        return;
+      }
+      const lines = entries
+        .slice(0, 10)
+        .map((e, i) => {
+          const d = new Date(e.ts).toLocaleString("pl-PL");
+          return `${i + 1}. [${d}]\n   📌 ${e.instruction.slice(0, 60)}\n   ✅ ${e.summary.slice(0, 120)}`;
+        })
+        .join("\n\n");
+      setHistory((h) => [
+        ...h,
+        { role: "assistant" as const, text: `📋 Ostatnie zmiany Goose:\n\n${lines}`, provider: "system", ts: Date.now() },
+      ]);
+    } catch {
+      setHistory((h) => [
+        ...h,
+        { role: "assistant" as const, text: "⚠ Nie można pobrać changelog (HUB offline?)", provider: "system", ts: Date.now() },
+      ]);
+    }
+  }, []);
+
   const sendMessage = useCallback(async () => {
     const text = prompt.trim();
     if (!text || loading) return;
+
+    // /goose <instrukcja> — bezpośredni dispatch do Goose (bez JIMBO chat)
+    if (/^\/g(?:oose)?\s+/i.test(text)) {
+      const instruction = text.replace(/^\/g(?:oose)?\s+/i, "").trim();
+      if (!instruction) return;
+      setPrompt("");
+      const msgIdx = history.length;
+      setHistory((h) => [...h, { role: "user", text, provider: "user", ts: Date.now() }]);
+      setLoading(true);
+      await dispatchToGoose(msgIdx, instruction);
+      setLoading(false);
+      return;
+    }
+
     setPrompt("");
     setHistory((h) => [...h, { role: "user", text, provider, ts: Date.now() }]);
     setLoading(true);
@@ -359,6 +596,122 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     const basePayload = { prompt: text, provider, maxTokens: 2048 };
 
     try {
+      /* PATH AGENT: BUCH_AGENT mode — agentic loop z tool calling */
+      if (useAgent && provider === "agent-hub") {
+        const agentMessages = [
+          ...history.slice(-20).map((m) => ({ role: m.role, content: m.text })),
+          { role: "user" as const, content: text },
+        ];
+
+        // Placeholder wiadomości z live trace
+        const agentTs = Date.now();
+        setHistory((h) => [
+          ...h,
+          {
+            role: "assistant" as const,
+            text: "",
+            provider: "buch-agent",
+            ts: agentTs,
+            streaming: true,
+            agentTrace: [],
+          },
+        ]);
+
+        const updateAgent = (
+          updater: (msg: Message) => Message,
+        ) =>
+          setHistory((h) =>
+            h.map((m) => (m.ts === agentTs ? updater(m) : m)),
+          );
+
+        try {
+          const res = await fetch("http://localhost:4224/chat/agent", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ messages: agentMessages }),
+          });
+          if (!res.ok || !res.body)
+            throw new Error(`Agent error ${res.status}`);
+
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buf = "";
+          let finalText = "";
+
+          // eslint-disable-next-line no-constant-condition
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            const lines = buf.split("\n");
+            buf = lines.pop() ?? "";
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const raw = line.slice(6).trim();
+              if (raw === "[DONE]") break;
+              try {
+                const ev = JSON.parse(raw) as {
+                  type: string;
+                  tool?: string;
+                  input?: Record<string, unknown>;
+                  output?: string;
+                  text?: string;
+                  message?: string;
+                };
+                if (ev.type === "tool_call") {
+                  updateAgent((m) => ({
+                    ...m,
+                    agentTrace: [
+                      ...(m.agentTrace ?? []),
+                      {
+                        tool: ev.tool ?? "",
+                        input: ev.input ?? {},
+                        status: "calling" as const,
+                      },
+                    ],
+                  }));
+                } else if (ev.type === "tool_result") {
+                  updateAgent((m) => {
+                    const trace = [...(m.agentTrace ?? [])];
+                    const idx = [...trace].reverse().findIndex(
+                      (t) => t.tool === ev.tool && t.status === "calling",
+                    );
+                    if (idx !== -1) {
+                      const realIdx = trace.length - 1 - idx;
+                      const isError = (ev.output ?? "").startsWith("ERROR:");
+                      trace[realIdx] = {
+                        ...trace[realIdx],
+                        output: ev.output,
+                        status: isError ? "error" : "done",
+                      };
+                    }
+                    return { ...m, agentTrace: trace };
+                  });
+                } else if (ev.type === "token" && ev.text) {
+                  finalText += ev.text;
+                  updateAgent((m) => ({ ...m, text: finalText }));
+                } else if (ev.type === "error") {
+                  finalText = `⚠ Agent error: ${ev.message ?? "nieznany błąd"}`;
+                  updateAgent((m) => ({ ...m, text: finalText }));
+                }
+              } catch { /* ignore bad JSON */ }
+            }
+          }
+        } catch (agentErr) {
+          if (isNetworkError(agentErr)) {
+            updateAgent((m) => ({
+              ...m,
+              text: "⚠ BUCH_AGENT niedostępny (HUB offline). Przełącz na inny tryb lub uruchom start_zeno_hub.bat.",
+            }));
+          } else {
+            throw agentErr;
+          }
+        } finally {
+          updateAgent((m) => ({ ...m, streaming: false }));
+        }
+        return;
+      }
+
       /* PATH 0: JIMBO Agent HUB (localhost:4224) */
       if (provider === "agent-hub") {
         const hubMessages = [
@@ -683,12 +1036,22 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
               </button>
               <button
                 className={`buch-widget-btn${useTools ? " buch-btn-active" : ""}`}
-                onClick={() => setUseTools((v) => !v)}
+                onClick={() => { setUseTools((v) => !v); setUseAgent(false); }}
                 title="Narzędzia webowe (Claude)"
                 aria-label="Narzędzia"
               >
                 ⚒
               </button>
+              {provider === "agent-hub" && (
+                <button
+                  className={`buch-widget-btn${useAgent ? " buch-btn-active buch-btn-agent" : ""}`}
+                  onClick={() => setUseAgent((v) => !v)}
+                  title="BUCH_AGENT — orkiestrator z 15 narzędziami (pliki, R2, D1, Goose, Pi, search)"
+                  aria-label="Agent"
+                >
+                  🔧
+                </button>
+              )}
               {onOpenFull && (
                 <button
                   className="buch-widget-btn"
@@ -697,6 +1060,16 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                   aria-label="Pełny asystent"
                 >
                   ⊞
+                </button>
+              )}
+              {provider === "agent-hub" && (
+                <button
+                  className="buch-widget-btn"
+                  onClick={showChangelog}
+                  title="Pokaż ostatnie zmiany Goose"
+                  aria-label="Changelog"
+                >
+                  📋
                 </button>
               )}
               <button
@@ -722,10 +1095,21 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
               </div>
             )}
             {history.map((m, i) => (
-              <div key={i} className={`buch-widget-msg buch-msg-${m.role}`}>
+              <div
+                key={i}
+                className={`buch-widget-msg buch-msg-${m.role}${
+                  m.provider === "reflexion" ? " buch-msg-reflexion" :
+                  m.provider === "goose-retry" ? " buch-msg-retry" :
+                  m.provider === GOOSE_LIVE_PROVIDER ? " buch-msg-goose-live" : ""
+                }`}
+              >
                 <div className="buch-msg-meta">
                   <span className="buch-msg-role">
-                    {m.role === "user" ? "TY" : "AI"}
+                    {m.role === "user" ? "TY" :
+                     m.provider === "reflexion" ? "📊" :
+                     m.provider === "goose-retry" ? "🔄" :
+                     m.provider === GOOSE_LIVE_PROVIDER ? "⚡" :
+                     m.provider === "goose" ? "🦆" : "AI"}
                   </span>
                   <span className="buch-msg-prov">{m.provider}</span>
                   {m.tokens != null && (
@@ -740,6 +1124,9 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
                     </span>
                   )}
                 </div>
+                {m.agentTrace && m.agentTrace.length > 0 && (
+                  <AgentTraceBlock events={m.agentTrace} />
+                )}
                 <MessageContent
                   text={m.text}
                   streaming={m.streaming}

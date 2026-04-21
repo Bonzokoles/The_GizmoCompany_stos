@@ -5,6 +5,8 @@
  * Deployed on zenbrowsers.org (CF Pages)
  */
 import { useState, useEffect } from "react";
+import { ErrorBoundary } from "../ErrorBoundary";
+import { LoadingSpinner } from "../LoadingSpinner";
 import { BuchChatWidget } from "../assistant/BuchChatWidget";
 import { AssistantPage } from "../assistant/AssistantPage";
 import { JimboKitPanel } from "../assistant/JimboKitPanel";
@@ -130,12 +132,7 @@ export function WebLanding() {
     }
     if (tab === "aihub") aihub.loadAiProviders();
     if (tab === "workflows") workflows.loadWorkflowStatuses();
-    if (tab === "biztools" && !biztools.tavilyAutoRan && biztools.tavilyKey) {
-      biztools.setTavilyAutoRan(true);
-      biztools.handleTavilySearch(
-        "business financial analytics tools open source AI 2025",
-      );
-    }
+    // Removed auto-run Tavily - requires explicit user consent via button click
   }, [tab]);
 
   return (
@@ -177,53 +174,55 @@ export function WebLanding() {
         ))}
       </nav>
 
-      {tab === "overview" && (
-        <OverviewTab
-          {...overview}
-          apis={apis}
-          sites={sites}
-          onlineApis={onlineApis}
-        />
-      )}
-      {tab === "workers" && (
-        <WorkersTab
-          {...workers}
-          filteredWorkers={filteredWorkers}
-          workerCategories={workerCategories}
-        />
-      )}
-      {tab === "content" && <ContentTab {...content} />}
-      {tab === "analytics" && (
-        <AnalyticsTab {...analytics} ANALYTICS_SOURCES={ANALYTICS_SOURCES} />
-      )}
-      {tab === "crawlers" && <CrawlersTab {...crawlers} />}
-      {tab === "storage" && <StorageTab {...storage} />}
-      {tab === "databases" && <DatabasesTab {...databases} />}
-      {tab === "images" && <ImagesTab {...images} />}
-      {tab === "moa" && <MoaTab {...moa} />}
-      {tab === "pipelines" && (
-        <PipelinesTab {...pipelines} PIPELINES_LIST={PIPELINES_LIST} />
-      )}
-      {tab === "render" && <RenderTab {...render} />}
-      {tab === "queues" && <QueuesTab {...queues} />}
-      {tab === "aihub" && (
-        <AiHubTab
-          {...aihub}
-          setTab={setTab}
-          setQueueName={queues.setQueueName}
-          setQueueAction={queues.setQueueAction}
-        />
-      )}
-      {tab === "biztools" && (
-        <BizToolsTab
-          {...biztools}
-          BIZ_CATEGORIES={BIZ_CATEGORIES}
-          BIZTOOLS_CATALOG={BIZTOOLS_CATALOG}
-        />
-      )}
-      {tab === "workflows" && <WorkflowsTab {...workflows} />}
-      {tab === "assistant" && <AssistantPage />}
-      {tab === "mediahub" && <MediaHubTab {...mediahub} />}
+      <ErrorBoundary>
+        {tab === "overview" && (
+          <OverviewTab
+            {...overview}
+            apis={apis}
+            sites={sites}
+            onlineApis={onlineApis}
+          />
+        )}
+        {tab === "workers" && (
+          <WorkersTab
+            {...workers}
+            filteredWorkers={filteredWorkers}
+            workerCategories={workerCategories}
+          />
+        )}
+        {tab === "content" && <ContentTab {...content} />}
+        {tab === "analytics" && (
+          <AnalyticsTab {...analytics} ANALYTICS_SOURCES={ANALYTICS_SOURCES} />
+        )}
+        {tab === "crawlers" && <CrawlersTab {...crawlers} />}
+        {tab === "storage" && <StorageTab {...storage} />}
+        {tab === "databases" && <DatabasesTab {...databases} />}
+        {tab === "images" && <ImagesTab {...images} />}
+        {tab === "moa" && <MoaTab {...moa} />}
+        {tab === "pipelines" && (
+          <PipelinesTab {...pipelines} PIPELINES_LIST={PIPELINES_LIST} />
+        )}
+        {tab === "render" && <RenderTab {...render} />}
+        {tab === "queues" && <QueuesTab {...queues} />}
+        {tab === "aihub" && (
+          <AiHubTab
+            {...aihub}
+            setTab={setTab}
+            setQueueName={queues.setQueueName}
+            setQueueAction={queues.setQueueAction}
+          />
+        )}
+        {tab === "biztools" && (
+          <BizToolsTab
+            {...biztools}
+            BIZ_CATEGORIES={BIZ_CATEGORIES}
+            BIZTOOLS_CATALOG={BIZTOOLS_CATALOG}
+          />
+        )}
+        {tab === "workflows" && <WorkflowsTab {...workflows} />}
+        {tab === "assistant" && <AssistantPage />}
+        {tab === "mediahub" && <MediaHubTab {...mediahub} />}
+      </ErrorBoundary>
 
       <footer>
         <p>

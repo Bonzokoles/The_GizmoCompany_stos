@@ -1,0 +1,7 @@
+﻿{
+  "_category": "terminal",
+  "_category_name": "Terminal / Commands",
+  "_description": "Uruchamianie komend i skryptów systemowych",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz Terminal / Commands w pipeline agenta.",
+  "tools": []
+}

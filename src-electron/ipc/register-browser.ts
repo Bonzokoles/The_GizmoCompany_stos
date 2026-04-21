@@ -1,7 +1,7 @@
 import { ipcMain, type BrowserWindow } from "electron";
 import type { ServiceContainer } from "../app/service-container";
 import { isSafeUrl, isValidString } from "../utils/validate-url";
-import { BrowserManager } from "../services/browser-manager";
+import { BrowserManager } from "../services/browser";
 import { IPC } from "../../src/shared/ipc/channels";
 
 const CH = IPC.BROWSER;

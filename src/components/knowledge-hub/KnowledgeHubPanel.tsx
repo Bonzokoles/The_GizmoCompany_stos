@@ -140,11 +140,12 @@ export function KnowledgeHubPanel({ onClose }: Props) {
 
   const handleReadFile = async (filePath: string) => {
     setSelectedFilePath(filePath);
-    const res = await window.electronAPI.catalog.readFile(filePath);
-    if (res.success && res.data) {
-      setFileContent(res.data.content);
+    // file.read → IPC file:read → { success, content, size, modified, error }
+    const res = await window.electronAPI.file?.read(filePath);
+    if (res?.success && res.content) {
+      setFileContent(res.content);
     } else {
-      setFileContent('Nie można odczytać pliku');
+      setFileContent(res?.error ?? 'Nie można odczytać pliku');
     }
   };
 

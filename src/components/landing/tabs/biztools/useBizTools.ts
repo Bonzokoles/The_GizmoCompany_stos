@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { useState, useCallback, useEffect } from "react";
 import { apiFetch } from "../../shared/api";
 import { ANALYTICS_SOURCES } from "../../shared/constants";
@@ -8,11 +7,12 @@ import {
   cfGateway,
   isJimboOnline,
 } from "../../shared/jimboClient";
+import type { BizCategory, TavilyResult, ToolHistoryItem } from "./types";
 
 export function useBizTools() {
-  const [bizSearch, setBizSearch] = useState("");
+  const [bizSearch, setBizSearch] = useState<string>("");
 
-  const [bizCategory, setBizCategory] = useState("all");
+  const [bizCategory, setBizCategory] = useState<BizCategory>("all");
 
   const [tavilyKey, setTavilyKey] = useState(() => {
     try {
@@ -112,48 +112,58 @@ export function useBizTools() {
       setToolResult("");
       setToolEvents([]);
 
-      const online = await isJimboOnline();
-      setJimboOnline(online);
+      try {
+        const online = await isJimboOnline();
+        setJimboOnline(online);
 
-      const context = Object.entries(params)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join("; ");
+        const context = Object.entries(params)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("; ");
 
-      if (online) {
-        jimboStream(
-          `Uruchom narzędzie ${id}. Kontekst: ${context || "brak"}`,
-          `biz-${id}-${Date.now()}`,
-          (chunk) => setToolResult((prev) => `${prev}${chunk}`),
-          (full) => {
-            const text = full || "Brak odpowiedzi z JIMbo.";
-            setToolResult(text);
-            setToolHistory((prev) => [{ id, text, ts: Date.now() }, ...prev]);
-            setToolLoading(false);
-          },
-          (tool, result) => {
-            if (tool.includes("search")) {
-              setToolEvents((prev) => [...prev, `💡 Szukam: ${result || id}`]);
-            } else if (tool.includes("fetch") || tool.includes("url")) {
-              setToolEvents((prev) => [
-                ...prev,
-                `🔗 Pobieram: ${result || id}`,
-              ]);
-            }
-          },
+        if (online) {
+          jimboStream(
+            `Uruchom narzędzie ${id}. Kontekst: ${context || "brak"}`,
+            `biz-${id}-${Date.now()}`,
+            (chunk) => setToolResult((prev) => `${prev}${chunk}`),
+            (full) => {
+              const text = full || "Brak odpowiedzi z JIMbo.";
+              setToolResult(text);
+              setToolHistory((prev) => [{ id, text, ts: Date.now() }, ...prev]);
+              setToolLoading(false);
+            },
+            (tool, result) => {
+              if (tool.includes("search")) {
+                setToolEvents((prev) => [
+                  ...prev,
+                  `💡 Szukam: ${result || id}`,
+                ]);
+              } else if (tool.includes("fetch") || tool.includes("url")) {
+                setToolEvents((prev) => [
+                  ...prev,
+                  `🔗 Pobieram: ${result || id}`,
+                ]);
+              }
+            },
+          );
+          return;
+        }
+
+        const fallback = await cfGateway<any>(
+          "/api/biz/analyze",
+          { tool: id, params },
+          "POST",
         );
-        return;
+        const text =
+          fallback?.content || fallback?.result || "Brak odpowiedzi fallback.";
+        setToolResult(text);
+        setToolHistory((prev) => [{ id, text, ts: Date.now() }, ...prev]);
+        setToolLoading(false);
+      } catch (error: any) {
+        const errorMsg = error.message || "Błąd podczas wykonywania narzędzia";
+        setToolResult(`❌ ${errorMsg}`);
+        setToolEvents((prev) => [...prev, `⚠️ Błąd: ${errorMsg}`]);
+        setToolLoading(false);
       }
-
-      const fallback = await cfGateway<any>(
-        "/api/biz/analyze",
-        { tool: id, params },
-        "POST",
-      );
-      const text =
-        fallback?.content || fallback?.result || "Brak odpowiedzi fallback.";
-      setToolResult(text);
-      setToolHistory((prev) => [{ id, text, ts: Date.now() }, ...prev]);
-      setToolLoading(false);
     },
     [],
   );

@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import type { ServiceContainer } from "../app/service-container";
 import { IPC } from "../../src/shared/ipc/channels";
+import { getErrorMessage } from "../utils/errors";
 
 const CH = IPC.DIALOG;
 
@@ -86,7 +87,7 @@ export function registerDialog(
       return {
         success: false,
         files: [],
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       };
     }
   });

@@ -1,6 +1,6 @@
 import { ipcMain, type BrowserWindow } from "electron";
 import type { ServiceContainer } from "../app/service-container";
-import { CrawlerService, type CrawlConfig } from "../services/crawler-service";
+import { CrawlerService, type CrawlConfig } from "../services/search";
 import { isSafeUrl, isValidString } from "../utils/validate-url";
 import { IPC } from "../../src/shared/ipc/channels";
 

@@ -62,18 +62,32 @@ export function BrowserUI() {
   const [loading, setLoading] = useState(false);
 
   // ── Shell state ──────────────────────────────────────────────────────────
-  /** Currently open floating panel (null = none) */
-  const [activePanel, setActivePanel] = useState<PanelId | null>(null);
+  /** Currently open floating panels */
+  const [openPanels, setOpenPanels] = useState<Set<PanelId>>(new Set());
   const [showSidebar, setShowSidebar] = useState(false);
   const [kbDocContext, setKBDocContext] = useState<KBDocContext | null>(null);
   const [showUpdateNotification, setShowUpdateNotification] = useState(true);
+  /** Agents queued for AgentWorkspace — synced via PanelContext */
+  const [workspaceAgents, setWorkspaceAgents] = useState<string[]>([]);
 
   const webviewRef = useRef<WebViewPanelHandle>(null);
   const tabCounter = useRef(1);
 
   // ── Toggle panel — same button opens / closes ────────────────────────────
   const togglePanel = useCallback((id: PanelId) => {
-    setActivePanel((prev) => (prev === id ? null : id));
+    setOpenPanels((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const closePanel = useCallback((id: PanelId) => {
+    setOpenPanels((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
   }, []);
 
   // ── Tab handlers ─────────────────────────────────────────────────────────
@@ -200,9 +214,9 @@ export function BrowserUI() {
     };
   }, []);
 
-  // ── Panel context (memoised shape) ───────────────────────────────────────
-  const panelCtx: PanelContext = {
-    onClose: () => setActivePanel(null),
+  // ── Per-panel context factory (memoised) ─────────────────────────────────
+  const getContext = useCallback((id: PanelId): PanelContext => ({
+    onClose: () => closePanel(id),
     onNavigate: handleNavigate,
     onNewTab: handleNewTab,
     onBack: handleGoBack,
@@ -210,11 +224,19 @@ export function BrowserUI() {
     onReload: handleReload,
     currentUrl,
     kbDocContext,
+    workspaceAgents: openPanels.has('agent-workspace' as PanelId) ? workspaceAgents : [],
     onSendToJimbo: (doc: KBDocContext) => {
       setKBDocContext(doc);
-      setActivePanel("jimbo-kit");
+      setOpenPanels((prev) => new Set([...prev, 'jimbo-kit' as PanelId]));
     },
-  };
+    onSpawnAgent: (agentName: string) => {
+      setWorkspaceAgents(prev => {
+        const next = prev.includes(agentName) ? prev : [...prev, agentName].slice(0, 3);
+        return next;
+      });
+      setOpenPanels(prev => new Set([...prev, 'agent-workspace' as PanelId]));
+    },
+  }), [closePanel, handleNavigate, handleNewTab, handleGoBack, handleGoForward, handleReload, currentUrl, kbDocContext, workspaceAgents]);
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
@@ -323,7 +345,7 @@ export function BrowserUI() {
                   className="btn-icon"
                   onClick={() => togglePanel(entry.id)}
                   title={entry.title}
-                  aria-pressed={activePanel === entry.id}
+                  aria-pressed={openPanels.has(entry.id)}
                   style={navBtnStyle}
                 >
                   {entry.icon}
@@ -382,8 +404,8 @@ export function BrowserUI() {
               onFaviconChange={handleFaviconChange}
             />
 
-            {/* Active floating panel */}
-            <PanelHost activePanel={activePanel} ctx={panelCtx} />
+            {/* Active floating panels */}
+            <PanelHost openPanels={openPanels} getContext={getContext} />
           </main>
         </div>
       </BrowserShellLayout>

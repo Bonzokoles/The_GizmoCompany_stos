@@ -1,8 +1,8 @@
 /**
- * PanelHost.tsx — renders the currently active floating panel
+ * PanelHost.tsx — renders all currently open floating panels
  *
- * Wraps the panel in Suspense (lazy loading fallback) and an ErrorBoundary
- * so a crash inside one panel never takes down the whole browser shell.
+ * Each panel gets its own Suspense fallback and ErrorBoundary so a crash
+ * inside one panel never takes down the whole browser shell.
  */
 
 import { Suspense } from 'react';
@@ -11,27 +11,29 @@ import { PANEL_BY_ID } from './panel-registry';
 import type { PanelId, PanelContext } from './shell.types';
 
 interface PanelHostProps {
-  /** Which panel to render — null means no panel */
-  activePanel: PanelId | null;
-  /** Shared context forwarded to every panel */
-  ctx: PanelContext;
+  openPanels: Set<PanelId>;
+  getContext: (id: PanelId) => PanelContext;
 }
 
 function PanelFallback() {
   return <div className="panel-loading">Ładowanie panelu...</div>;
 }
 
-export function PanelHost({ activePanel, ctx }: PanelHostProps) {
-  if (!activePanel) return null;
-
-  const entry = PANEL_BY_ID[activePanel];
-  if (!entry) return null;
-
+export function PanelHost({ openPanels, getContext }: PanelHostProps) {
+  if (openPanels.size === 0) return null;
   return (
-    <Suspense fallback={<PanelFallback />}>
-      <ErrorBoundary>
-        {entry.render(ctx)}
-      </ErrorBoundary>
-    </Suspense>
+    <>
+      {[...openPanels].map((id) => {
+        const entry = PANEL_BY_ID[id];
+        if (!entry) return null;
+        return (
+          <Suspense key={id} fallback={<PanelFallback />}>
+            <ErrorBoundary>
+              {entry.render(getContext(id))}
+            </ErrorBoundary>
+          </Suspense>
+        );
+      })}
+    </>
   );
 }

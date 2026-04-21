@@ -1,0 +1,68 @@
+
+> zeno-browser@0.1.0 build
+> npm run build:vite && npm run build:electron
+
+
+> zeno-browser@0.1.0 build:vite
+> cross-env VITE_BUILD_TARGET=web vite build
+
+[36mvite v8.0.8 [32mbuilding client environment for production...[36m[39m
+[2K
+transforming...Ôťô 370 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                              8.69 kB Ôöé gzip:  2.22 kB
+dist/assets/zeno-icon-Qcmq-bU0.png                          31.55 kB
+dist/assets/UpdateNotification-CCU45QDd.css                  1.33 kB Ôöé gzip:  0.61 kB
+dist/assets/vendor-xterm-xterm-BrP-ENHg.css                  3.93 kB Ôöé gzip:  1.01 kB
+dist/assets/vendor-react-CHpVij2M.css                       15.39 kB Ôöé gzip:  2.55 kB
+dist/assets/JimboKitPanel-DCxhOovQ.css                      16.41 kB Ôöé gzip:  3.47 kB
+dist/assets/index-CVAB0SLk.css                              68.25 kB Ôöé gzip: 12.73 kB
+dist/assets/vendor-d3-ease-C0jAUUqE.js                       0.06 kB Ôöé gzip:  0.08 kB
+dist/assets/JimboKitPanel-82Y7mTJw.js                        0.07 kB Ôöé gzip:  0.07 kB
+dist/assets/vendor-classcat-Ba73MUwc.js                      0.22 kB Ôöé gzip:  0.17 kB
+dist/assets/rolldown-runtime-Dw2cE7zH.js                     0.68 kB Ôöé gzip:  0.41 kB
+dist/assets/vendor-xterm-addon-fit-B_v7HC8n.js               1.20 kB Ôöé gzip:  0.49 kB
+dist/assets/vendor-d3-timer-Dc2-cYT6.js                      1.32 kB Ôöé gzip:  0.66 kB
+dist/assets/vendor-d3-dispatch-BraHmmpP.js                   1.51 kB Ôöé gzip:  0.71 kB
+dist/assets/UpdateNotification-Cy_1Fx42.js                   1.73 kB Ôöé gzip:  0.84 kB
+dist/assets/vendor-xterm-addon-web-links-fwx_2IBW.js         2.37 kB Ôöé gzip:  1.15 kB
+dist/assets/vendor-d3-interpolate-BKvCCeRI.js                4.67 kB Ôöé gzip:  2.15 kB
+dist/assets/vendor-d3-color-DLmPVP-O.js                      7.06 kB Ôöé gzip:  2.99 kB
+dist/assets/vendor-page-agent-page-controller-DSuyDUqe.js    8.27 kB Ôöé gzip:  3.07 kB
+dist/assets/vendor-d3-zoom-qxvJFVAV.js                       9.42 kB Ôöé gzip:  3.29 kB
+dist/assets/AgentWorkspacePanel-Dwmg0lX5.js                 10.38 kB Ôöé gzip:  3.64 kB
+dist/assets/vendor-d3-transition-FAdDTqAp.js                11.08 kB Ôöé gzip:  3.66 kB
+dist/assets/vendor-ai-motion-D32gxbdq.js                    12.78 kB Ôöé gzip:  4.40 kB
+dist/assets/TerminalPanel-9tIl0QR4.js                       13.94 kB Ôöé gzip:  5.25 kB
+dist/assets/vendor-d3-drag-BjJUUdik.js                      16.26 kB Ôöé gzip:  5.27 kB
+dist/assets/PiTerminalPanel-Dzla_3dw.js                     17.64 kB Ôöé gzip:  5.49 kB
+dist/assets/vendor-xterm-addon-search-DMFIgkn-.js           36.50 kB Ôöé gzip: 11.45 kB
+dist/assets/JimboKitPanel-Cj7kJHJE.js                       51.31 kB Ôöé gzip: 17.55 kB
+dist/assets/ElectronApp-Uiv_Utbf.js                         51.97 kB Ôöé gzip: 14.82 kB
+dist/assets/vendor-page-agent-n_v0qZKQ.js                  203.76 kB Ôöé gzip: 54.07 kB
+dist/assets/index-5ja0uKTH.js                              234.69 kB Ôöé gzip: 57.48 kB
+dist/assets/vendor-react-C8YSLihi.js                       313.08 kB Ôöé gzip: 98.77 kB
+dist/assets/vendor-xterm-xterm-Bi0J7mC1.js                 340.33 kB Ôöé gzip: 86.29 kB
+
+[EVAL] Warning: Use of direct `eval` function is strongly discouraged as it poses security risks and may cause issues with minification.
+      ÔĽşÔöÇ[ node_modules/@page-agent/page-controller/dist/lib/page-controller.js:2002:29 ]
+      Ôöé
+ 2002 Ôöé       const asyncFunction = eval(`(async () => { ${script} })`);
+      Ôöé                             ÔöÇÔöÇÔöČÔöÇ  
+      Ôöé                               ÔĽ░ÔöÇÔöÇÔöÇ Use of direct `eval` here.
+      Ôöé 
+      Ôöé Help: Consider using indirect eval. For more information, check the documentation: https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔĽ»
+
+[PLUGIN_TIMINGS] Warning: Your build spent significant time in plugins. Here is a breakdown:
+  - vite:terser (66%)
+  - vite:build-import-analysis (23%)
+  - vite:css-post (6%)
+  - patch-streamdown-shiki (5%)
+See https://rolldown.rs/options/checks#plugintimings for more details.
+
+[32mÔťô built in 5.90s[39m
+> zeno-browser@0.1.0 build:electron
+> tsc -p tsconfig.electron.json
+

@@ -1,0 +1,104 @@
+{
+  "version": "1.2",
+  "description": "Polaczek Agents — lokalne pomocniki AI na małych modelach Ollama",
+  "ollama_base": "http://localhost:11434/v1",
+  "model_notes": {
+    "ministral-3:3b":      "3.8B | 262K ctx | vision+tools ✅ | Q4_K_M | 3.0GB | Apache 2.0 | NIE DO POLACZKÓW — nie rozumie polskiego. Nadaje się tylko do zadań EN.",
+    "qwen3.5:2b":          "2.3B | 262K ctx | vision+tools+thinking ✅ | Q8_0 | 2.7GB | GŁÓWNY lekki — thinking, dobry multilingualnie",
+    "glm-ocr:latest":      "1.1B | 131K ctx | vision+tools ✅ | F16 | 2.2GB | temp=0 | DEDYKOWANY OCR",
+    "nexusriot/Qwen3.5-Uncensored-HauhauCS-Aggressive:4b": "4.5B | 262K ctx | vision+tools+thinking ✅ | Q4_K_M | 3.4GB | fine-tune bez filtrów — blunt analiza trudnych danych",
+    "gemma4:e2b":          "5.1B | 131K ctx | vision+tools+thinking ✅ | Q4_K_M | 7.2GB | najmocniejszy lokalny",
+    "phi4-mini-reasoning": "3.8B | 131K ctx | tylko completion ❌ | Q4_K_M | Microsoft math expert | brak tools — do czystego rozumowania/kalkulacji",
+    "granite4:latest":          "3.4B dense | 131K ctx | tools ✅ | Q4_K_M | 2.1GB | Apache 2.0 | fallback — najnowszy IBM, dobry IF",
+    "granite3.1-moe:latest":    "3.3B MoE | 131K ctx | tools ✅ | Q4_K_M | 2.0GB | Apache 2.0 | MoE = szybszy, mniej RAM niż dense — dobry gdy kilka agentów działa równolegle",
+    "granite3.3:2b":       "2.5B | 131K ctx | tools ✅ | Q4_K_M | 1.5GB | zdegradowany",
+    "granite3-dense:2b":   "2.6B | 4K ctx ⚠️ | tools ✅ | 1.6GB | NIE używaj",
+    "stablelm-zephyr:3b":  "3B  | 4K ctx ⚠️ | tylko completion ❌ | Q4_0 | 1.6GB | non-commercial ⚠️ | NIE do Polaczków",
+    "SpeakLeash/bielik-4.5b-v3.0-instruct:Q8_0": "4.5B | PL-natywny | Q8_0 | 5.1GB | jedyny dedykowany PL model",
+    "gemma3:4b":           "4B  | 128K ctx | tools ✅ | 3.3GB | stary fallback ogólny"
+  },
+  "agents": [
+    {
+      "id": "Polaczek_01_Bibliotekarz",
+      "role": "bibliotekarz",
+      "icon": "[B]",
+      "model": "qwen3.5:2b",
+      "model_fallback": "granite4:latest",
+      "prompt_file": "Polaczek_01_Bibliotekarz/prompt.md",
+      "tasks_file": "Polaczek_01_Bibliotekarz/tasks.md",
+      "description": "Organizacja plików, bibliotek, wiedzy. Kataloguje, taguje, deduplikuje.",
+      "tags": ["fs", "rag", "kb", "organize", "catalog"],
+      "status": "active",
+      "why_model": "qwen3.5:2b: 262K ctx + thinking + dobry polski — ministral wykluczony (nie rozumie polskiego)"
+    },
+    {
+      "id": "Polaczek_01_Porzadkowy",
+      "role": "porzadkowy",
+      "icon": "[P]",
+      "model": "qwen3.5:2b",
+      "model_fallback": "granite4:latest",
+      "prompt_file": "Polaczek_01_Porzadkowy/prompt.md",
+      "tasks_file": "Polaczek_01_Porzadkowy/tasks.md",
+      "description": "Czyszczenie, porządkowanie, archiwizacja. Likwiduje duplikaty i śmieci.",
+      "tags": ["cleanup", "archive", "deduplicate", "fs"],
+      "status": "active",
+      "why_model": "qwen3.5:2b: thinking + 262K ctx + polskie rozumienie — ministral wykluczony (nie rozumie polskiego)"
+    },
+    {
+      "id": "Polaczek_01_Skaner",
+      "role": "skaner",
+      "icon": "[S]",
+      "model": "glm-ocr:latest",
+      "model_fallback": "qwen3.5:2b",
+      "prompt_file": "Polaczek_01_Skaner/prompt.md",
+      "tasks_file": "Polaczek_01_Skaner/tasks.md",
+      "description": "OCR dokumentów, skanów, obrazów, zrzutów ekranu. Ekstrakcja tabel i faktur.",
+      "tags": ["ocr", "vision", "pdf", "scan", "invoice", "screenshot", "table"],
+      "status": "active",
+      "capabilities": ["vision"],
+      "accepts_image": true,
+      "why_model": "GLM-OCR: 1.1B, F16, temp=0 — deterministyczny, CogViT encoder + GLM-0.5B decoder. Zbudowany pod OCR."
+    },
+    {
+      "id": "Polaczek_01_Analityk",
+      "role": "analityk",
+      "icon": "[A]",
+      "model": "nexusriot/Qwen3.5-Uncensored-HauhauCS-Aggressive:4b",
+      "model_fallback": "gemma4:e2b",
+      "prompt_file": "Polaczek_01_Analityk/prompt.md",
+      "tasks_file": "Polaczek_01_Analityk/tasks.md",
+      "description": "Analiza danych, raportowanie, feed processing, SQLite. Głębsze myślenie.",
+      "tags": ["data", "feed", "sqlite", "report", "analysis"],
+      "status": "active",
+      "why_model": "Qwen3.5-Uncensored: thinking + 262K ctx, bez filtrów — powie wprost co jest złe w danych bez owijania w bawełnę"
+    },
+    {
+      "id": "Polaczek_01_Tlumacz",
+      "role": "tlumacz",
+      "icon": "[T]",
+      "model": "SpeakLeash/bielik-4.5b-v3.0-instruct:Q8_0",
+      "model_fallback": "qwen3.5:2b",
+      "prompt_file": "Polaczek_01_Tlumacz/prompt.md",
+      "tasks_file": "Polaczek_01_Tlumacz/tasks.md",
+      "description": "Tłumaczenia PL↔EN, streszczenia po polsku, polish dokumentacji.",
+      "tags": ["translate", "pl", "en", "summarize", "docs"],
+      "status": "planned",
+      "why_model": "Bielik: jedyny natywny PL model — naturalny polski, dobry do tłumaczeń tech"
+    }
+  ],
+  "schematron_model": {
+    "note": "Model do walidacji schematów — wymaga konwersji safetensors→GGUF",
+    "source": "U:/The_DEVz_HUB_of_work/Schematron-3B",
+    "modelfile": "Polaczek_01_Bibliotekarz/Modelfile.schematron",
+    "status": "pending_conversion",
+    "conversion_cmd": "python -m llama_cpp.convert_hf_to_gguf U:/The_DEVz_HUB_of_work/Schematron-3B --outfile schematron-3b.gguf --outtype q4_K_M"
+  },
+  "todo": {
+    "phi4-mini-reasoning": "Brak tools. Użyj do czystego rozumowania: prześlij dane jako tekst, poproś o analizę/kalkulację. Dobry jako pre-processor dla Analityka.",
+    "stablelm-zephyr:3b":  "NIE używaj w Polaczkach. Brak tools, 4K ctx, non-commercial.",
+    "granite3-dense:2b":   "Kontekst 4K — zbyt mały. Odłóż lub usuń.",
+    "granite3.3:2b":       "Zdegradowany — zostaw jako secondary fallback.",
+    "Polaczek_01_Tlumacz": "prompt.md + tasks.md gotowe. Status: planned — czeka na bielik model (5.1GB). Fallback: qwen3.5:2b.",
+    "ministral-3:3b": "Wykluczone z Polaczków — brak obsługi polskiego. Trzymaj jako fallback dla zadań EN."
+  }
+}

@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ GIT_HOOB_CATALOG — Narzędzia i Repozytoria</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg:           #080b10;
+            --surface:      #0d1117;
+            --surface2:     #161b22;
+            --hover:        #0d2137;
+            --border:       rgba(15,234,7,.18);
+            --border2:      rgba(99,171,5,.12);
+            --gray:         #8b929e;
+            --text:         #c9d1d9;
+            --accent:       #238636;
+            --accent2:      #1f6feb;
+            --green:        #3fb950;
+            --yellow:       #d29922;
+            --red:          #da3633;
+            --purple:       #8b5cf6;
+            --cyan:         #39c5cf;
+            --card-w:       230px;
+            --glow:         rgba(63,185,80,.08);
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: sticky; top: 0; z-index: 200;
+            background: rgba(13,17,23,.97);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 20px;
+            display: flex; align-items: center; gap: 12px;
+        }
+
+        .logo {
+            font-size: 1.15rem; font-weight: 800;
+            background: linear-gradient(135deg, #3fb950, #1f6feb);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-right: auto; white-space: nowrap;
+        }
+
+        .hbtn {
+            padding: 7px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: .82rem; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+            transition: all .2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .hbtn-green  { background: rgba(35,134,54,.85); color: #fff; border-color: #238636; }
+        .hbtn-blue   { background: rgba(31,111,235,.85); color: #fff; border-color: #1f6feb; }
+        .hbtn-purple { background: rgba(139,92,246,.85); color: #fff; border-color: #8b5cf6; }
+        .hbtn:hover  { transform: translateY(-1px); filter: brightness(1.2); }
+
+        /* ── LAYOUT ── */
+        .container { display: flex; min-height: calc(100vh - 49px); }
+
+        aside {
+            width: 240px; min-width: 240px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 14px 10px;
+            height: calc(100vh - 49px);
+            overflow-y: auto;
+            position: sticky; top: 49px;
+        }
+
+        aside::-webkit-scrollbar { width: 4px; }
+        aside::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        .sidebar-label {
+            font-size: .7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: .08em; color: var(--gray);
+            padding: 10px 12px 6px; margin-top: 4px;
+        }
+
+        .cat-btn {
+            width: 100%; text-align: left;
+            background: transparent; border: none;
+            color: var(--gray); padding: 7px 12px;
+            border-radius: 6px; cursor: pointer;
+            font-size: .85rem; font-family: 'Inter', sans-serif;
+            margin-bottom: 2px; transition: all .15s;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .cat-btn:hover { background: var(--hover); color: var(--text); }
+        .cat-btn.active { background: rgba(35,134,54,.25); color: #3fb950; font-weight: 600; border: 1px solid rgba(35,134,54,.3); }
+
+        .cat-left { display: flex; align-items: center; gap: 8px; }
+        .cat-count { font-size: .72rem; background: var(--surface2); padding: 1px 7px; border-radius: 20px; color: var(--gray); }
+
+        .sidebar-sep { border: 0; border-top: 1px solid var(--border); margin: 8px 0; }
+
+        /* ── MAIN ── */
+        main { flex: 1; padding: 20px 24px; overflow: hidden; }
+
+        .top-bar {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 16px; flex-wrap: wrap;
+        }
+
+        #searchInput {
+            flex: 1; min-width: 220px;
+            padding: 9px 14px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); font-size: .9rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color .2s;
+        }
+        #searchInput:focus { outline: none; border-color: var(--accent2); }
+        #searchInput::placeholder { color: var(--gray); }
+
+        .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+        .filter-btn, .star-filter-btn {
+            padding: 6px 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--gray);
+            font-size: .8rem; font-weight: 600; cursor: pointer;
+            white-space: nowrap; transition: all .15s;
+            font-family: 'Inter', sans-serif;
+        }
+        .filter-btn:hover, .star-filter-btn:hover { border-color: var(--accent); color: var(--text); }
+        .filter-btn.active, .star-filter-btn.active {
+            background: rgba(35,134,54,.2); border-color: var(--accent);
+            color: var(--green); font-weight: 700;
+        }
+
+        /* ── STATS ── */
+        #statsBar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+        .stat-pill {
+            padding: 5px 12px; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 20px;
+            font-size: .8rem; color: var(--gray);
+        }
+        .stat-pill .n { color: var(--green); font-weight: 700; }
+
+        /* ── SECTION HEADER ── */
+        .section-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 12px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-icon { font-size: 1.3rem; }
+        .section-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .section-desc { color: var(--gray); font-size: .82rem; margin-left: auto; }
+
+        /* ── CARDS ── */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
+            gap: 12px; margin-bottom: 28px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 10px; padding: 14px;
+            cursor: pointer; transition: all .2s;
+            position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(63,185,80,.4), transparent);
+            opacity: 0; transition: opacity .2s;
+        }
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 24px var(--glow); }
+        .card:hover::before { opacity: 1; }
+
+        .card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; }
+        .card-icon { font-size: 1.8rem; }
+        .card-stars { color: var(--yellow); font-size: .8rem; margin-top: 2px; }
+
+        .status-badge {
+            padding: 2px 7px; border-radius: 4px;
+            font-size: .65rem; font-weight: 700; text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .status-badge.todo     { background: rgba(139,146,158,.2); color: var(--gray); border: 1px solid rgba(139,146,158,.3); }
+        .status-badge.priority { background: rgba(210,153,34,.2);  color: var(--yellow); border: 1px solid rgba(210,153,34,.4); }
+        .status-badge.deploy   { background: rgba(63,185,80,.15);  color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+        .status-badge.reject   { background: rgba(218,54,51,.15);  color: var(--red); border: 1px solid rgba(218,54,51,.3); }
+
+        .card-name { font-size: .95rem; font-weight: 700; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+        .card-desc { font-size: .8rem; color: var(--gray); margin-bottom: 8px; line-height: 1.4; }
+
+        /* ── CARD EXPAND IN-PLACE ── */
+        .card-expand-body {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            animation: expandIn .2s ease;
+        }
+        @keyframes expandIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .card.expanded .card-expand-body { display: block; }
+        .card.expanded { border-color: var(--accent2); box-shadow: 0 0 0 1px rgba(31,111,235,.2), 0 12px 32px rgba(31,111,235,.12); }
+        .card.expanded::before { opacity: 1; background: linear-gradient(90deg, transparent, rgba(31,111,235,.5), transparent); }
+
+        .expand-hint {
+            font-size: .68rem; color: var(--gray); text-align: right;
+            margin-top: 6px; opacity: .6; user-select: none;
+            transition: opacity .2s;
+        }
+        .card:hover .expand-hint { opacity: 1; }
+        .card.expanded .expand-hint { display: none; }
+
+        .expand-use-cases { list-style: none; margin-bottom: 10px; }
+        .expand-use-cases li {
+            font-size: .78rem; color: #79b8ff; padding: 4px 0;
+            border-bottom: 1px solid rgba(31,111,235,.1);
+            display: flex; gap: 8px; align-items: flex-start; line-height: 1.4;
+        }
+        .expand-use-cases li:last-child { border-bottom: none; }
+        .expand-use-cases li::before { content: '▸'; color: var(--accent2); flex-shrink: 0; margin-top: 1px; }
+
+        .expand-ai-note {
+            font-size: .75rem; color: var(--gray); font-style: italic;
+            background: rgba(31,111,235,.05); border-left: 2px solid rgba(31,111,235,.25);
+            padding: 5px 8px; border-radius: 0 4px 4px 0; margin-bottom: 10px; line-height: 1.5;
+        }
+
+        .expand-actions {
+            display: flex; gap: 6px; margin-top: 8px;
+        }
+        .expand-detail-btn {
+            flex: 1; padding: 6px 10px; font-size: .78rem; font-weight: 600;
+            background: rgba(31,111,235,.15); border: 1px solid rgba(31,111,235,.3);
+            color: var(--accent2); border-radius: 5px; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: all .15s;
+        }
+        .expand-detail-btn:hover { background: rgba(31,111,235,.3); }
+        .expand-close-btn {
+            padding: 6px 10px; font-size: .78rem; font-weight: 600;
+            background: rgba(139,146,158,.1); border: 1px solid rgba(139,146,158,.2);
+            color: var(--gray); border-radius: 5px; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: all .15s;
+        }
+        .expand-close-btn:hover { background: rgba(139,146,158,.2); }
+
+        .card-use-case {
+            font-size: .75rem; color: #4fa3e0;
+            background: rgba(31,111,235,.08); border-left: 2px solid rgba(31,111,235,.4);
+            padding: 4px 8px; border-radius: 0 4px 4px 0;
+            margin-bottom: 8px; font-style: italic;
+        }
+
+        .card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+        .tag {
+            padding: 2px 7px; border-radius: 3px;
+            font-size: .68rem; font-weight: 600;
+            background: var(--surface2); color: var(--text); border: 1px solid var(--border);
+        }
+        .tag.rust   { background: rgba(206,66,43,.25); color: #f1502f; border-color: rgba(206,66,43,.4); }
+        .tag.python { background: rgba(55,118,171,.25); color: #79b8ff; border-color: rgba(55,118,171,.4); }
+        .tag.go     { background: rgba(0,173,216,.2);  color: #79d4e8; border-color: rgba(0,173,216,.3); }
+        .tag.ts     { background: rgba(49,120,198,.25); color: #79b8ff; border-color: rgba(49,120,198,.4); }
+        .tag.ai     { background: rgba(139,92,246,.2); color: #c4b5fd; border-color: rgba(139,92,246,.3); }
+        .tag.mcp    { background: rgba(57,197,207,.15); color: var(--cyan); border-color: rgba(57,197,207,.3); }
+        .tag.selfhosted { background: rgba(63,185,80,.15); color: var(--green); border-color: rgba(63,185,80,.3); }
+
+        /* ── AUTO-STARS BADGE in AF modal ── */
+        .auto-badge {
+            display: inline-block; font-size: .65rem; font-weight: 700;
+            background: rgba(210,153,34,.25); color: var(--yellow);
+            border: 1px solid rgba(210,153,34,.4); border-radius: 20px;
+            padding: 1px 7px; margin-left: 6px; vertical-align: middle;
+        }
+        .auto-stars-preview {
+            display: inline-flex; gap: 3px; margin-left: 8px;
+            vertical-align: middle;
+        }
+        .auto-stars-preview span { color: var(--yellow); font-size: 1rem; }
+
+        .card-gh-stats {
+            margin-top: 8px; padding-top: 8px;
+            border-top: 1px solid var(--border);
+            font-size: .72rem; color: var(--gray);
+            display: flex; gap: 10px; flex-wrap: wrap;
+        }
+
+        .empty { text-align: center; padding: 60px; color: var(--gray); }
+        .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: .4; }
+
+        /* ── MODAL OVERLAY ── */
+        .overlay, .autofetch-overlay, .add-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000; overflow-y: auto; padding: 40px 20px;
+        }
+        .overlay.open, .autofetch-overlay.open, .add-overlay.open {
+            display: flex; align-items: flex-start; justify-content: center;
+        }
+
+        .modal, .af-modal, .add-modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px; padding: 28px;
+            width: 100%; position: relative;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal     { max-width: 720px; }
+        .af-modal  { max-width: 680px; }
+        .add-modal { max-width: 620px; }
+
+        .modal-close {
+            position: absolute; top: 14px; right: 14px;
+            background: transparent; border: none;
+            color: var(--gray); font-size: 1.3rem; cursor: pointer;
+            transition: color .2s; width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 4px;
+        }
+        .modal-close:hover { color: var(--red); background: rgba(218,54,51,.1); }
+
+        .modal-title {
+            font-size: 1.25rem; font-weight: 800;
+            margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;
+        }
+        .modal-cat {
+            display: inline-block; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 3px 12px; font-size: .8rem; color: var(--gray);
+            margin-bottom: 16px;
+        }
+        .modal-desc {
+            font-size: 1rem; color: var(--text);
+            margin-bottom: 16px; line-height: 1.6;
+        }
+
+        .modal-section { margin-bottom: 20px; }
+        .modal-section h3 {
+            font-size: .75rem; text-transform: uppercase; letter-spacing: .08em;
+            color: var(--gray); margin-bottom: 10px; font-weight: 700;
+        }
+
+        .readme-box {
+            background: var(--bg); padding: 14px;
+            border-radius: 8px; font-size: .88rem; line-height: 1.65;
+            white-space: pre-wrap; color: var(--text);
+            border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Use cases block in modal */
+        .use-cases-list { list-style: none; }
+        .use-cases-list li {
+            padding: 6px 0 6px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: .88rem; display: flex; align-items: flex-start; gap: 10px;
+        }
+        .use-cases-list li::before { content: '▸'; color: var(--accent2); flex-shrink: 0; }
+        .use-cases-list li:last-child { border-bottom: none; }
+
+        .ai-summary-box {
+            background: rgba(31,111,235,.06); border: 1px solid rgba(31,111,235,.2);
+            border-radius: 8px; padding: 12px 16px; font-size: .88rem;
+            color: #79b8ff; line-height: 1.6;
+        }
+
+        .workflow-chip {
+            display: inline-block;
+            background: rgba(139,92,246,.1); border: 1px solid rgba(139,92,246,.2);
+            border-radius: 6px; padding: 5px 10px;
+            font-size: .78rem; font-family: 'JetBrains Mono', monospace;
+            color: #c4b5fd; margin: 3px;
+        }
+
+        #mLinks { display: flex; gap: 8px; flex-wrap: wrap; }
+        .link-btn {
+            padding: 8px 14px; border-radius: 6px;
+            text-decoration: none; font-size: .85rem; font-weight: 600;
+            transition: all .2s; display: inline-block; border: 1px solid transparent;
+        }
+        .link-btn.primary   { background: var(--accent2); color: #fff; }
+        .link-btn.secondary { background: var(--surface2); color: var(--text); border-color: var(--border); }
+        .link-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+
+        .modal-controls {
+            display: flex; gap: 12px; align-items: center;
+            padding: 14px; background: var(--bg); border-radius: 8px; margin-top: 16px; flex-wrap: wrap;
+        }
+        .modal-controls label { font-size: .85rem; color: var(--gray); }
+
+        select {
+            padding: 7px 10px; background: var(--surface2);
+            border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text); font-size: .85rem; font-family: 'Inter', sans-serif;
+        }
+
+        #mStatusNote { margin-left: auto; color: var(--green); font-size: .82rem; font-weight: 600; }
+
+        /* Stars */
+        .star-rating-container { display: flex; gap: 8px; align-items: center; }
+        #mStarRating, #afStarRating, #fStarRating { display: flex; gap: 4px; }
+        .star { font-size: 1.4rem; color: var(--gray); cursor: pointer; transition: all .15s; }
+        .star.filled { color: var(--yellow); }
+        .star:hover { transform: scale(1.2); }
+        #starSavedNote { font-size: .82rem; color: var(--green); font-weight: 600; opacity: 0; transition: opacity .3s; }
+        #starSavedNote.show { opacity: 1; }
+
+        /* ── AUTO-FETCH MODAL ── */
+        .af-input-row { margin-bottom: 14px; }
+        .af-input-row label {
+            display: block; font-size: .8rem; color: var(--gray);
+            margin-bottom: 5px; font-weight: 600; letter-spacing: .02em;
+        }
+        .af-input-row input,
+        .af-input-row select,
+        .af-input-row textarea {
+            width: 100%; padding: 9px 12px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-size: .88rem; font-family: 'Inter', sans-serif;
+            transition: border-color .2s;
+        }
+        .af-input-row input:focus,
+        .af-input-row textarea:focus { outline: none; border-color: var(--accent2); }
+        .af-input-row textarea { min-height: 90px; resize: vertical; font-family: 'JetBrains Mono', monospace; font-size: .82rem; }
+
+        /* Use cases editor in AF modal */
+        .use-case-list-editor { list-style: none; margin-bottom: 8px; }
+        .use-case-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 5px 0; border-bottom: 1px solid var(--border);
+        }
+        .use-case-item input {
+            flex: 1; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 4px; color: var(--text); padding: 5px 8px; font-size: .82rem;
+        }
+        .use-case-del {
+            background: rgba(218,54,51,.15); border: 1px solid rgba(218,54,51,.3);
+            color: var(--red); border-radius: 4px; cursor: pointer;
+            padding: 3px 8px; font-size: .8rem;
+        }
+        .uc-add-btn {
+            background: rgba(31,111,235,.1); border: 1px solid rgba(31,111,235,.25);
+            color: var(--accent2); border-radius: 4px; cursor: pointer; padding: 5px 12px;
+            font-size: .8rem; font-family: 'Inter', sans-serif; margin-top: 4px;
+        }
+
+        .af-fetch-btn, .af-save-btn {
+            width: 100%; padding: 11px;
+            border: none; border-radius: 8px;
+            font-size: .95rem; font-weight: 700; cursor: pointer;
+            transition: all .2s; font-family: 'Inter', sans-serif;
+            margin-bottom: 12px;
+        }
+        .af-fetch-btn { background: var(--accent2); color: #fff; }
+        .af-fetch-btn:hover { background: #388bfd; }
+        .af-fetch-btn:disabled { background: var(--gray); cursor: not-allowed; }
+        .af-save-btn { background: var(--accent); color: #fff; }
+        .af-save-btn:hover { background: #2ea043; }
+
+        .af-status {
+            padding: 9px 14px; border-radius: 6px; font-size: .88rem;
+            margin-bottom: 14px; text-align: center; display: none;
+        }
+        .af-status.show { display: block; }
+        .af-status.success { background: rgba(63,185,80,.12); color: var(--green); border: 1px solid rgba(63,185,80,.3); }
+        .af-status.error   { background: rgba(218,54,51,.1);  color: var(--red);   border: 1px solid rgba(218,54,51,.3); }
+        .af-status.loading { background: rgba(31,111,235,.1); color: #79b8ff;      border: 1px solid rgba(31,111,235,.3); }
+
+        #afPreview { display: none; }
+        #afPreview.visible { display: block; padding-top: 18px; border-top: 1px solid var(--border); }
+
+        /* Fetch progress steps */
+        .fetch-steps { margin-bottom: 14px; }
+        .fetch-step {
+            display: flex; align-items: center; gap: 10px;
+            padding: 5px 0; font-size: .82rem; color: var(--gray);
+        }
+        .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gray); flex-shrink: 0; }
+        .step-dot.done    { background: var(--green); }
+        .step-dot.active  { background: var(--accent2); animation: pulse 1s infinite; }
+        .step-dot.error   { background: var(--red); }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+        /* gh info preview chips */
+        .gh-info-row {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;
+        }
+        .gh-chip {
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 20px; padding: 3px 10px;
+            font-size: .75rem; color: var(--gray);
+        }
+        .gh-chip .v { color: var(--text); font-weight: 600; }
+
+        /* project info */
+        #projectInfo {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 10px 16px; margin-bottom: 16px;
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap; font-size: .82rem;
+        }
+        .info-label { color: var(--gray); font-weight: 600; }
+        .info-value { color: var(--text); font-family: 'JetBrains Mono', monospace; }
+        #projectInfo a { color: var(--accent2); text-decoration: none; }
+        #projectInfo a:hover { text-decoration: underline; }
+
+        /* Export modal */
+        #exportModal {
+            position: fixed; bottom: 20px; right: 20px; z-index: 999;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px 18px; font-size: .85rem;
+            display: none; max-width: 320px;
+        }
+        #exportModal.show { display: block; animation: slideIn .3s; }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        #exportModal .em-title { font-weight: 700; margin-bottom: 8px; color: var(--green); }
+        .em-btn {
+            display: block; width: 100%; margin-top: 6px; padding: 8px 12px;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text); font-size: .82rem; cursor: pointer; text-align: left;
+            font-family: 'Inter', sans-serif; transition: background .15s;
+        }
+        .em-btn:hover { background: var(--hover); }
+
+        /* ── AI UPDATE PANEL ── */
+        .ai-update-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,.8); backdrop-filter: blur(10px);
+            z-index: 1000; overflow-y: auto; padding: 40px 20px;
+        }
+        .ai-update-overlay.open { display: flex; align-items: flex-start; justify-content: center; }
+        .ai-update-modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 12px; padding: 28px; width: 100%; max-width: 680px;
+            position: relative;
+        }
+        .ai-update-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+        .ai-update-desc  { font-size: .82rem; color: var(--gray); margin-bottom: 18px; line-height: 1.5; }
+        .ai-update-history {
+            max-height: 220px; overflow-y: auto; margin-top: 14px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--bg);
+        }
+        .ai-hist-row {
+            display: flex; align-items: center; gap: 10px; padding: 8px 14px;
+            border-bottom: 1px solid var(--border); font-size: .82rem;
+        }
+        .ai-hist-row:last-child { border-bottom: none; }
+        .ai-hist-name { font-family: 'JetBrains Mono', monospace; color: var(--text); flex: 1; }
+        .ai-hist-status { font-weight: 600; font-size: .75rem; }
+        .ai-hist-note { color: var(--gray); font-size: .75rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .ai-hist-by { color: var(--purple); font-size: .72rem; }
+        .aiu-apply-btn {
+            width: 100%; padding: 11px; margin-top: 12px;
+            background: var(--purple); color: #fff; border: none;
+            border-radius: 8px; font-size: .95rem; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif; transition: all .2s;
+        }
+        .aiu-apply-btn:hover { background: #7c3aed; }
+        .aiu-paste-area {
+            width: 100%; min-height: 140px; resize: vertical;
+            background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+            color: var(--text); padding: 10px 12px; font-family: 'JetBrains Mono', monospace;
+            font-size: .82rem; margin-top: 6px;
+        }
+
+        /* ── TOAST ── */
+        #toastContainer {
+            position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+        }
+        .toast {
+            padding: 10px 20px; border-radius: 8px; font-size: .88rem; font-weight: 600;
+            pointer-events: none; animation: toastIn .3s ease, toastOut .3s ease 2.7s forwards;
+            white-space: nowrap;
+        }
+        .toast.success { background: rgba(63,185,80,.9); color: #000; }
+        .toast.info    { background: rgba(139,92,246,.9); color: #fff; }
+        .toast.warning { background: rgba(210,153,34,.9); color: #000; }
+        @keyframes toastIn  { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform: translateY(0); } }
+        @keyframes toastOut { from { opacity:1; } to { opacity:0; } }
+
+        /* Project badge in header */
+        .project-badge {
+            background: rgba(139,92,246,.2); border: 1px solid rgba(139,92,246,.35);
+            border-radius: 6px; padding: 4px 12px;
+            font-size: .78rem; color: #c4b5fd; font-weight: 600;
+            white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">⚡ GIT_HOOB_CATALOG</div>
+        <div class="project-badge" id="projectBadge" title="Aktywny projekt">📁 ładowanie...</div>
+        <button class="hbtn hbtn-blue" onclick="openAutoFetch()" id="autoFetchBtn">🔗 Auto-fetch z URL</button>
+        <button class="hbtn hbtn-green" onclick="openAdd()">+ Dodaj ręcznie</button>
+        <button class="hbtn" style="background:rgba(139,92,246,.85);color:#fff;border-color:#8b5cf6" onclick="openAiUpdatePanel()">🤖 AI Updates</button>
+        <button class="hbtn hbtn-purple" onclick="openExportMenu()">💾 Eksport</button>
+    </header>
+
+    <div class="container">
+        <aside id="sidebar"></aside>
+        <main>
+            <div id="projectInfo">
+                <div><span class="info-label">📁 Projekt: </span><span class="info-value" id="projectNameDisplay">—</span></div>
+                <div><span class="info-label">📂 Ścieżka: </span><span class="info-value" id="projectPathDisplay">—</span></div>
+                <div><span class="info-label">📝 Narzędzi: </span><span class="info-value" id="filesCount">0</span></div>
+                <div id="aiUpdatesAlert" style="display:none">
+                    <span style="color:var(--purple);font-weight:700;cursor:pointer" onclick="openAiUpdatePanel()">
+                        🤖 <span id="aiUpdatesCount">0</span> aktualizacji AI — kliknij aby zastosować
+                    </span>
+                </div>
+            </div>
+
+            <div class="top-bar">
+                <input type="text" id="searchInput" placeholder="🔍 Szukaj (nazwa, opis, use case, tag)..." oninput="renderCards()">
+                <div class="filter-group">
+                    <button class="filter-btn active" onclick="setStatusFilter(this,'all')">Wszystkie</button>
+                    <button class="filter-btn" onclick="setStatusFilter(this,'priority')">⭐ Priorytet</button>
+                    <button class="filter-btn" onclick="setStatusFilter(this,'deploy')">✅ Wdrożone</button>
+                    <button class="filter-btn" onclick="setStatusFilter(this,'todo')">📋 TODO</button>
+                </div>
+                <div class="filter-group">
+                    <button class="star-filter-btn active" onclick="setStarFilter(this,0)">⭐ Wszystkie</button>
+                    <button class="star-filter-btn" onclick="setStarFilter(this,1)">⭐+</button>
+                    <button class="star-filter-btn" onclick="setStarFilter(this,2)">⭐⭐+</button>
+                    <button class="star-filter-btn" onclick="setStarFilter(this,3)">⭐⭐⭐</button>
+                </div>
+            </div>
+
+            <div id="statsBar"></div>
+            <div id="cardsContainer"></div>
+        </main>
+    </div>
+
+    <!-- ═══ TOOL DETAIL MODAL ═══ -->
+    <div id="overlay" class="overlay" onclick="closeModal(event)">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModalDirect()">✕</button>
+            <div class="modal-title" id="mTitle"></div>
+            <span class="modal-cat" id="mCat"></span>
+            <div class="modal-desc" id="mDesc"></div>
+
+            <div id="mGhInfo" class="gh-info-row" style="margin-bottom:14px"></div>
+
+            <div class="modal-section" id="mUseCasesSection">
+                <h3>🎯 Do czego służy / Przypadki użycia</h3>
+                <ul class="use-cases-list" id="mUseCases"></ul>
+            </div>
+
+            <div class="modal-section" id="mAiSummarySection">
+                <h3>🤖 Podsumowanie dla AI</h3>
+                <div class="ai-summary-box" id="mAiSummary"></div>
+            </div>
+
+            <div class="modal-section" id="mWorkflowSection">
+                <h3>🔄 Przykładowe workflow</h3>
+                <div id="mWorkflows"></div>
+            </div>
+
+            <div class="modal-section">
+                <h3>📖 Pełny opis (README)</h3>
+                <div class="readme-box" id="mReadme"></div>
+            </div>
+
+            <div class="modal-section">
+                <h3>🔗 Linki</h3>
+                <div id="mLinks"></div>
+            </div>
+
+            <div class="modal-section">
+                <h3>⭐ Ocena</h3>
+                <div class="star-rating-container">
+                    <div id="mStarRating"></div>
+                    <span id="starSavedNote"></span>
+                </div>
+            </div>
+
+            <div class="modal-controls">
+                <label>Status:</label>
+                <select id="mStatusSel" onchange="changeStatus(this.value)"></select>
+                <span id="mStatusNote"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ AUTO-FETCH MODAL ═══ -->
+    <div id="afOverlay" class="autofetch-overlay" onclick="closeAutoFetch(event)">
+        <div class="af-modal">
+            <button class="modal-close" onclick="closeAutoFetchDirect()">✕</button>
+            <div style="font-size:1.15rem;font-weight:800;margin-bottom:6px;">🔗 Auto-fetch z URL</div>
+            <div style="font-size:.82rem;color:var(--gray);margin-bottom:18px;">
+                Wklej URL repozytorium GitHub lub strony. System automatycznie wykryje kategorię, use cases i podsumowanie AI.
+            </div>
+
+            <div class="af-input-row">
+                <label>URL repozytorium / strony</label>
+                <input type="text" id="afUrl" placeholder="https://github.com/owner/repo" autocomplete="off">
+            </div>
+
+            <button id="afFetchBtn" class="af-fetch-btn" onclick="doAutoFetch()">⚡ Pobierz i analizuj</button>
+
+            <div class="fetch-steps" id="fetchSteps" style="display:none">
+                <div class="fetch-step" id="step1"><span class="step-dot" id="dot1"></span><span id="stepText1">Łączenie z API...</span></div>
+                <div class="fetch-step" id="step2"><span class="step-dot" id="dot2"></span><span id="stepText2">Analiza metadanych...</span></div>
+                <div class="fetch-step" id="step3"><span class="step-dot" id="dot3"></span><span id="stepText3">Generowanie kategorii i use-cases...</span></div>
+            </div>
+
+            <div id="afStatus" class="af-status"></div>
+
+            <div id="afPreview">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="af-input-row">
+                        <label>Ikona</label>
+                        <input type="text" id="afIcon" value="🔧" maxlength="2">
+                    </div>
+                    <div class="af-input-row">
+                        <label>Kategoria <span class="auto-badge" id="afCatAutoBadge" style="display:none">AUTO</span></label>
+                        <select id="afCat"></select>
+                    </div>
+                </div>
+
+                <div class="af-input-row">
+                    <label>Nazwa narzędzia</label>
+                    <input type="text" id="afName" maxlength="60">
+                </div>
+                <div class="af-input-row">
+                    <label>Krótki opis (jednozdaniowy)</label>
+                    <input type="text" id="afDesc" maxlength="100">
+                </div>
+
+                <div class="af-input-row">
+                    <label>🎯 Przypadki użycia (do czego służy) — edytowalne</label>
+                    <ul class="use-case-list-editor" id="afUseCasesList"></ul>
+                    <button class="uc-add-btn" onclick="addUseCaseRow('afUseCasesList')">+ Dodaj przypadek użycia</button>
+                </div>
+
+                <div class="af-input-row">
+                    <label>🤖 Podsumowanie dla AI (jak agent ma tego używać)</label>
+                    <textarea id="afAiSummary" rows="3"></textarea>
+                </div>
+
+                <div class="af-input-row">
+                    <label>📖 Pełny opis / README</label>
+                    <textarea id="afReadme" rows="5"></textarea>
+                </div>
+
+                <div id="afGhChips" class="gh-info-row" style="margin-bottom:12px"></div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="af-input-row">
+                        <label>URL główny</label>
+                        <input type="text" id="afMainUrl">
+                    </div>
+                    <div class="af-input-row">
+                        <label>Dokumentacja (opcjonalnie)</label>
+                        <input type="text" id="afDocs">
+                    </div>
+                </div>
+                <div class="af-input-row">
+                    <label>Tagi (oddzielone przecinkami)</label>
+                    <input type="text" id="afTags" placeholder="rust, selfhosted, ai, mcp">
+                </div>
+
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                    <div class="af-input-row">
+                        <label>Status</label>
+                        <select id="afStatus2">
+                            <option value="todo">📋 Do zrobienia</option>
+                            <option value="priority">⭐ Priorytet</option>
+                            <option value="deploy">✅ Wdrożone</option>
+                            <option value="reject">❌ Odrzucone</option>
+                        </select>
+                    </div>
+                    <div class="af-input-row">
+                        <label>Ocena <span class="auto-badge" id="afStarsAutoBadge" style="display:none">AUTO</span> <span class="auto-stars-preview" id="afStarsPreview"></span></label>
+                        <div id="afStarRating" data-value="0"></div>
+                    </div>
+                </div>
+
+                <button class="af-save-btn" onclick="saveAutoFetched()">✅ Zapisz narzędzie do katalogu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ADD MANUAL MODAL ═══ -->
+    <div id="addOverlay" class="add-overlay" onclick="closeAdd(event)">
+        <div class="add-modal">
+            <button class="modal-close" onclick="closeAddDirect()">✕</button>
+            <div style="font-size:1.1rem;font-weight:800;margin-bottom:18px;">+ Dodaj narzędzie ręcznie</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="af-input-row">
+                    <label>Ikona</label>
+                    <input type="text" id="fIcon" value="🔧" maxlength="2">
+                </div>
+                <div class="af-input-row">
+                    <label>Kategoria</label>
+                    <select id="fCat"></select>
+                </div>
+            </div>
+            <div class="af-input-row">
+                <label>Nazwa *</label>
+                <input type="text" id="fName" maxlength="60">
+            </div>
+            <div class="af-input-row">
+                <label>Krótki opis</label>
+                <input type="text" id="fDesc" maxlength="100">
+            </div>
+
+            <div class="af-input-row">
+                <label>🎯 Przypadki użycia</label>
+                <ul class="use-case-list-editor" id="fUseCasesList"></ul>
+                <button class="uc-add-btn" onclick="addUseCaseRow('fUseCasesList')">+ Dodaj</button>
+            </div>
+
+            <div class="af-input-row">
+                <label>🤖 Podsumowanie dla AI</label>
+                <textarea id="fAiSummary" rows="2"></textarea>
+            </div>
+            <div class="af-input-row">
+                <label>Pełny opis</label>
+                <textarea id="fReadme" rows="4"></textarea>
+            </div>
+            <div class="af-input-row">
+                <label>URL *</label>
+                <input type="text" id="fUrl">
+            </div>
+            <div class="af-input-row">
+                <label>Dokumentacja</label>
+                <input type="text" id="fDocs">
+            </div>
+            <div class="af-input-row">
+                <label>Tagi</label>
+                <input type="text" id="fTags" placeholder="rust, selfhosted">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div class="af-input-row">
+                    <label>Status</label>
+                    <select id="fStatus">
+                        <option value="todo">📋 Do zrobienia</option>
+                        <option value="priority">⭐ Priorytet</option>
+                        <option value="deploy">✅ Wdrożone</option>
+                        <option value="reject">❌ Odrzucone</option>
+                    </select>
+                </div>
+                <div class="af-input-row">
+                    <label>Ocena</label>
+                    <div id="fStarRating" data-value="0"></div>
+                </div>
+            </div>
+            <button class="af-save-btn" onclick="saveNewTool()">✅ Zapisz</button>
+        </div>
+    </div>
+
+    <!-- Export menu -->
+    <div id="exportModal">
+        <div class="em-title">💾 Eksport katalogu</div>
+        <button class="em-btn" onclick="exportJSON()">📄 Pobierz jako JSON (pełny)</button>
+        <button class="em-btn" onclick="exportAIReadable()">🤖 Pobierz AI-readable JSON</button>
+        <button class="em-btn" onclick="exportCategoryJSONs()">📁 Pobierz JSONy per kategoria (ZIP-like)</button>
+        <button class="em-btn" onclick="copyToClipboard()">📋 Kopiuj JSON do schowka</button>
+        <button class="em-btn" style="color:var(--gray);margin-top:6px" onclick="closeExportMenu()">✕ Zamknij</button>
+    </div>
+
+    <!-- AI UPDATE PANEL -->
+    <div id="aiUpdateOverlay" class="ai-update-overlay" onclick="closeAiUpdatePanel(event)">
+        <div class="ai-update-modal">
+            <button class="modal-close" onclick="document.getElementById('aiUpdateOverlay').classList.remove('open')">✕</button>
+            <div class="ai-update-title">🤖 AI Status Updates</div>
+            <div class="ai-update-desc">
+                Model AI (Jimbo) dopisuje tutaj aktualizacje statusów narzędzi.<br>
+                Wklej JSON lub załaduj z pliku <code>ai-status-updates.json</code>.
+            </div>
+
+            <div class="af-input-row">
+                <label>Wklej JSON z aktualizacjami (pole "updates": [...])</label>
+                <textarea class="aiu-paste-area" id="aiuPasteArea" placeholder='{
+  "updates": [
+    {
+      "tool_name": "github-mcp-server",
+      "new_status": "deploy",
+      "note": "Uzyte do PR #42",
+      "updated_by": "Jimbo-AI",
+      "updated_at": "2026-04-15T21:00:00Z"
+    }
+  ]
+}'></textarea>
+            </div>
+
+            <button class="aiu-apply-btn" onclick="applyAiUpdates()">⚡ Zastosuj aktualizacje AI</button>
+
+            <div id="aiuResult" class="af-status" style="margin-top:8px"></div>
+
+            <div style="margin-top:16px">
+                <div style="font-size:.8rem;color:var(--gray);font-weight:700;margin-bottom:8px;">📋 HISTORIA AKTUALIZACJI</div>
+                <div class="ai-update-history" id="aiUpdateHistory">
+                    <div style="padding:20px;text-align:center;color:var(--gray);font-size:.82rem">Brak historii aktualizacji</div>
+                </div>
+            </div>
+
+            <div style="margin-top:14px;padding:10px 14px;background:var(--bg);border-radius:8px;font-size:.78rem;color:var(--gray)">
+                💡 <strong>Dla modeli AI:</strong> Zapisuj aktualizacje do pliku
+                <code style="color:var(--cyan)">ai-status-updates.json</code> lub użyj skryptu
+                <code style="color:var(--yellow)">update-tool-status.ps1</code>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  CATEGORIES — rozszerzone o nowe kategorie
+// ═══════════════════════════════════════════════════════════════
+const CATEGORIES = [
+    { id: 'editor',          icon: '📝', name: 'File Editing',         desc: 'Odczyt, zapis, edycja plików' },
+    { id: 'terminal',        icon: '⚡', name: 'Terminal / Commands',   desc: 'Komendy, shell, PowerShell' },
+    { id: 'search',          icon: '🔍', name: 'Search / Grep',         desc: 'Wyszukiwanie w kodzie i plikach' },
+    { id: 'memory',          icon: '🧠', name: 'Memory / Context',      desc: 'Pamięć agenta, notatki, kontekst' },
+    { id: 'git',             icon: '🔀', name: 'Git Operations',         desc: 'Commit, branch, push, PR' },
+    { id: 'ai_llm',          icon: '🤖', name: 'AI / LLM Tools',        desc: 'Modele językowe, Agents, API AI' },
+    { id: 'build_deploy',    icon: '🏗️', name: 'Build / Deploy',        desc: 'CI/CD, bundling, deployment' },
+    { id: 'testing',         icon: '🧪', name: 'Testing / QA',          desc: 'Testy jednostkowe, e2e, coverage' },
+    { id: 'database',        icon: '🗄️', name: 'Database / Storage',    desc: 'SQL, NoSQL, ORM, migracje' },
+    { id: 'security',        icon: '🔐', name: 'Security / Auth',        desc: 'AuthN, AuthZ, sekrety, skanery' },
+    { id: 'monitoring',      icon: '📊', name: 'Monitoring / Logs',      desc: 'Metryki, logi, alerty, dashboardy' },
+    { id: 'devops',          icon: '🐳', name: 'DevOps / Infrastructure', desc: 'Docker, K8s, Terraform, IaC' },
+    { id: 'mcp_tools',       icon: '🔌', name: 'MCP Tools / Servers',    desc: 'Model Context Protocol servers' },
+    { id: 'ui_frontend',     icon: '🎨', name: 'UI / Frontend',          desc: 'React, Vue, CSS, komponenty UI' },
+    { id: 'api_backend',     icon: '🌐', name: 'API / Backend',          desc: 'REST, GraphQL, FastAPI, Express' },
+    { id: 'data_processing', icon: '⚙️', name: 'Data Processing',        desc: 'ETL, parsowanie, transformacje' },
+    { id: 'automation',      icon: '🤖', name: 'Automation / Scraping',  desc: 'Web scraping, cron, roboty' },
+    { id: 'networking',      icon: '📡', name: 'Networking / Proxy',     desc: 'HTTP, proxy, tunelowanie, DNS' },
+    { id: 'other',           icon: '🔧', name: 'Other Tools',            desc: 'Utilitki i narzędzia pomocnicze' },
+];
+
+const STATUS_LABELS = {
+    todo:     { label: '📋 TODO',      cls: 'todo' },
+    priority: { label: '⭐ Priorytet', cls: 'priority' },
+    deploy:   { label: '✅ Wdrożone',  cls: 'deploy' },
+    reject:   { label: '❌ Odrzucone', cls: 'reject' },
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  PROJECT / WORKSPACE
+// ═══════════════════════════════════════════════════════════════
+let WORKSPACE = {
+    project_name: '',
+    project_path: '',
+    project_repo: '',
+};
+
+function tryLoadWorkspace() {
+    // 1. Read from body data attributes (set by init-workspace.ps1)
+    const body = document.body;
+    const bodyProject = body.dataset.project || '';
+    const bodyPath    = body.dataset.projectPath || '';
+
+    if (bodyProject && bodyProject !== '{{PROJECT_NAME}}') {
+        WORKSPACE.project_name = bodyProject;
+        WORKSPACE.project_path = bodyPath;
+        applyWorkspaceToUI();
+    }
+
+    // 2. Try to fetch workspace.json (works when served via local server)
+    fetch('./workspace.json')
+        .then(r => r.ok ? r.json() : null)
+        .then(ws => {
+            if (!ws) return;
+            if (ws.project_name && ws.project_name !== '{{PROJECT_NAME}}') {
+                WORKSPACE = { ...WORKSPACE, ...ws };
+                applyWorkspaceToUI();
+            }
+            // Check for pending AI updates
+            return fetch('./ai-status-updates.json');
+        })
+        .then(r => r && r.ok ? r.json() : null)
+        .then(upd => {
+            if (upd && upd.updates && upd.updates.length > 0) {
+                showAiUpdatesAlert(upd.updates.length);
+                renderAiUpdateHistory(upd.updates);
+            }
+        })
+        .catch(() => {/* file:// protocol — silent fail */});
+
+    // 3. Fallback: derive from URL or localStorage
+    if (!WORKSPACE.project_name) {
+        const stored = localStorage.getItem('git_hoob_workspace');
+        if (stored) {
+            try { WORKSPACE = JSON.parse(stored); applyWorkspaceToUI(); } catch(e) {}
+        }
+    }
+}
+
+function applyWorkspaceToUI() {
+    const name = WORKSPACE.project_name || 'GIT_HOOB_catalogi';
+    const path = WORKSPACE.project_path || '';
+    // Header badge
+    document.getElementById('projectBadge').textContent = `📁 ${name}`;
+    // Info bar
+    document.getElementById('projectNameDisplay').textContent = name;
+    document.getElementById('projectPathDisplay').textContent = path || 'V:\\GIT_HOOB_catalogi\\';
+    // Title tab
+    document.title = `⚡ ${name} — GIT_HOOB_CATALOG`;
+    // Save to LS
+    localStorage.setItem('git_hoob_workspace', JSON.stringify(WORKSPACE));
+    // Update LS_KEY to be project-specific
+    window.LS_KEY_ACTIVE = `git_hoob_catalog_${name.replace(/\s/g,'_')}`;
+}
+
+function showAiUpdatesAlert(count) {
+    const el = document.getElementById('aiUpdatesAlert');
+    if (el) { el.style.display=''; document.getElementById('aiUpdatesCount').textContent = count; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════
+let tools = [];
+let activeCat = 'all';
+let activeStatus = 'all';
+let activeStarFilter = 0;
+let currentToolId = null;
+const LS_KEY = 'git_hoob_catalog_v2';
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════════════════════════
+function renderAll() { renderSidebar(); renderCards(); updateFilesCount(); }
+
+function renderSidebar() {
+    const aside = document.getElementById('sidebar');
+    let html = `<div class="sidebar-label">FILTRY</div>`;
+    html += `<button class="cat-btn ${activeCat==='all'?'active':''}" onclick="setCat('all')">
+        <span class="cat-left">🗂️ Wszystkie</span>
+        <span class="cat-count">${tools.length}</span>
+    </button>`;
+    html += `<hr class="sidebar-sep">`;
+    html += `<div class="sidebar-label">KATEGORIE</div>`;
+    CATEGORIES.forEach(c => {
+        const n = tools.filter(t => t.cat === c.id).length;
+        if (n === 0) return;
+        html += `<button class="cat-btn ${activeCat===c.id?'active':''}" onclick="setCat('${c.id}')">
+            <span class="cat-left">${c.icon} ${c.name}</span>
+            <span class="cat-count">${n}</span>
+        </button>`;
+    });
+    aside.innerHTML = html;
+}
+
+function renderCards() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = tools.filter(t => {
+        const matchCat    = activeCat === 'all' || t.cat === activeCat;
+        const matchStatus = activeStatus === 'all' || t.status === activeStatus;
+        const matchStars  = activeStarFilter === 0 || (t.stars||0) >= activeStarFilter;
+        const searchText  = [t.name, t.desc, t.readme || '', (t.use_cases||[]).join(' '), (t.tags||[]).join(' '), t.ai_summary||''].join(' ').toLowerCase();
+        const matchQ      = !q || searchText.includes(q);
+        return matchCat && matchStatus && matchStars && matchQ;
+    });
+
+    // Stats bar
+    const sb = document.getElementById('statsBar');
+    sb.innerHTML = `
+        <div class="stat-pill"><span class="n">${filtered.length}</span> narzędzi</div>
+        ${filtered.filter(t=>t.status==='priority').length?`<div class="stat-pill">⭐ <span class="n">${filtered.filter(t=>t.status==='priority').length}</span> priorytet</div>`:''}
+        ${filtered.filter(t=>t.status==='deploy').length?`<div class="stat-pill">✅ <span class="n">${filtered.filter(t=>t.status==='deploy').length}</span> wdrożone</div>`:''}
+        ${filtered.filter(t=>(t.stars||0)>=3).length?`<div class="stat-pill">⭐⭐⭐ <span class="n">${filtered.filter(t=>(t.stars||0)>=3).length}</span></div>`:''}
+    `;
+
+    if (!filtered.length) {
+        document.getElementById('cardsContainer').innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>Brak narzędzi — dodaj pierwsze za pomocą Auto-fetch!</div>';
+        return;
+    }
+
+    let html = '';
+    if (activeCat === 'all') {
+        const groups = {};
+        filtered.forEach(t => { if(!groups[t.cat]) groups[t.cat]=[]; groups[t.cat].push(t); });
+        CATEGORIES.forEach(c => {
+            if (!groups[c.id]) return;
+            html += `<div class="section-header">
+                <span class="section-icon">${c.icon}</span>
+                <h2>${c.name}</h2>
+                <span class="section-desc">${groups[c.id].length} narzędzi — ${c.desc}</span>
+            </div>
+            <div class="cards">${groups[c.id].map(renderCard).join('')}</div>`;
+        });
+    } else {
+        const cat = CATEGORIES.find(c=>c.id===activeCat);
+        html = `<div class="section-header">
+            <span class="section-icon">${cat?.icon||''}</span>
+            <h2>${cat?.name||activeCat}</h2>
+            <span class="section-desc">${cat?.desc||''}</span>
+        </div>
+        <div class="cards">${filtered.map(renderCard).join('')}</div>`;
+    }
+    document.getElementById('cardsContainer').innerHTML = html;
+}
+
+// ── Auto-calculate stars from GitHub star count ──────────────────
+function autoStarsFromGhCount(ghStars) {
+    if (!ghStars || ghStars === 0) return 1; // unknown → 1 star
+    if (ghStars >= 10000) return 3;          // 10k+ → ★★★
+    if (ghStars >= 1000)  return 2;          // 1k+  → ★★
+    return 1;                                // <1k  → ★
+}
+
+function renderCard(t) {
+    const s = STATUS_LABELS[t.status] || STATUS_LABELS.todo;
+    const tagsHtml = (t.tags||[]).slice(0,4).map(tag=>`<span class="tag ${tag}">${tag}</span>`).join('');
+    const stars = t.stars || 0;
+    const starsHtml = stars > 0 ? `${'★'.repeat(stars)}` : '';
+    const ghStats = [];
+    if (t.gh_stars)    ghStats.push(`⭐ ${t.gh_stars.toLocaleString()}`);
+    if (t.gh_language) ghStats.push(t.gh_language);
+    if (t.gh_license)  ghStats.push(t.gh_license);
+
+    // Build expand body — use_cases + ai_summary
+    const useCases = t.use_cases || [];
+    const ucHtml = useCases.length
+        ? `<ul class="expand-use-cases">${useCases.map(u=>`<li>${u}</li>`).join('')}</ul>`
+        : '';
+    const aiHtml = t.ai_summary
+        ? `<div class="expand-ai-note">🤖 ${t.ai_summary.substring(0,160)}${t.ai_summary.length>160?'…':''}</div>`
+        : '';
+
+    return `<div class="card" id="card-${t.id}" onclick="toggleCard(event,${t.id})">
+        <div class="card-head">
+            <div class="card-icon">${t.icon||'🔧'}</div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+                <span class="status-badge ${s.cls}">${s.label}</span>
+                ${starsHtml?`<span class="card-stars">${starsHtml}</span>`:''}
+            </div>
+        </div>
+        <div class="card-name">${t.name}</div>
+        <div class="card-desc">${t.desc||''}</div>
+        ${tagsHtml?`<div class="card-tags">${tagsHtml}</div>`:''}
+        ${ghStats.length?`<div class="card-gh-stats">${ghStats.join(' · ')}</div>`:''}
+        <div class="expand-hint">▾ kliknij aby rozwinąć opis</div>
+        <div class="card-expand-body">
+            ${ucHtml}
+            ${aiHtml}
+            <div class="expand-actions">
+                <button class="expand-detail-btn" onclick="event.stopPropagation();openModal(${t.id})">📋 Pełne szczegóły</button>
+                <button class="expand-close-btn" onclick="event.stopPropagation();collapseCard(${t.id})">✕ Zwiń</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+function toggleCard(event, id) {
+    // Ignore clicks on buttons inside the card
+    if (event.target.closest('button')) return;
+    const card = document.getElementById(`card-${id}`);
+    if (!card) return;
+    const isExpanded = card.classList.contains('expanded');
+    // Collapse all other cards first
+    document.querySelectorAll('.card.expanded').forEach(c => c.classList.remove('expanded'));
+    if (!isExpanded) {
+        card.classList.add('expanded');
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+function collapseCard(id) {
+    const card = document.getElementById(`card-${id}`);
+    if (card) card.classList.remove('expanded');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODAL — TOOL DETAIL
+// ═══════════════════════════════════════════════════════════════
+function openModal(id) {
+    const t = tools.find(x=>x.id===id);
+    if (!t) return;
+    currentToolId = id;
+    const cat = CATEGORIES.find(c=>c.id===t.cat);
+
+    document.getElementById('mTitle').textContent = `${t.icon||'🔧'} ${t.name}`;
+    document.getElementById('mCat').textContent = `${cat?.icon||''} ${cat?.name||t.cat}`;
+    document.getElementById('mDesc').textContent = t.desc || '';
+
+    // GH chips
+    const ghChips = [];
+    if (t.gh_stars)    ghChips.push(`⭐ <span class="v">${t.gh_stars.toLocaleString()}</span> stars`);
+    if (t.gh_language) ghChips.push(`Lang: <span class="v">${t.gh_language}</span>`);
+    if (t.gh_license)  ghChips.push(`License: <span class="v">${t.gh_license}</span>`);
+    if (t.gh_topics?.length) ghChips.push(`Topics: <span class="v">${t.gh_topics.slice(0,4).join(', ')}</span>`);
+    document.getElementById('mGhInfo').innerHTML = ghChips.map(c=>`<span class="gh-chip">${c}</span>`).join('');
+
+    // Use cases
+    const useCases = t.use_cases || [];
+    const ucSection = document.getElementById('mUseCasesSection');
+    ucSection.style.display = useCases.length ? '' : 'none';
+    document.getElementById('mUseCases').innerHTML = useCases.map(uc=>`<li>${uc}</li>`).join('');
+
+    // AI Summary
+    const aiSection = document.getElementById('mAiSummarySection');
+    aiSection.style.display = t.ai_summary ? '' : 'none';
+    document.getElementById('mAiSummary').textContent = t.ai_summary || '';
+
+    // Workflows
+    const wfSection = document.getElementById('mWorkflowSection');
+    const wfs = t.ai_workflows || [];
+    wfSection.style.display = wfs.length ? '' : 'none';
+    document.getElementById('mWorkflows').innerHTML = wfs.map(w=>`<span class="workflow-chip">${w}</span>`).join('');
+
+    document.getElementById('mReadme').textContent = t.readme || '— brak opisu —';
+
+    // Links
+    let links = '';
+    if (t.url)  links += `<a class="link-btn primary" href="${t.url}" target="_blank" rel="noopener">🔗 Repozytorium</a>`;
+    if (t.docs) links += `<a class="link-btn secondary" href="${t.docs}" target="_blank" rel="noopener">📖 Dokumentacja</a>`;
+    document.getElementById('mLinks').innerHTML = links || '<span style="color:var(--gray);font-size:.85rem">— brak linków —</span>';
+
+    renderModalStars(t.stars||0);
+    const sel = document.getElementById('mStatusSel');
+    sel.innerHTML = Object.entries(STATUS_LABELS).map(([k,v])=>`<option value="${k}" ${t.status===k?'selected':''}>${v.label}</option>`).join('');
+
+    document.getElementById('overlay').classList.add('open');
+}
+
+function changeStatus(val) {
+    if (!currentToolId) return;
+    const t = tools.find(x=>x.id===currentToolId);
+    if (t) { t.status=val; saveToStorage(); renderCards(); renderSidebar(); }
+    const note = document.getElementById('mStatusNote');
+    note.textContent = '✓ Zapisano';
+    setTimeout(() => note.textContent='', 1500);
+}
+
+function renderModalStars(curr) {
+    let html = `<span class="star ${curr===0?'filled':''}" onclick="setToolStars(0)" title="Usuń">✕</span>`;
+    for(let i=1;i<=3;i++) html+=`<span class="star ${i<=curr?'filled':''}" onclick="setToolStars(${i})">★</span>`;
+    document.getElementById('mStarRating').innerHTML = html;
+}
+function setToolStars(n) {
+    if (!currentToolId) return;
+    const t = tools.find(x=>x.id===currentToolId);
+    if (t) { t.stars=n; renderModalStars(n); saveToStorage(); renderCards(); }
+    const note = document.getElementById('starSavedNote');
+    note.classList.add('show'); setTimeout(()=>note.classList.remove('show'),1200);
+}
+function initFormStarRating(cid) { const c=document.getElementById(cid); if(c){c.dataset.value='0'; renderFormStars(cid,0);} }
+function renderFormStars(cid,curr) {
+    const c=document.getElementById(cid); if(!c) return;
+    let html='';
+    for(let i=1;i<=3;i++) html+=`<span class="star ${i<=curr?'filled':''}" onclick="setFormStars('${cid}',${i})">★</span>`;
+    html+=curr>0?` <span class="star" onclick="setFormStars('${cid}',0)" style="font-size:.7rem;color:var(--gray)">✕</span>`:'';
+    c.innerHTML=html;
+}
+function setFormStars(cid,n) { const c=document.getElementById(cid); c.dataset.value=n; renderFormStars(cid,n); }
+function setStarFilter(btn,min){ activeStarFilter=min; document.querySelectorAll('.star-filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderCards(); }
+function closeModal(e){ if(e.target===document.getElementById('overlay')) closeModalDirect(); }
+function closeModalDirect(){ document.getElementById('overlay').classList.remove('open'); currentToolId=null; }
+
+// ═══════════════════════════════════════════════════════════════
+//  FILTERS
+// ═══════════════════════════════════════════════════════════════
+function setCat(id){ activeCat=id; renderSidebar(); renderCards(); }
+function setStatusFilter(btn,val){
+    activeStatus=val;
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); renderCards();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  USE CASE EDITOR
+// ═══════════════════════════════════════════════════════════════
+function addUseCaseRow(listId, value='') {
+    const ul = document.getElementById(listId);
+    const li = document.createElement('li');
+    li.className = 'use-case-item';
+    li.innerHTML = `<input type="text" value="${value}" placeholder="np. Automatyczne tworzenie PR po analizie kodu">
+        <button class="use-case-del" onclick="this.parentElement.remove()">✕</button>`;
+    ul.appendChild(li);
+}
+function getUseCasesFromList(listId) {
+    return Array.from(document.querySelectorAll(`#${listId} input`)).map(i=>i.value.trim()).filter(Boolean);
+}
+function populateUseCases(listId, useCases=[]) {
+    const ul = document.getElementById(listId);
+    ul.innerHTML = '';
+    useCases.forEach(uc => addUseCaseRow(listId, uc));
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  ADD FORM
+// ═══════════════════════════════════════════════════════════════
+function openAdd() {
+    document.getElementById('fCat').innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+    initFormStarRating('fStarRating');
+    populateUseCases('fUseCasesList');
+    document.getElementById('addOverlay').classList.add('open');
+}
+function closeAdd(e){ if(e.target===document.getElementById('addOverlay')) closeAddDirect(); }
+function closeAddDirect(){ document.getElementById('addOverlay').classList.remove('open'); }
+
+function saveNewTool() {
+    const name = document.getElementById('fName').value.trim();
+    const url  = document.getElementById('fUrl').value.trim();
+    if (!name || !url) { alert('Wymagane: Nazwa i URL'); return; }
+    const maxId = Math.max(...tools.map(t=>t.id), 0);
+    const tool = {
+        id: maxId+1,
+        cat: document.getElementById('fCat').value,
+        icon: document.getElementById('fIcon').value||'🔧',
+        name, desc: document.getElementById('fDesc').value,
+        readme: document.getElementById('fReadme').value,
+        url, docs: document.getElementById('fDocs').value,
+        tags: document.getElementById('fTags').value.split(',').map(s=>s.trim()).filter(Boolean),
+        status: document.getElementById('fStatus').value,
+        stars: parseInt(document.getElementById('fStarRating').dataset.value)||0,
+        use_cases: getUseCasesFromList('fUseCasesList'),
+        ai_summary: document.getElementById('fAiSummary').value.trim(),
+        ai_workflows: [],
+        fetched_at: new Date().toISOString(),
+    };
+    tools.push(tool); saveToStorage(); closeAddDirect(); renderAll();
+    ['fName','fDesc','fReadme','fUrl','fDocs','fTags','fAiSummary'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fIcon').value='🔧';
+    populateUseCases('fUseCasesList');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  LOCAL STORAGE
+// ═══════════════════════════════════════════════════════════════
+function saveToStorage() {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(tools)); } catch(e) {}
+}
+function loadFromStorage() {
+    try {
+        const d = localStorage.getItem(LS_KEY);
+        if (d) { const parsed = JSON.parse(d); if(Array.isArray(parsed)) tools = parsed; }
+    } catch(e) { console.warn('loadFromStorage:', e); }
+}
+function updateFilesCount() { document.getElementById('filesCount').textContent = tools.length; }
+
+// ═══════════════════════════════════════════════════════════════
+//  AUTO-FETCH — ULEPSZONE
+// ═══════════════════════════════════════════════════════════════
+const CAT_KEYWORDS = {
+    editor:          ['read_file','write_file','editor','notepad','vscode','sublime','vim','emacs','code','patch','diff'],
+    terminal:        ['terminal','shell','command','cli','powershell','bash','exec','run','process'],
+    search:          ['search','grep','find','ripgrep','semantic','index','solr','elasticsearch'],
+    memory:          ['memory','context','note','remember','knowledge','store','vector','embedding'],
+    git:             ['git','commit','branch','push','pull','merge','pr','repository','version control'],
+    ai_llm:          ['llm','gpt','claude','gemini','openai','anthropic','langchain','llamaindex','ollama','model','inference'],
+    build_deploy:    ['build','deploy','ci','cd','webpack','vite','rollup','gradle','maven','pipeline','cloud','aws','azure'],
+    testing:         ['test','jest','vitest','playwright','cypress','mocha','coverage','benchmark','assert'],
+    database:        ['database','sql','postgres','mysql','sqlite','mongodb','redis','orm','prisma','drizzle','query'],
+    security:        ['security','auth','oauth','jwt','encryption','secret','vault','scan','vulnerability','cve'],
+    monitoring:      ['monitor','log','metric','alert','dashboard','prometheus','grafana','sentry','datadog','telemetry'],
+    devops:          ['docker','kubernetes','k8s','terraform','ansible','helm','container','infrastructure','iac'],
+    mcp_tools:       ['mcp','model context protocol','server','tool','agent plugin','extension'],
+    ui_frontend:     ['react','vue','angular','svelte','css','tailwind','component','ui','design','figma','storybook'],
+    api_backend:     ['api','rest','graphql','fastapi','express','flask','fastify','grpc','websocket','http','server'],
+    data_processing: ['etl','pipeline','csv','json','xml','parquet','pandas','spark','data','transform','parse'],
+    automation:      ['automation','scraping','crawler','puppeteer','selenium','cron','scheduler','robot','workflow'],
+    networking:      ['proxy','vpn','tunnel','dns','http','tcp','socket','network','firewall','nginx','caddy'],
+    other:           ['util','helper','misc','tool','library','sdk'],
+};
+
+const USE_CASE_TEMPLATES = {
+    editor:          ['Odczyt i modyfikacja plików projektu','Tworzenie nowych plików z zawartością','Patchowanie istniejącego kodu'],
+    terminal:        ['Uruchamianie skryptów build i test','Automatyzacja zadań systemowych','Interakcja z REPL/CLI narzędzi'],
+    search:          ['Wyszukiwanie implementacji funkcji w codebase','Semantyczne przeszukiwanie dokumentacji','Grep po wzorcach w plikach projektu'],
+    memory:          ['Przechowywanie informacji między sesjami agenta','Budowanie bazy wiedzy o projekcie','Zapamiętywanie preferencji użytkownika'],
+    git:             ['Tworzenie branch i pull requestów','Automatyczny commit po zmianach kodu','Code review przez agenta'],
+    ai_llm:          ['Wywoływanie modeli LLM z custom promptem','Orkiestracja agentów AI','Embeddingi i wyszukiwanie semantyczne'],
+    build_deploy:    ['Automatyczne buildowanie po zmianach','Deploy na staging/produkcję','Pipeline CI/CD'],
+    testing:         ['Uruchamianie testów i analiza wyników','Generowanie raportów pokrycia','E2E testy interfejsu'],
+    database:        ['Zapytania SQL i analiza danych','Migracje bazy danych','CRUD operacje przez API'],
+    security:        ['Skanowanie kodu pod kątem podatności','Zarządzanie sekretami i API keys','Audit bezpieczeństwa projektu'],
+    monitoring:      ['Śledzenie błędów w produkcji','Analiza logów aplikacji','Alerty o anomaliach'],
+    devops:          ['Zarządzanie kontenerami Docker','Deployment na Kubernetes','Infrastruktura jako kod (IaC)'],
+    mcp_tools:       ['Rozszerzenie możliwości agenta AI','Integracja z zewnętrznymi systemami przez MCP','Dostęp do API przez standaryzowany protokół'],
+    ui_frontend:     ['Tworzenie komponentów UI','Stylowanie i responsywny design','Budowanie interaktywnych aplikacji webowych'],
+    api_backend:     ['Tworzenie REST API endpointów','Integracja z zewnętrznymi serwisami','Websockety i komunikacja real-time'],
+    data_processing: ['Parsowanie i transformacja danych','Pipeline ETL','Analiza i wizualizacja danych'],
+    automation:      ['Web scraping i zbieranie danych','Automatyzacja powtarzalnych zadań','Harmonogramowanie zadań cron'],
+    networking:      ['Konfiguracja proxy i reverse proxy','Tunelowanie połączeń','Monitoring sieci'],
+    other:           ['Narzędzie pomocnicze w pipeline agenta','Integracja z zewnętrznym systemem','Specjalistyczne zadanie'],
+};
+
+const AI_SUMMARY_TEMPLATES = {
+    editor:          'Używaj gdy agent musi czytać lub modyfikować pliki lokalne. Sprawdź uprawnienia przed zapisem.',
+    terminal:        'Używaj gdy agent musi wykonać komendy systemowe. WAŻNE: zawsze weryfikuj komendy przed wykonaniem.',
+    search:          'Używaj gdy agent musi znaleźć kod, funkcję lub wzorzec w pliku/repozytorium.',
+    memory:          'Używaj gdy agent musi zapamiętać informacje między sesjami lub dzielić wiedzę z innymi agentami.',
+    git:             'Używaj gdy agent musi wykonać operacje na repozytorium: commit, PR, merge. Wymaga odpowiednich uprawnień.',
+    ai_llm:          'Używaj gdy zadanie wymaga generacji tekstu, kodu, analizy przez LLM lub orkiestracji agentów.',
+    build_deploy:    'Używaj gdy agent musi zbudować i/lub wdrożyć aplikację. Wymaga konfiguracji CI/CD.',
+    testing:         'Używaj gdy agent musi uruchomić testy lub sprawdzić jakość kodu.',
+    database:        'Używaj gdy agent musi operować na danych w bazie. WAŻNE: nigdy nie wykonuj DELETE/DROP bez potwierdzenia.',
+    security:        'Używaj gdy agent musi sprawdzić bezpieczeństwo lub zarządzać secretami. Traktuj wyniki jako wrażliwe.',
+    monitoring:      'Używaj gdy agent musi sprawdzić stan aplikacji, logi lub metryki wydajności.',
+    devops:          'Używaj gdy agent zarządza infrastrukturą, kontenerami lub pipeline CI/CD.',
+    mcp_tools:       'Używaj gdy agent potrzebuje dostępu do zewnętrznego systemu przez protokół MCP.',
+    ui_frontend:     'Używaj gdy agent buduje lub modyfikuje interfejs użytkownika aplikacji web.',
+    api_backend:     'Używaj gdy agent tworzy lub integruje API backendowe.',
+    data_processing: 'Używaj gdy agent musi transformować, parsować lub analizować dane strukturalne.',
+    automation:      'Używaj gdy agent musi automatyzować powtarzalne zadania lub zbierać dane z web.',
+    networking:      'Używaj gdy agent konfiguruje sieć, proxy lub tunelowanie połączeń.',
+    other:           'Narzędzie pomocnicze — sprawdź dokumentację przed użyciem.',
+};
+
+function detectCategory(name, desc, topics, language) {
+    const text = [name, desc, ...(topics||[]), language||''].join(' ').toLowerCase();
+    let best = 'other'; let bestScore = 0;
+    for (const [catId, keywords] of Object.entries(CAT_KEYWORDS)) {
+        let score = 0;
+        keywords.forEach(kw => { if(text.includes(kw)) score += kw.length > 6 ? 3 : kw.length > 4 ? 2 : 1; });
+        if (score > bestScore) { bestScore = score; best = catId; }
+    }
+    return best;
+}
+
+function detectTags(language, topics) {
+    const tags = [];
+    const langMap = { typescript:'ts', javascript:'ts', python:'python', rust:'rust', go:'go', java:'java', csharp:'dotnet', 'c#':'dotnet' };
+    if (language && langMap[language.toLowerCase()]) tags.push(langMap[language.toLowerCase()]);
+    const topicStr = (topics||[]).join(' ').toLowerCase();
+    if (topicStr.includes('mcp'))       tags.push('mcp');
+    if (topicStr.includes('ai') || topicStr.includes('llm')) tags.push('ai');
+    if (topicStr.includes('selfhost')) tags.push('selfhosted');
+    if (topicStr.includes('agent'))    tags.push('ai');
+    return [...new Set(tags.filter(Boolean))];
+}
+
+function detectIcon(cat) {
+    const map = {
+        editor:'📝', terminal:'⚡', search:'🔍', memory:'🧠', git:'🔀', ai_llm:'🤖',
+        build_deploy:'🏗️', testing:'🧪', database:'🗄️', security:'🔐', monitoring:'📊',
+        devops:'🐳', mcp_tools:'🔌', ui_frontend:'🎨', api_backend:'🌐',
+        data_processing:'⚙️', automation:'🦾', networking:'📡', other:'🔧'
+    };
+    return map[cat] || '🔧';
+}
+
+function generateUseCases(cat, name, desc, topics) {
+    const base = USE_CASE_TEMPLATES[cat] || USE_CASE_TEMPLATES.other;
+    // Add one specific use case from name/desc if possible
+    const specific = [];
+    if (desc && desc.length > 10) {
+        specific.push(`${desc.substring(0,80)} — używaj w pipeline agenta bezpośrednio`);
+    }
+    return [...specific, ...base].slice(0, 4);
+}
+
+function generateAiSummary(cat, name, desc, ghStars, language) {
+    const base = AI_SUMMARY_TEMPLATES[cat] || AI_SUMMARY_TEMPLATES.other;
+    const starsNote = ghStars > 5000 ? ` Popularne repo (${ghStars.toLocaleString()} ⭐).` : ghStars > 1000 ? ` Sprawdzone repo (${ghStars.toLocaleString()} ⭐).` : '';
+    const langNote = language ? ` Język: ${language}.` : '';
+    return `${base}${starsNote}${langNote}`;
+}
+
+// Steps UI
+function setStep(num, state, text) {
+    const dot = document.getElementById(`dot${num}`);
+    const textEl = document.getElementById(`stepText${num}`);
+    if (dot) { dot.className = `step-dot ${state}`; }
+    if (textEl && text) textEl.textContent = text;
+}
+
+function openAutoFetch() {
+    document.getElementById('afCat').innerHTML = CATEGORIES.map(c=>`<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+    ['afUrl','afName','afDesc','afReadme','afMainUrl','afDocs','afTags','afAiSummary'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('afIcon').value='🔧';
+    document.getElementById('afGhChips').innerHTML='';
+    initFormStarRating('afStarRating');
+    const st = document.getElementById('afStatus'); st.className='af-status'; st.textContent='';
+    document.getElementById('afPreview').classList.remove('visible');
+    document.getElementById('fetchSteps').style.display='none';
+    document.getElementById('afStarsAutoBadge').style.display='none';
+    document.getElementById('afStarsPreview').innerHTML='';
+    document.getElementById('afCatAutoBadge').style.display='none';
+    document.getElementById('afOverlay').classList.add('open');
+    populateUseCases('afUseCasesList');
+    setTimeout(()=>document.getElementById('afUrl').focus(),100);
+}
+function closeAutoFetch(e){ if(e.target===document.getElementById('afOverlay')) closeAutoFetchDirect(); }
+function closeAutoFetchDirect(){ document.getElementById('afOverlay').classList.remove('open'); }
+
+function parseGitHubUrl(url) {
+    const m = url.match(/github\.com\/([^\/]+)\/([^\/\?#]+)/);
+    if (m) return { owner: m[1], repo: m[2].replace(/\.git$/, '') };
+    return null;
+}
+
+async function doAutoFetch() {
+    const urlInput = document.getElementById('afUrl');
+    const statusEl = document.getElementById('afStatus');
+    const fetchBtn = document.getElementById('afFetchBtn');
+    const preview  = document.getElementById('afPreview');
+    const steps    = document.getElementById('fetchSteps');
+
+    let url = urlInput.value.trim();
+    if (!url) { statusEl.textContent='⚠️ Wklej URL'; statusEl.className='af-status error show'; return; }
+    if (!url.startsWith('http')) url = 'https://' + url;
+
+    fetchBtn.disabled = true;
+    statusEl.className = 'af-status loading show';
+    statusEl.textContent = '⏳ Inicjalizacja...';
+    steps.style.display = 'block';
+    setStep(1,'active','Łączenie z GitHub API...');
+    setStep(2,'','Czekam...');
+    setStep(3,'','Czekam...');
+
+    try {
+        const gh = parseGitHubUrl(url);
+
+        if (gh) {
+            setStep(1,'active',`Pobieranie danych: ${gh.owner}/${gh.repo}...`);
+            const res = await fetch(`https://api.github.com/repos/${gh.owner}/${gh.repo}`,{headers:{'Accept':'application/vnd.github.v3+json'}});
+            if (!res.ok) throw new Error(`GitHub API ${res.status}: ${res.statusText}`);
+            const data = await res.json();
+            setStep(1,'done',`✓ Pobrano: ${data.full_name}`);
+
+            setStep(2,'active','Analiza metadanych, kategorii...');
+            await new Promise(r=>setTimeout(r,200));
+
+            const cat      = detectCategory(data.name, data.description||'', data.topics||[], data.language);
+            const tags     = detectTags(data.language, data.topics);
+            const icon     = detectIcon(cat);
+            const useCases = generateUseCases(cat, data.name, data.description, data.topics);
+            const aiSum    = generateAiSummary(cat, data.name, data.description||'', data.stargazers_count||0, data.language);
+
+            // ── AUTO-STARS: przelicz gh_stars → ocena 1-3 ──
+            const autoStars = autoStarsFromGhCount(data.stargazers_count||0);
+
+            setStep(2,'done','✓ Kategoria i tagi wykryte');
+            setStep(3,'active','Budowanie opisu AI...');
+
+            // Buduj readme
+            const parts = [
+                data.description||'',
+                data.stargazers_count ? `⭐ ${data.stargazers_count.toLocaleString()} stars na GitHub` : '',
+                data.language ? `Język: ${data.language}` : '',
+                data.license?.spdx_id ? `Licencja: ${data.license.spdx_id}` : '',
+                (data.topics||[]).length ? `Topics: ${data.topics.join(', ')}` : '',
+                data.forks_count ? `Forki: ${data.forks_count.toLocaleString()}` : '',
+                data.pushed_at ? `Ostatnia aktualizacja: ${new Date(data.pushed_at).toLocaleDateString('pl-PL')}` : '',
+            ].filter(Boolean);
+
+            // Fill form
+            document.getElementById('afIcon').value     = icon;
+            document.getElementById('afName').value     = data.name;
+            document.getElementById('afDesc').value     = (data.description||'').substring(0,100);
+            document.getElementById('afReadme').value   = parts.join('\n');
+            document.getElementById('afCat').value      = cat;
+            document.getElementById('afMainUrl').value  = data.html_url;
+            document.getElementById('afDocs').value     = data.homepage||'';
+            document.getElementById('afTags').value     = tags.join(', ');
+            document.getElementById('afAiSummary').value= aiSum;
+            populateUseCases('afUseCasesList', useCases);
+
+            // ── Ustaw auto-stars i pokaż badge ──
+            setFormStars('afStarRating', autoStars);
+            document.getElementById('afStarsAutoBadge').style.display = 'inline-block';
+            document.getElementById('afStarsPreview').innerHTML = '★'.repeat(autoStars);
+            document.getElementById('afCatAutoBadge').style.display = 'inline-block';
+
+            // GH chips
+            const chips = [];
+            if(data.stargazers_count) chips.push(`⭐ ${data.stargazers_count.toLocaleString()} stars`);
+            if(data.language)         chips.push(`🔤 ${data.language}`);
+            if(data.license?.spdx_id) chips.push(`⚖️ ${data.license.spdx_id}`);
+            if((data.topics||[]).length) chips.push(`🏷️ ${data.topics.slice(0,3).join(', ')}`);
+            if(data.forks_count)      chips.push(`🍴 ${data.forks_count.toLocaleString()} forks`);
+            document.getElementById('afGhChips').innerHTML = chips.map(c=>`<span class="gh-chip">${c}</span>`).join('');
+
+            // Store gh_ metadata
+            document.getElementById('afPreview').dataset.ghStars    = data.stargazers_count||0;
+            document.getElementById('afPreview').dataset.ghLanguage = data.language||'';
+            document.getElementById('afPreview').dataset.ghTopics   = (data.topics||[]).join(',');
+            document.getElementById('afPreview').dataset.ghLicense  = data.license?.spdx_id||'';
+
+            setStep(3,'done','✓ Analiza AI zakończona');
+
+            statusEl.textContent = `✅ Pobrano: ${data.full_name} — kategoria: ${CATEGORIES.find(c=>c.id===cat)?.name||cat}`;
+            statusEl.className   = 'af-status success show';
+
+        } else {
+            // Generic URL via proxy
+            setStep(1,'active','Pobieranie HTML strony...');
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+            const res = await fetch(proxyUrl, {signal: AbortSignal.timeout(12000)});
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const html = await res.text();
+            setStep(1,'done','✓ Strona pobrana');
+
+            setStep(2,'active','Parsowanie meta tagów...');
+            const getMeta = (name) => {
+                for(const attr of ['name','property']){
+                    const rx = new RegExp(`<meta[^>]+${attr}=["']${name}["'][^>]+content=["']([^"']+)["']`,'i');
+                    const m2 = new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+${attr}=["']${name}["']`,'i');
+                    const r1 = html.match(rx); if(r1) return r1[1];
+                    const r2 = html.match(m2); if(r2) return r2[1];
+                }
+                return '';
+            };
+            const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            const title = getMeta('og:title')||(titleMatch?titleMatch[1].trim():'');
+            const desc  = getMeta('og:description')||getMeta('description')||'';
+            const kw    = getMeta('keywords')||'';
+            const cleanName = title.split(/[|\-–—]/)[0].trim() || new URL(url).hostname;
+            setStep(2,'done','✓ Metadane sparsowane');
+
+            setStep(3,'active','Wykrywanie kategorii...');
+            const cat   = detectCategory(cleanName, desc, kw.split(','), '');
+            const icon  = detectIcon(cat);
+            const tags  = kw.split(',').map(k=>k.trim().toLowerCase()).filter(k=>['rust','python','go','ts','java','ai','mcp','dotnet'].includes(k));
+            const ucs   = generateUseCases(cat, cleanName, desc, []);
+            const aiSum = generateAiSummary(cat, cleanName, desc, 0, '');
+            setStep(3,'done','✓ Analiza AI zakończona');
+
+            document.getElementById('afIcon').value     = icon;
+            document.getElementById('afName').value     = cleanName.substring(0,60);
+            document.getElementById('afDesc').value     = desc.substring(0,100);
+            document.getElementById('afReadme').value   = desc;
+            document.getElementById('afCat').value      = cat;
+            document.getElementById('afMainUrl').value  = url;
+            document.getElementById('afAiSummary').value= aiSum;
+            document.getElementById('afTags').value     = tags.join(', ');
+            populateUseCases('afUseCasesList', ucs);
+
+            statusEl.textContent = `✅ Pobrano metadane strony — kategoria: ${CATEGORIES.find(c=>c.id===cat)?.name||cat}`;
+            statusEl.className   = 'af-status success show';
+        }
+
+        preview.classList.add('visible');
+
+    } catch(err) {
+        console.error('Auto-fetch error:', err);
+        setStep(1,'error',''); setStep(2,'error',''); setStep(3,'error','');
+        statusEl.textContent = `❌ Błąd: ${err.message}`;
+        statusEl.className   = 'af-status error show';
+        document.getElementById('afMainUrl').value = url;
+        preview.classList.add('visible');
+    } finally {
+        fetchBtn.disabled = false;
+    }
+}
+
+function saveAutoFetched() {
+    const name = document.getElementById('afName').value.trim();
+    const url  = document.getElementById('afMainUrl').value.trim();
+    if (!name || !url) { alert('Wymagane: Nazwa i URL'); return; }
+    if (tools.some(t=>t.url===url)) { if(!confirm('Narzędzie z tym URL już istnieje. Dodać mimo to?')) return; }
+
+    const prev = document.getElementById('afPreview');
+    const maxId = Math.max(...tools.map(t=>t.id), 0);
+    const tool = {
+        id: maxId+1,
+        cat:       document.getElementById('afCat').value,
+        icon:      document.getElementById('afIcon').value||'🔧',
+        name,
+        desc:      document.getElementById('afDesc').value,
+        readme:    document.getElementById('afReadme').value,
+        url,
+        docs:      document.getElementById('afDocs').value,
+        tags:      document.getElementById('afTags').value.split(',').map(s=>s.trim()).filter(Boolean),
+        status:    document.getElementById('afStatus2').value,
+        stars:     parseInt(document.getElementById('afStarRating').dataset.value)||0,
+        use_cases: getUseCasesFromList('afUseCasesList'),
+        ai_summary:   document.getElementById('afAiSummary').value.trim(),
+        ai_workflows: [],
+        gh_stars:    parseInt(prev.dataset.ghStars)||0,
+        gh_language: prev.dataset.ghLanguage||'',
+        gh_topics:   prev.dataset.ghTopics ? prev.dataset.ghTopics.split(',').filter(Boolean) : [],
+        gh_license:  prev.dataset.ghLicense||'',
+        fetched_at:  new Date().toISOString(),
+    };
+
+    tools.push(tool);
+    saveToStorage();
+    closeAutoFetchDirect();
+    renderAll();
+
+    // flash notification
+    const sb = document.getElementById('statsBar');
+    const pill = document.createElement('div');
+    pill.className = 'stat-pill';
+    pill.innerHTML = `<span style="color:var(--green)">✅ Dodano: ${name}</span>`;
+    sb.prepend(pill);
+    setTimeout(()=>pill.remove(), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════════════════════════
+function openExportMenu() { document.getElementById('exportModal').classList.add('show'); }
+function closeExportMenu()  { document.getElementById('exportModal').classList.remove('show'); }
+
+function exportJSON() {
+    const data = { _system:'GIT_HOOB_catalogi', _exported: new Date().toISOString(), tools, categories:CATEGORIES };
+    downloadJSON(data, `GIT_HOOB_catalog_${dateStr()}.json`);
+    closeExportMenu();
+}
+
+function exportAIReadable() {
+    const aiData = {
+        _description: 'AI-readable catalog of tools. Use use_cases and ai_summary fields to determine when to use each tool.',
+        _exported: new Date().toISOString(),
+        categories: CATEGORIES.map(c=>({id:c.id,icon:c.icon,name:c.name,desc:c.desc})),
+        tools: tools.map(t=>({
+            id: t.id, cat: t.cat, name: t.name, icon: t.icon,
+            desc: t.desc, status: t.status, stars: t.stars,
+            url: t.url, tags: t.tags,
+            use_cases: t.use_cases||[], ai_summary: t.ai_summary||'',
+            ai_workflows: t.ai_workflows||[],
+            gh_stars: t.gh_stars, gh_language: t.gh_language,
+        }))
+    };
+    downloadJSON(aiData, `GIT_HOOB_AI_readable_${dateStr()}.json`);
+    closeExportMenu();
+}
+
+function exportCategoryJSONs() {
+    // Export all categories as one combined JSON (since we can't write multiple files from browser directly)
+    const byCategory = {};
+    CATEGORIES.forEach(c => {
+        const catTools = tools.filter(t=>t.cat===c.id);
+        if (catTools.length > 0) {
+            byCategory[c.id] = {
+                _category: c.id, _category_name: c.name, _description: c.desc,
+                _ai_hint: `Sprawdź te narzędzia gdy potrzebujesz ${c.name} w pipeline agenta.`,
+                tools: catTools
+            };
+        }
+    });
+    downloadJSON({ _system:'GIT_HOOB_catalogi_categories', _exported: new Date().toISOString(), categories: byCategory },
+        `GIT_HOOB_categories_${dateStr()}.json`);
+    closeExportMenu();
+}
+
+function copyToClipboard() {
+    const data = { _system:'GIT_HOOB_catalogi', tools };
+    navigator.clipboard.writeText(JSON.stringify(data, null, 2)).then(()=>{
+        alert('✅ JSON skopiowany do schowka!');
+    });
+    closeExportMenu();
+}
+
+function downloadJSON(data, filename) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename; a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function dateStr() { return new Date().toISOString().slice(0,10); }
+
+// ═══════════════════════════════════════════════════════════════
+//  AI UPDATE PANEL
+// ═══════════════════════════════════════════════════════════════
+let aiUpdateHistory = [];
+
+function openAiUpdatePanel() {
+    document.getElementById('aiUpdateOverlay').classList.add('open');
+    renderAiUpdateHistory(aiUpdateHistory);
+}
+function closeAiUpdatePanel(e) {
+    if (e.target === document.getElementById('aiUpdateOverlay'))
+        document.getElementById('aiUpdateOverlay').classList.remove('open');
+}
+
+function renderAiUpdateHistory(updates) {
+    aiUpdateHistory = updates;
+    const el = document.getElementById('aiUpdateHistory');
+    if (!el) return;
+    if (!updates || updates.length === 0) {
+        el.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gray);font-size:.82rem">Brak historii aktualizacji</div>';
+        return;
+    }
+    const statusColors = { todo:'var(--gray)', priority:'var(--yellow)', deploy:'var(--green)', reject:'var(--red)' };
+    const statusLabels = { todo:'📋 W oczekiwaniu', priority:'⭐ Zaplanowane', deploy:'✅ Użyte', reject:'❌ Odrzucone' };
+    el.innerHTML = [...updates].reverse().map(u => `
+        <div class="ai-hist-row">
+            <span class="ai-hist-name">${u.tool_name||'?'}</span>
+            <span class="ai-hist-status" style="color:${statusColors[u.new_status]||'var(--gray)'}">${statusLabels[u.new_status]||u.new_status}</span>
+            <span class="ai-hist-note" title="${u.note||''}">${u.note||'—'}</span>
+            <span class="ai-hist-by">by ${u.updated_by||'AI'}</span>
+        </div>`).join('');
+}
+
+function applyAiUpdates() {
+    const paste = document.getElementById('aiuPasteArea').value.trim();
+    const resultEl = document.getElementById('aiuResult');
+    if (!paste) { resultEl.textContent='⚠️ Wklej JSON z aktualizacjami'; resultEl.className='af-status error show'; return; }
+
+    let updates;
+    try {
+        const parsed = JSON.parse(paste);
+        updates = Array.isArray(parsed) ? parsed : (parsed.updates || []);
+        if (!updates.length) throw new Error('Tablica updates jest pusta');
+    } catch(e) {
+        resultEl.textContent = `❌ Błąd JSON: ${e.message}`;
+        resultEl.className = 'af-status error show';
+        return;
+    }
+
+    let applied = 0; let notFound = 0;
+    const validStatuses = ['todo','priority','deploy','reject'];
+
+    updates.forEach(upd => {
+        if (!upd.tool_name || !upd.new_status) return;
+        if (!validStatuses.includes(upd.new_status)) return;
+
+        // Match by name (case-insensitive partial) or tool_id
+        const match = tools.find(t =>
+            t.name.toLowerCase() === upd.tool_name.toLowerCase() ||
+            t.name.toLowerCase().includes(upd.tool_name.toLowerCase()) ||
+            (upd.tool_id && t.id === upd.tool_id)
+        );
+
+        if (match) {
+            const oldStatus = match.status;
+            match.status = upd.new_status;
+            if (upd.note) match.ai_last_note = upd.note;
+            if (upd.updated_by) match.ai_updated_by = upd.updated_by;
+            match.ai_updated_at = upd.updated_at || new Date().toISOString();
+            applied++;
+            showToast(`✅ ${match.name}: ${STATUS_LABELS[oldStatus]?.label||oldStatus} → ${STATUS_LABELS[upd.new_status]?.label||upd.new_status}`, 'success');
+        } else {
+            notFound++;
+            showToast(`⚠️ Nie znaleziono: ${upd.tool_name}`, 'warning');
+        }
+    });
+
+    if (applied > 0) {
+        saveToStorage(); renderAll();
+        renderAiUpdateHistory(updates);
+        resultEl.textContent = `✅ Zastosowano ${applied} aktualizacji${notFound ? ` | ⚠️ ${notFound} nie znaleziono` : ''}`;
+        resultEl.className = 'af-status success show';
+        // Hide alert badge
+        document.getElementById('aiUpdatesAlert').style.display = 'none';
+    } else {
+        resultEl.textContent = `❌ Żadne narzędzie nie pasuje. Sprawdź nazwy.`;
+        resultEl.className = 'af-status error show';
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg, type='info') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+tryLoadWorkspace();
+loadFromStorage();
+renderAll();
+
+// Close export menu on outside click
+document.addEventListener('click', (e) => {
+    const em = document.getElementById('exportModal');
+    if (!em.contains(e.target) && !e.target.closest('[onclick*="openExportMenu"]')) {
+        em.classList.remove('show');
+    }
+});
+</script>
+</body>
+</html>

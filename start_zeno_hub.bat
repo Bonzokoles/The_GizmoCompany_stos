@@ -17,16 +17,24 @@ cd /d "%~dp0"
 set "ZENO_DIR=%~dp0"
 set "MYBONZO_DIR=U:\WWW_MyBonzo_com"
 
+:: ── MEMORY SAVER — ustaw =1 zeby pominac ciezkie kontenery (ClickHouse/Plausible)
+:: Przydatne gdy VirtualAlloc failed / malo wolnej pamieci wirtualnej
+set "SKIP_PLAUSIBLE=0"
+:: Ustaw =1 zeby pominac rowniez Umami Analytics
+set "SKIP_ANALYTICS=0"
+
 :: Node (NVM4W) + Podman w PATH
 set "PATH=C:\nvm4w\nodejs;C:\ProgramData\nvm;C:\Users\Bonzo2\AppData\Local\Programs\Podman;%PATH%"
 
 :: Katalog na logi
 if not exist "logs" mkdir logs
+echo [%date% %time%] START > logs\startup_debug.log
 
 :: =============================================
 :: PHASE 1: PODMAN MACHINE
 :: =============================================
 echo [PHASE 1/8] Podman Machine...
+echo [%date% %time%] Phase 1: Podman >> logs\startup_debug.log
 podman machine inspect podman-machine-default >nul 2>&1
 if errorlevel 1 (
     echo   Maszyna Podman nie istnieje - inicjalizacja ^(moze potrwac kilka minut^)...
@@ -143,42 +151,46 @@ if errorlevel 1 (
         /root/sist2-admin/sist2_admin/app.py >nul 2>&1
 )
 
-echo   [07/10] plausible-db (PostgreSQL)
-podman start plausible-db >nul 2>&1
-if errorlevel 1 (
-    podman run -d --name plausible-db --network plausible-net ^
-        -e POSTGRES_DB=plausible -e POSTGRES_USER=plausible -e POSTGRES_PASSWORD=plausible ^
-        -v plausible-db-data:/var/lib/postgresql/data ^
-        --restart unless-stopped ^
-        docker.io/library/postgres:16-alpine >nul 2>&1
-)
+if "%SKIP_PLAUSIBLE%"=="1" (
+    echo   [07-09] SKIP: Plausible + ClickHouse (SKIP_PLAUSIBLE=1 — oszczednosc pamieci)
+) else (
+    echo   [07/10] plausible-db (PostgreSQL)
+    podman start plausible-db >nul 2>&1
+    if errorlevel 1 (
+        podman run -d --name plausible-db --network plausible-net ^
+            -e POSTGRES_DB=plausible -e POSTGRES_USER=plausible -e POSTGRES_PASSWORD=plausible ^
+            -v plausible-db-data:/var/lib/postgresql/data ^
+            --restart unless-stopped ^
+            docker.io/library/postgres:16-alpine >nul 2>&1
+    )
 
-echo   [08/10] plausible-events-db (ClickHouse)
-podman start plausible-events-db >nul 2>&1
-if errorlevel 1 (
-    podman run -d --name plausible-events-db --network plausible-net ^
-        -v plausible-events-data:/var/lib/clickhouse ^
-        -v "%ZENO_DIR%plausible-ce\clickhouse\clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:Z" ^
-        -v "%ZENO_DIR%plausible-ce\clickhouse\clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:Z" ^
-        --restart unless-stopped ^
-        docker.io/clickhouse/clickhouse-server:24.3.3.102-alpine >nul 2>&1
-)
+    echo   [08/10] plausible-events-db (ClickHouse — ~1GB RAM)
+    podman start plausible-events-db >nul 2>&1
+    if errorlevel 1 (
+        podman run -d --name plausible-events-db --network plausible-net ^
+            -v plausible-events-data:/var/lib/clickhouse ^
+            -v "%ZENO_DIR%plausible-ce\clickhouse\clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:Z" ^
+            -v "%ZENO_DIR%plausible-ce\clickhouse\clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:Z" ^
+            --restart unless-stopped ^
+            docker.io/clickhouse/clickhouse-server:24.3.3.102-alpine >nul 2>&1
+    )
 
-timeout /t 3 /nobreak >nul
+    timeout /t 3 /nobreak >nul
 
-echo   [09/10] plausible (Plausible CE)
-podman start plausible >nul 2>&1
-if errorlevel 1 (
-    podman run -d --name plausible --network plausible-net ^
-        -p 8100:8000 ^
-        -e BASE_URL=http://localhost:8100 ^
-        -e SECRET_KEY_BASE="fSDMf2LxaQYA22uiZSA3ZpxV3llPA2cwu7c1ZF9gqmOvElsOHXOFwXuHS9+tTZGa" ^
-        -e DATABASE_URL="postgres://plausible:plausible@plausible-db:5432/plausible" ^
-        -e CLICKHOUSE_DATABASE_URL="http://plausible-events-db:8123/plausible_events_db" ^
-        -e DISABLE_REGISTRATION=false ^
-        -e HTTP_PORT=8000 ^
-        --restart unless-stopped ^
-        ghcr.io/plausible/community-edition:v3.2.0 >nul 2>&1
+    echo   [09/10] plausible (Plausible CE)
+    podman start plausible >nul 2>&1
+    if errorlevel 1 (
+        podman run -d --name plausible --network plausible-net ^
+            -p 8100:8000 ^
+            -e BASE_URL=http://localhost:8100 ^
+            -e SECRET_KEY_BASE="fSDMf2LxaQYA22uiZSA3ZpxV3llPA2cwu7c1ZF9gqmOvElsOHXOFwXuHS9+tTZGa" ^
+            -e DATABASE_URL="postgres://plausible:plausible@plausible-db:5432/plausible" ^
+            -e CLICKHOUSE_DATABASE_URL="http://plausible-events-db:8123/plausible_events_db" ^
+            -e DISABLE_REGISTRATION=false ^
+            -e HTTP_PORT=8000 ^
+            --restart unless-stopped ^
+            ghcr.io/plausible/community-edition:v3.2.0 >nul 2>&1
+    )
 )
 
 echo   [10/11] zeno-superset (Apache Superset BI)
@@ -211,6 +223,7 @@ echo.
 :: PHASE 4: NODE.JS + ZENO BUILD
 :: =============================================
 echo [PHASE 4/8] Node.js + ZENO Build...
+echo [%date% %time%] Phase 4: Node build >> logs\startup_debug.log
 for /f "tokens=*" %%v in ('node --version 2^>nul') do set NODE_VER=%%v
 if not defined NODE_VER (
     echo   [BLAD] Node.js nie jest zainstalowany!
@@ -264,6 +277,20 @@ start "JIMBO-agent-HUB" /MIN cmd /c "cd /d %HUB_DIR% && npm start > %ZENO_DIR%lo
 echo   [OK] JIMBO Agent HUB uruchomiony -^> http://localhost:%HUB_PORT%  (log: logs\jimbo_hub.log)
 
 :: =============================================
+:: POLACZEK WATCHDOG (background, port 4225)
+:: =============================================
+echo [BG] Polaczek Watchdog (port 4225)...
+set "WATCHDOG_PORT=4225"
+
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%WATCHDOG_PORT% " ^| findstr "LISTENING"') do (
+    taskkill /PID %%P /F >nul 2>&1
+)
+taskkill /FI "WINDOWTITLE eq Polaczek-Watchdog" /F >nul 2>&1
+
+start "Polaczek-Watchdog" /MIN cmd /c "cd /d %HUB_DIR% && npx tsx polaczek/polaczek-watchdog.ts > %ZENO_DIR%logs\polaczek_watchdog.log 2>&1"
+echo   [OK] Polaczek Watchdog uruchomiony -^> http://localhost:%WATCHDOG_PORT%  (log: logs\polaczek_watchdog.log)
+
+:: =============================================
 :: JIMBO LOCAL TOOL SERVER (background, port 4111)
 :: =============================================
 echo [BG] JIMBO Local Tool Server (port 4111)...
@@ -282,10 +309,37 @@ if not exist "%JIMBO_TOOL_DIR%\node_modules" (
     cmd /c "cd /d %JIMBO_TOOL_DIR% && npm install > %ZENO_DIR%logs\jimbo_tool_install.log 2>&1"
 )
 
-start "JIMBO-LocalTool" /MIN cmd /c "cd /d %JIMBO_TOOL_DIR% && set JIMBO_PORT=4111&& set JIMBO_MODEL=gpt-4o-mini&& set JIMBO_TOOL_MODEL=gpt-4o-mini&& set JIMBO_CODING_MODEL=gpt-4o&& npx tsx server.ts > %ZENO_DIR%logs\jimbo_tool.log 2>&1"
-timeout /t 3 /nobreak >nul
+start "JIMBO-LocalTool" /MIN cmd /c "cd /d %JIMBO_TOOL_DIR% && set JIMBO_PORT=4111&& npx tsx server.ts > %ZENO_DIR%logs\jimbo_tool.log 2>&1"
+
+:: Czekaj az JIMBO_KIT bedzie gotowy (max 20s)
+echo   [TOOL] Czekam az JIMBO Tool Server bedzie gotowy (max 20s)...
+set TOOL_READY=0
+for /L %%i in (1,1,20) do (
+    if "!TOOL_READY!"=="0" (
+        curl -s -o nul -w "%%{http_code}" http://localhost:%JIMBO_TOOL_PORT%/health 2>nul | findstr "200" >nul 2>&1
+        if not errorlevel 1 (
+            set TOOL_READY=1
+            echo   [OK] JIMBO Tool Server gotowy po %%i sekundach
+        ) else (
+            timeout /t 1 /nobreak >nul
+        )
+    )
+)
+if "!TOOL_READY!"=="0" (
+    echo   [WARN] JIMBO Tool Server nie odpowiada po 20s - kontynuuje mimo to
+)
+
+:: Pobierz PID nasluchu
 for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":%JIMBO_TOOL_PORT% " ^| findstr "LISTENING"') do set JIMBO_TOOL_PID=%%P
-echo   [OK] JIMBO Local Tool Server uruchomiony -^> http://localhost:%JIMBO_TOOL_PORT%  (PID: %JIMBO_TOOL_PID%, log: logs\jimbo_tool.log)
+
+:: Skills reload — wczytaj SKILL.md z agents/skills/ do zywioru
+if "!TOOL_READY!"=="1" (
+    echo   [SKILLS] Ladowanie skills z agents/skills/...
+    for /f "tokens=*" %%R in ('curl -s -X POST http://localhost:%JIMBO_TOOL_PORT%/api/skills/reload 2^>nul') do set SKILLS_RESULT=%%R
+    echo   [SKILLS] !SKILLS_RESULT!
+)
+
+echo   [OK] JIMBO Local Tool Server -^> http://localhost:%JIMBO_TOOL_PORT%  (PID: %JIMBO_TOOL_PID%, log: logs\jimbo_tool.log)
 echo.
 
 :: Goose interactive terminal — widoczne okno, mozna wpisywac komendy
@@ -317,6 +371,14 @@ echo [BG] KB Viewer (Baza Wiedzy HTML — port 8765)...
 set "KB_DIR=U:\The_DEVz_HUB_of_work\knowledge_base"
 start "KB-Viewer" /MIN cmd /c "set PYTHONIOENCODING=utf-8 && cd /d %KB_DIR% && python kb_viewer.py > %ZENO_DIR%logs\kb_viewer.log 2>&1"
 echo   [OK] KB Viewer -^> http://localhost:8765
+echo.
+
+:: =============================================
+:: KB SERVER — RAG/ChromaDB (background, port 7071)
+:: =============================================
+echo [BG] KB Server (RAG/ChromaDB — port 7071)...
+start "KB-Server" /MIN cmd /c "set PYTHONIOENCODING=utf-8 && cd /d %KB_DIR% && python kb_server.py > %ZENO_DIR%logs\kb_server.log 2>&1"
+echo   [OK] KB Server -^> http://localhost:7071  (log: logs\kb_server.log)
 echo.
 
 :: =============================================
@@ -434,6 +496,8 @@ echo     Umami          http://localhost:5183
 echo     Plausible      http://localhost:8100
 echo     Superset       http://localhost:8088
 echo     Mydia          http://localhost:4100
+echo     KB Viewer      http://localhost:8765
+echo     KB Server RAG  http://localhost:7071/docs
 echo.
 echo   Tunele (telefon):
 echo     URL w: logs\tunnel_zeno.log
@@ -441,6 +505,20 @@ echo            logs\tunnel_mybonzo.log
 echo.
 echo   Watchdog: aktywny (co 30s)
 echo   Logi:     logs\watchdog.log
+echo.
+echo   JIMBO Skills:
+echo     Katalog:  %JIMBO_TOOL_DIR%\agents\skills\
+if "!TOOL_READY!"=="1" (
+    if defined SKILLS_RESULT (
+        echo     Status:   !SKILLS_RESULT!
+    ) else (
+        echo     Status:   zaladowane
+    )
+) else (
+    echo     Status:   JIMBO nie odpowiedzial w czasie startu - skills zaladuja sie przy pierwszym uzyciu
+)
+echo     Nowy skill: cd /d %JIMBO_TOOL_DIR% ^&^& npm run skills -- install owner/repo
+echo     Reload:     curl -X POST http://localhost:%JIMBO_TOOL_PORT%/api/skills/reload
 echo.
 echo   Zamkniecie: Ctrl+C lub zamknij to okno
 echo  ======================================================
@@ -485,7 +563,9 @@ echo       Vite:        http://localhost:5173
 echo       Wrangler CF: http://localhost:8788
 echo       Electron:    auto-launch
 echo.
+echo [%date% %time%] Phase 8: calling npm run dev >> logs\startup_debug.log
 call npm run dev
+echo [%date% %time%] npm run dev EXITED code=%ERRORLEVEL% >> logs\startup_debug.log
 
 :: =============================================
 :: CLEANUP — ZENO Browser zamkniety
@@ -510,6 +590,8 @@ taskkill /FI "WINDOWTITLE eq LibrariesAPI" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq LibCuration" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq KB-Viewer" /F >nul 2>&1
 for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":8765 " ^| findstr "LISTENING"') do taskkill /PID %%P /F >nul 2>&1
+taskkill /FI "WINDOWTITLE eq KB-Server" /F >nul 2>&1
+for /f "tokens=5" %%P in ('netstat -ano 2^>nul ^| findstr ":7071 " ^| findstr "LISTENING"') do taskkill /PID %%P /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq Wrangler-CF-Dev" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq MyBonzo-Astro" /F >nul 2>&1
 taskkill /FI "WINDOWTITLE eq DevzHub-Sync" /F >nul 2>&1
@@ -522,4 +604,4 @@ echo   [OK] Pozostale serwisy
 echo.
 echo   Sesja ZENO HUB zakonczona. Do zobaczenia!
 echo  ======================================================
-timeout /t 3 /nobreak >nul
+pause

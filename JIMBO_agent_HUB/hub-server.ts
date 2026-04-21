@@ -60,6 +60,82 @@ import {
   triggerGHWorkflow,
   listGHRuns,
 } from "./core/cf-remote.js";
+import {
+  appendChange,
+  readChangelog,
+  readIssues,
+} from "./tools/goose-changelog.js";
+import { AGENT_TOOLS } from "./tools/tool-definitions.js";
+import { executeTool } from "./tools/tool-executor.js";
+
+// ── BUCH Agent — system prompt dla trybu orkiestratora ─────────────
+const AGENT_SYSTEM_PROMPT = `Jesteś BUCH_AGENT — inteligentnym orkiestratorem ZENO Browser.
+Masz dostęp do 15 narzędzi. Używaj ich by wykonywać zadania, a nie tylko odpowiadać.
+
+ZASADY:
+- Gdy zadanie wymaga pliku → użyj read_file lub list_dir najpierw, potem działaj
+- Gdy zadanie wymaga edycji wielu plików → deleguj do hub_goose_run (Goose jest lepszy do kodowania)
+- Gdy zadanie wymaga danych z chmury → d1_query lub r2_read/r2_list
+- Gdy potrzeba wyszukiwania → web_search
+- Gdy zadanie jest analityczne/organizacyjne → pi_agent_run (Polaczek/Ollama)
+- Blog post → blog_post
+- Szukanie w lokalnej KB (ChromaDB, 20 kategorii) → kb_search lub kb_categories
+- Zawsze sprawdź local_services_status jeśli serwis może być offline
+- Nie modyfikuj chronionych plików (src-electron/main.ts, src/shared/ipc/, package.json, itp.)
+- Odpowiadaj po polsku, zwięźle, technicznie
+
+DOSTĘPNE SERWISY LOKALNE:
+  JIMBO HUB  :4224 — agent, skills, memory, reflexion
+  JimboKit   :4111 — 24 narzędzia (fs/sys/podman/git/net/rag)
+  Goose      — autonomiczny agent kodujący (via hub_goose_run)
+  Pi/Polaczek— lokalne agenty Ollama (bibliotekarz, analityk, porzadkowy)
+  SearXNG    :8080 — wyszukiwarka (web_search)
+
+PROJEKTY:
+  ZENO Browser       U:\\WWW_Zen_BRo_wser_org3
+  mybonzo.com        U:\\WWW_MyBonzo_com
+  mybonzoai blog     U:\\WWW_MYbonzoai_blog
+  jimbo.org          U:\\WWW_Jimbo_ORG
+`;
+
+// ── Goose preamble — dołączany do każdego zadania Goose ────────────
+// Instruuje Goose o kontekście aplikacji, chronionych plikach i protokołach raportowania.
+const GOOSE_PREAMBLE = `=== KONTEKST APLIKACJI ZENO BROWSER ===
+Projekt: ZENO Browser (U:\\WWW_Zen_BRo_wser_org3)
+Stos: TypeScript, React 18, Electron 27, Vite 5, Node.js, SQLite, Cloudflare Workers/Pages/D1/R2.
+
+PLIKI CHRONIONE — NIE MODYFIKUJ:
+  src-electron/main.ts, src-electron/preload.ts, src-electron/app/
+  src/shared/ipc/channels.ts i contracts/ (80 kanałów IPC — single source of truth)
+  src/main.tsx, src/App.tsx (entry pointy React)
+  package.json, package-lock.json
+  vite.config.ts, vite.electron.config.ts, tsconfig*.json, electron-builder*
+  .github/, .cloudflare/
+
+MOŻESZ MODYFIKOWAĆ (narzędzia i dodatki):
+  JIMBO_agent_HUB/     — serwer HUB, core, skills, tools, agents
+  src/components/assistant/  — BuchChatWidget i pokrewne
+  src/components/panels/     — panele boczne (AgentHubPanel, JimboKitPanel, itp.)
+  src/styles/                — CSS
+  functions/                 — Cloudflare Functions API
+
+PROTOKÓŁ — ZNALEZIONY BŁĄD/NIEDZIAŁAJĄCA FUNKCJA:
+Zapisz do U:\\WWW_Zen_BRo_wser_org3\\JIMBO_agent_HUB\\goose-issues.json (tablica JSON):
+{ "ts": <Date.now()>, "description": "opis problemu", "location": "plik:linia", "status": "open" }
+Użyj read + JSON.parse + push + JSON.stringify + write. Stwórz plik jeśli nie istnieje.
+
+PROTOKÓŁ — NAPRAWIONO/ZMIENIONO:
+Zapisz do U:\\WWW_Zen_BRo_wser_org3\\JIMBO_agent_HUB\\goose-changelog.json (tablica JSON):
+{ "ts": <Date.now()>, "taskId": "TASK_ID_PLACEHOLDER", "instruction": "co zlecono", "summary": "co zrobiono", "files": ["lista zmienionych plików"] }
+Stwórz plik jeśli nie istnieje. Dopisuj — nie nadpisuj całości.
+
+ZASADY:
+- Przed edycją sprawdź kto importuje dany moduł (grep po nazwie)
+- Jeśli jesteś niepewny zakresu zmiany — opisz plan i zatrzymaj się
+- Zawsze dokumentuj zmiany w goose-changelog.json
+
+=== ZADANIE ===
+`;
 
 // ── System prompt — wstrzykiwany do każdej rozmowy ─────────────────
 const SYSTEM_PROMPT: Message = {
@@ -368,6 +444,14 @@ Wykonaj zadanie jeszcze raz uwzględniając powyższą wskazówkę.`;
           `[Goose] ${summaryContent}`,
           goose.getSessionName() ?? "default",
         );
+        // Auto-log do changelog jeśli synthesis sugeruje zmiany
+        try {
+          appendChange({
+            taskId: result.taskId,
+            instruction: instructions,
+            summary: summaryContent,
+          });
+        } catch { /* changelog nie jest krytyczny */ }
       }
     } catch {
       // synthesis nie jest krytyczna — ignoruj błędy
@@ -625,7 +709,13 @@ app.post("/agent/run", async (req, res) => {
 
   const taskId = randomUUID();
 
-  // Zapisz instrukcje i czas startu (do skill auto-save + reflexion)
+  // Preamble z kontekstem aplikacji + instrukcja
+  const fullInstruction = GOOSE_PREAMBLE.replace(
+    "TASK_ID_PLACEHOLDER",
+    taskId,
+  ) + instruction;
+
+  // Zapisz ORYGINALNE instrukcje (bez preamble) do synthesis + skill-save
   taskInstructions.set(taskId, instruction);
   taskStartTimes.set(taskId, Date.now());
 
@@ -640,7 +730,7 @@ app.post("/agent/run", async (req, res) => {
   // Uruchamiamy async — nie blokujemy odpowiedzi
   console.log(`[HUB] Przed wywołaniem goose.runTask. TaskId: ${taskId}, Instrukcje: "${instruction}", Workdir: "${workdir ?? 'N/A'}"`);
   goose
-    .runTask({ id: taskId, instructions: instruction, workdir })
+    .runTask({ id: taskId, instructions: fullInstruction, workdir })
     .then(() => {
         console.log(`[HUB] goose.runTask zakończono dla TaskId: ${taskId}`);
     })
@@ -659,6 +749,254 @@ app.get("/agent/tasks", (_req, res) => {
 app.delete("/agent/tasks/:id", (req, res) => {
   const killed = goose.killTask(req.params.id);
   res.json({ killed, taskId: req.params.id });
+});
+
+// ── REST: Goose changelog i issues ───────────────────────────────
+app.get("/agent/changelog", (_req, res) => {
+  res.json(readChangelog(30));
+});
+
+app.get("/agent/issues", (_req, res) => {
+  res.json(readIssues());
+});
+
+// ── REST: list local directory (for LibraryBrowser in JimboKit) ──
+app.get("/tools/list-dir", async (req, res) => {
+  const dirPath = String(req.query.path ?? "U:\\WWW_Zen_BRo_wser_tool");
+  try {
+    const result = await executeTool("list_dir", { path: dirPath });
+    res.json({ ok: true, path: dirPath, listing: result });
+  } catch (err: unknown) {
+    res.status(400).json({ ok: false, error: String(err) });
+  }
+});
+
+// ── REST: read local file (for LibraryBrowser in JimboKit) ───────
+app.get("/tools/read-file", async (req, res) => {
+  const filePath = String(req.query.path ?? "");
+  if (!filePath) return res.status(400).json({ ok: false, error: "Brak path" });
+  try {
+    const result = await executeTool("read_file", { path: filePath });
+    res.json({ ok: true, path: filePath, content: result });
+  } catch (err: unknown) {
+    res.status(400).json({ ok: false, error: String(err) });
+  }
+});
+
+// ── REST: Knowledge Base proxy (port 7071 → ZENO clients) ────────
+//
+// KB Server (FastAPI + ChromaDB) działa na porcie 7071.
+// ZENO Browser ma ograniczony CORS więc proxy przez HUB.
+//
+const KB_SERVER = "http://localhost:7071";
+
+async function kbProxy(
+  path: string,
+  method: "GET" | "POST",
+  body?: unknown,
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  const res = await fetch(`${KB_SERVER}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
+    signal: AbortSignal.timeout(8000),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+// GET /kb/stats — statystyki bazy wiedzy
+app.get("/kb/stats", async (_req, res) => {
+  try {
+    const r = await kbProxy("/api/kb/stats", "GET");
+    res.status(r.status).json(r.data);
+  } catch (e) {
+    res.status(503).json({ error: "KB Server niedostępny (port 7071)", detail: String(e) });
+  }
+});
+
+// GET /kb/categories — lista kategorii z licznikami
+app.get("/kb/categories", async (_req, res) => {
+  try {
+    const r = await kbProxy("/api/kb/categories", "GET");
+    res.status(r.status).json(r.data);
+  } catch (e) {
+    res.status(503).json({ error: "KB Server niedostępny (port 7071)", detail: String(e) });
+  }
+});
+
+// POST /kb/search { query, limit? } — wyszukiwanie RAG (wszystkie kategorie)
+app.post("/kb/search", async (req, res) => {
+  const { query, limit } = req.body as { query?: string; limit?: number };
+  if (!query?.trim()) return res.status(400).json({ error: "Brak query" });
+  try {
+    const r = await kbProxy("/api/kb/search", "POST", { query, limit: limit ?? 10 });
+    res.status(r.status).json(r.data);
+  } catch (e) {
+    res.status(503).json({ error: "KB Server niedostępny (port 7071)", detail: String(e) });
+  }
+});
+
+// POST /kb/rag { query, categories?, limit? } — RAG z filtrem kategorii
+app.post("/kb/rag", async (req, res) => {
+  const { query, categories, limit } = req.body as {
+    query?: string;
+    categories?: string[];
+    limit?: number;
+  };
+  if (!query?.trim()) return res.status(400).json({ error: "Brak query" });
+  try {
+    const r = await kbProxy("/api/kb/query", "POST", { query, categories, limit: limit ?? 10 });
+    res.status(r.status).json(r.data);
+  } catch (e) {
+    res.status(503).json({ error: "KB Server niedostępny (port 7071)", detail: String(e) });
+  }
+});
+
+// POST /kb/ingest { category_id? } — indeksowanie KB
+app.post("/kb/ingest", async (req, res) => {
+  const { category_id } = req.body as { category_id?: string };
+  try {
+    const path = category_id
+      ? `/api/kb/categories/${category_id}/ingest`
+      : "/api/kb/ingest";
+    const r = await kbProxy(path, "POST");
+    res.status(r.status).json(r.data);
+  } catch (e) {
+    res.status(503).json({ error: "KB Server niedostępny (port 7071)", detail: String(e) });
+  }
+});
+
+// ── REST: BUCH Agent — agentic loop z tool calling ───────────────
+// POST /chat/agent { messages, model? }
+// Zwraca SSE stream z eventami: tool_call, tool_result, token, error
+app.post("/chat/agent", async (req, res) => {
+  const { messages, model: reqModel } = req.body as {
+    messages?: Array<{ role: string; content: string }>;
+    model?: string;
+  };
+
+  if (!messages?.length) {
+    return res.status(400).json({ error: "Brak messages" });
+  }
+
+  // SSE headers
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  const sendSSE = (data: object) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  const agentModelId =
+    reqModel ??
+    process.env.AGENT_MODEL ??
+    "anthropic/claude-3-5-haiku-20241022";
+
+  const agentLLM = createLLMClient();
+
+  // Buduj kontekst — system prompt + pamięć core + messages
+  const systemContent =
+    AGENT_SYSTEM_PROMPT + "\n\n" + memory.formatCoreForPrompt();
+
+  const loopMessages: Array<{
+    role: string;
+    content: string | null;
+    tool_calls?: unknown;
+    tool_call_id?: string;
+    name?: string;
+  }> = [
+    { role: "system", content: systemContent },
+    ...messages,
+  ];
+
+  const MAX_ITERATIONS = 12;
+  let iterations = 0;
+
+  try {
+    while (iterations < MAX_ITERATIONS) {
+      iterations++;
+
+      const response = await (agentLLM as unknown as {
+        chat: {
+          completions: {
+            create: (opts: Record<string, unknown>) => Promise<{
+              choices: Array<{
+                message: {
+                  role: string;
+                  content: string | null;
+                  tool_calls?: Array<{
+                    id: string;
+                    function: { name: string; arguments: string };
+                  }>;
+                };
+                finish_reason: string;
+              }>;
+            }>;
+          };
+        };
+      }).chat.completions.create({
+        model: agentModelId,
+        messages: loopMessages,
+        tools: AGENT_TOOLS,
+        tool_choice: "auto",
+        max_tokens: 4096,
+      });
+
+      const choice = response.choices[0];
+      const msg = choice.message;
+      loopMessages.push(msg as typeof loopMessages[0]);
+
+      // Brak tool calls — odpowiedź finalna
+      if (!msg.tool_calls?.length) {
+        const finalText = msg.content ?? "";
+        sendSSE({ type: "token", text: finalText });
+        break;
+      }
+
+      // Wykonaj tool calls
+      for (const tc of msg.tool_calls) {
+        const toolName = tc.function.name;
+        let toolArgs: Record<string, unknown> = {};
+        try {
+          toolArgs = JSON.parse(tc.function.arguments) as Record<string, unknown>;
+        } catch { /* ignore */ }
+
+        sendSSE({ type: "tool_call", tool: toolName, input: toolArgs });
+
+        let toolOutput: string;
+        try {
+          toolOutput = await executeTool(toolName, toolArgs);
+        } catch (err) {
+          toolOutput = `ERROR: ${err instanceof Error ? err.message : String(err)}`;
+        }
+
+        sendSSE({ type: "tool_result", tool: toolName, output: toolOutput });
+
+        loopMessages.push({
+          role: "tool",
+          tool_call_id: tc.id,
+          content: toolOutput,
+          name: toolName,
+        });
+      }
+    }
+
+    if (iterations >= MAX_ITERATIONS) {
+      sendSSE({
+        type: "token",
+        text: "⚠ Osiągnięto limit iteracji agenta. Zadanie może być niekompletne.",
+      });
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    sendSSE({ type: "error", message: msg });
+  }
+
+  res.write("data: [DONE]\n\n");
+  res.end();
 });
 
 // ── REST: ReflexionEngine ─────────────────────────────────────────
@@ -2318,6 +2656,173 @@ app.get("/projects/cf/all", async (_req, res) => {
     res.json({ projects, total: projects.length });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Polaczek Agents ───────────────────────────────────────────────
+import { readFileSync as _rfs, existsSync as _exs } from "fs";
+import { resolve as _res } from "path";
+
+const POLACZEK_DIR = _res(import.meta.dirname ?? __dirname, "polaczek");
+
+function loadPolaczekRegistry() {
+  const p = `${POLACZEK_DIR}/registry.json`;
+  return _exs(p) ? JSON.parse(_rfs(p, "utf-8")) : { agents: [] };
+}
+
+// GET /polaczek/list — lista agentów Polaczek
+app.get("/polaczek/list", (_req, res) => {
+  const reg = loadPolaczekRegistry();
+  res.json({ agents: reg.agents, count: reg.agents.length });
+});
+
+// GET /polaczek/:id — szczegóły + prompt + zadania
+app.get("/polaczek/:id", (req, res) => {
+  const reg = loadPolaczekRegistry();
+  const agent = reg.agents.find((a: { id: string }) => a.id === req.params.id);
+  if (!agent) return res.status(404).json({ error: "Nieznany agent" });
+
+  const promptPath = `${POLACZEK_DIR}/${agent.prompt_file}`;
+  const tasksPath = `${POLACZEK_DIR}/${agent.tasks_file}`;
+  res.json({
+    ...agent,
+    prompt: _exs(promptPath) ? _rfs(promptPath, "utf-8") : null,
+    tasks: _exs(tasksPath) ? _rfs(tasksPath, "utf-8") : null,
+  });
+});
+
+// POST /polaczek/:id/run — uruchom Polaczek (Ollama / OpenRouter / OpenAI / Anthropic)
+// Body: { task, provider?, api_key?, model_override?, image_base64?, image_url? }
+app.post("/polaczek/:id/run", async (req, res) => {
+  const reg = loadPolaczekRegistry();
+  const agent = reg.agents.find((a: { id: string }) => a.id === req.params.id);
+  if (!agent) return res.status(404).json({ error: "Nieznany agent" });
+
+  const {
+    task,
+    provider       = "ollama",
+    api_key        = "",
+    model_override = "",
+    image_base64,
+    image_url,
+  } = req.body as {
+    task?: string;
+    provider?: string;
+    api_key?: string;
+    model_override?: string;
+    image_base64?: string;
+    image_url?: string;
+  };
+  if (!task) return res.status(400).json({ error: "Pole 'task' jest wymagane" });
+  if (provider !== "ollama" && !api_key)
+    return res.status(400).json({ error: `Pole 'api_key' jest wymagane dla providera ${provider}` });
+
+  const promptPath = `${POLACZEK_DIR}/${agent.prompt_file}`;
+  const tasksPath  = `${POLACZEK_DIR}/${agent.tasks_file}`;
+  const systemPrompt = _exs(promptPath) ? _rfs(promptPath, "utf-8") : `Jesteś ${agent.id}.`;
+  const allTasks     = _exs(tasksPath)  ? _rfs(tasksPath,  "utf-8") : "";
+
+  // ── Wybór klienta OpenAI-compat wg providera ──────────────────────────────
+  const { default: OpenAI } = await import("openai");
+
+  type ProviderCfg = { baseURL: string; apiKey: string; defaultHeaders?: Record<string, string> };
+  const PROVIDER_CONFIGS: Record<string, ProviderCfg> = {
+    ollama:      { baseURL: "http://localhost:11434/v1",         apiKey: "ollama" },
+    openrouter:  { baseURL: "https://openrouter.ai/api/v1",     apiKey: api_key },
+    openai:      { baseURL: "https://api.openai.com/v1",        apiKey: api_key },
+    anthropic:   {
+      baseURL: "https://api.anthropic.com/v1",
+      apiKey:  api_key,
+      defaultHeaders: { "anthropic-version": "2023-06-01", "anthropic-beta": "messages-2023-06-01" },
+    },
+  };
+
+  // Domyślne modele chmurowe gdy brak override
+  const CLOUD_DEFAULTS: Record<string, string> = {
+    openrouter: "anthropic/claude-3-5-haiku",
+    openai:     "gpt-4o-mini",
+    anthropic:  "claude-3-5-haiku-20241022",
+  };
+
+  const cfg = PROVIDER_CONFIGS[provider] ?? PROVIDER_CONFIGS["ollama"];
+  const client = new OpenAI({ baseURL: cfg.baseURL, apiKey: cfg.apiKey, defaultHeaders: cfg.defaultHeaders });
+
+  // Model: override > registry (dla ollama) > cloud default
+  const resolveModel = () => {
+    if (model_override) return model_override;
+    if (provider === "ollama") return agent.model;
+    return CLOUD_DEFAULTS[provider] ?? agent.model;
+  };
+  const resolveModelFallback = () => {
+    if (provider === "ollama") return agent.model_fallback;
+    return resolveModel(); // przy chmurze nie zmieniamy modelu w fallbacku
+  };
+
+  const chosenModel = resolveModel();
+
+  const userMsg = task.startsWith("T-")
+    ? `Wykonaj zadanie ${task} z listy:\n\n${allTasks}`
+    : task;
+
+  // Buduj content — z obrazem lub bez
+  type _TextPart  = { type: "text";      text: string };
+  type _ImgPart   = { type: "image_url"; image_url: { url: string } };
+  type _MsgParam  = { role: "system"; content: string } | { role: "user"; content: string | Array<_TextPart | _ImgPart> };
+
+  let userContent: string | Array<_TextPart | _ImgPart> = userMsg;
+  if (agent.accepts_image && (image_base64 || image_url)) {
+    const imgUrl = image_base64 ? `data:image/png;base64,${image_base64}` : image_url!;
+    userContent = [
+      { type: "text"      as const, text: userMsg },
+      { type: "image_url" as const, image_url: { url: imgUrl } },
+    ];
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const buildMessages = (): any[] => [
+    { role: "system", content: systemPrompt },
+    { role: "user",   content: userContent  },
+  ] as _MsgParam[];
+
+  const temp = agent.accepts_image ? 0 : 0.3; // temp=0 dla OCR
+
+  try {
+    const completion = await client.chat.completions.create({
+      model: chosenModel,
+      messages: buildMessages(),
+      temperature: temp,
+    });
+    res.json({
+      agent_id:  agent.id,
+      model:     chosenModel,
+      provider,
+      task,
+      has_image: !!(image_base64 || image_url),
+      output:    completion.choices[0].message.content,
+    });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    // fallback — tylko dla Ollama ma sens zmiana modelu
+    if (provider === "ollama" && agent.model_fallback && agent.model_fallback !== chosenModel) {
+      const fallbackModel = resolveModelFallback();
+      try {
+        const completion2 = await client.chat.completions.create({
+          model: fallbackModel,
+          messages: buildMessages(),
+          temperature: temp,
+        });
+        return res.json({
+          agent_id:  agent.id,
+          model:     fallbackModel,
+          provider,
+          task,
+          has_image: !!(image_base64 || image_url),
+          output:    completion2.choices[0].message.content,
+          fallback:  true,
+        });
+      } catch { /* ignoruj — zwróć oryginalny błąd */ }
+    }
+    res.status(500).json({ error: message });
   }
 });
 

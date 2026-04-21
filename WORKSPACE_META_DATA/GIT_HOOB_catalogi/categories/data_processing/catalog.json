@@ -1,0 +1,7 @@
+﻿{
+  "_category": "data_processing",
+  "_category_name": "Data Processing",
+  "_description": "Przetwarzanie i transformacja danych",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz Data Processing w pipeline agenta.",
+  "tools": []
+}

@@ -2,6 +2,9 @@ import { BrowserWindow, shell } from "electron";
 import isDev from "electron-is-dev";
 import path from "path";
 
+// Suppress Electron's built-in security warnings (CSP unsafe-eval, etc.) in dev
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = "true";
+
 export function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 1400,
@@ -38,9 +41,11 @@ export function createWindow(): BrowserWindow {
       callback({ cancel: false });
       return;
     }
+    // analytics.mybonzo.com — Umami script loaded in index.html (web tracking)
+    const ANALYTICS = "https://analytics.mybonzo.com";
     const csp = isDev
-      ? "default-src 'self' 'unsafe-inline' 'unsafe-eval' ws://localhost:* http://localhost:*; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' ws://localhost:* http://localhost:* https:; frame-src *;"
-      : "default-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https:; frame-src *;";
+      ? `default-src 'self' 'unsafe-inline' 'unsafe-eval' ws://localhost:* http://localhost:*; script-src 'self' 'unsafe-inline' 'unsafe-eval' ${ANALYTICS}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' ws://localhost:* http://localhost:* https:; frame-src *;`
+      : `default-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' ${ANALYTICS}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https: ${ANALYTICS}; frame-src *;`;
     callback({
       responseHeaders: {
         ...details.responseHeaders,

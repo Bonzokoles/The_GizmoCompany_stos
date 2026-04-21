@@ -1,0 +1,7 @@
+﻿{
+  "_category": "git",
+  "_category_name": "Git Operations",
+  "_description": "Operacje na repozytoriach Git",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz Git Operations w pipeline agenta.",
+  "tools": []
+}

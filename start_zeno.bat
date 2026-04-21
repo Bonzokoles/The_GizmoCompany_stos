@@ -55,6 +55,7 @@ echo   [1/9] zeno-umami-db (PostgreSQL)...
 podman start zeno-umami-db >nul 2>&1
 if errorlevel 1 (
     podman run -d --name zeno-umami-db ^
+        --network zeno-net ^
         -e POSTGRES_DB=umami -e POSTGRES_USER=umami -e POSTGRES_PASSWORD=umami ^
         -v umami-db-data:/var/lib/postgresql/data ^
         --restart unless-stopped ^
@@ -80,6 +81,7 @@ echo   [3/9] zeno-umami (Analytics)...
 podman start zeno-umami >nul 2>&1
 if errorlevel 1 (
     podman run -d --name zeno-umami ^
+        --network zeno-net ^
         -p 5183:3000 ^
         -e DATABASE_URL=postgresql://umami:umami@zeno-umami-db:5432/umami ^
         -e DISABLE_TELEMETRY=1 ^
@@ -202,7 +204,6 @@ echo       OK
 echo.
 
 echo [2/2] Uruchamianie ZENO Browser...
-echo       Vite:        http://localhost:5173
 echo       Websurfx:    http://localhost:8888
 echo       Meilisearch: http://localhost:7700
 echo       sist2:       http://localhost:8085
@@ -213,4 +214,4 @@ echo       Aby zamknac: Ctrl+C lub zamknij okno
 echo ============================================
 echo.
 
-call npm run dev
+call npm start

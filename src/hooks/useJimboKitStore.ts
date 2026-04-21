@@ -186,7 +186,16 @@ export function useJimboKitStore(): JimboKitStore {
       ws.onopen = () => setIsConnected(true);
       ws.onclose = () => setIsConnected(false);
     }
-    return () => { ws?.close(); };
+    return () => {
+      if (!ws) return;
+      if (ws.readyState === WebSocket.CONNECTING) {
+        // Prevent "WebSocket closed before connection established" error:
+        // delay close until after the handshake finishes
+        ws.onopen = () => ws.close();
+      } else {
+        ws.close();
+      }
+    };
   }, []); // eslint-disable-line -- WS connection intentionally runs once
 
   function chatId(data?: { chat_id?: string }): string {

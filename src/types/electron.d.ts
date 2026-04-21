@@ -238,8 +238,14 @@ export interface SystemInfo {
   hostname: string;
 }
 
+export interface PtySpawnOpts {
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+}
+
 export interface PtyAPI {
-  create(cols: number, rows: number, cwd?: string): Promise<{ success: boolean; id?: string; error?: string }>;
+  create(cols: number, rows: number, cwd?: string, opts?: PtySpawnOpts): Promise<{ success: boolean; id?: string; error?: string }>;
   write(id: string, data: string): Promise<{ success: boolean; error?: string }>;
   resize(id: string, cols: number, rows: number): Promise<{ success: boolean; error?: string }>;
   kill(id: string): Promise<{ success: boolean; error?: string }>;
@@ -269,6 +275,17 @@ export interface FsEntry {
   size: number;
   modified: number;
   extension: string;
+}
+
+export interface SystemAPI {
+  /** Otwiera dialog wyboru pliku */
+  fileDialogOpen(payload?: unknown): Promise<unknown>;
+  /** Otwiera URL w domyślnej przeglądarce */
+  openExternal(payload: unknown): Promise<void>;
+  /** Wysyła komendę do terminala */
+  terminalSend(payload: unknown): Promise<unknown>;
+  /** Zwraca ścieżkę główną aplikacji (app.getAppPath()) */
+  appGetPath(): Promise<string>;
 }
 
 export interface FileAPI {
@@ -633,6 +650,7 @@ export interface ElectronAPI {
   umami?: UmamiAPI;
   mcp?: McpAPI;
   file?: FileAPI;
+  system?: SystemAPI;
 
   /** Subscribe to IPC events from main process. Returns unsubscribe function. */
   on(channel: string, callback: (...args: unknown[]) => void): () => void;

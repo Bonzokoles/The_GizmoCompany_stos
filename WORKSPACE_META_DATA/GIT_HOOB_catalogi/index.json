@@ -1,0 +1,6 @@
+{
+  "_description": "Płaski indeks wszystkich narzędzi. Auto-generowany z pliku tools-catalog.html. Eksportuj z interfejsu przyciskiem 'Eksport → AI-readable JSON'.",
+  "_ai_hint": "Przeszukuj po polach: name, use_cases, ai_summary, cat, tags. Pole use_cases opisuje konkretne zastosowania. Pole ai_summary — kiedy i jak agent powinien tego używać.",
+  "_last_updated": "Auto-generowany",
+  "tools": []
+}

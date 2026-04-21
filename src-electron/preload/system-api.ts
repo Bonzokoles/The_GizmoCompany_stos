@@ -10,4 +10,7 @@ export const systemAPI = {
     ipcRenderer.invoke(CH.OPEN_EXTERNAL, payload),
   terminalSend: (payload: unknown) =>
     ipcRenderer.invoke(CH.TERMINAL_SEND, payload),
+  /** Zwraca app.getAppPath() z procesu głównego */
+  appGetPath: (): Promise<string> =>
+    ipcRenderer.invoke(CH.APP_GET_PATH),
 } as const;

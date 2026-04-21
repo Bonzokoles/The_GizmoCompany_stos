@@ -1,0 +1,7 @@
+﻿{
+  "_category": "search",
+  "_category_name": "Search / Grep",
+  "_description": "Wyszukiwanie w kodzie i plikach",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz Search / Grep w pipeline agenta.",
+  "tools": []
+}

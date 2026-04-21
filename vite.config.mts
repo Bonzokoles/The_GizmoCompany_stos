@@ -72,6 +72,15 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    watch: {
+      // Ignore restore points (contextplus MCP) and other non-source dirs
+      ignored: [
+        "**/restore_*/**",
+        "**/.claude/**",
+        "**/dist/**",
+        "**/website/**",
+      ],
+    },
     proxy: {
       // Forward /api/* → wrangler pages dev (port 8788) — eliminuje CORS w dev
       "/api": {
@@ -83,6 +92,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ["use-sync-external-store/shim/index.js"],
+    // Exclude non-source dirs from dep scanning
+    exclude: [],
+    entries: ["index.html", "src/**/*.{ts,tsx}"],
   },
   build: {
     outDir: "dist",

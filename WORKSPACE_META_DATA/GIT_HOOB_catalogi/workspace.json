@@ -1,0 +1,12 @@
+{
+  "_description": "Workspace config — auto-filled by init-workspace.ps1 or manually",
+  "_ai_instructions": "Ten plik identyfikuje projekt. Czytaj go aby wiedzieć w jakim projekcie pracujesz. Pole 'catalog_path' wskazuje gdzie jest katalog narzędzi. Pole 'ai_updates_file' to plik do którego PISZESZ aktualizacje statusów narzędzi.",
+  "project_name": "{{PROJECT_NAME}}",
+  "project_path": "{{PROJECT_PATH}}",
+  "project_repo": "{{PROJECT_REPO}}",
+  "catalog_path": "{{CATALOG_PATH}}\\GIT_HOOB_catalogi\\tools-catalog.html",
+  "ai_updates_file": "{{CATALOG_PATH}}\\GIT_HOOB_catalogi\\ai-status-updates.json",
+  "catalog_json": "{{CATALOG_PATH}}\\GIT_HOOB_catalogi\\index.json",
+  "initialized_at": "{{INIT_DATE}}",
+  "template_version": "2.1.0"
+}

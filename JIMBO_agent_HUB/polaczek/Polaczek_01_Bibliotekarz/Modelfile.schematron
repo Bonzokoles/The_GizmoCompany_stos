@@ -1,0 +1,23 @@
+# Modelfile dla Schematron-3B → Ollama
+#
+# UWAGA: Ollama wymaga formatu GGUF.
+# Schematron-3B jest w safetensors — wymagana konwersja.
+#
+# Kroki konwersji (jednorazowo):
+#   1. pip install llama-cpp-python transformers torch
+#   2. python -m llama_cpp.convert_hf_to_gguf U:\The_DEVz_HUB_of_work\Schematron-3B --outfile schematron-3b.gguf --outtype q4_K_M
+#   3. ollama create schematron-3b -f Modelfile.schematron
+#
+# Po konwersji — odkomentuj FROM i zakomentuj komunikat:
+
+# FROM U:\The_DEVz_HUB_of_work\Schematron-3B\schematron-3b.gguf
+
+SYSTEM """
+Jesteś Schematron-3B — specjalistyczny model do analizy struktury i organizacji danych.
+Twoje zadania: walidacja schematów, katalogowanie bibliotek, porządkowanie wiedzy.
+Odpowiadasz zwięźle, w języku polskim. Format: JSON lub lista punktowana.
+"""
+
+PARAMETER temperature 0.3
+PARAMETER top_p 0.9
+PARAMETER num_ctx 4096

@@ -1,7 +1,6 @@
 import { ipcMain, type BrowserWindow } from "electron";
 import type { ServiceContainer } from "../app/service-container";
-import { NetworkManager } from "../services/network-manager";
-import { NetworkMonitor } from "../services/network-monitor";
+import { NetworkManager, NetworkMonitor } from "../services/browser";
 import { isValidString } from "../utils/validate-url";
 import { IPC } from "../../src/shared/ipc/channels";
 

@@ -9,6 +9,19 @@ import { systemAPI } from "./preload/system-api";
 import { pluginAPI } from "./preload/plugin-api";
 import { terminalAPI } from "./preload/terminal-api";
 import { fileAPI } from "./preload/file-api";
+import { knowledgeHubAPI } from "./preload/knowledge-hub-api";
+import { windowAPI } from "./preload/window-api";
+import { dialogAPI } from "./preload/dialog-api";
+import { crawlerAPI } from "./preload/crawler-api";
+import { mcpAPI } from "./preload/mcp-api";
+
+// Suppress noisy dev-only console messages before React loads
+const _origLog = console.log.bind(console);
+console.log = (...args: unknown[]) => {
+  const msg = typeof args[0] === "string" ? args[0] : "";
+  if (msg.includes("Download the React DevTools")) return;
+  _origLog(...args);
+};
 
 const electronAPI = {
   browser: browserAPI,
@@ -21,6 +34,11 @@ const electronAPI = {
   plugin: pluginAPI,
   terminal: terminalAPI,
   file: fileAPI,
+  knowledgeHub: knowledgeHubAPI,
+  window: windowAPI,
+  dialog: dialogAPI,
+  crawler: crawlerAPI,
+  mcp: mcpAPI,
   on: (channel: string, listener: (...args: unknown[]) => void) => {
     ipcRenderer.on(channel, (_event, ...args) => listener(...args));
     return () => ipcRenderer.removeAllListeners(channel);

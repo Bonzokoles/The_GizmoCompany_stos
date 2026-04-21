@@ -1,0 +1,7 @@
+﻿{
+  "_category": "build_deploy",
+  "_category_name": "Build / Deploy",
+  "_description": "Kompilacja i deployment aplikacji",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz Build / Deploy w pipeline agenta.",
+  "tools": []
+}

@@ -1,0 +1,64 @@
+{
+  "_category": "mcp_tools",
+  "_category_name": "MCP Tools / Servers",
+  "_description": "Serwery MCP (Model Context Protocol) rozszerzające możliwości agentów AI. Używaj gdy chcesz dać agentowi dostęp do zewnętrznych systemów.",
+  "_ai_hint": "MCP servers to wtyczki dla agentów AI. Gdy agent potrzebuje połączyć się z GitHub, bazą danych, przeglądarką lub innym systemem — sprawdź tutaj.",
+  "tools": [
+    {
+      "id": 1,
+      "cat": "mcp_tools",
+      "icon": "🐙",
+      "name": "github-mcp-server",
+      "desc": "Oficjalny serwer MCP do integracji z GitHub API",
+      "readme": "Umożliwia agentom AI zarządzanie repozytoriami GitHub, issues, pull requestami, plikami i workflow za pomocą protokołu MCP. Obsługuje GitHub REST API i GraphQL.",
+      "url": "https://github.com/github/github-mcp-server",
+      "docs": "https://github.com/github/github-mcp-server#readme",
+      "tags": ["mcp", "github", "ts"],
+      "status": "deploy",
+      "stars": 3,
+      "use_cases": [
+        "Tworzenie i zarządzanie pull requestami przez agenta",
+        "Automatyczne tworzenie issues z analizy kodu",
+        "Czytanie i zapisywanie plików bezpośrednio na GitHub",
+        "Wyszukiwanie kodu w repozytoriach GitHub"
+      ],
+      "ai_summary": "Używaj gdy agent musi interagować z GitHub bez lokalnego klonowania repo. Daje dostęp do: list_issues, create_pr, search_code, get_file_contents. Wymaga tokenu GitHub.",
+      "ai_workflows": [
+        "User zgłasza bug → agent tworzy issue na GitHub → przypisuje do milestone",
+        "Agent analizuje PR → dodaje review komentarze → zatwierdza lub odrzuca"
+      ],
+      "gh_stars": 8200,
+      "gh_language": "TypeScript",
+      "gh_topics": ["mcp", "github", "ai", "agent"],
+      "gh_license": "MIT",
+      "fetched_at": "2026-04-15T21:00:00Z"
+    },
+    {
+      "id": 2,
+      "cat": "mcp_tools",
+      "icon": "🗄️",
+      "name": "tabularis-mcp",
+      "desc": "MCP server do połączeń z bazami danych SQL",
+      "readme": "Pozwala agentom AI wykonywać zapytania SQL, przeglądać schemat tabel i zarządzać danymi w bazach PostgreSQL, MySQL, SQLite przez interfejs MCP.",
+      "url": "https://github.com/tabularis/tabularis-mcp",
+      "docs": "",
+      "tags": ["mcp", "database", "sql"],
+      "status": "deploy",
+      "stars": 3,
+      "use_cases": [
+        "Analiza danych w bazie przez agenta bez dostępu do kodu",
+        "Generowanie raportów SQL na żądanie",
+        "Debugowanie problemów z danymi w produkcji"
+      ],
+      "ai_summary": "Używaj gdy agent musi odczytać lub zmodyfikować dane w bazie SQL. Narzędzia: list_tables, describe_table, run_query. WAŻNE: nigdy nie uruchamiaj DELETE/DROP bez potwierdzenia usera.",
+      "ai_workflows": [
+        "User pyta o dane → agent run_query → formatuje wynik jako tabelę Markdown"
+      ],
+      "gh_stars": 450,
+      "gh_language": "TypeScript",
+      "gh_topics": ["mcp", "database", "sql", "ai"],
+      "gh_license": "MIT",
+      "fetched_at": "2026-04-15T21:00:00Z"
+    }
+  ]
+}

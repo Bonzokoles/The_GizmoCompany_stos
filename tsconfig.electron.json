@@ -17,6 +17,6 @@
     "resolveJsonModule": true,
     "noImplicitAny": false
   },
-  "include": ["src-electron/**/*"],
+  "include": ["src-electron/**/*", "src/plugin-system/**/*", "src/shared/**/*"],
   "exclude": ["node_modules"]
 }

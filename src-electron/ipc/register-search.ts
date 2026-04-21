@@ -1,15 +1,11 @@
 import { ipcMain, type BrowserWindow } from "electron";
 import type { ServiceContainer } from "../app/service-container";
-import { SearchService, type SearchConfig } from "../services/search-service";
-import { type SearchFilters } from "../services/searxng-service";
+import { SearchService, type SearchConfig, type SearchFilters } from "../services/search";
 import { isValidString } from "../utils/validate-url";
 import { IPC } from "../../src/shared/ipc/channels";
+import { getErrorMessage } from "../utils/errors";
 
 const CH = IPC.SEARCH;
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 export function registerSearch(
   _win: BrowserWindow,

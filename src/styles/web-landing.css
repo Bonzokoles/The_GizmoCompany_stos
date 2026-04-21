@@ -1947,6 +1947,106 @@ footer {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.4; }
 }
+
+/* Goose live-buffer (streaming chunks) */
+.buch-msg-goose-live {
+  border-left: 2px solid #ffc832;
+  background: rgba(255,200,50,0.04);
+}
+.buch-msg-goose-live .buch-msg-text {
+  font-family: monospace;
+  font-size: 0.78rem;
+  white-space: pre-wrap;
+  color: #e0e0c8;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+/* Reflexion badge */
+.buch-msg-reflexion {
+  border-left: 2px solid #8ca0ff;
+  background: rgba(140,160,255,0.05);
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+/* Auto-retry notice */
+.buch-msg-retry {
+  border-left: 2px solid #ff9940;
+  background: rgba(255,153,64,0.05);
+  font-size: 0.82rem;
+  font-style: italic;
+  opacity: 0.85;
+}
+
+/* Agent mode button highlight */
+.buch-btn-agent { color: #a78bfa; border-color: rgba(167,139,250,0.5); }
+
+/* BUCH_AGENT message */
+.buch-msg-assistant:has(.buch-agent-trace) {
+  border-left: 2px solid #a78bfa;
+}
+
+/* Agent tool trace container */
+.buch-agent-trace {
+  margin: 6px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Individual tool block */
+.buch-agent-tool {
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(0,0,0,0.25);
+}
+.buch-agent-tool-calling { border-color: rgba(255,200,50,0.3); }
+.buch-agent-tool-done    { border-color: rgba(124,255,178,0.25); }
+.buch-agent-tool-error   { border-color: rgba(255,107,107,0.35); }
+
+/* Tool header row */
+.buch-agent-tool-hdr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  background: rgba(255,255,255,0.04);
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  font-size: 0.8rem;
+}
+.buch-agent-tool-hdr:hover { background: rgba(255,255,255,0.08); }
+.buch-agent-tool-icon { font-size: 0.75rem; }
+.buch-agent-tool-name { color: #a78bfa; font-size: 0.78rem; flex: 1; }
+.buch-agent-tool-toggle { font-size: 0.6rem; opacity: 0.5; }
+
+/* Tool body */
+.buch-agent-tool-body {
+  padding: 6px 8px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.buch-agent-tool-section { display: flex; flex-direction: column; gap: 2px; }
+.buch-agent-tool-label { font-size: 0.68rem; opacity: 0.5; text-transform: uppercase; }
+.buch-agent-tool-pre {
+  margin: 0;
+  font-size: 0.72rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #c8d0e0;
+  max-height: 160px;
+  overflow-y: auto;
+  background: rgba(0,0,0,0.2);
+  padding: 4px 6px;
+  border-radius: 4px;
+}
 .buch-widget-footer {
   flex-shrink: 0;
   padding: 10px 12px;

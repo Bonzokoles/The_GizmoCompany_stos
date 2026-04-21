@@ -3,15 +3,12 @@ import type { ServiceContainer } from "../app/service-container";
 import {
   KnowledgeHubService,
   type AgentDefinition,
-} from "../services/knowledge-hub-service";
+} from "../services/knowledge";
 import { isValidString } from "../utils/validate-url";
 import { IPC } from "../../src/shared/ipc/channels";
+import { getErrorMessage } from "../utils/errors";
 
 const CH = IPC.HUB;
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 export function registerHub(
   _win: BrowserWindow,

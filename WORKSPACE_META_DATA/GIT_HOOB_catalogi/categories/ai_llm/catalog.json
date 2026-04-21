@@ -1,0 +1,36 @@
+{
+  "_category": "ai_llm",
+  "_category_name": "AI / LLM Tools",
+  "_description": "Modele językowe i narzędzia AI",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz AI / LLM Tools w pipeline agenta.",
+  "tools": [
+    {
+      "id": 1,
+      "name": "agent-skills-cli",
+      "icon": "🎯",
+      "cat": "ai_llm",
+      "desc": "Universal CLI — instaluje i synchronizuje 'skills' (instrukcje AI) do 45 agentów jednocześnie. Natywna obsługa Antigravity.",
+      "readme": "Universal CLI for Agent Skills. Access 40,000+ skills from SkillsMP and sync them to Cursor, Claude Code, GitHub Copilot, OpenAI Codex, and Antigravity.\n⭐ 125 stars na GitHub\nJęzyk: TypeScript\nLicencja: MIT\nTopics: ai-agents, cli, cursor, github-copilot, antigravity, llm, marketplace\nLast push: 2026-02-27\nnpm: agent-skills-cli",
+      "tags": ["typescript", "ai", "cli", "automation"],
+      "url": "https://github.com/Karanjot786/agent-skills-cli",
+      "docs": "https://agentskills.in/docs",
+      "status": "deploy",
+      "stars": 2,
+      "gh_stars": 125,
+      "gh_language": "TypeScript",
+      "gh_license": "MIT",
+      "gh_topics": ["ai-agents", "cli", "cursor", "github-copilot", "antigravity", "llm", "marketplace"],
+      "use_cases": [
+        "Instalacja gotowych skill-ów (instrukcji AI) z marketplace do Antigravity jedną komendą",
+        "Synchronizacja tych samych instrukcji AI równocześnie do Cursor, Claude Code i Antigravity",
+        "Tworzenie własnych SKILL.md instrukcji projektowych i wersjonowanie w Git",
+        "Auto-scoring jakości promptów / instrukcji (0-100, grade F-A)",
+        "Zarządzanie instrukcjami AI w prywatnych repozytoriach firmowych (SSH/token)"
+      ],
+      "ai_summary": "Użyj gdy chcesz standaryzować instrukcje (prompty/rules) między wieloma agentami w projekcie. Zamiast ręcznie kopiować .md pliki do .cursor/, .claude/, .agent/ — skills install robi to automatycznie. Szczególnie cenne dla Antigravity: skills sync → ~/.gemini/antigravity/skills/. Wymaga Node.js + npm install -g agent-skills-cli.",
+      "ai_workflows": ["skills install @github/awesome-copilot -a antigravity -y", "skills sync", "skills score ./my-skill"],
+      "ai_updated_by": "Jimbo-AI",
+      "ai_updated_at": "2026-04-15T21:27:00Z"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import { ipcMain, type BrowserWindow } from "electron";
 import type { ServiceContainer } from "../app/service-container";
-import { WorkflowEngine, type WorkflowStep } from "../services/workflow-engine";
+import { WorkflowEngine, type WorkflowStep } from "../services/ai";
 import { isValidString } from "../utils/validate-url";
 import { IPC } from "../../src/shared/ipc/channels";
 

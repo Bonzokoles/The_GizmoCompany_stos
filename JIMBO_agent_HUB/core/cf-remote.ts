@@ -142,6 +142,58 @@ export async function d1Query(
   return result[0];
 }
 
+// ── Cloudflare R2 ────────────────────────────────────────────────────
+
+/** Lista plików w buckecie R2 (opcjonalny prefix) */
+export async function r2ListFiles(
+  bucket: string,
+  prefix?: string,
+): Promise<{ key: string; size: number; uploaded: string }[]> {
+  const qs = prefix ? `?prefix=${encodeURIComponent(prefix)}` : '';
+  const result = await cfFetch<{
+    objects: { key: string; size: number; uploaded: string }[];
+  }>(`/accounts/${accountId()}/r2/buckets/${bucket}/objects${qs}`);
+  return result.objects ?? [];
+}
+
+/** Odczytuje plik z R2 — zwraca tekst */
+export async function r2ReadFile(bucket: string, key: string): Promise<string> {
+  const url = `${CF_BASE}/accounts/${accountId()}/r2/buckets/${bucket}/objects/${encodeURIComponent(key)}`;
+  const token = process.env.CF_API_TOKEN;
+  if (!token) throw new Error('CF_API_TOKEN nie ustawiony');
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`R2 read error ${res.status}: ${key}`);
+  return res.text();
+}
+
+/** Zapisuje plik do R2 */
+export async function r2WriteFile(
+  bucket: string,
+  key: string,
+  content: string,
+  contentType = 'text/plain',
+): Promise<void> {
+  const url = `${CF_BASE}/accounts/${accountId()}/r2/buckets/${bucket}/objects/${encodeURIComponent(key)}`;
+  const token = process.env.CF_API_TOKEN;
+  if (!token) throw new Error('CF_API_TOKEN nie ustawiony');
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': contentType,
+    },
+    body: content,
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    const msg = await res.text().catch(() => '');
+    throw new Error(`R2 write error ${res.status}: ${msg}`);
+  }
+}
+
 // ── GitHub Actions ────────────────────────────────────────────────────
 
 const GH_API = 'https://api.github.com';

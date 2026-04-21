@@ -139,3 +139,18 @@ curl -X POST http://localhost:4224/skills/search \
   -H "Content-Type: application/json" \
   -d '{"query": "cloudflare pages deploy", "limit": 3}'
 ```
+
+## Polaczki — Lokalne Agenty Pomocnicze
+
+Prompt files: `U:\WWW_Zen_BRo_wser_org3\WORKSPACE_META_DATA\prompty\polaczki\`
+Uruchamiane przez Ollama lokalnie (nie przez Hub API).
+
+| Agent | Model | Zadanie |
+|-------|-------|---------|
+| `Polaczek_01_Bibliotekarz` | Schematron-3B / gemma3:4b | HTML→JSON extraction, indeks wiedzy |
+| `Polaczek_01_Porzadkowy` | gemma3:4b | Organizacja plików, duplikaty |
+| `Polaczek_01_Skryba` | bielik-4.5b | Dokumentacja, README, changelog |
+| `Polaczek_01_Kartograf` | gemma3:4b | Mapa architektury, Mermaid diagrams |
+
+Ollama tool calling: **v0.3.0+** — modele gemma3, qwen2.5, llama3.2 obsługują narzędzia.
+Schematron-3B wymaga konwersji safetensors→GGUF przed użyciem w Ollama.

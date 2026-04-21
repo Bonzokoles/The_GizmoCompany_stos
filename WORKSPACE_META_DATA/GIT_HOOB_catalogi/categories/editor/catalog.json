@@ -1,0 +1,7 @@
+﻿{
+  "_category": "editor",
+  "_category_name": "File Editing",
+  "_description": "Narzędzia do odczytu, edycji i zapisu plików",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz File Editing w pipeline agenta.",
+  "tools": []
+}

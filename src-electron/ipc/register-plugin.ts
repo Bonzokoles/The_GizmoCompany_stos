@@ -1,5 +1,5 @@
 import type { BrowserWindow } from "electron";
-import { PluginIPCBridge } from "../services/plugin-ipc-bridge";
+import { PluginIPCBridge } from "../services/plugins";
 import type { ServiceContainer } from "../app/service-container";
 
 export function registerPlugin(

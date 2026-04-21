@@ -2,6 +2,7 @@ import { ipcMain, type BrowserWindow } from "electron";
 import type { ServiceContainer } from "../app/service-container";
 import { isValidString } from "../utils/validate-url";
 import { IPC } from "../../src/shared/ipc/channels";
+import { getErrorMessage } from "../utils/errors";
 
 const CH = IPC.TERMINAL;
 
@@ -42,8 +43,9 @@ export function registerTerminal(
     } catch (error: unknown) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: getErrorMessage(error),
       };
     }
   });
+
 }

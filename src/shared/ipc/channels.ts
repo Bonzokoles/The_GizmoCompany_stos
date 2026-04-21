@@ -86,6 +86,7 @@ export const IPC = {
         FILE_DIALOG_OPEN: 'system:file-dialog-open',
         OPEN_EXTERNAL: 'system:open-external',
         TERMINAL_SEND: 'system:terminal-send',
+        APP_GET_PATH: 'system:app-get-path',
     },
     TERMINAL: {
         EXECUTE: 'terminal:execute',

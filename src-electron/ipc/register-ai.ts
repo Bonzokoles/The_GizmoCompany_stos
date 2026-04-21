@@ -3,14 +3,11 @@ import type { ServiceContainer } from "../app/service-container";
 import {
   AIGatewayService,
   type AIRequest,
-} from "../services/ai-gateway-service";
+} from "../services/ai";
 import { IPC } from "../../src/shared/ipc/channels";
+import { getErrorMessage } from "../utils/errors";
 
 const CH = IPC.AI;
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
 
 export function registerAi(
   _win: BrowserWindow,

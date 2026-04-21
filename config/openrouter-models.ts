@@ -124,7 +124,7 @@ type ModelId =
 export const ROLE_MODELS = {
   // ── JIMbo_kit (chat serwer, port 4111) ────────────────────────────────────
   /** Główny model czatu — odpowiedzi dla użytkownika */
-  JIMBO_CHAT: OR_MODELS.FREE.DEEPSEEK_R1,
+  JIMBO_CHAT: OR_MODELS.FREE.GEMMA_3_27B,
   /** Model do tool-use (Phase 1) — musi być dobry w JSON/function calling */
   JIMBO_TOOLS: OR_MODELS.CHEAP.GEMINI_2_FLASH,
   /** Model do kodowania — precyzja, długi kontekst kodu */
@@ -164,6 +164,37 @@ export const ROLE_MODELS = {
   /** Body Builder — generator równoległych requestów (MOA/benchmarking) */
   BODY_BUILDER: OR_MODELS.ROUTERS.BODY_BUILDER,
 } as const satisfies Record<string, ModelId | string>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FALLBACK CHAINS — uporządkowane listy modeli dla każdej roli
+// System próbuje modele po kolei — gdy jeden zawiedzie, przechodzi do następnego.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const FALLBACK_CHAINS = {
+  /** Chat/rozumowanie — free modele + płatny fallback */
+  JIMBO_CHAT: [
+    OR_MODELS.FREE.GEMMA_3_27B, // primary: dobry do polskiego, darmowy
+    OR_MODELS.FREE.LLAMA_3_3_70B, // backup: solidny general-purpose
+    OR_MODELS.FREE.GEMINI_2_FLASH, // backup: szybki
+    OR_MODELS.FREE.MISTRAL_SMALL, // backup: szybki
+    OR_MODELS.CHEAP.GEMINI_2_FLASH, // płatny fallback (ostatnia deska ratunku)
+  ] as string[],
+
+  /** Tool-use (Phase 1) — stabilny model z function calling */
+  JIMBO_TOOLS: [
+    OR_MODELS.CHEAP.GEMINI_2_FLASH, // primary: dobry w tool-use, tani
+    OR_MODELS.CHEAP.GEMINI_2_5_FLASH, // backup: nowszy Gemini
+    OR_MODELS.FREE.GEMINI_2_FLASH, // free fallback
+    OR_MODELS.FREE.LLAMA_3_3_70B, // ostateczny fallback
+  ] as string[],
+
+  /** Kodowanie — DeepSeek Chat z Gemini fallback */
+  JIMBO_CODING: [
+    OR_MODELS.CHEAP.DEEPSEEK_CHAT, // primary: najlepszy do kodu
+    OR_MODELS.CHEAP.GEMINI_2_5_FLASH, // backup: długi kontekst
+    OR_MODELS.CHEAP.GEMINI_2_FLASH, // backup: szybki
+  ] as string[],
+} as const;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPER → generuje fragment .env z aktualnymi wyborami

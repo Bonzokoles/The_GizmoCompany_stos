@@ -1,5 +1,5 @@
-// @ts-nocheck
-import type { BizToolsTabProps } from "./types";
+import type { BizToolsTabProps, BizCategory } from "./types";
+import { LoadingSpinner } from "../../../LoadingSpinner";
 
 export function BizToolsTab({
   BIZTOOLS_CATALOG,
@@ -53,7 +53,7 @@ export function BizToolsTab({
           <div className="form-group">
             <select
               value={bizCategory}
-              onChange={(e) => setBizCategory(e.target.value)}
+              onChange={(e) => setBizCategory(e.target.value as BizCategory)}
             >
               {BIZ_CATEGORIES.map((c) => (
                 <option key={c} value={c}>
@@ -251,6 +251,15 @@ export function BizToolsTab({
           <p style={{ color: "#f87171", marginTop: 12 }}>❌ {tavilyError}</p>
         )}
 
+        {tavilyLoading && (
+          <div style={{ marginTop: 16 }}>
+            <LoadingSpinner
+              size="md"
+              message="Przeszukuję biznesowe bazy danych przez Tavily..."
+            />
+          </div>
+        )}
+
         {tavilyResults.length > 0 && (
           <div style={{ marginTop: 16 }}>
             <h4 style={{ marginBottom: 12 }}>
@@ -444,6 +453,16 @@ export function BizToolsTab({
           </button>
         </div>
         {activeTool && <p className="muted">Aktywne narzędzie: {activeTool}</p>}
+
+        {toolLoading && (
+          <div style={{ marginTop: 16 }}>
+            <LoadingSpinner
+              size="md"
+              message="Wykonuję narzędzie przez JIMbo..."
+            />
+          </div>
+        )}
+
         {toolEvents?.length > 0 && (
           <div className="status-list" style={{ marginTop: 8 }}>
             {toolEvents.map((evt, i) => (

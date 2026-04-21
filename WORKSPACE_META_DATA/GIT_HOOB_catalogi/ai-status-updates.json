@@ -1,0 +1,19 @@
+{
+  "_description": "AI Status Update Queue — Model AI pisze tutaj aktualizacje statusów narzędzi. Katalog czyta ten plik automatycznie przy wczytaniu strony.",
+  "_format": "Tablica obiektów update. Każdy update ma: tool_name LUB tool_id, new_status, note (opcjonalnie), updated_by, updated_at.",
+  "_valid_statuses": ["todo", "priority", "deploy", "reject"],
+  "_status_meaning": {
+    "todo":     "W oczekiwaniu — narzędzie znane ale nie użyte",
+    "priority": "Zaplanowane do użycia w tym projekcie",
+    "deploy":   "Użyte/Dodane — narzędzie zostało wdrożone lub użyte",
+    "reject":   "Odrzucone — nie pasuje do projektu"
+  },
+  "_example": {
+    "tool_name": "github-mcp-server",
+    "new_status": "deploy",
+    "note": "Użyte do tworzenia PR #42, integracja pełna",
+    "updated_by": "Jimbo-AI",
+    "updated_at": "2026-04-15T21:00:00Z"
+  },
+  "updates": []
+}

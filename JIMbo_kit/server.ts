@@ -29,7 +29,91 @@ import { readFileSync, existsSync, readdirSync, statSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { executeJimboTool, jimboOpenAITools } from "./tools/index";
-import { ROLE_MODELS } from "../config/openrouter-models.js";
+import { ROLE_MODELS, FALLBACK_CHAINS } from "../config/openrouter-models.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname_kit = dirname(__filename);
+
+// ── Wczytaj zewnętrzny prompt systemowy (lib/system-prompt.md) ───────────────
+const SYSTEM_PROMPT_PATH = resolve(__dirname_kit, "lib/system-prompt.md");
+let EXTERNAL_SYSTEM_PROMPT = "";
+if (existsSync(SYSTEM_PROMPT_PATH)) {
+  EXTERNAL_SYSTEM_PROMPT = readFileSync(SYSTEM_PROMPT_PATH, "utf-8").trim();
+  console.log("[JIMBOKIT] Loaded system-prompt.md:", SYSTEM_PROMPT_PATH);
+} else {
+  console.warn("[JIMBOKIT] system-prompt.md not found, using inline fallback");
+}
+
+// ── Auto-start: wczytaj kontekst workspace przy starcie serwera ───────────────
+
+function tryReadFile(filePath: string, label: string): string {
+  if (!existsSync(filePath)) {
+    console.warn(`[JIMBOKIT] Auto-context: brak pliku: ${label}`);
+    return "";
+  }
+  const content = readFileSync(filePath, "utf-8").trim();
+  console.log(`[JIMBOKIT] Auto-context OK: ${label} (${content.length} znaków)`);
+  return content;
+}
+
+const WORKSPACE_ROOT = resolve(__dirname_kit, "..");
+
+// 1. Jimbo system prompt z WORKSPACE_META_DATA
+const WS_JIMBO_PROMPT = tryReadFile(
+  resolve(WORKSPACE_ROOT, "WORKSPACE_META_DATA/prompty/jimbo/system-prompt.md"),
+  "WORKSPACE_META_DATA/prompty/jimbo/system-prompt.md"
+);
+
+// 2. Pliki STEP (procedury kroków)
+const STEP_01 = tryReadFile(resolve(__dirname_kit, "lib/STEP_01.md"), "STEP_01.md");
+const STEP_02 = tryReadFile(resolve(__dirname_kit, "lib/STEP_02.md"), "STEP_02.md");
+const STEP_03 = tryReadFile(resolve(__dirname_kit, "lib/STEP_03.md"), "STEP_03.md");
+
+// 3. README projektu (skrócony do 2000 znaków)
+const README_RAW = tryReadFile(resolve(WORKSPACE_ROOT, "README.md"), "README.md");
+const README_EXCERPT = README_RAW.length > 2000
+  ? README_RAW.slice(0, 2000) + "\n…(skrócono)"
+  : README_RAW;
+
+// 4. Statusy projektów z WORKSPACE_META_DATA/projekty/
+function loadProjectStatuses(): string {
+  const projektDir = resolve(WORKSPACE_ROOT, "WORKSPACE_META_DATA/projekty");
+  if (!existsSync(projektDir)) return "";
+  const sections: string[] = [];
+  try {
+    for (const entry of readdirSync(projektDir)) {
+      const statusPath = resolve(projektDir, entry, "status.md");
+      if (existsSync(statusPath)) {
+        const content = readFileSync(statusPath, "utf-8").trim();
+        sections.push(content);
+        console.log(`[JIMBOKIT] Auto-context: status projektu ${entry}`);
+      }
+    }
+  } catch (e) {
+    console.warn("[JIMBOKIT] Auto-context: błąd ładowania statusów projektów:", e);
+  }
+  return sections.join("\n\n---\n\n");
+}
+const PROJECT_STATUSES = loadProjectStatuses();
+
+// Złóż SESSION_CONTEXT — doklejany do systemu przy każdej sesji
+const contextParts: string[] = [];
+if (WS_JIMBO_PROMPT) contextParts.push(`### Instrukcje Jimbo (WORKSPACE)\n${WS_JIMBO_PROMPT}`);
+if (STEP_01)          contextParts.push(`### STEP_01 — Procedura kroku 1\n${STEP_01}`);
+if (STEP_02)          contextParts.push(`### STEP_02 — Procedura kroku 2\n${STEP_02}`);
+if (STEP_03)          contextParts.push(`### STEP_03 — Procedura kroku 3\n${STEP_03}`);
+if (PROJECT_STATUSES) contextParts.push(`### Statusy projektów (workspace)\n${PROJECT_STATUSES}`);
+if (README_EXCERPT)   contextParts.push(`### README projektu (fragment)\n${README_EXCERPT}`);
+
+const SESSION_CONTEXT = contextParts.length > 0
+  ? `\n\n${"═".repeat(60)}\nKONTEKST WORKSPACE — wczytany automatycznie przy starcie\n${"═".repeat(60)}\n\n${contextParts.join("\n\n---\n\n")}\n\n${"═".repeat(60)}\nKONIEC KONTEKSTU WORKSPACE\n${"═".repeat(60)}`
+  : "";
+
+if (SESSION_CONTEXT) {
+  console.log(`[JIMBOKIT] ✅ Session context: ${contextParts.length} sekcji, ${SESSION_CONTEXT.length} znaków łącznie`);
+} else {
+  console.warn("[JIMBOKIT] ⚠ Session context pusty — sprawdź ścieżki WORKSPACE_META_DATA");
+}
 
 // ── Env (załaduj ../.env lub .env) ────────────────────────────────────────────
 
@@ -55,8 +139,16 @@ loadEnv(resolve(__dir, ".env"));
 loadEnv(resolve(__dir, "../.env"));
 
 const PORT = Number(process.env.JIMBO_PORT ?? 3701);
-const MODEL = process.env.JIMBO_MODEL ?? ROLE_MODELS.JIMBO_CHAT;
-const TOOL_MODEL = process.env.JIMBO_TOOL_MODEL ?? ROLE_MODELS.JIMBO_TOOLS;
+
+// Łańcuchy fallback — sys próbuje modele po kolei, pomijając niedostępne
+const CHAT_CHAIN: string[] = process.env.JIMBO_MODEL
+  ? [process.env.JIMBO_MODEL, ...FALLBACK_CHAINS.JIMBO_CHAT]
+  : [...FALLBACK_CHAINS.JIMBO_CHAT];
+const TOOL_CHAIN: string[] = process.env.JIMBO_TOOL_MODEL
+  ? [process.env.JIMBO_TOOL_MODEL, ...FALLBACK_CHAINS.JIMBO_TOOLS]
+  : [...FALLBACK_CHAINS.JIMBO_TOOLS];
+const MODEL = CHAT_CHAIN[0]; // aktywny model (do logów/status)
+const TOOL_MODEL = TOOL_CHAIN[0]; // aktywny tool model (do logów/status)
 const ORKEY = process.env.OPENROUTER_API_KEY ?? "";
 const SEARXNG_URL = process.env.SEARXNG_URL ?? "http://localhost:8888";
 const JIMBO_GW =
@@ -435,6 +527,69 @@ async function executeTool(
   }
 }
 
+// ── Fallback wrappers ─────────────────────────────────────────────────────────
+
+async function createCompletionWithFallback(
+  models: string[],
+  params: Omit<OpenAI.Chat.ChatCompletionCreateParamsNonStreaming, "model">,
+): Promise<OpenAI.Chat.ChatCompletion> {
+  let lastError: Error | null = null;
+  for (const model of models) {
+    try {
+      const result = await openrouter.chat.completions.create({
+        ...params,
+        model,
+        stream: false,
+      } as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming);
+      if (model !== models[0]) console.log(`[JIMBO] Tool fallback → ${model}`);
+      return result;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(
+        `[JIMBO] Model ${model} failed: ${msg} — próbuję kolejny...`,
+      );
+      lastError = err instanceof Error ? err : new Error(msg);
+    }
+  }
+  throw (
+    lastError ?? new Error(`Wszystkie modele niedostępne: ${models.join(", ")}`)
+  );
+}
+
+async function createStreamWithFallback(
+  models: string[],
+  params: Omit<
+    OpenAI.Chat.ChatCompletionCreateParamsStreaming,
+    "model" | "stream"
+  >,
+): Promise<{
+  stream: AsyncIterable<OpenAI.Chat.ChatCompletionChunk>;
+  usedModel: string;
+}> {
+  let lastError: Error | null = null;
+  for (const model of models) {
+    try {
+      const stream = await openrouter.chat.completions.create({
+        ...params,
+        model,
+        stream: true,
+      } as OpenAI.Chat.ChatCompletionCreateParamsStreaming);
+      if (model !== models[0]) console.log(`[JIMBO] Chat fallback → ${model}`);
+      return { stream, usedModel: model };
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(
+        `[JIMBO] Stream model ${model} failed: ${msg} — próbuję kolejny...`,
+      );
+      lastError = err instanceof Error ? err : new Error(msg);
+    }
+  }
+  throw (
+    lastError ??
+    new Error(`Wszystkie stream modele niedostępne: ${models.join(", ")}`)
+  );
+}
+
 // ── Chat handler — tool-use + streaming ──────────────────────────────────────
 
 async function handleChat(req: http.IncomingMessage, res: http.ServerResponse) {
@@ -491,7 +646,7 @@ async function handleChat(req: http.IncomingMessage, res: http.ServerResponse) {
 
       const systemMessage: Msg = {
         role: "system",
-        content: `Jesteś JimboKit — WARSTWA LOKALNA w architekturze 2-warstwowej ZENO Browser.
+        content: (EXTERNAL_SYSTEM_PROMPT || `Jesteś JimboKit — WARSTWA LOKALNA w architekturze 2-warstwowej ZENO Browser.
 Masz dostęp do 7 narzędzi.
 
   WARSTWA 1 — TY (JimboKit :3701)  : web_search, fetch_url, kb_search, read_local_file, list_local_dir
@@ -505,7 +660,7 @@ ZASADA: Ty czytasz lokalny FS. Zapisy do D1/R2 przechodzą przez BUCH — nigdy 
   • Potrzebujesz aktualnych informacji (newsy, wydarzenia)
   • Sprawdzasz fakty lub weryfikujesz dane
   • Szukasz ogólnej wiedzy dostępnej w Internecie
-  ⏱ Timeout: 8s | Wynik: max 10 rezultatów z tytułami/linkami/snippetami
+  ⏱ Timeout: 8s | Wynik: max 6 rezultatów z tytułami/linkami/snippetami
 
 📄 fetch_url — UŻYWAJ GDY:
   • Potrzebujesz pobrać konkretną stronę WWW
@@ -554,15 +709,15 @@ ZASADA: Ty czytasz lokalny FS. Zapisy do D1/R2 przechodzą przez BUCH — nigdy 
    - BUCH niedostępny (D1/R2 error) → zaproponuj restart :5180
    - Plik nie istnieje → sprawdź list_local_dir
 
-3. **Beste practices**:
-   - Zawsze wyjaśniaj, DLACZEGO używasz danego narzędzia
+3. **Best practices**:
+   - Wyjaśniaj DLACZEGO używasz narzędzia — ale jednym zdaniem, nie elaboruj
    - Podsumowuj wyniki zamiast wklejać raw data
-   - Używaj kb_search PRZED web_search dla wewnętrznych pytań
+   - Używaj kb_search ZAWSZE przed web_search dla wewnętrznych pytań
 
 ═══ PEŁNA DOKUMENTACJA ═══
 .workspace_meta/scripts/ai-tools-index.md (schematy, przykłady, provider matrix)
 
-Odpowiadaj po polsku, chyba że użytkownik pisze inaczej.`,
+Odpowiadaj po polsku, chyba że użytkownik pisze inaczej.`) + SESSION_CONTEXT,
       };
 
       const contextMessages: Msg[] = [
@@ -576,14 +731,12 @@ Odpowiadaj po polsku, chyba że użytkownik pisze inaczej.`,
         "[JIMBOKIT] handleChat: Calling OpenRouter for tool-use phase with messages:",
         JSON.stringify(contextMessages),
       );
-      // ── Phase 1: tool-use (non-streaming) ─────────────────────────────────
-      const toolResp = await openrouter.chat.completions.create({
-        model: TOOL_MODEL,
+      // ── Phase 1: tool-use (non-streaming, z fallback) ─────────────────────
+      const toolResp = await createCompletionWithFallback(TOOL_CHAIN, {
         messages: contextMessages,
         tools: ALL_TOOLS,
         tool_choice: "auto",
         max_tokens: 1024,
-        stream: false,
       });
 
       const toolMsg = toolResp.choices[0]?.message;
@@ -635,12 +788,10 @@ Odpowiadaj po polsku, chyba że użytkownik pisze inaczej.`,
         "[JIMBOKIT] handleChat: Calling OpenRouter for streaming phase with messages:",
         JSON.stringify(contextMessages),
       );
-      // ── Phase 2: streaming final answer ───────────────────────────────────
-      const stream = await openrouter.chat.completions.create({
-        model: MODEL,
+      // ── Phase 2: streaming final answer (z fallback) ──────────────────────
+      const { stream } = await createStreamWithFallback(CHAT_CHAIN, {
         messages: contextMessages,
         max_tokens: 2048,
-        stream: true,
       });
 
       let fullContent = "";
@@ -719,6 +870,7 @@ const server = http.createServer(async (req, res) => {
         service: "jimbokit-server",
         port: PORT,
         model: MODEL,
+        chatChain: CHAT_CHAIN,
         sessions: sessionStore.size,
         clients: wsClients.size,
         ws: `ws://127.0.0.1:${PORT}/ws`,
@@ -732,12 +884,25 @@ const server = http.createServer(async (req, res) => {
         version: "1.0.0",
         port: PORT,
         model: MODEL,
+        toolModel: TOOL_MODEL,
         provider: "openrouter",
         sessions: sessionStore.size,
         clients: wsClients.size,
         uptime: process.uptime(),
         nodeVersion: process.version,
         hasApiKey: !!ORKEY,
+      });
+    }
+
+    // ── GET /api/models ──────────────────────────────────────────────────────
+    if (method === "GET" && url.pathname === "/api/models") {
+      return json(res, 200, {
+        chat: { primary: CHAT_CHAIN[0], chain: CHAT_CHAIN },
+        tools: { primary: TOOL_CHAIN[0], chain: TOOL_CHAIN },
+        env: {
+          JIMBO_MODEL: process.env.JIMBO_MODEL ?? null,
+          JIMBO_TOOL_MODEL: process.env.JIMBO_TOOL_MODEL ?? null,
+        },
       });
     }
 

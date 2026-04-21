@@ -7,22 +7,10 @@ import type { Tab as ElectronTab } from "../../types/electron";
 
 /** All panel identifiers — one source of truth */
 export type PanelId =
-  | "ai"
-  | "security"
-  | "cloudflare"
-  | "plugins"
-  | "tools"
-  | "ai-gateway"
   | "terminal"
-  | "analytics"
-  | "search"
-  | "catalog"
-  | "knowledge"
-  | "agents-creator"
   | "jimbo-kit"
-  | "kb-viewer"
-  | "code-editor"
-  | "file-agent";
+  | "pi-terminal"
+  | "agent-workspace";
 
 /** Kontekst dokumentu przekazywany z KB Viewer do Jimbo_kit */
 export interface KBDocContext {
@@ -54,6 +42,10 @@ export interface PanelContext {
   kbDocContext?: KBDocContext | null;
   /** Ustaw kontekst KB i otwórz Jimbo_kit */
   onSendToJimbo?: (doc: KBDocContext) => void;
+  /** Otwórz AgentWorkspace z wybranym agentem */
+  onSpawnAgent?: (agentName: string) => void;
+  /** Lista agentów do uruchomienia w AgentWorkspace */
+  workspaceAgents?: string[];
 }
 
 /** Shared tab model used by shell workspace components */

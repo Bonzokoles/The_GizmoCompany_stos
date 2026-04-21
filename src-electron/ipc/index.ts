@@ -14,6 +14,9 @@ import { registerDialog } from "./register-dialog";
 import { registerPlugin } from "./register-plugin";
 import { registerPty } from "./register-pty";
 import { registerFile } from "./register-file";
+import { registerSystem } from "./register-system";
+import { registerAnalytics } from "./register-analytics";
+import { registerCloud } from "./register-cloud";
 
 export function registerAllIpc(
   win: BrowserWindow,
@@ -33,4 +36,7 @@ export function registerAllIpc(
   registerPlugin(win, container);
   registerPty(win);
   registerFile(win);
+  registerSystem(win, container);
+  registerAnalytics(win, container);
+  registerCloud(win, container);
 }

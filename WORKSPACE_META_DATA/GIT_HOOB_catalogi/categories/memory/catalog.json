@@ -1,0 +1,7 @@
+﻿{
+  "_category": "memory",
+  "_category_name": "Memory / Context",
+  "_description": "Pamięć agenta i zarządzanie kontekstem",
+  "_ai_hint": "Sprawdź te narzędzia gdy potrzebujesz Memory / Context w pipeline agenta.",
+  "tools": []
+}

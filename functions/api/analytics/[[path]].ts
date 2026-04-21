@@ -9,24 +9,27 @@
  *   GET  /api/analytics/status     — Service health
  */
 
-import type { Env } from '../../types';
-import { jsonResponse, errorResponse, corsHeaders } from '../../types';
+import type { Env } from "../../types";
+import { jsonResponse, errorResponse, corsHeaders } from "../../types";
 
-const UMAMI_URL = 'https://analytics.mybonzo.com';
+const UMAMI_URL = "https://analytics.mybonzo.com";
 
 const SITE_IDS: Record<string, string> = {
-  'jimbo77.org': '4505adfc-d398-43d9-b3a9-750ec4abf561',
-  'mybonzoaiblog.com': '79467ba2-ff07-4ce5-9126-87d51dedebf3',
-  'zenbrowsers.org': '8fbc639b-7427-4323-9931-faa797bb7fd3',
-  'mybonzo.com': 'af266351-8b2e-4358-9717-aa93f7ad2589',
-  'jimbo77.com': 'ddcd9b63-7ffd-4024-a9b9-a5b02ad9e002',
+  "jimbo77.org": "4505adfc-d398-43d9-b3a9-750ec4abf561",
+  "mybonzoaiblog.com": "79467ba2-ff07-4ce5-9126-87d51dedebf3",
+  "zenbrowsers.org": "8fbc639b-7427-4323-9931-faa797bb7fd3",
+  "mybonzo.com": "af266351-8b2e-4358-9717-aa93f7ad2589",
+  "jimbo77.com": "ddcd9b63-7ffd-4024-a9b9-a5b02ad9e002",
 };
 
 async function umamiApi(path: string, env: Env): Promise<any> {
-  const resp = await fetch(`${UMAMI_URL}/api${path}`, {
+  const baseUrl = env.UMAMI_URL || "https://analytics.mybonzo.com";
+  const token = env.UMAMI_API_KEY || "";
+  const resp = await fetch(`${baseUrl}/api${path}`, {
     headers: {
-      'User-Agent': 'ZENO-Analytics/1.0',
-      Accept: 'application/json',
+      "User-Agent": "ZENO-Analytics/1.0",
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     signal: AbortSignal.timeout(10000),
   });
@@ -36,23 +39,35 @@ async function umamiApi(path: string, env: Env): Promise<any> {
 
 async function handleOverview(env: Env, request: Request): Promise<Response> {
   const url = new URL(request.url);
-  const period = url.searchParams.get('period') || '24h';
+  const period = url.searchParams.get("period") || "24h";
 
   const now = Date.now();
-  const startAt = period === '7d' ? now - 7 * 86400000 : period === '30d' ? now - 30 * 86400000 : now - 86400000;
+  const startAt =
+    period === "7d"
+      ? now - 7 * 86400000
+      : period === "30d"
+        ? now - 30 * 86400000
+        : now - 86400000;
 
   const results = await Promise.allSettled(
     Object.entries(SITE_IDS).map(async ([site, id]) => {
       try {
-        const stats = await umamiApi(`/websites/${id}/stats?startAt=${startAt}&endAt=${now}`, env);
-        return { site, id, stats, status: 'ok' as const };
+        const stats = await umamiApi(
+          `/websites/${id}/stats?startAt=${startAt}&endAt=${now}`,
+          env,
+        );
+        return { site, id, stats, status: "ok" as const };
       } catch {
-        return { site, id, stats: null, status: 'error' as const };
+        return { site, id, stats: null, status: "error" as const };
       }
-    })
+    }),
   );
 
-  const siteStats = results.map((r) => (r.status === 'fulfilled' ? r.value : { site: 'unknown', stats: null, status: 'error' }));
+  const siteStats = results.map((r) =>
+    r.status === "fulfilled"
+      ? r.value
+      : { site: "unknown", stats: null, status: "error" },
+  );
 
   const totals = siteStats.reduce(
     (acc, s) => {
@@ -64,7 +79,7 @@ async function handleOverview(env: Env, request: Request): Promise<Response> {
       }
       return acc;
     },
-    { pageviews: 0, visitors: 0, visits: 0, bounces: 0 }
+    { pageviews: 0, visitors: 0, visits: 0, bounces: 0 },
   );
 
   return jsonResponse({
@@ -76,14 +91,15 @@ async function handleOverview(env: Env, request: Request): Promise<Response> {
   });
 }
 
-async function handleSites(): Promise<Response> {
+async function handleSites(env: Env): Promise<Response> {
+  const baseUrl = env.UMAMI_URL || UMAMI_URL;
   return jsonResponse({
     sites: Object.entries(SITE_IDS).map(([name, id]) => ({
       name,
       id,
-      dashboardUrl: `${UMAMI_URL}/websites/${id}`,
+      dashboardUrl: `${baseUrl}/websites/${id}`,
     })),
-    umamiUrl: UMAMI_URL,
+    umamiUrl: baseUrl,
     totalSites: Object.keys(SITE_IDS).length,
   });
 }
@@ -97,10 +113,12 @@ async function handleRealtime(env: Env): Promise<Response> {
       } catch {
         return { site, activeVisitors: 0 };
       }
-    })
+    }),
   );
 
-  const siteData = results.map((r) => (r.status === 'fulfilled' ? r.value : { site: 'unknown', activeVisitors: 0 }));
+  const siteData = results.map((r) =>
+    r.status === "fulfilled" ? r.value : { site: "unknown", activeVisitors: 0 },
+  );
   const totalActive = siteData.reduce((sum, s) => sum + s.activeVisitors, 0);
 
   return jsonResponse({
@@ -111,25 +129,26 @@ async function handleRealtime(env: Env): Promise<Response> {
 }
 
 export const onRequest: PagesFunction<Env> = async (context) => {
-  if (context.request.method === 'OPTIONS') return corsHeaders();
+  if (context.request.method === "OPTIONS") return corsHeaders();
 
   const url = new URL(context.request.url);
-  const path = url.pathname.replace('/api/analytics', '').replace(/^\/+/, '');
+  const path = url.pathname.replace("/api/analytics", "").replace(/^\/+/, "");
 
   switch (path) {
-    case 'overview':
+    case "overview":
       return handleOverview(context.env, context.request);
-    case 'sites':
-      return handleSites();
-    case 'realtime':
+    case "sites":
+      return handleSites(context.env);
+    case "realtime":
       return handleRealtime(context.env);
-    case 'status':
+    case "status":
       return jsonResponse({
-        service: 'analytics-hub',
-        status: 'operational',
-        umamiInstance: UMAMI_URL,
+        service: "analytics-hub",
+        status: "operational",
+        umamiInstance: context.env.UMAMI_URL || UMAMI_URL,
+        hasApiKey: !!context.env.UMAMI_API_KEY,
         trackedSites: Object.keys(SITE_IDS).length,
-        features: ['overview', 'per-site', 'realtime'],
+        features: ["overview", "per-site", "realtime"],
         timestamp: new Date().toISOString(),
       });
     default:
