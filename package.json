@@ -12,8 +12,9 @@
         "monitor:startup": "node scripts/zeno_browser_startup_monitor.js"
     },
     "dependencies": {
-        "ws": "^8.13.0",
-        "net": "^1.0.2"
+        "net": "^1.0.2",
+        "node-pty": "^1.1.0",
+        "ws": "^8.13.0"
     },
     "engines": {
         "node": ">=14.0.0"
