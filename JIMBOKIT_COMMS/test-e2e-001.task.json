@@ -1,0 +1,9 @@
+{
+  "id": "test-e2e-001",
+  "type": "code_analysis",
+  "payload": {
+    "file": "test.ts"
+  },
+  "priority": "high",
+  "timestamp": 1714000000000
+}

@@ -1,0 +1,31 @@
+{
+  "name": "gizmo-tools",
+  "version": "1.0.0",
+  "description": "A collection of tools for various scripts and utilities.",
+  "main": "tools/scripts/index.ts",
+  "scripts": {
+    "start": "ts-node tools/scripts/index.ts",
+    "build": "tsc",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Bonzokoles/The_GizmoCompany_stos.git"
+  },
+  "keywords": [
+    "tools",
+    "scripts",
+    "utilities"
+  ],
+  "author": "Bonzokoles",
+  "license": "MIT",
+  "dependencies": {
+    "ts-node": "^10.0.0",
+    "typescript": "^4.0.0",
+    "jest": "^27.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.0.0",
+    "@types/node": "^16.0.0"
+  }
+}

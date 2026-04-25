@@ -17,6 +17,8 @@ import { registerFile } from "./register-file";
 import { registerSystem } from "./register-system";
 import { registerAnalytics } from "./register-analytics";
 import { registerCloud } from "./register-cloud";
+import { registerClipboardIpc } from "./register-clipboard";
+import type { PiAgentService } from "../services/ai/pi-agent-service";
 
 export function registerAllIpc(
   win: BrowserWindow,
@@ -34,9 +36,13 @@ export function registerAllIpc(
   registerWindow(win, container);
   registerDialog(win, container);
   registerPlugin(win, container);
-  registerPty(win);
+  registerPty(win, container);
   registerFile(win);
   registerSystem(win, container);
   registerAnalytics(win, container);
   registerCloud(win, container);
+  registerClipboardIpc(win);
+
+  const piAgentService = container.get<PiAgentService>("piAgentService");
+  piAgentService.registerIpcHandlers();
 }

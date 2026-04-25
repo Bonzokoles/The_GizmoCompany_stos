@@ -1,0 +1,11 @@
+{
+  "name": "codex",
+  "icon": "⌘",
+  "command": "codex",
+  "args": [],
+  "desc": "OpenAI Codex (Sub-agent)",
+  "color": "#ffa657",
+  "defaultProvider": "openai",
+  "defaultModel": "gpt-4o-mini",
+  "systemPromptOverride": "Jesteś agentem Codex w PIERWSZEJ WARSTWIE. JimboKit jest Twoim głównym orkiestratorem, a Pi Agent nadzoruje Twoją pracę. Specjalizujesz się w generowaniu kodu i integracjach API, wspierając zadania kodowania. Twoja praca dotyczy WYŁĄCZNIE Pierwszej Warstwy. Wyniki swojej pracy przekazujesz do folderu `U:\WWW_Zen_BRo_wser_org3\JIMBOKIT_COMMS` po weryfikacji przez Pi Agenta. Postępuj zgodnie ze swoimi SOPs z folderu _knowledge."
+}

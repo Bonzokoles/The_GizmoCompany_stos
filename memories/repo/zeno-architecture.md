@@ -87,3 +87,32 @@ W warstwie renderer (Layer 2) wykonano polish ciemnego motywu:
   - `BrowserShellLayout` otrzymał `sidebar={<AppFolderPanel />}`
 
 Wymagania stylistyczne zachowane: brak dużych zaokrągleń (radius ustawiony na 4px).
+
+## MCP Terminal Tools Split (2026-04-24)
+
+`src-electron/mcp-server/tools/terminal-tools.ts` zastąpiony cienkim agregatorem.
+Trzy podfoldery z osobnymi metodami wywołującymi:
+
+- `Terminal_01/index.ts` — `createExecuteTools()` → `terminal_execute` (ping, tracert, nslookup, ipconfig, netstat, arp, route, curl, whoami, hostname, systeminfo)
+- `Terminal_02/index.ts` — `createNetworkTools()` → `terminal_ping`, `terminal_dns_lookup`
+- `Terminal_03/index.ts` — `createRouteTools()` → `terminal_traceroute`
+
+Agregator: `createTerminalTools()` = `[...createExecuteTools(), ...createNetworkTools(), ...createRouteTools()]`
+
+## AgentWorkspacePanel Refactor (2026-04-24)
+
+Panel agentów rozbity na niezależne terminale per slot:
+
+- `src/components/agents/AGENT_Pi_01/index.tsx` — `AgentTerminal_01` (SLOT 01)
+- `src/components/agents/AGENT_Pi_02/index.tsx` — `AgentTerminal_02` (SLOT 02)
+- `src/components/agents/AGENT_Pi_03/index.tsx` — `AgentTerminal_03` (SLOT 03)
+
+Każdy terminal: pełny PTY (node-pty) + xterm.js + `PROVIDER_DEFAULTS` (google/anthropic/openrouter/openai) + UI wyboru providera/modelu/klucza.
+
+`AgentWorkspacePanel.tsx` używa `renderSlot(slotIndex)` switch — edytuj tylko `AGENT_Pi_0X/index.tsx` dla zmian per terminal.
+
+Łańcuch wywołania: `PiTerminalPanel` → `onSpawnAgent` → `BrowserUI.workspaceAgents[]` → `panel-registry` → `AgentWorkspacePanel`.
+
+Komunikacja między agentami: `JIMBOKIT_COMMS/` folder + `systemPromptOverride` w JSON agenta.
+
+Dokumentacja: `src/components/agents/AGENT_WORKSPACE_GUIDE.md`, `src/components/WORKFLOW_CARD_GUIDE.md`.

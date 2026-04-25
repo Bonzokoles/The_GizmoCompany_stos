@@ -1,5 +1,5 @@
-/**
- * SidebarOverlay — Collapsible left sidebar available on any page
+﻿/**
+ * SidebarOverlay â€” Collapsible left sidebar available on any page
  * Reuses CATEGORIES from StartPage, slides in from left with backdrop
  */
 
@@ -43,7 +43,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
       <div style={{ ...styles.sidebar, animation: 'sidebarIn 200ms cubic-bezier(0.23, 1, 0.32, 1)' }}>
         {/* Header */}
         <div style={styles.header}>
-          <span style={styles.brand}>☰ Menu</span>
+          <span style={styles.brand}>â° Menu</span>
           <button
             className="sb-btn"
             onClick={onClose}
@@ -51,7 +51,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#ffffff15'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
           >
-            ✕
+            âś•
           </button>
         </div>
 
@@ -59,12 +59,21 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
         <div style={styles.quickLinks}>
           <button
             className="sb-btn"
+            onClick={() => handleLinkClick('file:///U:/WWW_Zen_BRo_wser_tool/NOT_IN_USE/meblepumo_dashboard.html')}
+            style={styles.quickLinkBtn}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4f8ef720'; (e.currentTarget as HTMLElement).style.borderColor = '#4f8ef7'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#16162e'; (e.currentTarget as HTMLElement).style.borderColor = '#2a2a4a'; }}
+          >
+            🗃️ Baza Danych (MeblePumo)
+          </button>
+          <button
+            className="sb-btn"
             onClick={() => handleLinkClick('file:///C:/Users/Bonzo2/Desktop/TOOLS_CATALOG.html')}
             style={styles.quickLinkBtn}
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4f8ef720'; (e.currentTarget as HTMLElement).style.borderColor = '#4f8ef7'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#16162e'; (e.currentTarget as HTMLElement).style.borderColor = '#2a2a4a'; }}
           >
-            📋 Katalog Narzędzi
+            đź“‹ Katalog NarzÄ™dzi
           </button>
           <button
             className="sb-btn"
@@ -73,7 +82,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4f8ef720'; (e.currentTarget as HTMLElement).style.borderColor = '#4f8ef7'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#16162e'; (e.currentTarget as HTMLElement).style.borderColor = '#2a2a4a'; }}
           >
-            📊 Analytics (Umami)
+            đź“Š Analytics (Umami)
           </button>
           <button
             className="sb-btn"
@@ -82,7 +91,7 @@ export function SidebarOverlay({ onNavigate, onClose }: SidebarOverlayProps) {
             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#4f8ef720'; (e.currentTarget as HTMLElement).style.borderColor = '#4f8ef7'; }}
             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#16162e'; (e.currentTarget as HTMLElement).style.borderColor = '#2a2a4a'; }}
           >
-            🔍 Wyszukiwarka
+            đź”Ť Wyszukiwarka
           </button>
         </div>
 
@@ -250,3 +259,6 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'Segoe UI', -apple-system, sans-serif",
   },
 };
+
+
+

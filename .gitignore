@@ -17,7 +17,9 @@ coverage/
 .env.local
 .env.*.local
 .dev.vars
-.dev.vars
+
+# Pi coding agent — local config & auth tokens (never commit)
+.pi-zeno/
 .dev.vars.*
 .workspace_meta/secrets/
 .workspace_meta/awesome-copilot/
@@ -80,6 +82,7 @@ JIMBO_agent_HUB/skills/library/search/cze-*
 
 # Workspace metadata (history / session notes — local only)
 .workspace_meta/
+WORKSPACE_META_DATA/
 
 services/mydia/
 .gitnexus

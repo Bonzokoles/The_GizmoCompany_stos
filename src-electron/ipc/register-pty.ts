@@ -1,5 +1,5 @@
-/**
- * PTY IPC handler — node-pty + xterm.js bridge
+﻿/**
+ * PTY IPC handler â€” node-pty + xterm.js bridge
  * Spawns PowerShell PTY sessions, streams data to renderer via webContents.send
  */
 import { ipcMain, type BrowserWindow } from "electron";
@@ -7,6 +7,8 @@ import * as os from "os";
 import { execFileSync } from "child_process";
 import * as path from "path";
 import { IPC } from "../../src/shared/ipc/channels";
+import type { ServiceContainer } from "../app/service-container";
+import type { MCPServer } from "../mcp-server";
 
 const CH = IPC.PTY;
 
@@ -27,11 +29,11 @@ function getShell(): { shell: string; args: string[] } {
 
 /**
  * Resolve the full path of an executable by name.
- * On Windows, uses `where <cmd>` — fixes "File not found" from node-pty
+ * On Windows, uses `where <cmd>` â€” fixes "File not found" from node-pty
  * when Electron's PATH doesn't include the user's Node.js installation.
  */
 function resolveExecutable(command: string): string {
-  // Already absolute path — use as-is
+  // Already absolute path â€” use as-is
   if (command.includes("/") || command.includes("\\")) return command;
 
   try {
@@ -39,7 +41,7 @@ function resolveExecutable(command: string): string {
       const out = execFileSync("where", [command], { encoding: "utf-8", timeout: 4_000 });
       const first = out.trim().split(/\r?\n/)[0]?.trim();
       if (first) {
-        console.log(`[PTY] Resolved '${command}' → ${first}`);
+        console.log(`[PTY] Resolved '${command}' â†’ ${first}`);
         return first;
       }
     } else {
@@ -48,21 +50,23 @@ function resolveExecutable(command: string): string {
       if (resolved) return resolved;
     }
   } catch {
-    // not found via where/which — fall back to original name
-    console.warn(`[PTY] Could not resolve '${command}' via where/which — using as-is`);
+    // not found via where/which â€” fall back to original name
+    console.warn(`[PTY] Could not resolve '${command}' via where/which â€” using as-is`);
   }
   return command;
 }
 
-export function registerPty(win: BrowserWindow): void {
-  // ── pty:create ─────────────────────────────────────────────
-  // opts.command — np. "ollama" dla Pi, domyślnie PowerShell
-  // opts.args    — argumenty komendy
-  // opts.env     — dodatkowe env vars (API keys itp.)
+export function registerPty(win: BrowserWindow, container: ServiceContainer): void {
+  const mcpServer = container.get<MCPServer>("mcpServer");
+  // â”€â”€ pty:create â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // opts.command â€” np. "ollama" dla Pi, domyĹ›lnie PowerShell
+  // opts.args    â€” argumenty komendy
+  // opts.env     â€” dodatkowe env vars (API keys itp.)
   ipcMain.handle(CH.CREATE, async (_, cols = 80, rows = 24, cwd?: string, opts?: {
     command?: string;
     args?: string[];
     env?: Record<string, string>;
+    windowsHide?: boolean; // Added windowsHide option
   }) => {
     try {
       const nodePty = await import("node-pty");
@@ -99,9 +103,12 @@ export function registerPty(win: BrowserWindow): void {
         rows: Math.max(1, rows),
         cwd: cwd ?? os.homedir(),
         env: mergedEnv,
+        // @ts-ignore
+        windowsHide: opts?.windowsHide, // Pass windowsHide option
       });
 
       ptyProcess.onData((data: string) => {
+
         if (!win.isDestroyed()) {
           win.webContents.send(CH.DATA, id, data);
         }
@@ -122,7 +129,7 @@ export function registerPty(win: BrowserWindow): void {
     }
   });
 
-  // ── pty:write ──────────────────────────────────────────────
+  // â”€â”€ pty:write â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   ipcMain.handle(CH.WRITE, (_, id: string, data: string) => {
     const session = sessions.get(id);
     if (!session) return { success: false, error: "Session not found" };
@@ -134,7 +141,7 @@ export function registerPty(win: BrowserWindow): void {
     }
   });
 
-  // ── pty:resize ─────────────────────────────────────────────
+  // â”€â”€ pty:resize â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   ipcMain.handle(CH.RESIZE, (_, id: string, cols: number, rows: number) => {
     const session = sessions.get(id);
     if (!session) return { success: false, error: "Session not found" };
@@ -146,7 +153,7 @@ export function registerPty(win: BrowserWindow): void {
     }
   });
 
-  // ── pty:kill ───────────────────────────────────────────────
+  // â”€â”€ pty:kill â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   ipcMain.handle(CH.KILL, (_, id: string) => {
     const session = sessions.get(id);
     if (!session) return { success: false, error: "Session not found" };
@@ -158,6 +165,42 @@ export function registerPty(win: BrowserWindow): void {
       return { success: false, error: String(err) };
     }
   });
+  // This will be the core for Pi orchestration and structured command execution.
+  // It sends a command, waits for a specific output marker or timeout, and returns the collected output.
+  ipcMain.handle(IPC.PI_AGENT.SEND_COMMAND_AND_WAIT, async (_, id: string, command: string, waitFor?: string, timeoutMs: number = 5000) => {
+    const session = sessions.get(id);
+    if (!session) {
+      return { success: false, error: "Session not found", output: "" };
+    }
+
+    return new Promise(async (resolve) => {
+      let accumulatedOutput = "";
+      let timeout: NodeJS.Timeout;
+
+      // Listener for data from PTY
+      const disposable = session.pty.onData((data: string) => {
+        accumulatedOutput += data;
+
+        // Check for specific waitFor string
+        if (waitFor && accumulatedOutput.includes(waitFor)) {
+          clearTimeout(timeout);
+          disposable.dispose();
+          // Remove the waitFor string from output if it's just a marker
+          const finalOutput = accumulatedOutput.split(waitFor).slice(0, -1).join(waitFor);
+          resolve({ success: true, output: finalOutput.trim() });
+        }
+      });
+
+      // Send the command to PTY
+      session.pty.write(command + '\r'); // Add carriage return to execute
+
+      // Set a timeout for waiting
+      timeout = setTimeout(() => {
+        disposable.dispose();
+        resolve({ success: false, error: `Timeout after ${timeoutMs}ms`, output: accumulatedOutput.trim() });
+      }, timeoutMs);
+    });
+  });
 }
 
 export function cleanupAllPtySessions(): void {
@@ -166,3 +209,7 @@ export function cleanupAllPtySessions(): void {
     sessions.delete(id);
   }
 }
+
+
+
+

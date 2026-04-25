@@ -1886,7 +1886,7 @@ export const JimboKitPanel: React.FC<JimboKitPanelProps> = ({
       : floating && activeTab === "pty"
         ? { position: "absolute", width: "660px", height: `${panelHeight}px`, top: 0, right: 0 }
         : floating
-          ? { position: "absolute", width: "420px", height: `${panelHeight}px`, top: 0, right: 0 }
+          ? { position: "absolute", width: "420px", height: `${panelHeight}px`, top: 0, right: 0, background: "rgba(7,9,15,0.7)" }
           : {};
 
   return (

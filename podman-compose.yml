@@ -216,6 +216,72 @@ services:
     restart: unless-stopped
     container_name: plausible
 
+  # ─── Apache Superset — BI/Dashboards + PUMO Finance Analytics ─────
+  superset-db:
+    image: docker.io/library/postgres:16-alpine
+    environment:
+      POSTGRES_DB: superset
+      POSTGRES_USER: superset
+      POSTGRES_PASSWORD: superset
+    volumes:
+      - superset-db-data:/var/lib/postgresql/data
+    networks:
+      - zeno-net
+    restart: unless-stopped
+    container_name: zeno-superset-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U superset"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  superset-redis:
+    image: docker.io/valkey/valkey:8-alpine
+    command: valkey-server --save 30 1 --loglevel warning
+    volumes:
+      - superset-redis-data:/data
+    networks:
+      - zeno-net
+    restart: unless-stopped
+    container_name: zeno-superset-redis
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  zeno-superset:
+    image: localhost/zeno-superset-custom:latest
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: "zeno-superset-secret-key-2026-finance-analytics-secure-32bytes!!"
+      DATABASE_URL: "postgresql+psycopg2://superset:superset@zeno-superset-db:5432/superset"
+      REDIS_HOST: zeno-superset-redis
+      REDIS_PORT: 6379
+      SUPERSET_WEBSERVER_TIMEOUT: 300
+      TALISMAN_ENABLED: "False"
+      WTF_CSRF_ENABLED: "False"
+    volumes:
+      - superset-data:/app/superset_home
+      - ./config/superset/superset_config.py:/app/pythonpath/superset_config.py:ro
+      - ../WWW_Zen_BRo_wser_tool:/app/data:ro
+    depends_on:
+      superset-db:
+        condition: service_healthy
+      superset-redis:
+        condition: service_healthy
+    networks:
+      - zeno-net
+    restart: unless-stopped
+    container_name: zeno-superset
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
 networks:
   zeno-net:
     driver: bridge
@@ -231,3 +297,6 @@ volumes:
   sist2-index:
   plausible-db-data:
   plausible-events-data:
+  superset-db-data:
+  superset-redis-data:
+  superset-data:

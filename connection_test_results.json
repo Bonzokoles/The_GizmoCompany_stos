@@ -1,0 +1,34 @@
+{
+  "results": {
+    "jimboHub": {
+      "service": "JIMBO Hub",
+      "connected": true,
+      "port": 4224
+    },
+    "localTool": {
+      "service": "Local Tool",
+      "connected": false,
+      "port": 4111
+    },
+    "viteServer": {
+      "service": "Vite Server",
+      "connected": true,
+      "port": 5173
+    },
+    "wranglerPages": {
+      "service": "Wrangler Pages",
+      "connected": false,
+      "port": 8788
+    },
+    "websocket": {
+      "service": "WebSocket",
+      "connected": false,
+      "error": "Unexpected server response: 404"
+    }
+  },
+  "summary": {
+    "passedTests": 2,
+    "totalTests": 5,
+    "timestamp": "2026-04-25T04:29:26.373Z"
+  }
+}

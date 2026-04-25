@@ -67,6 +67,7 @@ import {
 } from "./tools/goose-changelog.js";
 import { AGENT_TOOLS } from "./tools/tool-definitions.js";
 import { executeTool } from "./tools/tool-executor.js";
+import piRoutes from "./routes/pi-routes.js";
 
 // ── BUCH Agent — system prompt dla trybu orkiestratora ─────────────
 const AGENT_SYSTEM_PROMPT = `Jesteś BUCH_AGENT — inteligentnym orkiestratorem ZENO Browser.
@@ -174,6 +175,7 @@ loadAgents();
 // ── Init ──────────────────────────────────────────────────────────
 const app = express();
 app.use(express.json());
+app.use("/pi", piRoutes);
 
 app.use((_req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -1973,6 +1975,53 @@ app.post("/namespaces/deactivate", (req, res) => {
   const { namespace } = req.body as { namespace?: string };
   if (namespace && namespace !== "global") activeNamespaces.delete(namespace);
   res.json({ active: [...activeNamespaces] });
+});
+
+// ── JIMBOKit Comms (Bridge for BuchChatWidget to FS) ──────────────
+const COMMS_DIR = path.resolve(__dirname, "..", "JIMBOKIT_COMMS");
+if (!fs.existsSync(COMMS_DIR)) fs.mkdirSync(COMMS_DIR, { recursive: true });
+
+// GET /jimbokit-comms/pending — lista tasków z folderu (pliki *.task.json)
+app.get("/jimbokit-comms/pending", (_req, res) => {
+  try {
+    const files = fs.readdirSync(COMMS_DIR).filter((f) => f.endsWith(".task.json"));
+    const tasks = files.map((f) => {
+      const content = fs.readFileSync(path.join(COMMS_DIR, f), "utf-8");
+      const data = JSON.parse(content);
+      return { id: f.replace(".task.json", ""), ...data };
+    });
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+// POST /jimbokit-comms/result — zapisz wynik { id, result }
+app.post("/jimbokit-comms/result", (req, res) => {
+  const { id, result } = req.body as { id: string; result: any };
+  if (!id) return res.status(400).json({ error: "Brak id" });
+  try {
+    const resultPath = path.join(COMMS_DIR, `${id}.result.json`);
+    fs.writeFileSync(resultPath, JSON.stringify(result, null, 2), "utf-8");
+    res.json({ ok: true, path: resultPath });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+// DELETE /jimbokit-comms/task/:id — usuń task po przetworzeniu
+app.delete("/jimbokit-comms/task/:id", (req, res) => {
+  try {
+    const taskPath = path.join(COMMS_DIR, `${req.params.id}.task.json`);
+    if (fs.existsSync(taskPath)) {
+      fs.unlinkSync(taskPath);
+      res.json({ ok: true, id: req.params.id });
+    } else {
+      res.status(404).json({ error: "Task nie istnieje" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
 });
 
 // ── REST: agents (awesome-copilot) ───────────────────────────────

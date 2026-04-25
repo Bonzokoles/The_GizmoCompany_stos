@@ -1,4 +1,4 @@
-export const IPC = {
+﻿export const IPC = {
     AI: {
         CHAT: 'ai:chat',
         COMPLETIONS: 'ai:completions',
@@ -101,8 +101,15 @@ export const IPC = {
         WRITE: 'pty:write',
         RESIZE: 'pty:resize',
         KILL: 'pty:kill',
-        DATA: 'pty:data',       // main → renderer (push)
-        EXIT: 'pty:exit',       // main → renderer (push)
+        DATA: 'pty:data',       // main â†’ renderer (push)
+        EXIT: 'pty:exit',       // main â†’ renderer (push)
+    },
+    PI_AGENT: {
+        GET_STATUS: 'pi-agent:get-status',
+        LIST_MODELS: 'pi-agent:list-models',
+        LIST_SKILLS: 'pi-agent:list-skills',
+        LIST_AGENTS: 'pi-agent:list-agents',
+        SEND_COMMAND_AND_WAIT: 'pi-agent:send-command-and-wait',
     },
     FILE: {
         LIST: 'file:list',

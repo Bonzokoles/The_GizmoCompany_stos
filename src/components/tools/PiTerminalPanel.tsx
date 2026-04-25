@@ -11,6 +11,7 @@ import { useState, useRef, useEffect, useCallback, type MouseEvent as ReactMouse
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { WebLinksAddon } from "@xterm/addon-web-links";
+import { type IDisposable } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import zenoIcon from "../../assets/zeno-icon.png";
 
@@ -220,6 +221,49 @@ export default function PiTerminalPanel({ onClose, onSpawnAgent, workspaceAgents
     termRef.current = term;
     fitRef.current  = fitAddon;
 
+    // Enable clipboard copy/paste in Electron
+    const disposables: IDisposable[] = [];
+
+    if (isElectron) {
+      // Copy on selection (Ctrl+C handled by onKey, this is for mouse selection)
+      disposables.push(term.onSelectionChange(() => {
+        if (term.hasSelection()) {
+          window.electronAPI.clipboard.writeText(term.getSelection());
+        }
+      }));
+
+      // Handle Ctrl+C for copy, Ctrl+V for paste
+      disposables.push(term.onKey(async (e) => {
+        const ev = e.domEvent;
+        if (ev.ctrlKey && ev.shiftKey && e.key === "C") { // Ctrl+Shift+C on Linux for copy
+          if (term.hasSelection()) {
+            await window.electronAPI.clipboard.writeText(term.getSelection());
+            ev.preventDefault();
+          }
+        } else if (ev.ctrlKey && e.key === "C") { // Ctrl+C for copy (Windows/macOS), or interrupt
+          if (term.hasSelection()) {
+            await window.electronAPI.clipboard.writeText(term.getSelection());
+            ev.preventDefault();
+          } else if (ptyIdRef.current) {
+            // If no selection, send Ctrl+C to the PTY
+            window.electronAPI!.terminal!.pty!.write(ptyIdRef.current, "\x03");
+            ev.preventDefault();
+          }
+        } else if (ev.ctrlKey && e.key === "V") { // Ctrl+V for paste
+          if (ptyIdRef.current) {
+            const text = await window.electronAPI.clipboard.readText();
+            window.electronAPI!.terminal!.pty!.write(ptyIdRef.current, text);
+            ev.preventDefault();
+          } else {
+            // Fallback for non-running PTY or plain terminal
+            const text = await window.electronAPI.clipboard.readText();
+            term.paste(text);
+            ev.preventDefault();
+          }
+        }
+      }));
+    }
+
     if (!isElectron) {
       term.writeln("\x1b[33mPi Terminal dziala tylko w Electron.\x1b[0m");
       term.writeln("\x1b[36mUruchom ZENO Browser jako aplikacje desktopowa.\x1b[0m");
@@ -348,7 +392,7 @@ export default function PiTerminalPanel({ onClose, onSpawnAgent, workspaceAgents
         width:         "680px",
         height:        minimized ? "40px" : `${panelHeight}px`,
         overflow:      "hidden",
-        background:    "#07090f",
+        background:    "rgba(7,9,15,0.7)",
         borderRight:   "1px solid rgba(0,255,204,0.25)",
         borderTop:     "1px solid rgba(0,255,204,0.15)",
         borderBottom:  "none",

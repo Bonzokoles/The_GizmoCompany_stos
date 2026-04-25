@@ -14,6 +14,7 @@ import { windowAPI } from "./preload/window-api";
 import { dialogAPI } from "./preload/dialog-api";
 import { crawlerAPI } from "./preload/crawler-api";
 import { mcpAPI } from "./preload/mcp-api";
+import { clipboardAPI } from "./preload/clipboard-api";
 
 // Suppress noisy dev-only console messages before React loads
 const _origLog = console.log.bind(console);
@@ -39,6 +40,7 @@ const electronAPI = {
   dialog: dialogAPI,
   crawler: crawlerAPI,
   mcp: mcpAPI,
+  clipboard: clipboardAPI,
   on: (channel: string, listener: (...args: unknown[]) => void) => {
     ipcRenderer.on(channel, (_event, ...args) => listener(...args));
     return () => ipcRenderer.removeAllListeners(channel);

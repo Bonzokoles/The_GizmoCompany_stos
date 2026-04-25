@@ -1,168 +1,98 @@
-/**
- * Pi Bridge — lokalny agent loop przez Ollama OpenAI-compat API
- *
- * Pi (ollama launch pi) to interaktywna integracja — NIE serwer HTTP.
- * Ten bridge reimplementuje logikę Pi: agent loop + tool calling na modelach Ollama.
- *
- * Ollama API: http://localhost:11434/v1 (OpenAI-compatible)
- * Domyślny model: gemma3:4b lub bielik-4.5b (polskie)
- *
- * Różnica względem Goose:
- *   Goose = subprocess z REST API
- *   Pi Bridge = bezpośrednie wywołania Ollama /v1/chat/completions
- */
+import { promises as fs } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-import OpenAI from "openai";
-import { EventEmitter } from "events";
-
-const OLLAMA_BASE = "http://localhost:11434/v1";
-const DEFAULT_MODEL = "gemma3:4b";
-const POLISH_MODEL = "SpeakLeash/bielik-4.5b-v3.0-instruct:Q8_0";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const JIMBOKIT_COMMS_PATH = path.resolve(__dirname, "..", "..", "JIMBOKIT_COMMS");
 
 export interface PiTask {
   id: string;
-  instructions: string;
-  workdir?: string;
-  model?: string;
-  tools?: OpenAI.ChatCompletionTool[];
-  system?: string;
+  type: string;
+  payload: unknown;
+  priority: "low" | "medium" | "high";
+  timestamp: number;
 }
 
-export interface PiTaskResult {
-  id: string;
-  status: "done" | "error";
-  output: string;
-  tool_calls?: number;
-  model_used: string;
+export interface TaskResult {
+  taskId: string;
+  status: "pending" | "processing" | "completed" | "failed" | "dispatched";
+  result?: unknown;
+  error?: string;
+  timestamp: number;
 }
 
-export class PiBridge extends EventEmitter {
-  private client: OpenAI;
-
-  constructor() {
-    super();
-    this.client = new OpenAI({
-      baseURL: OLLAMA_BASE,
-      apiKey: "ollama",
-    });
+function isPiTask(value: unknown): value is PiTask {
+  if (!value || typeof value !== "object") {
+    return false;
   }
 
-  async checkOllama(): Promise<boolean> {
-    try {
-      const res = await fetch("http://localhost:11434/api/tags");
-      return res.ok;
-    } catch {
-      return false;
-    }
-  }
+  const task = value as Partial<PiTask>;
+  return (
+    typeof task.id === "string" &&
+    typeof task.type === "string" &&
+    (task.priority === "low" ||
+      task.priority === "medium" ||
+      task.priority === "high") &&
+    typeof task.timestamp === "number"
+  );
+}
 
-  async listModels(): Promise<string[]> {
-    try {
-      const res = await fetch("http://localhost:11434/api/tags");
-      const data = await res.json() as { models: Array<{ name: string }> };
-      return data.models.map((m) => m.name);
-    } catch {
-      return [];
-    }
-  }
+export class PiBridge {
+  private readonly taskResults = new Map<string, TaskResult>();
 
-  async runTask(task: PiTask): Promise<PiTaskResult> {
-    const alive = await this.checkOllama();
-    if (!alive) {
-      return {
-        id: task.id,
-        status: "error",
-        output: "Ollama nie działa. Uruchom: ollama serve",
-        model_used: "",
-      };
+  constructor() {}
+
+  async receiveTask(task: PiTask): Promise<string> {
+    if (!isPiTask(task)) {
+      throw new Error("Invalid Pi task payload");
     }
 
-    const model = task.model ?? DEFAULT_MODEL;
-    const systemPrompt = task.system ?? "Jesteś lokalnym agentem AI. Wykonuj zadania zwięźle i precyzyjnie.";
+    console.log(`[PiBridge] Received task from Pi: ${task.id}`);
 
-    const messages: OpenAI.ChatCompletionMessageParam[] = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: task.instructions },
-    ];
-
-    let toolCallCount = 0;
-    const MAX_ROUNDS = 5;
-
-    // Agent loop — max 5 rund tool-calling
-    for (let round = 0; round < MAX_ROUNDS; round++) {
-      const response = await this.client.chat.completions.create({
-        model,
-        messages,
-        tools: task.tools,
-        tool_choice: task.tools ? "auto" : undefined,
-        temperature: 0.3,
-      });
-
-      const msg = response.choices[0].message;
-      messages.push(msg);
-
-      // Brak tool calls → finalna odpowiedź
-      if (!msg.tool_calls?.length) {
-        return {
-          id: task.id,
-          status: "done",
-          output: msg.content ?? "",
-          tool_calls: toolCallCount,
-          model_used: model,
-        };
-      }
-
-      // Obsłuż tool calls (loguj — zewnętrzna obsługa po stronie callera)
-      toolCallCount += msg.tool_calls.length;
-      this.emit("tool_calls", { task_id: task.id, calls: msg.tool_calls });
-
-      // Placeholder wyników narzędzi — caller powinien obsłużyć przez event
-      for (const tc of msg.tool_calls) {
-        const fnName = (tc as { id: string; function?: { name: string } }).function?.name ?? tc.id;
-        messages.push({
-          role: "tool",
-          tool_call_id: tc.id,
-          content: `[Tool ${fnName} wykonany — wynik przekazany przez caller]`,
-        });
-      }
-    }
-
-    return {
-      id: task.id,
-      status: "done",
-      output: (messages.at(-1) as { content?: string })?.content ?? "Przekroczono limit rund",
-      tool_calls: toolCallCount,
-      model_used: model,
-    };
-  }
-
-  // Streaming chat — dla ZENO Browser / JIMBO UI
-  async streamChat(
-    messages: OpenAI.ChatCompletionMessageParam[],
-    model: string = DEFAULT_MODEL,
-    onChunk: (text: string) => void
-  ): Promise<void> {
-    const stream = await this.client.chat.completions.create({
-      model,
-      messages,
-      stream: true,
-      temperature: 0.4,
+    this.taskResults.set(task.id, {
+      taskId: task.id,
+      status: "pending",
+      timestamp: Date.now(),
     });
 
-    for await (const chunk of stream) {
-      const text = chunk.choices[0]?.delta?.content ?? "";
-      if (text) onChunk(text);
+    const taskPath = path.join(JIMBOKIT_COMMS_PATH, `${task.id}.task.json`);
+    await fs.writeFile(taskPath, JSON.stringify(task, null, 2), "utf-8");
+    console.log(`[PiBridge] Task written to: ${taskPath}`);
+
+    return task.id;
+  }
+
+  async getResultForPi(taskId: string): Promise<TaskResult> {
+    const cached = this.taskResults.get(taskId);
+    if (cached?.status === "completed" || cached?.status === "failed") {
+      return cached;
+    }
+
+    const resultPath = path.join(JIMBOKIT_COMMS_PATH, `${taskId}.result.json`);
+    try {
+      const content = await fs.readFile(resultPath, "utf-8");
+      const result: TaskResult = JSON.parse(content);
+      // Map properties effectively or merge them
+      const fullResult = {
+         ...cached,
+         ...result,
+         taskId
+      } as TaskResult;
+      this.taskResults.set(taskId, fullResult);
+      return fullResult;
+    } catch (err) {
+      if (cached) return cached;
+      throw new Error(`Task ${taskId} not found`);
     }
   }
 
-  getPolishModel(): string {
-    return POLISH_MODEL;
-  }
-
-  getDefaultModel(): string {
-    return DEFAULT_MODEL;
+  async getTaskStatus(taskId: string): Promise<TaskResult["status"] | "not_found"> {
+    try {
+      const res = await this.getResultForPi(taskId);
+      return res.status;
+    } catch (e) {
+      return "not_found";
+    }
   }
 }
-
-// Singleton
-export const piBridge = new PiBridge();

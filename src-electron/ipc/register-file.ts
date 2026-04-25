@@ -32,10 +32,14 @@ export function registerFile(win: BrowserWindow): void {
             return {
               name: e.name,
               path: fullPath,
-              type: e.isDirectory() ? ("directory" as const) : ("file" as const),
+              type: e.isDirectory()
+                ? ("directory" as const)
+                : ("file" as const),
               size: stat.size,
               modified: stat.mtimeMs,
-              extension: e.isDirectory() ? "" : path.extname(e.name).toLowerCase(),
+              extension: e.isDirectory()
+                ? ""
+                : path.extname(e.name).toLowerCase(),
             };
           } catch {
             return null;
@@ -47,7 +51,7 @@ export function registerFile(win: BrowserWindow): void {
           if (a.type !== b.type) return a.type === "directory" ? -1 : 1;
           return a.name.localeCompare(b.name);
         });
-      return { success: true, entries };
+      return { success: true, entries: result };
     } catch (err: unknown) {
       return { success: false, entries: [], error: String(err) };
     }
@@ -61,7 +65,12 @@ export function registerFile(win: BrowserWindow): void {
         return { success: false, error: "Plik za duży (max 5 MB)" };
       }
       const content = fs.readFileSync(filePath, "utf-8");
-      return { success: true, content, size: stat.size, modified: stat.mtimeMs };
+      return {
+        success: true,
+        content,
+        size: stat.size,
+        modified: stat.mtimeMs,
+      };
     } catch (err: unknown) {
       return { success: false, error: String(err) };
     }

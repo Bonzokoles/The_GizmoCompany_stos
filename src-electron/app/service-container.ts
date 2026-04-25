@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+﻿import { app, BrowserWindow } from "electron";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -9,6 +9,7 @@ import { CrawlerService, SearXNGService, SearchService, MeilisearchService, Webs
 import { CatalogService, KnowledgeHubService, SyncService } from "../services/knowledge";
 import { UmamiService } from "../services/analytics";
 import { createMCPServer, type MCPServer } from "../mcp-server";
+import { PiAgentService } from "../services/ai/pi-agent-service";
 
 type ServicesMap = {
   browserManager: BrowserManager;
@@ -30,6 +31,7 @@ type ServicesMap = {
   umamiService: UmamiService;
   syncService: SyncService;
   mcpServer: MCPServer;
+  piAgentService: PiAgentService; // Add this line
   terminalState: { cwd: string };
 };
 
@@ -73,14 +75,15 @@ export class ServiceContainer {
     const websurfxService = new WebsurfxService();
     const sist2Service = new Sist2Service();
     const knowledgeHubService = new KnowledgeHubService(catalogService);
-    void knowledgeHubService.autoRegisterHubLibraries();
+    // void knowledgeHubService.autoRegisterHubLibraries();
     const agentsCreatorService = new AgentsCreatorService(catalogService);
     const securitySandbox = new SecuritySandbox();
     const umamiService = new UmamiService();
-    umamiService.registerIPC();
+    // umamiService.registerIPC();
     const syncService = new SyncService();
-    syncService.registerIPC();
+    // syncService.registerIPC();
     const mcpServer = createMCPServer({ browserManager, mainWindow: null });
+    const piAgentService = new PiAgentService(this); // Temporary null for mainWindow
 
     this.register("browserManager", browserManager);
     this.register("aiGatewayService", aiGatewayService);
@@ -101,6 +104,7 @@ export class ServiceContainer {
     this.register("umamiService", umamiService);
     this.register("syncService", syncService);
     this.register("mcpServer", mcpServer);
+    this.register("piAgentService", piAgentService); // Register the new service
     this.register("terminalState", { cwd: app.getPath("home") });
   }
 
@@ -117,6 +121,7 @@ export class ServiceContainer {
     this.get<BrowserManager>("browserManager").setMainWindow(win);
     this.get<MCPServer>("mcpServer").updateContext({ mainWindow: win });
     this.get<NetworkManager>("networkManager").attach();
+    this.get<PiAgentService>("piAgentService").attachWindow(win); // Attach window to PiAgentService
   }
 
   execCommand(
@@ -175,3 +180,4 @@ export class ServiceContainer {
     };
   }
 }
+

@@ -1,0 +1,7 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Page not found" [level=1] [ref=e4]
+    - paragraph [ref=e5]: Sorry, we cannot find the page you are looking for. You may have mistyped the address or the page may have moved.
+    - link "Back to home" [ref=e6] [cursor=pointer]:
+      - /url: /
+  - img "404" [ref=e7]

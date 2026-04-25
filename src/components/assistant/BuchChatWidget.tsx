@@ -8,8 +8,9 @@
  * Używa /api/ai/v1/chat/completions (OpenAI-compatible proxy, CF Functions).
  * Model: deepseek-chat, system prompt po polsku.
  */
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { PageAgent } from "page-agent";
+import { useJIMBOKitComms } from "./useJIMBOKitComms";
 
 // Vite proxy (/api → localhost:8788) obsługuje dev i Electron webview.
 // Na CF Pages ścieżki relatywne działają bezpośrednio.
@@ -341,9 +342,11 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
     if (open) textareaRef.current?.focus();
   }, [open]);
 
+  const { pendingTasks, completeTask } = useJIMBOKitComms();
+
   const dispatchToGoose = useCallback(
     async (msgIdx: number, instructions: string) => {
-      setGooseStatuses((s) => ({ ...s, [msgIdx]: "running" }));
+      if (msgIdx !== -1) setGooseStatuses((s) => ({ ...s, [msgIdx]: "running" }));
 
       // Dodaj live-buffer wiadomość — będzie się wypełniać chunkami z Goose
       const bufferTs = Date.now() + Math.random(); // unikalny klucz
@@ -384,14 +387,14 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
         });
         if (!res.ok) {
           finalizeBuffer("⚠ HUB niedostępny lub błąd wysyłania zadania.", "goose-error");
-          setGooseStatuses((s) => ({ ...s, [msgIdx]: "error" }));
+          if (msgIdx !== -1) setGooseStatuses((s) => ({ ...s, [msgIdx]: "error" }));
           return;
         }
         const data = (await res.json()) as { taskId?: string };
         const taskId = data.taskId;
         if (!taskId) {
           finalizeBuffer("⚠ Brak taskId w odpowiedzi HUB.", "goose-error");
-          setGooseStatuses((s) => ({ ...s, [msgIdx]: "done" }));
+          if (msgIdx !== -1) setGooseStatuses((s) => ({ ...s, [msgIdx]: "done" }));
           return;
         }
 
@@ -402,7 +405,7 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
 
         const finish = (status: GooseStatus) => {
           if (synthTimer) clearTimeout(synthTimer);
-          setGooseStatuses((s) => ({ ...s, [msgIdx]: status }));
+          if (msgIdx !== -1) setGooseStatuses((s) => ({ ...s, [msgIdx]: status }));
           if (ws.readyState === WebSocket.OPEN) ws.close();
         };
 
@@ -571,6 +574,26 @@ export function BuchChatWidget({ onOpenFull }: BuchChatWidgetProps) {
       ]);
     }
   }, []);
+
+  const processingTasks = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const process = async () => {
+      for (const task of pendingTasks) {
+        if (processingTasks.current.has(task.id)) continue;
+        processingTasks.current.add(task.id);
+
+        console.log("[BUCH] Processing pending task from JIMBOKit:", task.id);
+        // Dispatch do Goose bez "trigger message" w UI
+        await dispatchToGoose(-1, task.instruction);
+        // Oznacz jako gotowe w HUB (zapisze wynik i usunie task.json)
+        await completeTask(task.id, { status: "dispatched", ts: Date.now() });
+
+        processingTasks.current.delete(task.id);
+      }
+    };
+    if (pendingTasks.length > 0) process();
+  }, [pendingTasks, dispatchToGoose, completeTask]);
 
   const sendMessage = useCallback(async () => {
     const text = prompt.trim();

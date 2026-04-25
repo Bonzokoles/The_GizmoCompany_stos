@@ -1,0 +1,40 @@
+- generic [ref=e1]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link "ZENO Finance Analytics" [ref=e6] [cursor=pointer]:
+          - /url: /superset/welcome/
+          - img "ZENO Finance Analytics" [ref=e7]
+        - menu [ref=e8]
+      - generic [ref=e10]:
+        - menu [ref=e11]:
+          - menuitem "triangle-down Settings" [ref=e12]:
+            - button "triangle-down Settings" [ref=e13] [cursor=pointer]:
+              - img "triangle-down" [ref=e14]:
+                - img [ref=e15]
+              - text: Settings
+          - menuitem "Languages" [ref=e17]:
+            - button "triangle-down" [ref=e18] [cursor=pointer]:
+              - img "triangle-down" [ref=e19]:
+                - img [ref=e20]
+        - link " Login" [ref=e25] [cursor=pointer]:
+          - /url: /login/
+          - generic [ref=e26]: 
+          - text: Login
+  - generic [ref=e31]:
+    - generic [ref=e33]: Sign In
+    - generic [ref=e35]:
+      - generic [ref=e36]: "Enter your login and password below:"
+      - generic [ref=e37]:
+        - generic [ref=e38]: "Username:"
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - generic [ref=e42]: 
+            - textbox "Username:" [active] [ref=e43]
+          - generic [ref=e44]: "Password:"
+          - generic [ref=e45]:
+            - generic [ref=e47]: 
+            - textbox "Password:" [ref=e48]
+      - button "Sign In" [ref=e52] [cursor=pointer]
+  - contentinfo [ref=e54]:
+    - separator [ref=e58]

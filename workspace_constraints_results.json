@@ -1,0 +1,57 @@
+{
+  "allowedPathsAccessible": [
+    {
+      "path": "U:/The_DEVz_HUB_of_work",
+      "accessible": true,
+      "fileCount": 15,
+      "validation": {
+        "isForbidden": false,
+        "isAllowed": true,
+        "canAccess": true
+      }
+    },
+    {
+      "path": "U:/WWW_Zen_BRo_wser_tool",
+      "accessible": true,
+      "fileCount": 36,
+      "validation": {
+        "isForbidden": false,
+        "isAllowed": true,
+        "canAccess": true
+      }
+    }
+  ],
+  "forbiddenPathsBlocked": [
+    {
+      "path": "U:/WWW_Zen_BRo_wser_org3/JIMBOKIT_COMMS",
+      "blocked": true,
+      "reason": "Path is correctly restricted",
+      "validation": {
+        "isForbidden": true,
+        "isAllowed": false,
+        "canAccess": false
+      }
+    },
+    {
+      "path": "U:/WWW_Zen_BRo_wser_org3/JIMBO_agent_HUB",
+      "blocked": true,
+      "reason": "Path is correctly restricted",
+      "validation": {
+        "isForbidden": true,
+        "isAllowed": false,
+        "canAccess": false
+      }
+    },
+    {
+      "path": "U:/WWW_Zen_BRo_wser_org3/src",
+      "blocked": true,
+      "reason": "Path is correctly restricted",
+      "validation": {
+        "isForbidden": true,
+        "isAllowed": false,
+        "canAccess": false
+      }
+    }
+  ],
+  "securityViolations": []
+}

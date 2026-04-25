@@ -1,0 +1,7 @@
+{
+  "jimboHub": true,
+  "localTool": false,
+  "viteServer": true,
+  "wranglerPages": false,
+  "websocket": true
+}

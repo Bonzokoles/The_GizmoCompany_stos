@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-04-25T04:33:47.509Z",
+  "results": {
+    "jimboHub": {
+      "name": "JIMBO Hub",
+      "connected": false,
+      "error": "Asynchronous forks do not support Buffer, TypedArray, DataView or string input: 'append'"
+    },
+    "localTool": {
+      "name": "Local Tool",
+      "connected": false,
+      "error": "Asynchronous forks do not support Buffer, TypedArray, DataView or string input: 'append'"
+    },
+    "viteServer": {
+      "name": "Vite Server",
+      "connected": false,
+      "error": "Asynchronous forks do not support Buffer, TypedArray, DataView or string input: 'append'"
+    },
+    "wranglerPages": {
+      "name": "Wrangler Pages",
+      "connected": false,
+      "error": "Asynchronous forks do not support Buffer, TypedArray, DataView or string input: 'append'"
+    },
+    "websocketServer": {
+      "name": "WebSocket Server",
+      "connected": false,
+      "error": "Asynchronous forks do not support Buffer, TypedArray, DataView or string input: 'append'"
+    }
+  },
+  "summary": {
+    "totalServices": 5,
+    "connectedServices": 0
+  }
+}

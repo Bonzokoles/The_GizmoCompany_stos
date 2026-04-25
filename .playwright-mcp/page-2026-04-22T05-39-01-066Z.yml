@@ -1,0 +1,161 @@
+- generic [ref=e2]:
+  - navigation [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e5]:
+        - link "ZENO Finance Analytics" [ref=e6] [cursor=pointer]:
+          - /url: /superset/welcome/
+          - img "ZENO Finance Analytics" [ref=e7]
+        - menu [ref=e8]:
+          - button "Dashboards" [ref=e9] [cursor=pointer]
+          - button "Charts" [ref=e10] [cursor=pointer]
+          - button "Datasets" [ref=e11] [cursor=pointer]
+          - menuitem "triangle-down SQL" [ref=e12]:
+            - button "triangle-down SQL" [ref=e13] [cursor=pointer]:
+              - img "triangle-down" [ref=e14]:
+                - img [ref=e15]
+              - text: SQL
+      - menu [ref=e19]:
+        - menuitem "triangle-down +" [ref=e20]:
+          - button "triangle-down +" [ref=e21] [cursor=pointer]:
+            - img "triangle-down" [ref=e22]:
+              - img [ref=e23]
+            - generic [ref=e26]: +
+        - menuitem "triangle-down Settings" [ref=e27]:
+          - button "triangle-down Settings" [ref=e28] [cursor=pointer]:
+            - img "triangle-down" [ref=e29]:
+              - img [ref=e30]
+            - text: Settings
+        - menuitem "Languages" [ref=e32]:
+          - button "triangle-down" [ref=e33] [cursor=pointer]:
+            - img "triangle-down" [ref=e34]:
+              - img [ref=e35]
+  - navigation [ref=e41]:
+    - generic [ref=e42]: Home
+    - menu
+    - generic:
+      - menu
+  - generic [ref=e44]:
+    - button "right Recents" [ref=e46] [cursor=pointer]:
+      - img "right" [ref=e47]:
+        - img [ref=e48]
+      - text: Recents
+    - generic [ref=e50]:
+      - button "right Dashboards" [expanded] [ref=e51] [cursor=pointer]:
+        - img "right" [ref=e52]:
+          - img [ref=e53]
+        - text: Dashboards
+      - generic [ref=e56]:
+        - navigation [ref=e58]:
+          - menu [ref=e59]:
+            - menuitem "Favorite" [ref=e60] [cursor=pointer]:
+              - tab "Favorite" [ref=e61]
+            - menuitem "Mine" [ref=e62] [cursor=pointer]:
+              - tab "Mine" [ref=e63]
+            - menuitem "All" [ref=e64] [cursor=pointer]:
+              - tab "All" [ref=e65]
+          - generic [ref=e66]:
+            - menu
+            - button "+ Dashboard" [ref=e67] [cursor=pointer]:
+              - generic [ref=e68]: +
+              - text: Dashboard
+            - button "View All »" [ref=e69] [cursor=pointer]:
+              - generic [ref=e70]: View All »
+        - generic [ref=e71]:
+          - generic [ref=e76] [cursor=pointer]:
+            - generic [ref=e79]:
+              - generic [ref=e80]: Bloomberg Finance Terminal
+              - generic [ref=e82]: published
+              - generic [ref=e84]:
+                - button "favorite-unselected" [ref=e85]:
+                  - img "favorite-unselected" [ref=e86]:
+                    - img [ref=e87]
+                - img "more-vert" [ref=e89]:
+                  - img [ref=e90]
+            - generic [ref=e92]: Modified 5 minutes ago
+          - generic [ref=e97] [cursor=pointer]:
+            - generic [ref=e100]:
+              - generic [ref=e101]: MEBLEPUMO Analytics
+              - generic [ref=e103]: published
+              - generic [ref=e105]:
+                - button "favorite-unselected" [ref=e106]:
+                  - img "favorite-unselected" [ref=e107]:
+                    - img [ref=e108]
+                - img "more-vert" [ref=e110]:
+                  - img [ref=e111]
+            - generic [ref=e113]: Modified 6 minutes ago
+    - generic [ref=e114]:
+      - button "right Charts" [expanded] [ref=e115] [cursor=pointer]:
+        - img "right" [ref=e116]:
+          - img [ref=e117]
+        - text: Charts
+      - generic [ref=e120]:
+        - navigation [ref=e122]:
+          - menu [ref=e123]:
+            - menuitem "Favorite" [ref=e124] [cursor=pointer]:
+              - tab "Favorite" [ref=e125]
+            - menuitem "Mine" [ref=e126] [cursor=pointer]:
+              - tab "Mine" [ref=e127]
+            - menuitem "All" [ref=e128] [cursor=pointer]:
+              - tab "All" [ref=e129]
+          - generic [ref=e130]:
+            - menu
+            - button "+ Chart" [ref=e131] [cursor=pointer]:
+              - generic [ref=e132]: +
+              - text: Chart
+            - button "View All »" [ref=e133] [cursor=pointer]:
+              - generic [ref=e134]: View All »
+        - generic [ref=e135]:
+          - generic [ref=e140] [cursor=pointer]:
+            - generic [ref=e143]:
+              - generic [ref=e144]: ── Navigation ──
+              - generic [ref=e146]:
+                - button "favorite-unselected" [ref=e147]:
+                  - img "favorite-unselected" [ref=e148]:
+                    - img [ref=e149]
+                - img "more-vert" [ref=e151]:
+                  - img [ref=e152]
+            - generic [ref=e154]: Modified 6 minutes ago
+          - generic [ref=e159] [cursor=pointer]:
+            - generic [ref=e162]:
+              - generic [ref=e163]: Crypto Snapshot (BTC/ETH/SOL)
+              - generic [ref=e165]:
+                - button "favorite-unselected" [ref=e166]:
+                  - img "favorite-unselected" [ref=e167]:
+                    - img [ref=e168]
+                - img "more-vert" [ref=e170]:
+                  - img [ref=e171]
+            - generic [ref=e173]: Modified 6 minutes ago
+          - generic [ref=e178] [cursor=pointer]:
+            - generic [ref=e181]:
+              - generic [ref=e182]: SHOP — 3 Month Price
+              - generic [ref=e184]:
+                - button "favorite-unselected" [ref=e185]:
+                  - img "favorite-unselected" [ref=e186]:
+                    - img [ref=e187]
+                - img "more-vert" [ref=e189]:
+                  - img [ref=e190]
+            - generic [ref=e192]: Modified 6 minutes ago
+          - generic [ref=e197] [cursor=pointer]:
+            - generic [ref=e200]:
+              - generic [ref=e201]: AMZN — 3 Month Price
+              - generic [ref=e203]:
+                - button "favorite-unselected" [ref=e204]:
+                  - img "favorite-unselected" [ref=e205]:
+                    - img [ref=e206]
+                - img "more-vert" [ref=e208]:
+                  - img [ref=e209]
+            - generic [ref=e211]: Modified 6 minutes ago
+          - generic [ref=e216] [cursor=pointer]:
+            - generic [ref=e219]:
+              - generic [ref=e220]: Profit Margin % — Peers
+              - generic [ref=e222]:
+                - button "favorite-unselected" [ref=e223]:
+                  - img "favorite-unselected" [ref=e224]:
+                    - img [ref=e225]
+                - img "more-vert" [ref=e227]:
+                  - img [ref=e228]
+            - generic [ref=e230]: Modified 6 minutes ago
+    - button "right Saved queries" [ref=e232] [cursor=pointer]:
+      - img "right" [ref=e233]:
+        - img [ref=e234]
+      - text: Saved queries
