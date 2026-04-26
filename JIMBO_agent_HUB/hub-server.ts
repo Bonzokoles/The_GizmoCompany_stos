@@ -68,6 +68,14 @@ import {
 import { AGENT_TOOLS } from "./tools/tool-definitions.js";
 import { executeTool } from "./tools/tool-executor.js";
 import piRoutes from "./routes/pi-routes.js";
+import {
+  validateTaskObject,
+  validateResultObject,
+  createValidTask,
+  formatValidationErrors,
+  type CommsTask,
+  type CommsResult,
+} from "./core/comms-validator.js";
 
 // ── BUCH Agent — system prompt dla trybu orkiestratora ─────────────
 const AGENT_SYSTEM_PROMPT = `Jesteś BUCH_AGENT — inteligentnym orkiestratorem ZENO Browser.
@@ -1979,14 +1987,77 @@ app.post("/namespaces/deactivate", (req, res) => {
 
 // ── JIMBOKit Comms (Bridge for BuchChatWidget to FS) ──────────────
 const COMMS_DIR = path.resolve(__dirname, "..", "JIMBOKIT_COMMS");
+const COMMS_TASKS_DIR = path.join(COMMS_DIR, "tasks");
+const COMMS_RESULTS_DIR = path.join(COMMS_DIR, "results");
+
+// Ensure all directories exist
 if (!fs.existsSync(COMMS_DIR)) fs.mkdirSync(COMMS_DIR, { recursive: true });
+if (!fs.existsSync(COMMS_TASKS_DIR)) fs.mkdirSync(COMMS_TASKS_DIR, { recursive: true });
+if (!fs.existsSync(COMMS_RESULTS_DIR)) fs.mkdirSync(COMMS_RESULTS_DIR, { recursive: true });
+
+// ── NOWE ENDPOINTY (FAZA 2) ────────────────────────────────────────
+
+// POST /jimbokit-comms/task — zapisz nowy task (z walidacją)
+app.post("/jimbokit-comms/task", (req, res) => {
+  try {
+    const task = req.body as CommsTask;
+    
+    // Walidacja
+    const validation = validateTaskObject(task);
+    if (!validation.valid) {
+      return res.status(400).json({ 
+        error: "Invalid task schema", 
+        details: formatValidationErrors(validation) 
+      });
+    }
+    
+    // Zapisz do tasks/
+    const taskPath = path.join(COMMS_TASKS_DIR, `${task.id}.task.json`);
+    fs.writeFileSync(taskPath, JSON.stringify(task, null, 2), "utf-8");
+    
+    res.json({ ok: true, taskId: task.id, path: taskPath });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+// GET /jimbokit-comms/tasks — lista tasków z tasks/ (nowa lokalizacja)
+app.get("/jimbokit-comms/tasks", (_req, res) => {
+  try {
+    const files = fs.readdirSync(COMMS_TASKS_DIR).filter((f) => f.endsWith(".task.json"));
+    const tasks = files.map((f) => {
+      const content = fs.readFileSync(path.join(COMMS_TASKS_DIR, f), "utf-8");
+      return JSON.parse(content) as CommsTask;
+    });
+    res.json({ tasks, count: tasks.length });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+// ── STARE ENDPOINTY (kompatybilność wsteczna) ──────────────────────
 
 // GET /jimbokit-comms/pending — lista tasków z folderu (pliki *.task.json)
+// TODO: Po 2 tygodniach przekieruj na /jimbokit-comms/tasks
 app.get("/jimbokit-comms/pending", (_req, res) => {
   try {
-    const files = fs.readdirSync(COMMS_DIR).filter((f) => f.endsWith(".task.json"));
+    // Sprawdź tasks/ najpierw, potem fallback do root
+    let files: string[] = [];
+    let baseDir = COMMS_TASKS_DIR;
+    
+    if (fs.existsSync(COMMS_TASKS_DIR)) {
+      files = fs.readdirSync(COMMS_TASKS_DIR).filter((f) => f.endsWith(".task.json"));
+    }
+    
+    // Fallback do root dla kompatybilności wstecznej
+    if (files.length === 0) {
+      const rootFiles = fs.readdirSync(COMMS_DIR).filter((f) => f.endsWith(".task.json"));
+      files = rootFiles;
+      baseDir = COMMS_DIR;
+    }
+    
     const tasks = files.map((f) => {
-      const content = fs.readFileSync(path.join(COMMS_DIR, f), "utf-8");
+      const content = fs.readFileSync(path.join(baseDir, f), "utf-8");
       const data = JSON.parse(content);
       return { id: f.replace(".task.json", ""), ...data };
     });
@@ -2001,8 +2072,24 @@ app.post("/jimbokit-comms/result", (req, res) => {
   const { id, result } = req.body as { id: string; result: any };
   if (!id) return res.status(400).json({ error: "Brak id" });
   try {
-    const resultPath = path.join(COMMS_DIR, `${id}.result.json`);
-    fs.writeFileSync(resultPath, JSON.stringify(result, null, 2), "utf-8");
+    // Walidacja result
+    const resultObj: CommsResult = {
+      taskId: id,
+      status: result.status || 'completed',
+      result: result.result,
+      error: result.error,
+      timestamp: new Date().toISOString()
+    };
+    
+    const validation = validateResultObject(resultObj);
+    if (!validation.valid) {
+      console.warn('[JIMBOKIT_COMMS] Result validation warning:', formatValidationErrors(validation));
+      // NIE blokujemy dla kompatybilności wstecznej
+    }
+    
+    // Zapisz do results/ (nowa lokalizacja)
+    const resultPath = path.join(COMMS_RESULTS_DIR, `${id}.result.json`);
+    fs.writeFileSync(resultPath, JSON.stringify(resultObj, null, 2), "utf-8");
     res.json({ ok: true, path: resultPath });
   } catch (err) {
     res.status(500).json({ error: String(err) });
@@ -2012,7 +2099,14 @@ app.post("/jimbokit-comms/result", (req, res) => {
 // DELETE /jimbokit-comms/task/:id — usuń task po przetworzeniu
 app.delete("/jimbokit-comms/task/:id", (req, res) => {
   try {
-    const taskPath = path.join(COMMS_DIR, `${req.params.id}.task.json`);
+    // Sprawdź tasks/ najpierw, potem fallback do root
+    let taskPath = path.join(COMMS_TASKS_DIR, `${req.params.id}.task.json`);
+    
+    if (!fs.existsSync(taskPath)) {
+      // Fallback do root
+      taskPath = path.join(COMMS_DIR, `${req.params.id}.task.json`);
+    }
+    
     if (fs.existsSync(taskPath)) {
       fs.unlinkSync(taskPath);
       res.json({ ok: true, id: req.params.id });

@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const JIMBOKIT_COMMS_PATH = path.resolve(__dirname, "..", "..", "JIMBOKIT_COMMS");
+const JIMBOKIT_COMMS_TASKS = path.join(JIMBOKIT_COMMS_PATH, "tasks");
+const JIMBOKIT_COMMS_RESULTS = path.join(JIMBOKIT_COMMS_PATH, "results");
 
 export interface PiTask {
   id: string;
@@ -56,7 +58,8 @@ export class PiBridge {
       timestamp: Date.now(),
     });
 
-    const taskPath = path.join(JIMBOKIT_COMMS_PATH, `${task.id}.task.json`);
+    // Nowa lokalizacja: tasks/
+    const taskPath = path.join(JIMBOKIT_COMMS_TASKS, `${task.id}.task.json`);
     await fs.writeFile(taskPath, JSON.stringify(task, null, 2), "utf-8");
     console.log(`[PiBridge] Task written to: ${taskPath}`);
 
@@ -69,11 +72,12 @@ export class PiBridge {
       return cached;
     }
 
-    const resultPath = path.join(JIMBOKIT_COMMS_PATH, `${taskId}.result.json`);
+    // Nowa lokalizacja: results/
+    let resultPath = path.join(JIMBOKIT_COMMS_RESULTS, `${taskId}.result.json`);
+    
     try {
       const content = await fs.readFile(resultPath, "utf-8");
       const result: TaskResult = JSON.parse(content);
-      // Map properties effectively or merge them
       const fullResult = {
          ...cached,
          ...result,
@@ -82,8 +86,23 @@ export class PiBridge {
       this.taskResults.set(taskId, fullResult);
       return fullResult;
     } catch (err) {
-      if (cached) return cached;
-      throw new Error(`Task ${taskId} not found`);
+      // Fallback do starej lokalizacji (root) dla kompatybilności wstecznej
+      const oldResultPath = path.join(JIMBOKIT_COMMS_PATH, `${taskId}.result.json`);
+      try {
+        const content = await fs.readFile(oldResultPath, "utf-8");
+        const result: TaskResult = JSON.parse(content);
+        const fullResult = {
+           ...cached,
+           ...result,
+           taskId
+        } as TaskResult;
+        this.taskResults.set(taskId, fullResult);
+        console.log(`[PiBridge] Found result in old location: ${oldResultPath}`);
+        return fullResult;
+      } catch (oldErr) {
+        if (cached) return cached;
+        throw new Error(`Task ${taskId} not found in new or old location`);
+      }
     }
   }
 
