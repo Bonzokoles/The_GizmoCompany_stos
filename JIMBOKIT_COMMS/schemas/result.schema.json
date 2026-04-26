@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JIMBOKIT_COMMS Result Schema",
+  "description": "Schemat wyniku zwracanego przez AGENT_PI przez JIMBOKIT_COMMS",
+  "type": "object",
+  "required": ["taskId", "status", "timestamp"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "description": "ID zadania, którego dotyczy wynik",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "status": {
+      "type": "string",
+      "description": "Status wykonania zadania",
+      "enum": ["completed", "failed", "processing", "cancelled", "timeout"]
+    },
+    "result": {
+      "type": "object",
+      "description": "Dane wyjściowe zadania (wymagane gdy status=completed)",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "Krótkie podsumowanie wyniku"
+        },
+        "files": {
+          "type": "array",
+          "description": "Lista ścieżek do plików wyjściowych",
+          "items": {
+            "type": "string"
+          }
+        },
+        "data": {
+          "description": "Główny wynik zadania (obiekt, string, array - dowolny typ)",
+          "oneOf": [
+            { "type": "object" },
+            { "type": "string" },
+            { "type": "array" },
+            { "type": "number" },
+            { "type": "boolean" }
+          ]
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Dodatkowe metadane wyniku",
+          "additionalProperties": true
+        }
+      }
+    },
+    "error": {
+      "type": "object",
+      "description": "Informacje o błędzie (wymagane gdy status=failed)",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Kod błędu"
+        },
+        "message": {
+          "type": "string",
+          "description": "Opis błędu"
+        },
+        "stack": {
+          "type": "string",
+          "description": "Stack trace (opcjonalnie)"
+        }
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "Czas zakończenia zadania (ISO 8601)",
+      "format": "date-time"
+    },
+    "duration": {
+      "type": "number",
+      "description": "Czas wykonania w sekundach (opcjonalne)",
+      "minimum": 0
+    }
+  }
+}

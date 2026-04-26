@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JIMBOKIT_COMMS Task Schema",
+  "description": "Schemat zadania przekazywanego do AGENT_PI przez JIMBOKIT_COMMS",
+  "type": "object",
+  "required": ["id", "type", "source", "priority", "payload", "timestamp"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unikalny identyfikator zadania (UUID)",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "type": {
+      "type": "string",
+      "description": "Typ zadania do wykonania",
+      "enum": [
+        "data_cleanup",
+        "data_analysis",
+        "document_processing",
+        "file_conversion",
+        "data_validation",
+        "batch_processing",
+        "custom"
+      ]
+    },
+    "source": {
+      "type": "string",
+      "description": "Źródło zadania",
+      "enum": ["jimbo_kit", "agent_pi", "buch_chat", "ui"]
+    },
+    "priority": {
+      "type": "string",
+      "description": "Priorytet wykonania",
+      "enum": ["low", "medium", "high", "urgent"],
+      "default": "medium"
+    },
+    "payload": {
+      "type": "object",
+      "description": "Dane wejściowe zadania",
+      "required": ["instruction"],
+      "properties": {
+        "instruction": {
+          "type": "string",
+          "description": "Dokładna instrukcja co AGENT_PI ma wykonać"
+        },
+        "files": {
+          "type": "array",
+          "description": "Lista ścieżek do plików wejściowych",
+          "items": {
+            "type": "string"
+          }
+        },
+        "context": {
+          "type": "string",
+          "description": "Dodatkowy kontekst dla zadania"
+        },
+        "outputFormat": {
+          "type": "string",
+          "description": "Oczekiwany format wyniku (json, csv, txt, markdown)",
+          "enum": ["json", "csv", "txt", "markdown", "auto"]
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Dodatkowe metadane zadania",
+          "additionalProperties": true
+        }
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "Czas utworzenia zadania (ISO 8601)",
+      "format": "date-time"
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Maksymalny czas wykonania w sekundach (opcjonalne)",
+      "minimum": 1
+    }
+  }
+}
