@@ -1,0 +1,141 @@
+{
+  "report_id": "DEMO-REP-001",
+  "status": "Ready_for_Goose_UI",
+  "analyzed_at": "2026-04-26T04:30:00Z",
+  "source_file": "demo_sales_02.json",
+  "business_insights": {
+    "executive_summary": "Analiza 5 produktów wykazała 2 bestsellery (marża >40%) i 2 produkty wymagające interwencji cenowej.",
+    "bestsellers": [
+      {
+        "id": 103,
+        "nazwa": "Lampa LED Smart",
+        "insight": "TOP performer: 50% marża + 78 szt. sprzedanych. Zwiększyć budżet reklamowy o 30%.",
+        "action": "scale_marketing",
+        "priority": "high"
+      },
+      {
+        "id": 101,
+        "nazwa": "Krzesło Dębowe Premium",
+        "insight": "Solidna marża 40% i wysoka rotacja (45 szt.). Utrzymać obecną strategię.",
+        "action": "maintain",
+        "priority": "medium"
+      }
+    ],
+    "dead_stock": [
+      {
+        "id": 105,
+        "nazwa": "Fotel Gaming RGB",
+        "insight": "ZERO sprzedaży pomimo ok. marży 27%. Problem: cena zbyt wysoka lub brak widoczności.",
+        "action": "price_reduce_10_percent",
+        "priority": "critical"
+      },
+      {
+        "id": 102,
+        "nazwa": "Biurko Executive X",
+        "insight": "Katastrofalnie niska marża (8.3%) + prawie brak sprzedaży (2 szt.). Wyprzedać i usunąć z oferty.",
+        "action": "clearance_sale",
+        "priority": "high"
+      }
+    ],
+    "mid_performers": [
+      {
+        "id": 104,
+        "nazwa": "Regał Metalowy 180cm",
+        "insight": "Średnia rotacja (12 szt.), ok. marża (20%). Monitor dalej.",
+        "action": "monitor",
+        "priority": "low"
+      }
+    ]
+  },
+  "metrics": {
+    "total_revenue_analyzed": 14220,
+    "avg_margin": 29.06,
+    "products_above_target": 2,
+    "products_below_target": 2,
+    "action_required_count": 2
+  },
+  "dashboard_hints": {
+    "layout_type": "ecommerce_alert_dashboard",
+    "title": "Q1 Sales Analysis — Immediate Actions Required",
+    "widgets": [
+      {
+        "type": "bar_chart",
+        "title": "Marża % per Produkt",
+        "data_source": "tabularis_data",
+        "x_axis": "nazwa",
+        "y_axis": "marza_procent",
+        "highlight": ["Lampa LED Smart", "Krzesło Dębowe Premium"],
+        "alert": ["Biurko Executive X"]
+      },
+      {
+        "type": "scatter_plot",
+        "title": "Rotacja vs Marża",
+        "x_axis": "sprzedano_sztuk",
+        "y_axis": "marza_procent",
+        "bubble_size": "cena_netto",
+        "quadrants": {
+          "q1": "Stars (high margin, high sales)",
+          "q2": "Question Marks (high margin, low sales)",
+          "q3": "Dogs (low margin, low sales)",
+          "q4": "Cash Cows (low margin, high sales)"
+        }
+      },
+      {
+        "type": "action_card_list",
+        "urgency": "high",
+        "cards": [
+          {
+            "title": "🚨 CRITICAL: Fotel Gaming RGB",
+            "text": "Zero sprzedaży. Obniż cenę o 10% (890 → 801 zł) lub usuń z oferty.",
+            "color": "red",
+            "cta": "Zmień cenę"
+          },
+          {
+            "title": "⚠️ HIGH: Biurko Executive X",
+            "text": "Marża 8.3% to strata. Wyprzedaż -15% i zakończ sprzedaż.",
+            "color": "orange",
+            "cta": "Wyprzedaż"
+          },
+          {
+            "title": "✅ SCALE: Lampa LED Smart",
+            "text": "50% marża + 78 szt. = goldmine. Zwiększ marketing.",
+            "color": "green",
+            "cta": "Zwiększ budżet"
+          }
+        ]
+      },
+      {
+        "type": "kpi_summary",
+        "metrics": [
+          {"label": "Przychód", "value": "14,220 zł", "trend": "+5%"},
+          {"label": "Średnia marża", "value": "29.06%", "trend": "-2%"},
+          {"label": "Produkty OK", "value": "2/5", "trend": "neutral"},
+          {"label": "Wymaga akcji", "value": "2", "trend": "alert"}
+        ]
+      }
+    ],
+    "recommended_view": "multi_widget_dashboard",
+    "refresh_interval_seconds": 3600
+  },
+  "next_steps": {
+    "immediate": [
+      "Obniż cenę Fotela Gaming RGB o 10%",
+      "Uruchom clearance sale dla Biurka Executive X"
+    ],
+    "this_week": [
+      "Zwiększ budżet reklamowy Lampy LED Smart o 30%",
+      "Monitoruj Regał Metalowy przez kolejne 14 dni"
+    ],
+    "this_month": [
+      "Przeanalizuj kategorię Gaming — dlaczego zero sprzedaży?",
+      "Zoptymalizuj pricing całej linii Mebli/Biurowych"
+    ]
+  },
+  "attachments": {
+    "source_data": "data/demo_sales_02.json",
+    "sql_queries_used": [
+      "SELECT * FROM products WHERE marza_procent > 40 ORDER BY sprzedano_sztuk DESC",
+      "SELECT * FROM products WHERE sprzedano_sztuk = 0"
+    ]
+  }
+}

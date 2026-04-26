@@ -266,3 +266,103 @@ Ten endpoint:
 **Status:** 🟢 GOTOWE DO TESTOWANIA (FAZA 0-3)  
 **Data:** 2026-04-26  
 **Następny krok:** Testuj przez 1-2 tygodnie, potem FAZA 4
+
+---
+
+## 🆕 ZENO Suffix Protocol — Integracja (2026-04-26)
+
+### Co to jest?
+
+**ZENO Suffix Protocol** to deterministyczny system handoff między agentami oparty o sufiksy plików:
+
+```
+_00.csv → _02.json → _04.json → Dashboard
+```
+
+### Struktura rozszerzona
+
+Dodano folder `data/` dla plików z sufiksami:
+
+```
+JIMBOKIT_COMMS/
+├── tasks/          ← zadania (JSON Schema)
+├── results/        ← wyniki (JSON Schema)
+├── data/           ← 🆕 pliki z sufiksami (_00, _02, _04...)
+├── archive/
+└── schemas/
+```
+
+### Protokół Sufiksów
+
+| Sufiks | Stan | Przykład |
+|--------|------|----------|
+| `_00.csv` | Surowe dane | `sales_00.csv` |
+| `_01.json` | Po indexerze (duże) | `sales_01.json` |
+| `_02.json` | **Tabularis Ready** | `sales_02.json` |
+| `_03.json` | Insights extracted | `sales_03.json` |
+| `_04.json` | **UI Package** | `sales_04.json` |
+| `_05.json` | Raport końcowy | `sales_05.json` |
+| `_ERR.json` | Error state | `sales_ERR.json` |
+
+### Jak współpracuje z JSON Schema?
+
+**Zadanie w `tasks/`:**
+```json
+{
+  "id": "uuid-123",
+  "type": "data_analysis",
+  "payload": {
+    "instruction": "Analyze sales",
+    "input_file": "data/sales_02.json",   // ← Plik z sufiksem!
+    "output_file": "data/sales_04.json",
+    "role": "Wnioskujący"
+  }
+}
+```
+
+**Wynik w `results/`:**
+```json
+{
+  "taskId": "uuid-123",
+  "status": "completed",
+  "result": {
+    "output_file": "data/sales_04.json",
+    "insights_count": 5
+  }
+}
+```
+
+### Przykłady demonstracyjne
+
+- `data/demo_sales_02.json` — Tabularis Ready (5 produktów)
+- `data/demo_sales_04.json` — UI Package z `dashboard_hints`
+- `data/README.md` — Pełna dokumentacja protokołu
+
+### Kiedy używać?
+
+**Użyj ZENO Suffix Protocol dla:**
+- ✅ E-commerce analytics
+- ✅ Large dataset processing (>10MB)
+- ✅ Multi-step transformations (ETL → Analysis → UI)
+- ✅ Atomic agent tasks (jeden agent = jedna transformacja)
+
+**Użyj zwykłego JSON Schema dla:**
+- ✅ Proste zadania (single-step)
+- ✅ Command-response (Pi → AGENT_PI)
+- ✅ Status updates
+- ✅ Error reporting
+
+### Referencje
+
+- `data/README.md` — Dokumentacja protokołu
+- `WORKSPACE_META_DATA/pomoce_mapy_projekt/SUPER_ANALITYK_e_comerce/` — Pełny workflow
+- `data/demo_sales_*.json` — Przykłady
+
+---
+
+**Status:** 🟢 GOTOWE DO TESTOWANIA (FAZA 0-3 + ZENO Protocol)  
+**Data:** 2026-04-26  
+**Następny krok:** 
+1. Testuj JIMBOKIT_COMMS przez 1-2 tygodnie
+2. Testuj ZENO workflow z przykładowymi plikami
+3. Potem FAZA 4

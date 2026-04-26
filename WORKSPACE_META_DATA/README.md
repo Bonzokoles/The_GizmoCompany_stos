@@ -80,3 +80,56 @@ WORKSPACE_META_DATA/
 ---
 
 *WORKSPACE_META_DATA v1.0 | Bonzo + JIMBO System | 2026*
+
+---
+
+## 🆕 Ostatnie Aktualizacje
+
+### 2026-04-26: JIMBOKIT_COMMS Refactoring ✅
+
+**Problem:** API connection między JIMbo_kit a Backend, format inconsistency (markdown vs JSON).
+
+**Rozwiązanie:** Zrefaktorowano system komunikacji agent-agent:
+- ✅ **Struktura folderów:** `JIMBOKIT_COMMS/` → `tasks/`, `results/`, `archive/`, `schemas/`
+- ✅ **Format:** Markdown → JSON Schema (ajv validation)
+- ✅ **API:** Dodano REST endpoints w JIMBO_agent_HUB (port 4224)
+- ✅ **Komponenty:**
+  - `comms-validator.ts` — JSON Schema validation
+  - `comms-helper.ts` — UI helpers
+  - PiBridge — zaktualizowany do nowej struktury
+- ✅ **Bezpieczeństwo:** Feature flag (`USE_HUB_API`) dla instant rollback
+- ✅ **Kompatybilność:** 2-tygodniowy fallback do starego systemu
+
+**Status:** FAZA 0-3 done (10h/13h), testowanie w toku
+
+**Testy:**
+- Validator: 7/7 ✅
+- Integracja (HUB + PiBridge): 6/6 ✅
+- UI Manual: ⏳ Do wykonania
+
+**Commits:**
+- `03dc2b0` — FAZA 0: Struktura + schemas
+- `e3f7f18` — FAZA 1: Validator
+- `bbaaa49` — FAZA 2: HUB API + PiBridge
+- `7c96072` — FAZA 3: UI feature flag
+- `a693337` — Dokumentacja
+
+**Dokumentacja zaktualizowana:**
+- `JIMBOKIT_COMMS/IMPLEMENTACJA_PODSUMOWANIE.md`
+- `JIMBOKIT_COMMS/PLAN_WDROZENIA.md`
+- `WORKSPACE_META_DATA/pomoce_mapy_projekt/01_architektura_warstw.md`
+- `WORKSPACE_META_DATA/pomoce_mapy_projekt/02_komunikacja_agentow.md`
+- `WORKSPACE_META_DATA/pomoce_mapy_projekt/04_flow_zadan.md`
+- `WORKSPACE_META_DATA/pomoce_mapy_projekt/ANALIZA_PRZEPŁYWU_DANYCH.md`
+
+**Następne kroki:**
+1. FAZA 4 (opcjonalna, ~1-2 tygodnie): Delegacja w JIMBO_KIT → endpoint `/delegate-to-pi`
+2. FAZA 5 (za 2 tygodnie): Cleanup fallbacków, finalizacja
+
+---
+
+**Aktualne priorytety projektu:**
+1. 🟢 **JIMBOKIT_COMMS** — testowanie nowego systemu
+2. 🔵 **Workspace cleanup** — archiwizacja niepotrzebnych plików
+3. ⚪ **React 18→19** — w kolejce (za React 19 stabilizacja)
+4. ⚪ **Vite 5→8** — w kolejce

@@ -1,0 +1,69 @@
+{
+  "metadata": {
+    "source": "demo_sales_00.csv",
+    "status": "Tabularis_Ready",
+    "processed_at": "2026-04-26T04:25:00Z",
+    "agent": "ETL_Prep_Agent",
+    "rows": 5,
+    "next_agent": "Analityk_Czytający"
+  },
+  "tabularis_data": [
+    {
+      "id": 101,
+      "nazwa": "Krzesło Dębowe Premium",
+      "kategoria": "Meble/Biurowe",
+      "cena_netto": 250,
+      "koszt": 150,
+      "marza_procent": 40.0,
+      "sprzedano_sztuk": 45,
+      "rotacja": "wysoka"
+    },
+    {
+      "id": 102,
+      "nazwa": "Biurko Executive X",
+      "kategoria": "Meble/Biurowe",
+      "cena_netto": 600,
+      "koszt": 550,
+      "marza_procent": 8.33,
+      "sprzedano_sztuk": 2,
+      "rotacja": "krytycznie_niska"
+    },
+    {
+      "id": 103,
+      "nazwa": "Lampa LED Smart",
+      "kategoria": "Oświetlenie/Smart",
+      "cena_netto": 120,
+      "koszt": 60,
+      "marza_procent": 50.0,
+      "sprzedano_sztuk": 78,
+      "rotacja": "wysoka"
+    },
+    {
+      "id": 104,
+      "nazwa": "Regał Metalowy 180cm",
+      "kategoria": "Meble/Magazynowe",
+      "cena_netto": 350,
+      "koszt": 280,
+      "marza_procent": 20.0,
+      "sprzedano_sztuk": 12,
+      "rotacja": "średnia"
+    },
+    {
+      "id": 105,
+      "nazwa": "Fotel Gaming RGB",
+      "kategoria": "Meble/Gaming",
+      "cena_netto": 890,
+      "koszt": 650,
+      "marza_procent": 26.97,
+      "sprzedano_sztuk": 0,
+      "rotacja": "zero"
+    }
+  ],
+  "summary": {
+    "total_revenue": 14220,
+    "total_products": 5,
+    "avg_margin": 29.06,
+    "bestseller_id": 103,
+    "dead_stock_count": 1
+  }
+}
