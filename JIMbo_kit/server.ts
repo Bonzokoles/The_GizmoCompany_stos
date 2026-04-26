@@ -28,11 +28,28 @@ import { randomUUID } from "crypto";
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
-import { executeJimboTool, jimboOpenAITools } from "./tools/index";
-import { ROLE_MODELS, FALLBACK_CHAINS } from "../config/openrouter-models.js";
+import { executeJimboTool, jimboOpenAITools } from "./tools/index.js";
+// import { ROLE_MODELS, FALLBACK_CHAINS } from "../config/openrouter-models.ts"; // ESM import issue - defined locally below
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname_kit = dirname(__filename);
+
+// ── Fallback Chains (local definition to avoid ESM import issues) ──
+const FALLBACK_CHAINS = {
+  JIMBO_CHAT: [
+    "google/gemma-3-27b-it:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+    "google/gemini-2.0-flash-exp:free",
+    "mistralai/mistral-small-2501:free",
+    "google/gemini-2.0-flash-001",
+  ],
+  JIMBO_TOOLS: [
+    "google/gemini-2.0-flash-001",
+    "google/gemini-2.5-flash-exp",
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
+  ],
+};
 
 // ── Wczytaj zewnętrzny prompt systemowy (lib/system-prompt.md) ───────────────
 const SYSTEM_PROMPT_PATH = resolve(__dirname_kit, "lib/system-prompt.md");

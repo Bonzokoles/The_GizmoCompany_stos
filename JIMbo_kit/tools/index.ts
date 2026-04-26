@@ -7,7 +7,7 @@ import { gitToolDefinitions, gitToolHandlers } from './git-tools';
 import { ragToolDefinitions, ragToolHandlers } from './rag-tools';
 import { networkToolDefinitions, networkToolHandlers } from './network-tools';
 import { hubToolDefinitions, hubToolHandlers } from './hub-tools';
-import { pumoToolDefinitions, pumoToolHandlers } from '../../../WWW_Zen_BRo_wser_tool/tools/pumo-dashboard-tool';
+// import { pumoToolDefinitions, pumoToolHandlers } from '../../../WWW_Zen_BRo_wser_tool/tools/pumo-dashboard-tool'; // DISABLED: module not found
 import { filePipelineToolDefinitions, filePipelineToolHandlers } from './file-pipeline';
 
 export const jimboToolDefinitions: ToolDefinition[] = [
@@ -19,7 +19,7 @@ export const jimboToolDefinitions: ToolDefinition[] = [
     ...networkToolDefinitions,
     ...hubToolDefinitions,
     ...filePipelineToolDefinitions,
-    ...pumoToolDefinitions,
+    // ...pumoToolDefinitions, // DISABLED: module not found
 ];
 
 export const jimboToolHandlers: Record<string, ToolHandler> = {
@@ -31,7 +31,7 @@ export const jimboToolHandlers: Record<string, ToolHandler> = {
     ...networkToolHandlers,
     ...hubToolHandlers,
     ...filePipelineToolHandlers,
-    ...pumoToolHandlers,
+    // ...pumoToolHandlers, // DISABLED: module not found
 };
 
 export const jimboOpenAITools: OpenAI.Chat.ChatCompletionTool[] = jimboToolDefinitions.map(
