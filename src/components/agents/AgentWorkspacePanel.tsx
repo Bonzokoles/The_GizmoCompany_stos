@@ -14,6 +14,12 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { 
+  writeTaskViaHub, 
+  writeTaskViaElectron, 
+  createTask,
+  type CommsTask 
+} from "../../utils/comms-helper";
 
 // ── Import terminali ze slotów ─────────────────────────────────────────────────
 // TERMINAL_SLOT_01 — edytuj: AGENT_Pi_01/index.tsx
@@ -222,6 +228,12 @@ export function AgentWorkspacePanel({
   const [commsStatus, setCommsStatus] = useState<string | null>(null);
   const [showPiCtrl, setShowPiCtrl] = useState(true);
 
+  // ── FAZA 3: Feature flag — przełącznik HUB API vs Electron file API ───────
+  // TRUE = nowy sposób (przez HUB API)
+  // FALSE = stary sposób (bezpośredni zapis pliku przez Electron)
+  // Łatwy rollback jeśli coś nie działa!
+  const USE_HUB_API = true;
+
   // ── Wczytaj definicje agentów z AGENT_LIBRARY/agents/*.json ──────────────
 
   useEffect(() => {
@@ -346,27 +358,52 @@ export function AgentWorkspacePanel({
   // ── Zapisz zadanie do JIMBOKIT_COMMS ────────────────────────────────────
   const writeToComms = useCallback(
     async (agentName: string, content: string) => {
-      if (!isElectron || !content.trim()) return;
-      const ts = new Date()
-        .toISOString()
-        .slice(0, 19)
-        .replace("T", "_")
-        .replace(/:/g, "-");
-      const filePath = `${COMMS_DIR}/${agentName}_task_${ts}.md`;
-      const md = `# Zadanie → ${agentName}\n> Wystawione przez: Pi Agent | ${new Date().toLocaleString("pl-PL")}\n\n${content}\n`;
+      if (!content.trim()) return;
+      
       try {
-        const res = await window.electronAPI?.file?.write?.(filePath, md);
-        setCommsStatus(
-          res?.success
-            ? `✓ COMMS/${agentName}_task_${ts}.md`
-            : `✗ ${res?.error ?? "błąd zapisu"}`,
-        );
+        if (USE_HUB_API) {
+          // NOWY SPOSÓB: przez HUB API z walidacją JSON
+          const task = createTask(content, {
+            type: 'custom',
+            priority: 'medium',
+            context: `Agent: ${agentName}`,
+            metadata: { 
+              source: 'AgentWorkspacePanel',
+              agentName,
+              timestamp: new Date().toISOString()
+            }
+          });
+          
+          const result = await writeTaskViaHub(task);
+          
+          if (result.ok) {
+            setCommsStatus(`✓ HUB API → task ${task.id.slice(0, 8)}...`);
+          } else {
+            setCommsStatus(`✗ HUB API: ${result.error}`);
+          }
+        } else {
+          // STARY SPOSÓB: bezpośredni zapis przez Electron file API
+          if (!isElectron) {
+            setCommsStatus('✗ Electron API niedostępny');
+            return;
+          }
+          
+          const result = await writeTaskViaElectron(agentName, content, COMMS_DIR);
+          
+          if (result.ok) {
+            const fileName = result.path?.split('/').pop() || 'task.md';
+            setCommsStatus(`✓ COMMS/${fileName}`);
+          } else {
+            setCommsStatus(`✗ ${result.error ?? 'błąd zapisu'}`);
+          }
+        }
       } catch (e) {
         setCommsStatus(`✗ ${String(e)}`);
       }
+      
       setTimeout(() => setCommsStatus(null), 5000);
     },
-    [],
+    [USE_HUB_API],
   );
 
   // ── Wyślij komendę do konkretnego slotu PTY ──────────────────────────────
