@@ -1,0 +1,37 @@
+# ZENO Browser & JIMBO Operations Hub
+
+> Centralny pulpit operacyjny dla autonomicznych agentów AI, Cloudflare Browser Run, szyny komunikacji IPC oraz monitoringu infrastruktury Edge.
+> Domena produkcyjna: https://zenbrowsers.org
+> Zapasowa domena Pages: https://zeno-browser-web.pages.dev
+
+## 🌐 O Platformie
+
+ZENO Browser (The_Zenon_browser / zeno-browser-web) implementuje hybrydową architekturę Dual-Target:
+1. **Desktop Client**: Kontener Electron 27 z mostkiem PTY (xterm.js + node-pty) oraz lokalnym serwerem Model Context Protocol (stdio + SSE).
+2. **Edge Operations Web**: Kokpit brzegowy wdrożony na Cloudflare Pages zintegrowany z Cloudflare Browser Run (wcześniej Browser Rendering), Workers AI, D1 Database i Cloudflare Queues.
+
+## 🛠️ Moduły Operacyjne (Core Matrix)
+
+- **/ (COCKPIT)**: Główny pulpit telemetrii, monitoring dostępności API i serwisów produkcyjnych.
+- **/render (BROWSER RUN)**: Szybkie akcje headless browsera na brzegu sieci:
+  - `/scrape`: Ekstrakcja danych strukturalnych i selektorów CSS.
+  - `/markdown`: Konwersja stron WWW do czystego Markdown pod modele LLM / RAG.
+  - `/screenshot`: Błyskawiczne zrzuty ekranu bez cold-startu.
+  - `/pdf`: Generowanie dokumentacji i raportów.
+  - `/json`: Ekstrakcja danych AI na podstawie zadanego schematu promptu.
+- **/workers (INFRASTRUCTURE)**: Zarządzanie workerami brzegowymi, kolejkami Cloudflare Queues oraz stanem baz D1.
+- **/stolarnia (STOLARNIA AMS)**: Telemetria i endpointy produkcyjnego API Stolarnia AMS.
+- **/assistant (ASYSTENT AI)**: Zintegrowany asystent konwersacyjny Buch / Jimbo z dostępem do historii sesji.
+
+## 🔌 Protokoły i Standardy Integracji
+
+- **Cloudflare Browser Run**: Natywna obsługa `env.BROWSER.quickAction()` oraz Chrome DevTools Protocol (CDP).
+- **Model Context Protocol (MCP)**: Serwer narzędziowy (port 4111) oraz mostek agentowy JIMBOKIT_COMMS.
+- **WebMCP**: Kompatybilność z protokołem `document.modelContext` dla agentów przeglądarkowych.
+- **Pay Per Crawl / X402**: Przygotowanie pod autoryzację i monetyzację zapytań agentowych HTTP 402.
+
+## 🔗 Ekosystem
+
+- https://jimbo77.com — Główny architekt i portfolio
+- https://mybonzoaiblog.com — Baza wiedzy AISEO
+- https://yutro.company — Wdrożenia komercyjne AI

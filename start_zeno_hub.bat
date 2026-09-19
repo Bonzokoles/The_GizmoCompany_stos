@@ -19,7 +19,7 @@ set "MYBONZO_DIR=U:\WWW_MyBonzo_com"
 
 :: ── MEMORY SAVER — ustaw =1 zeby pominac ciezkie kontenery (ClickHouse/Plausible)
 :: Przydatne gdy VirtualAlloc failed / malo wolnej pamieci wirtualnej
-set "SKIP_PLAUSIBLE=0"
+set "SKIP_PLAUSIBLE=1"
 :: Ustaw =1 zeby pominac rowniez Umami Analytics
 set "SKIP_ANALYTICS=0"
 
@@ -87,6 +87,7 @@ echo   [01/10] zeno-umami-db (PostgreSQL)
 podman start zeno-umami-db >nul 2>&1
 if errorlevel 1 (
     podman run -d --name zeno-umami-db ^
+        --network zeno-net ^
         -e POSTGRES_DB=umami -e POSTGRES_USER=umami -e POSTGRES_PASSWORD=umami ^
         -v umami-db-data:/var/lib/postgresql/data ^
         --restart unless-stopped ^
@@ -110,6 +111,7 @@ echo   [03/10] zeno-umami (Analytics)
 podman start zeno-umami >nul 2>&1
 if errorlevel 1 (
     podman run -d --name zeno-umami ^
+        --network zeno-net ^
         -p 5183:3000 ^
         -e DATABASE_URL=postgresql://umami:umami@zeno-umami-db:5432/umami ^
         -e DISABLE_TELEMETRY=1 ^

@@ -86,3 +86,24 @@ WORKSPACE_META_DATA/
 
 services/mydia/
 .gitnexus
+
+# Temporary test files & logs
+test_blog*.json
+*.log.err
+logs/
+*.processing
+
+# JIMBOKIT_COMMS working directories
+JIMBOKIT_COMMS/drop/
+JIMBOKIT_COMMS/archive/
+JIMBOKIT_COMMS/processed/
+JIMBOKIT_COMMS/results/
+JIMBOKIT_COMMS/test-data/
+JIMBOKIT_COMMS/inbox/
+
+# Tool and graph outputs
+graphify-out/
+src/graphify-out/
+.omg/
+conductor/
+.opencli_profile*/
