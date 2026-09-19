@@ -12,7 +12,7 @@
 import type { Env } from "../../types";
 import { jsonResponse, errorResponse, corsHeaders } from "../../types";
 
-const UMAMI_URL = "https://analytics.mybonzo.com";
+const UMAMI_URL = "https://analytics.jimbo77.com";
 
 const SITE_IDS: Record<string, string> = {
   "jimbo77.org": "4505adfc-d398-43d9-b3a9-750ec4abf561",
@@ -23,7 +23,7 @@ const SITE_IDS: Record<string, string> = {
 };
 
 async function umamiApi(path: string, env: Env): Promise<any> {
-  const baseUrl = env.UMAMI_URL || "https://analytics.mybonzo.com";
+  const baseUrl = env.UMAMI_URL || "https://analytics.jimbo77.com";
   const token = env.UMAMI_API_KEY || "";
   const resp = await fetch(`${baseUrl}/api${path}`, {
     headers: {
