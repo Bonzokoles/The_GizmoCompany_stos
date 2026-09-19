@@ -11,6 +11,7 @@ import type {
 
 export interface Env {
   DB: D1Database;
+  BROWSER?: any;
   // SESSION: KVNamespace;
   // AI_CACHE: KVNamespace;
   // SITE_REGISTRY: KVNamespace;

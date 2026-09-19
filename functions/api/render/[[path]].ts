@@ -1,6 +1,7 @@
 /**
- * ZENO Browser — Browser Rendering API
- * Proxies CF Browser Rendering REST API for screenshot, PDF, scrape, markdown, and AI JSON extraction
+ * ZENO Browser — Browser Rendering / Browser Run API
+ * Supports both Cloudflare Workers Browser Binding (env.BROWSER.quickAction)
+ * and Cloudflare Browser Rendering REST API fallback.
  */
 import type { Env } from '../../types';
 
@@ -37,6 +38,35 @@ async function cfRender(accountId: string, token: string, endpoint: string, body
   return res;
 }
 
+async function dispatchBrowserAction(
+  env: Env,
+  endpoint: string,
+  body: Record<string, unknown>
+): Promise<Response> {
+  const browser = env.BROWSER;
+  if (browser?.quickAction) {
+    try {
+      const qRes = await browser.quickAction(endpoint, body);
+      if (qRes) return qRes;
+    } catch (e: any) {
+      console.warn(`env.BROWSER quickAction fallback to REST: ${e?.message}`);
+    }
+  }
+
+  const accountId = (env as any).CF_ACCOUNT_ID || '7f490d58a478c6baccb0ae01ea1d87c3';
+  const token = (env as any).CF_API_TOKEN || (env as any).CLOUDFLARE_API_TOKEN;
+  if (!accountId || !token) {
+    return new Response(
+      JSON.stringify({
+        error: "Cloudflare Browser Run requires either env.BROWSER binding or CF_ACCOUNT_ID and CF_API_TOKEN with 'Browser Rendering - Edit' permission.",
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...CORS } }
+    );
+  }
+
+  return cfRender(accountId, token, endpoint, body);
+}
+
 /* ─── Route Handler ───────────────────────────────── */
 
 export const onRequest: PagesFunction<Env> = async (ctx) => {
@@ -51,10 +81,10 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   if (ctx.request.method === 'GET') {
     if (path === 'status' || path === '') {
       return json({
-        service: 'Browser Rendering',
+        service: 'Browser Run / Browser Rendering',
         status: 'online',
         endpoints: ['screenshot', 'pdf', 'scrape', 'markdown', 'json'],
-        engine: 'Cloudflare Browser Rendering REST API',
+        engine: ctx.env.BROWSER ? 'Cloudflare Workers Browser Binding' : 'Cloudflare Browser Rendering REST API',
       });
     }
     return err('Use POST for rendering endpoints', 405);
@@ -63,12 +93,6 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
   // POST endpoints
   if (ctx.request.method !== 'POST') {
     return err('Method not allowed', 405);
-  }
-
-  const accountId = ctx.env.CF_ACCOUNT_ID || "7f490d58a478c6baccb0ae01ea1d87c3";
-  const token = ctx.env.CF_API_TOKEN || (ctx.env as any).CLOUDFLARE_API_TOKEN;
-  if (!accountId || !token) {
-    return err('CF_ACCOUNT_ID and CF_API_TOKEN are required', 500);
   }
 
   let body: any;
@@ -84,7 +108,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     /* ── Screenshot ──────────────────────────────── */
     case 'screenshot': {
       if (!targetUrl) return err('url is required');
-      const res = await cfRender(accountId, token, 'screenshot', {
+      const res = await dispatchBrowserAction(ctx.env, 'screenshot', {
         url: targetUrl,
         viewport: body.viewport || { width: 1280, height: 720 },
         gotoOptions: { waitUntil: 'networkidle0', timeout: 30000 },
@@ -93,7 +117,6 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
         const errText = await res.text();
         return err(`Screenshot failed: ${errText}`, res.status);
       }
-      // Convert binary PNG to base64
       const buf = await res.arrayBuffer();
       const base64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
       return json({
@@ -108,7 +131,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     /* ── PDF ─────────────────────────────────────── */
     case 'pdf': {
       if (!targetUrl) return err('url is required');
-      const res = await cfRender(accountId, token, 'pdf', {
+      const res = await dispatchBrowserAction(ctx.env, 'pdf', {
         url: targetUrl,
         pdfOptions: body.pdfOptions || { format: 'a4', printBackground: true },
         gotoOptions: { waitUntil: 'networkidle0', timeout: 30000 },
@@ -133,7 +156,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       if (!targetUrl) return err('url is required');
       const selectors = body.selectors || ['h1', 'h2', 'p', 'a'];
       const elements = selectors.map((s: string) => ({ selector: s }));
-      const res = await cfRender(accountId, token, 'scrape', {
+      const res = await dispatchBrowserAction(ctx.env, 'scrape', {
         url: targetUrl,
         elements,
         gotoOptions: { waitUntil: 'networkidle0', timeout: 30000 },
@@ -142,7 +165,7 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
         const errText = await res.text();
         return err(`Scrape failed: ${errText}`, res.status);
       }
-      const data = await res.json() as any;
+      const data = (await res.json()) as any;
       return json({
         success: true,
         url: targetUrl,
@@ -159,16 +182,16 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       if (body.html) reqBody.html = body.html;
       reqBody.gotoOptions = { waitUntil: 'networkidle0', timeout: 30000 };
 
-      const res = await cfRender(accountId, token, 'markdown', reqBody);
+      const res = await dispatchBrowserAction(ctx.env, 'markdown', reqBody);
       if (!res.ok) {
         const errText = await res.text();
         return err(`Markdown conversion failed: ${errText}`, res.status);
       }
-      const data = await res.json() as any;
+      const data = (await res.json()) as any;
       return json({
         success: true,
         url: targetUrl || '(html input)',
-        markdown: data.result || data,
+        markdown: data.result || data.markdown || data,
       });
     }
 
@@ -184,7 +207,6 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
       if (body.response_format) {
         reqBody.response_format = body.response_format;
       } else {
-        // Default schema: extract key info
         reqBody.response_format = {
           type: 'json_schema',
           schema: {
@@ -206,12 +228,12 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
           },
         };
       }
-      const res = await cfRender(accountId, token, 'json', reqBody);
+      const res = await dispatchBrowserAction(ctx.env, 'json', reqBody);
       if (!res.ok) {
         const errText = await res.text();
         return err(`AI JSON extraction failed: ${errText}`, res.status);
       }
-      const data = await res.json() as any;
+      const data = (await res.json()) as any;
       return json({
         success: true,
         url: targetUrl,
@@ -221,6 +243,9 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     }
 
     default:
-      return err(`Unknown endpoint: ${path}. Available: screenshot, pdf, scrape, markdown, json`, 404);
+      return err(
+        `Unknown endpoint: ${path}. Available: screenshot, pdf, scrape, markdown, json`,
+        404
+      );
   }
 };

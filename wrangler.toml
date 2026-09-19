@@ -8,7 +8,7 @@
 
 name = "zeno-browser-web"
 pages_build_output_dir = "dist"
-compatibility_date = "2025-12-01"
+compatibility_date = "2026-03-24"
 compatibility_flags = ["nodejs_compat"]
 
 # ─── D1 Database (reuse from old project) ───────────────────
@@ -45,6 +45,10 @@ bucket_name = "zen-static-assets"
 # ─── Workers AI (CF built-in) ──────────────────────────────
 [ai]
 binding = "AI"
+
+# ─── Cloudflare Browser Run ─────────────────────────────────
+[browser]
+binding = "BROWSER"
 
 # ─── Queues ─────────────────────────────────────────────────
 [[queues.producers]]
@@ -117,6 +121,9 @@ binding = "VOICE_QUEUE"
 
 [env.production.ai]
 binding = "AI"
+
+[env.production.browser]
+binding = "BROWSER"
 # wrangler secret put ANTHROPIC_API_KEY
 # wrangler secret put WEBGATE_SECRET
 # wrangler secret put UMAMI_SITE_ID
