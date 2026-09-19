@@ -1,6 +1,6 @@
 /**
  * TerminalPanel — xterm.js + node-pty real terminal
- * Tabs: 🖥 Terminal | ⚡ JS | 📋 Komendy
+ * Tabs: ▬ Terminal | ◆ JS | □ Komendy
  */
 
 import { useState, useCallback, useRef, useEffect } from "react";
@@ -34,81 +34,81 @@ interface CommandCategory {
 const COMMAND_CATEGORIES: CommandCategory[] = [
   {
     name: "System",
-    icon: "💻",
+    icon: "▦",
     commands: [
-      { label: "Info systemowe", cmd: 'systeminfo | Select-String "OS Name|OS Version|System Type|Total Physical Memory"', icon: "🖥", description: "OS i pamięć" },
-      { label: "Dyski", cmd: "Get-PSDrive -PSProvider FileSystem | Format-Table Name,Used,Free,Root -AutoSize", icon: "💾", description: "Wolne miejsce" },
-      { label: "Procesy (Top 10)", cmd: "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Name,Id,CPU,WorkingSet | Format-Table -AutoSize", icon: "📊", description: "Procesy wg CPU" },
-      { label: "Pamięć RAM", cmd: '[math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory/1MB,1).ToString() + " GB wolne / " + [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory/1GB,1).ToString() + " GB"', icon: "🧠", description: "Użycie RAM" },
-      { label: "Uptime", cmd: '(Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime | ForEach-Object { "$($_.Days)d $($_.Hours)h $($_.Minutes)m" }', icon: "⏱", description: "Czas działania" },
+      { label: "Info systemowe", cmd: 'systeminfo | Select-String "OS Name|OS Version|System Type|Total Physical Memory"', icon: "▬", description: "OS i pamięć" },
+      { label: "Dyski", cmd: "Get-PSDrive -PSProvider FileSystem | Format-Table Name,Used,Free,Root -AutoSize", icon: "⊡", description: "Wolne miejsce" },
+      { label: "Procesy (Top 10)", cmd: "Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Name,Id,CPU,WorkingSet | Format-Table -AutoSize", icon: "▦", description: "Procesy wg CPU" },
+      { label: "Pamięć RAM", cmd: '[math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory/1MB,1).ToString() + " GB wolne / " + [math]::Round((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory/1GB,1).ToString() + " GB"', icon: "◈", description: "Użycie RAM" },
+      { label: "Uptime", cmd: '(Get-Date) - (Get-CimInstance Win32_OperatingSystem).LastBootUpTime | ForEach-Object { "$($_.Days)d $($_.Hours)h $($_.Minutes)m" }', icon: "◐", description: "Czas działania" },
     ],
   },
   {
     name: "Sieć",
-    icon: "🌐",
+    icon: "◎",
     commands: [
-      { label: "Adres IP", cmd: 'Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notmatch "Loopback" } | Select-Object InterfaceAlias,IPAddress | Format-Table -AutoSize', icon: "📡", description: "Adresy IP" },
-      { label: "Ping Google", cmd: "Test-Connection google.com -Count 3 | Format-Table Address,Latency -AutoSize", icon: "🏓", description: "Sprawdź łączność" },
-      { label: "Otwarte porty", cmd: "Get-NetTCPConnection -State Listen | Select-Object -First 15 LocalPort,OwningProcess | Sort-Object LocalPort | Format-Table -AutoSize", icon: "🚪", description: "Nasłuchujące porty" },
-      { label: "Publiczne IP", cmd: '(Invoke-RestMethod -Uri "https://api.ipify.org?format=json" -TimeoutSec 5).ip', icon: "🌍", description: "Twoje publiczne IP" },
+      { label: "Adres IP", cmd: 'Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notmatch "Loopback" } | Select-Object InterfaceAlias,IPAddress | Format-Table -AutoSize', icon: "◆", description: "Adresy IP" },
+      { label: "Ping Google", cmd: "Test-Connection google.com -Count 3 | Format-Table Address,Latency -AutoSize", icon: "◊", description: "Sprawdź łączność" },
+      { label: "Otwarte porty", cmd: "Get-NetTCPConnection -State Listen | Select-Object -First 15 LocalPort,OwningProcess | Sort-Object LocalPort | Format-Table -AutoSize", icon: "⊞", description: "Nasłuchujące porty" },
+      { label: "Publiczne IP", cmd: '(Invoke-RestMethod -Uri "https://api.ipify.org?format=json" -TimeoutSec 5).ip', icon: "◎", description: "Twoje publiczne IP" },
     ],
   },
   {
     name: "Git",
-    icon: "🔀",
+    icon: "◊",
     commands: [
-      { label: "Status", cmd: "git status --short", icon: "📋", description: "Stan repozytorium" },
-      { label: "Log (10)", cmd: "git log --oneline -10 --graph --decorate", icon: "📜", description: "Ostatnie 10 commitów" },
-      { label: "Branch", cmd: "git branch -a", icon: "🌿", description: "Lista gałęzi" },
-      { label: "Diff", cmd: "git diff --stat", icon: "📊", description: "Statystyki zmian" },
+      { label: "Status", cmd: "git status --short", icon: "□", description: "Stan repozytorium" },
+      { label: "Log (10)", cmd: "git log --oneline -10 --graph --decorate", icon: "▭", description: "Ostatnie 10 commitów" },
+      { label: "Branch", cmd: "git branch -a", icon: "◆", description: "Lista gałęzi" },
+      { label: "Diff", cmd: "git diff --stat", icon: "▦", description: "Statystyki zmian" },
     ],
   },
   {
     name: "Podman / Docker",
-    icon: "🐳",
+    icon: "⊞",
     commands: [
-      { label: "Kontenery", cmd: 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"', icon: "📦", description: "Działające kontenery" },
-      { label: "Obrazy", cmd: 'docker images --format "table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}"', icon: "💿", description: "Lokalne obrazy" },
-      { label: "Stats", cmd: 'docker stats --no-stream --format "table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}"', icon: "📊", description: "CPU/RAM kontenerów" },
+      { label: "Kontenery", cmd: 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"', icon: "⊞", description: "Działające kontenery" },
+      { label: "Obrazy", cmd: 'docker images --format "table {{.Repository}}\\t{{.Tag}}\\t{{.Size}}"', icon: "⊡", description: "Lokalne obrazy" },
+      { label: "Stats", cmd: 'docker stats --no-stream --format "table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}"', icon: "▦", description: "CPU/RAM kontenerów" },
     ],
   },
   {
     name: "NPM / Node",
-    icon: "📦",
+    icon: "⊞",
     commands: [
-      { label: "Wersje", cmd: 'Write-Output "Node: $(node -v)"; Write-Output "NPM: $(npm -v)"', icon: "📌", description: "Wersje" },
-      { label: "Outdated", cmd: "npm outdated 2>$null", icon: "⚡", description: "Przestarzałe pakiety" },
-      { label: "Audyt", cmd: 'npm audit --omit=dev 2>$null | Select-String "found|severity"', icon: "🔒", description: "Audyt bezpieczeństwa" },
+      { label: "Wersje", cmd: 'Write-Output "Node: $(node -v)"; Write-Output "NPM: $(npm -v)"', icon: "◆", description: "Wersje" },
+      { label: "Outdated", cmd: "npm outdated 2>$null", icon: "◆", description: "Przestarzałe pakiety" },
+      { label: "Audyt", cmd: 'npm audit --omit=dev 2>$null | Select-String "found|severity"', icon: "⊕", description: "Audyt bezpieczeństwa" },
     ],
   },
   {
     name: "ZENO Browser",
-    icon: "⚡",
+    icon: "◆",
     commands: [
-      { label: "Build dev", cmd: "npm run dev", icon: "🔧", description: "Serwer deweloperski" },
-      { label: "Build prod", cmd: "npm run build", icon: "📦", description: "Build produkcyjny" },
-      { label: "TS Check", cmd: "npx tsc --noEmit", icon: "✅", description: "Sprawdź typy" },
-      { label: "Lint", cmd: "npx eslint src/ --ext .ts,.tsx 2>$null", icon: "🔍", description: "ESLint" },
-      { label: "Tests", cmd: "npm run test:unit", icon: "🧪", description: "Testy jednostkowe" },
+      { label: "Build dev", cmd: "npm run dev", icon: "◐", description: "Serwer deweloperski" },
+      { label: "Build prod", cmd: "npm run build", icon: "⊞", description: "Build produkcyjny" },
+      { label: "TS Check", cmd: "npx tsc --noEmit", icon: "✓", description: "Sprawdź typy" },
+      { label: "Lint", cmd: "npx eslint src/ --ext .ts,.tsx 2>$null", icon: "◎", description: "ESLint" },
+      { label: "Tests", cmd: "npm run test:unit", icon: "◈", description: "Testy jednostkowe" },
     ],
   },
   {
     name: "JIMBO Hub",
     icon: "◆",
     commands: [
-      { label: "Health", cmd: "curl -s http://localhost:4224/health", icon: "💚", description: "Status JIMBO HUB" },
-      { label: "Skills lista", cmd: 'curl -s http://localhost:4224/skills/list | python -c "import sys,json; d=json.load(sys.stdin); [print(f\'{s[\\\"namespace\\\"]}/{s[\\\"name\\\"]}\') for s in d[\\\"skills\\\"]]"', icon: "📚", description: "Skills w DB" },
-      { label: "Memory core", cmd: "curl -s http://localhost:4224/memory/core", icon: "🧠", description: "Core memory JIMBO" },
-      { label: "Hub restart", cmd: "cd U:\\WWW_Zen_BRo_wser_org3\\JIMBO_agent_HUB && npx tsx hub-server.ts", icon: "🔄", description: "Restart JIMBO HUB" },
+      { label: "Health", cmd: "curl -s http://localhost:4224/health", icon: "◆", description: "Status JIMBO HUB" },
+      { label: "Skills lista", cmd: 'curl -s http://localhost:4224/skills/list | python -c "import sys,json; d=json.load(sys.stdin); [print(f\'{s[\\\"namespace\\\"]}/{s[\\\"name\\\"]}\') for s in d[\\\"skills\\\"]]"', icon: "▭", description: "Skills w DB" },
+      { label: "Memory core", cmd: "curl -s http://localhost:4224/memory/core", icon: "◈", description: "Core memory JIMBO" },
+      { label: "Hub restart", cmd: "cd U:\\WWW_Zen_BRo_wser_org3\\JIMBO_agent_HUB && npx tsx hub-server.ts", icon: "◐", description: "Restart JIMBO HUB" },
     ],
   },
   {
     name: "AI Tools",
-    icon: "🤖",
+    icon: "◈",
     commands: [
-      { label: "JIMBO tools", cmd: "curl -s http://localhost:4111/tools", icon: "🛠", description: "Lista narzędzi JIMBO_kit" },
-      { label: "JIMBO config", cmd: "curl -s http://localhost:4111/api/config", icon: "⚙", description: "Konfiguracja" },
-      { label: "Workers AI", cmd: 'curl -s "https://zeno-mcp.stolarnia-ams.workers.dev/status"', icon: "☁", description: "Status Workers AI" },
+      { label: "JIMBO tools", cmd: "curl -s http://localhost:4111/tools", icon: "◐", description: "Lista narzędzi JIMBO_kit" },
+      { label: "JIMBO config", cmd: "curl -s http://localhost:4111/api/config", icon: "◐", description: "Konfiguracja" },
+      { label: "Workers AI", cmd: 'curl -s "https://zeno-mcp.stolarnia-ams.workers.dev/status"', icon: "◎", description: "Status Workers AI" },
     ],
   },
 ];
@@ -139,7 +139,7 @@ function CommandPalette({ onRun }: { onRun: (cmd: string) => void }) {
         type="text"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
-        placeholder="🔍 Filtruj komendy..."
+        placeholder="◎ Filtruj komendy..."
         style={{ width: "100%", background: "#0f172a", border: "1px solid #334155", color: "#e2e8f0", borderRadius: "6px", padding: "6px 10px", fontSize: "12px", outline: "none", boxSizing: "border-box", marginBottom: "8px" }}
         spellCheck={false}
       />
@@ -185,7 +185,7 @@ function CommandPalette({ onRun }: { onRun: (cmd: string) => void }) {
 function JsConsole() {
   const [input, setInput] = useState("");
   const [lines, setLines] = useState<Array<{ type: "in" | "out" | "err"; text: string }>>([
-    { type: "out", text: "⚡ JS Console — eval w kontekście przeglądarki" },
+    { type: "out", text: "◆ JS Console — eval w kontekście przeglądarki" },
   ]);
   const [history, setHistory] = useState<string[]>([]);
   const [histIdx, setHistIdx] = useState(-1);
@@ -340,10 +340,68 @@ function XtermShell({ active }: { active: boolean }) {
           );
         });
     } else {
-      // Web/fallback mode — show info
-      term.writeln("\x1b[33m⚠ Terminal PTY dostępny tylko w aplikacji Electron.\x1b[0m");
-      term.writeln("\x1b[36mUruchom ZENO Browser jako aplikację desktopową.\x1b[0m\r\n");
-      term.writeln("\x1b[90mW trybie web użyj zakładki 📋 Komendy lub ⚡ JS.\x1b[0m");
+      // Web mode — check local tool daemon on 127.0.0.1:4111
+      term.writeln("\x1b[36m[ZENO Web Terminal] Inicjalizacja mostka z lokalnym daemonem (http://127.0.0.1:4111)...\x1b[0m");
+      let lineBuffer = "";
+
+      fetch("http://127.0.0.1:4111/health")
+        .then((res) => {
+          if (res.ok) {
+            term.writeln("\x1b[32m[OK] Połączono z lokalnym daemonem narzędzi na porcie 4111.\x1b[0m");
+          } else {
+            term.writeln("\x1b[33m[WARN] Serwer narzędzi odpowiedział kodem " + res.status + ".\x1b[0m");
+          }
+          term.write("\r\n\x1b[32mzeno@local:~$ \x1b[0m");
+        })
+        .catch(() => {
+          term.writeln("\x1b[90m[INFO] Tryb przeglądarkowy: lokalny serwer port 4111 jest offline.\x1b[0m");
+          term.writeln("\x1b[90mAby wykonywać komendy systemowe w przeglądarce, uruchom daemon: start.bat w U:\\WWW_Zen_BRo_wser_tool\x1b[0m");
+          term.write("\r\n\x1b[32mzeno@local:~$ \x1b[0m");
+        });
+
+      const disposeInput = term.onData(async (data) => {
+        if (data === "\r") {
+          term.write("\r\n");
+          const cmd = lineBuffer.trim();
+          lineBuffer = "";
+          if (!cmd) {
+            term.write("\x1b[32mzeno@local:~$ \x1b[0m");
+            return;
+          }
+          if (cmd === "clear") {
+            term.clear();
+            term.write("\x1b[32mzeno@local:~$ \x1b[0m");
+            return;
+          }
+          term.writeln("\x1b[90m[Wykonywanie: " + cmd + "...]\x1b[0m");
+          try {
+            const resp = await fetch("http://127.0.0.1:4111/api/ask", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ question: cmd }),
+            });
+            if (resp.ok) {
+              const resData = await resp.json();
+              term.writeln(resData.answer || JSON.stringify(resData, null, 2));
+            } else {
+              term.writeln("\x1b[31m[Błąd " + resp.status + "] Daemon nie zwrócił odpowiedzi.\x1b[0m");
+            }
+          } catch {
+            term.writeln("\x1b[31m[Błąd połączenia] Uruchom lokalny demon (U:\\WWW_Zen_BRo_wser_tool\\start.bat)\x1b[0m");
+          }
+          term.write("\x1b[32mzeno@local:~$ \x1b[0m");
+        } else if (data === "\u007f") {
+          if (lineBuffer.length > 0) {
+            lineBuffer = lineBuffer.slice(0, -1);
+            term.write("\b \b");
+          }
+        } else if (data >= " ") {
+          lineBuffer += data;
+          term.write(data);
+        }
+      });
+
+      cleanupRef.current.push(() => disposeInput.dispose());
     }
 
     // Resize observer
@@ -366,7 +424,7 @@ function XtermShell({ active }: { active: boolean }) {
       fitRef.current = null;
       ptyIdRef.current = null;
     };
-  }, []); // mount-only: terminal init runs once
+  }, [isElectron]);
 
   // Fit on tab activation
   useEffect(() => {
@@ -377,7 +435,7 @@ function XtermShell({ active }: { active: boolean }) {
     }
   }, [active]);
 
-  // Public method: write command to PTY
+  // Public method: write command to PTY or local daemon
   const writeCommand = useCallback((cmd: string) => {
     const term = termRef.current;
     const id = ptyIdRef.current;
@@ -386,9 +444,25 @@ function XtermShell({ active }: { active: boolean }) {
     if (id && isElectron) {
       window.electronAPI?.terminal?.pty?.write(id, cmd + "\r");
     } else {
-      // Fallback: show command in terminal (no execution)
       term.writeln(`\r\n\x1b[36m$ ${cmd}\x1b[0m`);
-      term.writeln("\x1b[33m[Tylko Electron — brak PTY]\x1b[0m");
+      fetch("http://127.0.0.1:4111/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: cmd }),
+      })
+        .then(async (r) => {
+          if (r.ok) {
+            const res = await r.json();
+            term.writeln(res.answer || JSON.stringify(res, null, 2));
+          } else {
+            term.writeln("\x1b[31m[Błąd " + r.status + "] Daemon nie zwrócił odpowiedzi.\x1b[0m");
+          }
+          term.write("\x1b[32mzeno@local:~$ \x1b[0m");
+        })
+        .catch(() => {
+          term.writeln("\x1b[33m[Lokalny daemon port 4111 offline - uruchom start.bat w U:\\WWW_Zen_BRo_wser_tool]\x1b[0m");
+          term.write("\x1b[32mzeno@local:~$ \x1b[0m");
+        });
     }
   }, [isElectron]);
 
@@ -423,10 +497,10 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
   }, []);
 
   const tabStyle = (tab: TerminalTab) => ({
-    background: activeTab === tab ? "#1e293b" : "transparent",
+    background: activeTab === tab ? "rgba(0, 255, 204, 0.08)" : "transparent",
     border: "none",
-    borderBottom: activeTab === tab ? "2px solid #7c3aed" : "2px solid transparent",
-    color: activeTab === tab ? "#e2e8f0" : "#64748b",
+    borderBottom: activeTab === tab ? "2px solid #00ffcc" : "2px solid transparent",
+    color: activeTab === tab ? "#00ffcc" : "#6b7f96",
     padding: "6px 12px",
     cursor: "pointer",
     fontSize: "12px",
@@ -443,32 +517,34 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
         right: isWide ? "0" : "0",
         width: isWide ? "900px" : "520px",
         height: "420px",
-        background: "#0f172a",
-        border: "1px solid #1e293b",
-        borderRadius: "10px 10px 0 0",
+        background: "rgba(7, 9, 15, 0.85)",
+        border: "1px solid rgba(0, 255, 204, 0.25)",
+        borderRadius: "0",
         display: "flex",
         flexDirection: "column",
         zIndex: 1000,
-        boxShadow: "0 -4px 24px rgba(0,0,0,0.6)",
+        boxShadow: "-8px 0 40px rgba(0, 0, 0, 0.6)",
+        backdropFilter: "blur(2px)",
         transition: "width 0.2s",
+        fontFamily: "'JetBrains Mono', 'Fira Code', Consolas, monospace",
       }}
     >
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", borderBottom: "1px solid #1e293b", padding: "0 8px", flexShrink: 0 }}>
-        <button onClick={() => setActiveTab("shell")} style={tabStyle("shell")}>🖥 Terminal</button>
-        <button onClick={() => setActiveTab("js")} style={tabStyle("js")}>⚡ JS</button>
-        <button onClick={() => setActiveTab("commands")} style={tabStyle("commands")}>📋 Komendy</button>
+      <div style={{ display: "flex", alignItems: "center", borderBottom: "1px solid rgba(0, 255, 204, 0.2)", background: "#0b1325", padding: "0 8px", flexShrink: 0 }}>
+        <button onClick={() => setActiveTab("shell")} style={tabStyle("shell")}>▬ Terminal</button>
+        <button onClick={() => setActiveTab("js")} style={tabStyle("js")}>◆ JS</button>
+        <button onClick={() => setActiveTab("commands")} style={tabStyle("commands")}>□ Komendy</button>
         <div style={{ flex: 1 }} />
         <button
           onClick={() => setIsWide((w) => !w)}
           title={isWide ? "Zwęź" : "Rozszerz"}
-          style={{ background: "none", border: "none", color: "#475569", cursor: "pointer", fontSize: "14px", padding: "4px 6px" }}
+          style={{ background: "none", border: "1px solid rgba(0, 255, 204, 0.2)", color: "#6b7f96", cursor: "pointer", fontSize: "11px", padding: "2px 6px", marginRight: 4 }}
         >
           {isWide ? "⟨⟩" : "⟩⟨"}
         </button>
         <button
           onClick={onClose}
-          style={{ background: "none", border: "none", color: "#475569", cursor: "pointer", fontSize: "16px", padding: "4px 8px" }}
+          style={{ background: "none", border: "1px solid rgba(0, 255, 204, 0.2)", color: "#6b7f96", cursor: "pointer", fontSize: "12px", padding: "2px 8px" }}
           title="Zamknij"
         >
           ×
@@ -498,9 +574,9 @@ export function TerminalPanel({ onClose }: TerminalPanelProps) {
       </div>
 
       {/* Status bar */}
-      <div style={{ borderTop: "1px solid #1e293b", padding: "3px 12px", fontSize: "10px", color: "#475569", display: "flex", gap: "12px", flexShrink: 0 }}>
+      <div style={{ borderTop: "1px solid rgba(0, 255, 204, 0.15)", padding: "3px 12px", fontSize: "10px", color: "#6b7f96", display: "flex", gap: "12px", flexShrink: 0, background: "#0b1325" }}>
         <span>PowerShell PTY</span>
-        <span style={{ color: "#4ade80" }}>● xterm.js</span>
+        <span style={{ color: "#00ffcc" }}>● xterm.js</span>
         <span>node-pty</span>
         <div style={{ flex: 1 }} />
         <span>Ctrl+C przerywa • Ctrl+L czyści</span>

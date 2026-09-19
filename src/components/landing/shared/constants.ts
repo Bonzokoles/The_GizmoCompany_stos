@@ -1,68 +1,19 @@
 import type { TabId, ApiStatus, AnalyticsSource } from "./types";
 
 export const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: "overview", label: "Overview", icon: "◉" },
-  { id: "workers", label: "Workers", icon: "▲" },
-  { id: "content", label: "Content", icon: "◇" },
-  { id: "analytics", label: "Analytics", icon: "◆" },
-  { id: "pipelines", label: "Pipelines", icon: "▶" },
-  { id: "crawlers", label: "Crawlers", icon: "◎" },
-  { id: "storage", label: "Storage", icon: "▣" },
-  { id: "databases", label: "Databases", icon: "▦" },
-  { id: "images", label: "Images", icon: "◧" },
-  { id: "moa", label: "MOA", icon: "⊕" },
-  { id: "render", label: "Render", icon: "◕" },
-  { id: "queues", label: "Queues", icon: "▷" },
-  { id: "aihub", label: "AI Chat", icon: "◈" },
-  { id: "assistant", label: "Asystent", icon: "◉" },
-  { id: "mediahub", label: "Media Hub", icon: "♫" },
-  { id: "biztools", label: "BizTools", icon: "▨" },
-  { id: "workflows", label: "Workflows", icon: "⚡" },
+  { id: "overview", label: "COCKPIT", icon: "◉" },
+  { id: "render", label: "BROWSER RUN", icon: "◕" },
+  { id: "workers", label: "INFRASTRUCTURE", icon: "▲" },
+  { id: "stolarnia", label: "STOLARNIA AMS", icon: "▤" },
+  { id: "assistant", label: "ASYSTENT AI", icon: "◈" },
 ];
 
 export const API_SERVICES: ApiStatus[] = [
-  { name: "WebGate", endpoint: "/api/webgate/status", status: "checking" },
+  { name: "Stolarnia AMS API", endpoint: "https://mybonzo-v3.stolarnia-ams.workers.dev/api/stolarska/projekty", status: "checking" },
   { name: "AI Gate", endpoint: "/api/ai/status", status: "checking" },
-  { name: "Search", endpoint: "/api/search/status", status: "checking" },
+  { name: "Browser Run API", endpoint: "/api/render/status", status: "checking" },
   { name: "Sites Hub", endpoint: "/api/sites/status", status: "checking" },
-  {
-    name: "Workers Monitor",
-    endpoint: "/api/workers/status",
-    status: "checking",
-  },
-  {
-    name: "Content Pipeline",
-    endpoint: "/api/content/status",
-    status: "checking",
-  },
-  {
-    name: "Analytics Hub",
-    endpoint: "/api/analytics/status",
-    status: "checking",
-  },
-  {
-    name: "Storage Manager",
-    endpoint: "/api/storage/status",
-    status: "checking",
-  },
-  { name: "Database Explorer", endpoint: "/api/db/status", status: "checking" },
-  { name: "MOA Pipeline", endpoint: "/api/moa/status", status: "checking" },
-  { name: "Images API", endpoint: "/api/images/status", status: "checking" },
-  {
-    name: "Crawlers Monitor",
-    endpoint: "/api/crawlers/status",
-    status: "checking",
-  },
-  {
-    name: "Pipelines API",
-    endpoint: "/api/pipelines/status",
-    status: "checking",
-  },
-  {
-    name: "Browser Rendering",
-    endpoint: "/api/render/status",
-    status: "checking",
-  },
+  { name: "Workers Monitor", endpoint: "/api/workers/status", status: "checking" },
 ];
 
 export const PIPELINES_LIST = [
