@@ -16,24 +16,26 @@
   width: 100%;
   margin: 0;
   padding: 0;
-  --color-bg:         #03040b;
-  --color-surface:    rgba(15,23,42,0.45);
-  --color-border:     rgba(255,255,255,0.08);
-  --color-text:       #f8fafc;
+  --color-bg:         #05070a;
+  --color-surface:    #0a0e14;
+  --color-panel:      #11141c;
+  --color-border:     #1a202c;
+  --color-text:       #ffffff;
   --color-text-muted: #94a3b8;
-  --color-accent:     #2dd4bf;
-  --color-accent-green: #a78bfa;
+  --color-accent:     #00E6A8;
+  --color-accent-gold: #d4a574;
+  --color-accent-cyan: #00e5ff;
   --color-danger:     #f87171;
-  --color-success:    #34d399;
-  --radius:           4px;
-  --glass-bg:         rgba(15,23,42,0.45);
-  --glass-border:     rgba(255,255,255,0.08);
-  --glass-glow:       rgba(45,212,191,0.15);
-  --accent-dim:       rgba(45,212,191,0.12);
-  --t:                200ms cubic-bezier(0.23,1,0.32,1);
+  --color-success:    #00E6A8;
+  --radius:           0px;
+  --glass-bg:         #0a0e14;
+  --glass-border:     #1a202c;
+  --glass-glow:       none;
+  --accent-dim:       rgba(0, 230, 168, 0.12);
+  --t:                150ms cubic-bezier(0.23,1,0.32,1);
   font-family: 'Inter', system-ui, sans-serif;
-  background: radial-gradient(ellipse at 20% -10%, #1a2238 0%, #03040b 55%) fixed;
-  color: #f8fafc;
+  background: #05070a fixed;
+  color: #e2e8f0;
 }
 
 /* ── Sticky condensed topbar (replaces .hero.compact) ── */
@@ -3535,3 +3537,45 @@ footer {
   border-color: #f59e0b40;
   background: #f59e0b0d;
 }
+
+/* ── STRICT DARK-TECHNICAL SYSTEM ENFORCEMENT ── */
+.web-landing.ops-dashboard,
+.web-landing.ops-dashboard *,
+.web-landing.ops-dashboard *::before,
+.web-landing.ops-dashboard *::after {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+.web-landing.ops-dashboard .card,
+.web-landing.ops-dashboard .worker-card,
+.web-landing.ops-dashboard .stat-card,
+.web-landing.ops-dashboard section.card,
+.web-landing.ops-dashboard .ai-section,
+.web-landing.ops-dashboard .search-section {
+  background: #0a0e14 !important;
+  border: 1px solid #1a202c !important;
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+
+.web-landing.ops-dashboard .card:hover,
+.web-landing.ops-dashboard .worker-card:hover {
+  border-color: #2d3748 !important;
+  box-shadow: none !important;
+}
+
+.web-landing.ops-dashboard button,
+.web-landing.ops-dashboard .btn-sm,
+.web-landing.ops-dashboard .btn-primary,
+.web-landing.ops-dashboard .tab-btn,
+.web-landing.ops-dashboard .filter-btn,
+.web-landing.ops-dashboard input,
+.web-landing.ops-dashboard textarea,
+.web-landing.ops-dashboard select,
+.web-landing.ops-dashboard code,
+.web-landing.ops-dashboard pre {
+  border-radius: 0px !important;
+  box-shadow: none !important;
+}
+

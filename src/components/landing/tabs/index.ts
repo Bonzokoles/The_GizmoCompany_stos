@@ -14,3 +14,4 @@ export * from "./aihub";
 export * from "./biztools";
 export * from "./workflows";
 export * from "./mediahub";
+export * from "./stolarnia";

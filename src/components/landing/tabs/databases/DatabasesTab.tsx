@@ -23,7 +23,7 @@ export function DatabasesTab({
     <div className="tab-content">
       <div className="tab-header">
         <h2>
-          🗄️ D1 Databases ({databases.length}){" "}
+          [D1_DATABASES] Cloudflare Edge SQL ({databases.length}){" "}
           <span className={`dot ${jimboOnline ? "online" : "offline"}`} />
         </h2>
         <button className="btn-sm" onClick={loadDatabases} disabled={dbLoading}>

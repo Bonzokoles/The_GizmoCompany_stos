@@ -31,7 +31,7 @@ export function QueuesTab({
     <div className="tab-content">
       <div className="tab-header">
         <h2>
-          📨 Cloudflare Queues{" "}
+          [QUEUES] Cloudflare Async Pipeline{" "}
           <span className={`dot ${jimboOnline ? "online" : "offline"}`} />
         </h2>
         <div className="tab-actions">
@@ -49,7 +49,7 @@ export function QueuesTab({
 
       {/* Queue Bindings Status */}
       <section className="card">
-        <h3>🏥 Queue Bindings Status</h3>
+        <h3>[STATUS] Queue Bindings</h3>
         {consumerHealth ? (
           <>
             <div

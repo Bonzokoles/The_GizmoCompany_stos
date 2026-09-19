@@ -19,7 +19,7 @@ export function StorageTab({
     <div className="tab-content">
       <div className="tab-header">
         <h2>
-          💾 R2 Storage ({buckets.length} buckets){" "}
+          [R2_STORAGE] Object Storage ({buckets.length} buckets){" "}
           <span className={`dot ${jimboOnline ? "online" : "offline"}`} />
         </h2>
         <button

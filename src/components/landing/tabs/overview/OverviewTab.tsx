@@ -25,7 +25,7 @@ export function OverviewTab({
     <div className="tab-content">
       {/* Search */}
       <section className="card search-section">
-        <h2>🔍 Search</h2>
+        <h2>[SEARCH] Global Web &amp; Knowledge Index</h2>
         <div className="input-row">
           <input
             type="text"
@@ -35,7 +35,7 @@ export function OverviewTab({
             placeholder="Search the web via ZENO..."
           />
           <button onClick={handleSearch} disabled={searching}>
-            {searching ? "..." : "Search"}
+            {searching ? "[RUN]..." : "[RUN] Search"}
           </button>
         </div>
         {searchResults && (
@@ -64,24 +64,24 @@ export function OverviewTab({
       {/* AI Gate */}
       <section className="card ai-section">
         <h2>
-          AI Gate{" "}
+          [AI_GATE] Autonomous Prompt Engine{" "}
           <span className={`dot ${jimboOnline ? "online" : "offline"}`} />
         </h2>
         <div className="input-row">
           <textarea
             value={aiPrompt}
             onChange={(e) => setAiPrompt(e.target.value)}
-            placeholder="Ask AI anything..."
+            placeholder="Enter prompt or task specification..."
             rows={3}
           />
           <button onClick={handleAI} disabled={aiLoading}>
-            {aiLoading ? "..." : "Ask"}
+            {aiLoading ? "[RUN]..." : "[RUN] Ask AI"}
           </button>
           <button
             onClick={() => handleJimboAsk(aiPrompt)}
             disabled={jimboLoading || aiLoading}
           >
-            {jimboLoading ? "..." : "Ask JIMbo"}
+            {jimboLoading ? "[RUN]..." : "[RUN] Ask JIMbo"}
           </button>
         </div>
         <div className="input-row" style={{ marginTop: 8 }}>
@@ -89,7 +89,7 @@ export function OverviewTab({
             onClick={() => handleJimboSearch(searchQuery)}
             disabled={searching || jimboLoading}
           >
-            {searching ? "..." : "Szukaj przez JIMbo"}
+            {searching ? "[RUN]..." : "[RUN] JIMbo Search"}
           </button>
         </div>
         {jimboToolEvents?.length > 0 && (
@@ -112,7 +112,7 @@ export function OverviewTab({
       <div className="dashboard-grid">
         <section className="card">
           <h2>
-            ⚡ API Services ({onlineApis}/{apis.length})
+            [API_TELEMETRY] ({onlineApis}/{apis.length})
           </h2>
           <div className="status-list">
             {apis.map((svc) => (
@@ -126,7 +126,7 @@ export function OverviewTab({
         </section>
 
         <section className="card">
-          <h2>🌐 Connected Sites</h2>
+          <h2>[TOPOLOGY] Connected Sites ({sites.length})</h2>
           <div className="status-list">
             {sites.map((site) => (
               <div key={site.name} className="status-row">
@@ -140,7 +140,7 @@ export function OverviewTab({
         </section>
 
         <section className="card">
-          <h2>🚀 WebGate</h2>
+          <h2>[WEBGATE] Edge Proxy</h2>
           <p className="muted">CORS-free web proxy on Cloudflare Edge</p>
           <div className="endpoint-list">
             <code>POST /api/webgate/fetch</code>
@@ -149,7 +149,7 @@ export function OverviewTab({
         </section>
 
         <section className="card">
-          <h2>📦 Desktop App</h2>
+          <h2>[DESKTOP_CLIENT] Electron Release</h2>
           <p className="muted">Full ZENO Browser experience with Electron</p>
           <div className="downloads">
             <a
@@ -158,15 +158,15 @@ export function OverviewTab({
               rel="noopener noreferrer"
               className="btn-primary"
             >
-              GitHub Releases
+              [FETCH] GitHub Releases
             </a>
           </div>
         </section>
 
         <section className="card">
-          <h2>AI Hub</h2>
+          <h2>[AI_HUB] Dedicated Workspace</h2>
           <p className="muted">
-            Szybki dostęp do dedykowanego AI Hub na stronie głównej
+            Direct access to dedicated AI Hub and agent orchestrator
           </p>
           <div className="downloads">
             <a
@@ -175,7 +175,7 @@ export function OverviewTab({
               rel="noopener noreferrer"
               className="btn-primary"
             >
-              Otwórz AI Hub
+              [ENTER] AI Hub Console
             </a>
           </div>
         </section>

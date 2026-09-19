@@ -37,6 +37,7 @@ import {
   BizToolsTab,
   WorkflowsTab,
   MediaHubTab,
+  StolarniaTab,
 } from "./tabs";
 import { useOverview } from "./tabs/overview/useOverview";
 import { useWorkers } from "./tabs/workers/useWorkers";
@@ -142,21 +143,24 @@ export function WebLanding() {
       <header className="hero compact">
         <div className="hero-glow" />
         <h1>
-          <span className="accent">ZENO</span> O_O_SHELL
+          <span className="accent">ZENO</span> CORE MATRIX
         </h1>
         <p className="subtitle">
-          THE_second Layer_Operations_Dashboard_Zenbrowsers.org
+          AUTONOMOUS AGENT &amp; CLOUDFLARE EDGE OPERATIONS HUB
         </p>
         <div className="hero-stats">
           <span className="stat">
-            <b>{onlineApis}</b>/{apis.length} APIs
+            <span className="dot online" style={{ display: "inline-block", marginRight: 6 }} />
+            <b>SYS_ONLINE</b>
           </span>
           <span className="stat">
-            <b>{sites.filter((s: any) => s.status === "online").length}</b>/
-            {sites.length} Sites
+            APIS: <b>{onlineApis}</b>/{apis.length}
           </span>
           <span className="stat">
-            <b>{workers.workers.length}</b> Workers
+            SITES: <b>{sites.filter((s: any) => s.status === "online").length}</b>/{sites.length}
+          </span>
+          <span className="stat">
+            WORKERS: <b>{workers.workers.length}</b>
           </span>
         </div>
       </header>
@@ -188,8 +192,12 @@ export function WebLanding() {
             {...workers}
             filteredWorkers={filteredWorkers}
             workerCategories={workerCategories}
+            storage={storage}
+            databases={databases}
+            queues={queues}
           />
         )}
+        {tab === "stolarnia" && <StolarniaTab />}
         {tab === "content" && <ContentTab {...content} />}
         {tab === "analytics" && (
           <AnalyticsTab {...analytics} ANALYTICS_SOURCES={ANALYTICS_SOURCES} />
