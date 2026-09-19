@@ -51,7 +51,13 @@ export function useRender() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      setRenderResult(data);
+      if (!data) {
+        setRenderResult({
+          error: "Network transport or response parse failure during Browser Run execution",
+        });
+      } else {
+        setRenderResult(data);
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Render request failed";
       setRenderResult({ error: msg });
