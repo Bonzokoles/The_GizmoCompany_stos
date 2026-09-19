@@ -1,30 +1,19 @@
-// @ts-nocheck
 import { useState, useCallback, useEffect } from "react";
 import { apiFetch } from "../../shared/api";
-import { ANALYTICS_SOURCES } from "../../shared/constants";
 import { jimboChat, cfGateway, isJimboOnline } from "../../shared/jimboClient";
+import type { RenderActionType, RenderResultData } from "./types";
 
 export function useRender() {
   const [renderUrl, setRenderUrl] = useState("");
-
-  const [renderAction, setRenderAction] = useState<
-    "screenshot" | "pdf" | "scrape" | "markdown" | "json"
-  >("screenshot");
-
+  const [renderAction, setRenderAction] =
+    useState<RenderActionType>("screenshot");
   const [renderSelectors, setRenderSelectors] = useState("h1, h2, p, a");
-
   const [renderPrompt, setRenderPrompt] = useState("");
-
-  const [renderResult, setRenderResult] = useState<any>(null);
-
+  const [renderResult, setRenderResult] = useState<RenderResultData | null>(null);
   const [renderLoading, setRenderLoading] = useState(false);
-
   const [jimboOnline, setJimboOnline] = useState(false);
-
   const [jimboResponse, setJimboResponse] = useState("");
-
-  const [deployments, setDeployments] = useState<any[]>([]);
-
+  const [deployments, setDeployments] = useState<unknown[]>([]);
   const [deployLog, setDeployLog] = useState("");
 
   useEffect(() => {
@@ -45,28 +34,40 @@ export function useRender() {
     if (!renderUrl.trim()) return;
     setRenderLoading(true);
     setRenderResult(null);
-    const payload: any = { url: renderUrl };
-    if (renderAction === "scrape") {
-      payload.selectors = renderSelectors
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
+    try {
+      const payload: Record<string, unknown> = { url: renderUrl.trim() };
+      if (renderAction === "scrape") {
+        payload.selectors = renderSelectors
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      if (renderAction === "json") {
+        payload.prompt =
+          renderPrompt || "Extract the main content and key information";
+      }
+      const data = await apiFetch<RenderResultData>(`/api/render/${renderAction}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!data) {
+        setRenderResult({
+          error: "Network transport or response parse failure during Browser Run execution",
+        });
+      } else {
+        setRenderResult(data);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Render request failed";
+      setRenderResult({ error: msg });
+    } finally {
+      setRenderLoading(false);
     }
-    if (renderAction === "json") {
-      payload.prompt =
-        renderPrompt || "Extract the main content and key information";
-    }
-    const data = await apiFetch(`/api/render/${renderAction}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    setRenderResult(data);
-    setRenderLoading(false);
   }, [renderUrl, renderAction, renderSelectors, renderPrompt]);
 
   const handleTriggerDeploy = useCallback(async (project: string) => {
-    const data = await cfGateway<any>("/api/pages/deploy", { project }, "POST");
+    const data = await cfGateway<unknown>("/api/pages/deploy", { project }, "POST");
     if (data) setDeployments((prev) => [data, ...prev]);
   }, []);
 
@@ -77,7 +78,7 @@ export function useRender() {
       const online = await isJimboOnline();
       setJimboOnline(online);
       if (!online) {
-        setJimboResponse("JIMbo offline. Sprawdź logi w Cloudflare Dashboard.");
+        setJimboResponse("JIMbo offline. Sprawdz logi w Cloudflare Dashboard.");
         return;
       }
       const text = await jimboChat(
