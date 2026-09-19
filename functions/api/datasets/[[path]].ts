@@ -69,6 +69,11 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    if (!context.env.STATIC_ASSETS) {
+      return new Response(JSON.stringify({ error: 'Storage not configured on this account' }), {
+        status: 503, headers: { ...CORS, 'Content-Type': 'application/json' },
+      });
+    }
     const obj = await context.env.STATIC_ASSETS.get(DATASETS_PREFIX + filename);
     if (!obj) {
       return new Response(JSON.stringify({ error: 'Dataset file not in storage' }), {
