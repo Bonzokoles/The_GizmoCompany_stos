@@ -65,8 +65,8 @@ export const onRequest: PagesFunction<Env> = async (ctx) => {
     return err('Method not allowed', 405);
   }
 
-  const accountId = ctx.env.CF_ACCOUNT_ID;
-  const token = ctx.env.CF_API_TOKEN;
+  const accountId = ctx.env.CF_ACCOUNT_ID || "7f490d58a478c6baccb0ae01ea1d87c3";
+  const token = ctx.env.CF_API_TOKEN || (ctx.env as any).CLOUDFLARE_API_TOKEN;
   if (!accountId || !token) {
     return err('CF_ACCOUNT_ID and CF_API_TOKEN are required', 500);
   }
