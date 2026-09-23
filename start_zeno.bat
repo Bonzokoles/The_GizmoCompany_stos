@@ -115,11 +115,21 @@ if errorlevel 1 (
 podman network connect zeno-net zeno-websurfx >nul 2>&1
 echo         OK
 
-echo   [6/9] zeno-sist2 (Document Indexer)...
+echo   [6/6] zeno-sist2 (Document Indexer)...
 podman start zeno-sist2 >nul 2>&1
 if errorlevel 1 (
     podman run -d --name zeno-sist2 ^
         -p 4090:4090 -p 8085:8080 ^
+        -v V:\chambers\01_sist2:/sist2-admin ^
+        -v Z:\:/data/z:ro ^
+        -v F:\:/data/f:ro ^
+        -v U:\:/data/u:ro ^
+        -v Q:\:/data/q:ro ^
+        -v R:\:/data/r:ro ^
+        -v S:\:/data/s:ro ^
+        -v V:\:/data/v:ro ^
+        -v W:\:/data/w:ro ^
+        -v Y:\:/data/y:ro ^
         -e SIST2_ADMIN=1 ^
         --entrypoint python3 ^
         docker.io/sist2app/sist2:x64-linux ^
@@ -127,52 +137,10 @@ if errorlevel 1 (
 )
 echo         OK
 
-echo   [7/9] plausible-db (PostgreSQL for Plausible)...
-podman start plausible-db >nul 2>&1
-if errorlevel 1 (
-    podman run -d --name plausible-db --network plausible-net ^
-        -e POSTGRES_DB=plausible -e POSTGRES_USER=plausible -e POSTGRES_PASSWORD=plausible ^
-        -v plausible-db-data:/var/lib/postgresql/data ^
-        --restart unless-stopped ^
-        docker.io/library/postgres:16-alpine >nul 2>&1
-)
-echo         OK
-
-echo   [8/9] plausible-events-db (ClickHouse)...
-podman start plausible-events-db >nul 2>&1
-if errorlevel 1 (
-    podman run -d --name plausible-events-db --network plausible-net ^
-        -v plausible-events-data:/var/lib/clickhouse ^
-        -v "%~dp0plausible-ce\clickhouse\clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:Z" ^
-        -v "%~dp0plausible-ce\clickhouse\clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:Z" ^
-        --restart unless-stopped ^
-        docker.io/clickhouse/clickhouse-server:24.3.3.102-alpine >nul 2>&1
-)
-echo         OK
-
-timeout /t 3 /nobreak >nul
-
-echo   [9/9] plausible (Plausible CE Analytics)...
-podman start plausible >nul 2>&1
-if errorlevel 1 (
-    podman run -d --name plausible --network plausible-net ^
-        -p 8100:8000 ^
-        -e BASE_URL=http://localhost:8100 ^
-        -e SECRET_KEY_BASE="fSDMf2LxaQYA22uiZSA3ZpxV3llPA2cwu7c1ZF9gqmOvElsOHXOFwXuHS9+tTZGa" ^
-        -e DATABASE_URL="postgres://plausible:plausible@plausible-db:5432/plausible" ^
-        -e CLICKHOUSE_DATABASE_URL="http://plausible-events-db:8123/plausible_events_db" ^
-        -e DISABLE_REGISTRATION=false ^
-        -e HTTP_PORT=8000 ^
-        --restart unless-stopped ^
-        ghcr.io/plausible/community-edition:v3.2.0 >nul 2>&1
-)
-echo         OK
-
 echo.
 echo [PODMAN] Status kontenerow:
 timeout /t 2 /nobreak >nul
 podman ps --filter "name=zeno-" --format "  {{.Names}}  ->  {{.Status}}"
-podman ps --filter "name=plausible" --format "  {{.Names}}  ->  {{.Status}}"
 echo.
 
 :: ─── NODE.JS CHECK ──────────────────────────────

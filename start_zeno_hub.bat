@@ -17,11 +17,11 @@ cd /d "%~dp0"
 set "ZENO_DIR=%~dp0"
 set "MYBONZO_DIR=U:\WWW_MyBonzo_com"
 
-:: ── MEMORY SAVER — ustaw =1 zeby pominac ciezkie kontenery (ClickHouse/Plausible)
-:: Przydatne gdy VirtualAlloc failed / malo wolnej pamieci wirtualnej
+:: ── MEMORY & AGENT SAVER — ustaw =1 aby pominąć ciężkie kontenery lub =0 dla agentów CLI
 set "SKIP_PLAUSIBLE=1"
-:: Ustaw =1 zeby pominac rowniez Umami Analytics
 set "SKIP_ANALYTICS=0"
+set "LAUNCH_GOOSE=0"
+set "LAUNCH_AGENT_PI=0"
 
 :: Node (NVM4W) + Podman w PATH
 set "PATH=C:\nvm4w\nodejs;C:\ProgramData\nvm;C:\Users\Bonzo2\AppData\Local\Programs\Podman;%PATH%"
@@ -147,6 +147,16 @@ podman start zeno-sist2 >nul 2>&1
 if errorlevel 1 (
     podman run -d --name zeno-sist2 ^
         -p 4090:4090 -p 8085:8080 ^
+        -v V:\chambers\01_sist2:/sist2-admin ^
+        -v Z:\:/data/z:ro ^
+        -v F:\:/data/f:ro ^
+        -v U:\:/data/u:ro ^
+        -v Q:\:/data/q:ro ^
+        -v R:\:/data/r:ro ^
+        -v S:\:/data/s:ro ^
+        -v V:\:/data/v:ro ^
+        -v W:\:/data/w:ro ^
+        -v Y:\:/data/y:ro ^
         -e SIST2_ADMIN=1 ^
         --entrypoint python3 ^
         docker.io/sist2app/sist2:x64-linux ^
@@ -344,13 +354,17 @@ if "!TOOL_READY!"=="1" (
 echo   [OK] JIMBO Local Tool Server -^> http://localhost:%JIMBO_TOOL_PORT%  (PID: %JIMBO_TOOL_PID%, log: logs\jimbo_tool.log)
 echo.
 
-:: Goose interactive terminal — widoczne okno, mozna wpisywac komendy
-if exist "E:\Programs\goose\goose.exe" (
-    echo [BG] Uruchamianie Goose Terminal...
-    start "◈ JIMBO HUB — Goose AI Terminal" cmd /k "%HUB_DIR%\start_goose_terminal.bat"
-    echo   [OK] Goose Terminal otwarty ^(widoczne okno ^- mozna wpisywac komendy^)
+:: Goose interactive terminal — domyślnie wyłączone dla szybkiego startu (LAUNCH_GOOSE=0)
+if "%LAUNCH_GOOSE%"=="1" (
+    if exist "E:\Programs\goose\goose.exe" (
+        echo [BG] Uruchamianie Goose Terminal...
+        start "◈ JIMBO HUB — Goose AI Terminal" cmd /k "%HUB_DIR%\start_goose_terminal.bat"
+        echo   [OK] Goose Terminal otwarty ^(widoczne okno ^- mozna wpisywac komendy^)
+    ) else (
+        echo   [WARN] Goose nie znaleziony: E:\Programs\goose\goose.exe
+    )
 ) else (
-    echo   [WARN] Goose nie znaleziony: E:\Programs\goose\goose.exe
+    echo   [SKIP] Goose Terminal pominiety ^(LAUNCH_GOOSE=0 — szybki start ZENO Browser^)
 )
 
 :: Goose Desktop App (opcjonalne — odkomentuj zeby uruchamiac automatycznie)

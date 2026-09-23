@@ -152,8 +152,16 @@ services:
       - "4090:4090"
       - "8085:8080"
     volumes:
-      - sist2-data:/sist2-data
-      - sist2-index:/index
+      - V:\chambers\01_sist2:/sist2-admin
+      - Z:\:/data/z:ro
+      - F:\:/data/f:ro
+      - U:\:/data/u:ro
+      - Q:\:/data/q:ro
+      - R:\:/data/r:ro
+      - S:\:/data/s:ro
+      - V:\:/data/v:ro
+      - W:\:/data/w:ro
+      - Y:\:/data/y:ro
     environment:
       SIST2_ADMIN: "1"
     restart: unless-stopped
